@@ -19,7 +19,7 @@
 * Base de données : PostgreSQL
 * ORM : Prisma
 * Auth : JWT + refresh token
-* Front web : React + Vite
+* Front web : React
 * UI : SCSS , à voir Bootstrap 
 * Maps : Mapbox ou Google Maps
 * Déploiement : Render / Railway / Fly.io

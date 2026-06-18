@@ -1,344 +1,293 @@
-# <br><p align="center" p>Cahier des charges 66Partners <br>
+# <br><p align="center">Cahier des Charges - ***66Partners***</p>
 
-# <br><p align="center" p>**SOMMAIRE**
-
-- ## I. Présentation 👋
-
-- ## II. Fonctionnalités du projet ⚙️
-
-  - II-1. MVP (Minimum Viable Product)
-    - Besoins Fonctionnels de l'application
-  - Version 1.1 - Améliorations Rapides
-
-- ## III. Évolutions potentielles ↗️
-
-  - Version 1.2 - Fonctionnalités Sociales
-    - Partage et communauté
-    - Sécurité avancée
-  - Version 1.3 - Intelligence Artificielle
-    - Recommandations personnalisées
-  - Version 2.0 - Extension Mobile
-    - Application mobile native
-  - Version 2.1+ - Fonctionnalités Avancées
-    - Intégrations externes
-    - Fonctionnalités premium
-
-- ## IV. Choix et Justification de l'architecture du projet 🏗️
-
-- ## V. Liste des Technologies utilisées pour le projet 🛠️
-
-  - V-1. BackEnd
-    - RunTime & Framework
-    - Infrastructure & Déploiement
-  - V-2. Base de Données
-  - V-3. FrontEnd
-    - Framework & Build
-
-- ## VI. Authentification / Autorisation 👮
-
-  - VI-1. Authentification ㊙️
-  - VI-2. Validation & Sécurité 🔐
-  - VI-3. Sécurité & Authentification 🔐 ㊙️
-  - VI-4. Tests & Qualité 🧪
-
-- ## VII. Cible 🎯
-
-  - VII-1. Cible principale (utilisateurs visés)
-  - VII-2. Navigateurs compatibles 🌐
-
-- ## VIII. Arborescence de l'application 🌳
-
-- ## IX. Liste des routes de l'application 🛣️
-
-  - IX-1. Auth
-  - IX-2. Gestion utilisateur
-  - IX-3. Livres (Recherche)
-  - IX-4. Bibliothèque personnelle
-  - IX-5. Liste de lecture
-
-- ## X. User Stories 👥
-
-  - Rôle : Visiteur
-  - Rôle : Utilisateur
-  - Rôle : Administrateur
-
-- ## XI. Analyse des Risques ⚠️
-
-  - API et services externes
-  - Base de données
-  - Sécurité
-  - Infrastructure
-
-- ## XII. Rôle de l’équipe 🧑‍🤝‍🧑
-
-- ## XIII. RGPD (Règlement Général sur la Protection des Données) ⚖️
-
-  - Inventaire des données
-  - Politique de confidentialité
-  - Consentement
-  - Droits des utilisateurs
-  - Sécurité des données
-  - Registre des traitements
-  - Cookies / Traceurs
-  - Sensibilisation de l’équipe
-
-- ## XIV. Documents de Conception 📄
-
-  - Diagramme ERD
-  - Diagramme de Séquence
-  - Use Case
-
-## <br> I- Présentation 👋
-
-**BlaBlaBook** est une plateforme web pensée pour tous les passionnés de lecture.
-Elle permet aux utilisateurs de créer et gérer leur bibliothèque personnelle, suivre leurs lectures, découvrir de nouveaux ouvrages et partager leurs avis avec d’autres lecteurs.
-
-L’objectif est de favoriser l’échange autour des livres, créer une communauté active et rendre la gestion de ses lectures simple et agréable.
-
-Le projet a été réalisé en équipe, avec une organisation en méthode agile. Nous avons travaillé par étapes, de la conception au développement, en passant par des phases de test et de mise en ligne.
-
-## Fonctionnalités du projet ⚙️
-
-### MVP (Minimum Viable Product) ==> Besoins Fonctionnels de l'application
-
-- Page d'accueil avec présentation de BlaBlaBook et quelques livres "random".
-- Système d'inscription et de connexion. 🔐
-- Gestion de bibliothèque personnelle : ajouter des livres, lus et à lire, pouvoir les retirer de sa liste (et non de la base de données ^^).
-- Recherche et découverte de nouveaux livres : moteur de recherche. 🔎
-- Page de détail d'un livre avec les informations liées à ce dernier.
-
-## Evolutions potentielles↗️
-
-### Version 1.1 - Améliorations Rapides
-
-#### Amélioration de l'expérience utilisateur
-
-- **Système de notation et d'avis** : Permettre aux utilisateurs de noter et commenter les livres pour partager leurs opinions et aider la communauté
-- **Statistiques personnelles** : Affichage des habitudes de lecture (genres préférés, nombre de livres lus, progression annuelle)
-- **Recherche avancée** : Filtrage des résultats par genre, note moyenne, date de publication et autres critères
-- **Moteur de recherche dynamique** : Suggestions en temps réel dans une liste déroulante pour améliorer l'expérience de recherche
-
-#### Fonctionnalités RGPD et conformité
-
-- **Export de données** : Permettre aux utilisateurs de récupérer l'historique complet de leur bibliothèque et données personnelles
-- **Droit à l'oubli** : Suppression complète et définitive du compte utilisateur et de toutes ses données associées
-- **Mentions légales** : Mise en place des informations légales conformes au RGPD et aux réglementations en vigueur
-
-#### Modération et administration
-
-- **Modération des contenus** : Outils de gestion des avis et commentaires inappropriés par les administrateurs
-- **Statistiques globales** : Tableau de bord administrateur avec métriques d'usage, livres populaires et analyses d'activité
+<p align="center">
+  <img src="./Maquettes/exemplelogo.png" alt="Logo 66Partners" width="500" />
+</p>
 
 ---
 
-### Version 1.2 - Fonctionnalités Sociales
+# <p align="center">SOMMAIRE</p>
 
-#### Partage et communauté
+## I. Présentation 👋
 
-- **Bibliothèques publiques** : Option permettant aux utilisateurs de rendre leur bibliothèque visible publiquement (entièrement ou partiellement)
-- **Forum de discussion** : Création d'espaces d'échange thématiques dédiés aux discussions sur les livres et la lecture
-- **Chat en temps réel** : Système de messagerie instantanée entre utilisateurs pour des échanges directs
-- **Groupes de lecture** : Fonctionnalité de création et participation à des clubs de lecture thématiques ou par affinités
+## II. Fonctionnalités du projet ⚙️
 
-#### Sécurité avancée
+### II-1. MVP (Minimum Viable Product)
 
-- **Gestion des permissions** : Système de rôles avec différents niveaux d'accès administrateur
-- **Configuration sécuritaire** : Interface de paramètres de sécurité avancés accessible aux administrateurs
+- Gestion des comptes utilisateurs
+- Gestion des profils sportifs
+- Gestion des activités sportives
+- Gestion des participations
+- Messagerie entre utilisateurs
+- Avis et notation
+
+### II-2. Version 1.1
+
+- Notifications temps réel
+- Optimisation de l'expérience utilisateur
+
+## III. Évolutions potentielles ↗️
+
+### III-1. Version 2.0
+
+- Application mobile React Native
+- Intégration Strava
+- Groupes sportifs
+- Système Premium
+- Suggestions intelligentes de partenaires
+
+## IV. Architecture du projet 🏗️
+
+## V. Technologies utilisées 🛠️
+
+### V-1. Backend
+
+- Runtime & Framework
+- Infrastructure & Déploiement
+
+### V-2. Base de données
+
+### V-3. Frontend
+
+- Framework & Build
+
+## VI. Authentification & Sécurité 👮
+
+### VI-1. Authentification
+
+### VI-2. Validation & Sécurité
+
+### VI-3. Qualité & Tests
+
+## VII. Cible 🎯
+
+### VII-1. Utilisateurs visés
+
+### VII-2. Navigateurs compatibles
+
+## VIII. Architecture fonctionnelle 🌳
+
+## IX. Routes de l'application 🛣️
+
+### IX-1. Authentification
+
+### IX-2. Gestion utilisateur
+
+### IX-3. Activités sportives
+
+### IX-4. Participations
+
+### IX-5. Messagerie
+
+### IX-6. Avis & Notations
+
+## X. User Stories 👥
+
+### Rôle : Visiteur
+
+### Rôle : Utilisateur
+
+### Rôle : Administrateur
+
+## XI. Modèle de données 🗄️
+
+### MCD
+
+### MLD
+
+### MPD
+
+## XII. Analyse des risques ⚠️
+
+### Infrastructure
+
+### Base de données
+
+### Sécurité
+
+### Services tiers
+
+## XIII. RGPD ⚖️
+
+### Inventaire des données
+
+### Consentement
+
+### Droit à l'oubli
+
+### Export des données
+
+### Sécurité des données
+
+## XIV. Documents de conception 📄
+
+### Diagrammes UML
+
+### Diagrammes de séquence
+
+### Cas d'utilisation (Use Cases)
 
 ---
 
-### Version 1.3 - Intelligence Artificielle
+# I. Présentation 👋
 
-#### Recommandations personnalisées
+## Contexte
 
-- **Algorithme de recommandation** : Système de suggestions de livres basé sur les genres préférés, les notes attribuées et l'historique de lecture
-- **Support multilingue** : Extension de l'interface pour supporter au minimum le français et l'anglais
+La pratique sportive est souvent freinée par une difficulté récurrente : trouver des partenaires ayant le même niveau, les mêmes disponibilités ou pratiquant la même activité.
 
----
+Dans les Pyrénées-Orientales, de nombreux sportifs pratiquent régulièrement des activités telles que le vélo, le padel, le tennis, le trail ou encore la randonnée, mais peinent parfois à constituer un groupe ou à trouver un partenaire rapidement.
 
-### Version 2.0 - Extension Mobile
-
-#### Application mobile native
-
-- **Scanner de livres** : Fonctionnalité d'ajout de livres par scan du code-barres via l'application mobile
-- **Synchronisation cross-platform** : Continuité parfaite des données entre les versions web et mobile
-- **Notifications push** : Système d'alertes pour nouveaux livres recommandés, activités des groupes et interactions sociales
+**66Partners** a pour objectif de répondre à ce besoin en proposant une plateforme locale de mise en relation sportive.
 
 ---
 
-### Version 2.1+ - Fonctionnalités Avancées
+## Présentation du projet
 
-#### Intégrations externes
+**66Partners** est une plateforme web permettant aux habitants des Pyrénées-Orientales de trouver facilement des partenaires de sport selon :
 
-- **API partenaires** : Intégration avec d'autres plateformes de lecture et librairies en ligne
-- **Synchronisation e-readers** : Connexion et synchronisation avec les liseuses populaires (Kindle, Kobo, etc.)
-- **Réseaux sociaux** : Fonctionnalités de partage de lectures et recommandations sur les plateformes sociales externes
+- leur localisation ;
+- leur niveau ;
+- leurs disponibilités ;
+- leur discipline sportive.
 
-#### Fonctionnalités premium
-
-- **Analyses avancées** : Génération de rapports détaillés de lecture, tendances personnalisées et comparaisons
-- **Sauvegarde cloud** : Système de stockage sécurisé et redondant des données utilisateur
-- **Thèmes personnalisés** : Options de personnalisation avancée de l'interface utilisateur
+L'application vise à favoriser la pratique sportive locale tout en développant une dimension sociale basée sur la confiance et le partage.
 
 ---
 
-# Choix et Justification de l'architecture du projet🏗️
+## Objectifs du projet
 
-Nous avons opté pour une architecture client-serveur (ou architecture découplée) afin de séparer clairement les responsabilités entre le frontend et le backend, garantissant ainsi une meilleure maintenabilité et évolutivité du projet. Cette approche consiste en une API REST développée avec Node.js et Express, qui communique avec une Single Page Application (SPA) développée en React.
+Les objectifs principaux sont :
 
-Le backend, orchestré avec Sequelize pour la gestion de la base de données PostgreSQL, expose des endpoints REST pour toutes les fonctionnalités métier : gestion des utilisateurs, bibliothèques personnelles, listes de lecture et avis. Le frontend React consomme cette API via des requêtes HTTP (Axios), offrant une interface utilisateur dynamique et réactive.
+- Faciliter la mise en relation entre sportifs.
+- Encourager la pratique régulière du sport.
+- Créer une communauté sportive locale.
+- Permettre l'organisation rapide de sorties sportives.
+- Offrir une expérience simple et intuitive.
 
-Cette séparation nous permet une plus grande flexibilité : le frontend peut évoluer indépendamment du backend, et l'API peut potentiellement servir d'autres clients (application mobile, autres interfaces). L'ensemble est orchestré via Docker pour assurer l'isolation des services et la portabilité entre environnements.
+---
 
-Pour les données livres, nous utilisons l'API Open Library comme source externe, le backend servant de passerelle pour filtrer et enrichir ces données avant de les exposer au frontend. Cette approche renforce la sécurité (pas d'appel direct depuis le client) et nous permet de ne stocker que les livres réellement utilisés par nos utilisateurs. Le backend garde ainsi le contrôle total sur les interactions personnalisées comme les statuts de lecture, les commentaires et la gestion des listes privées/publiques.
+## Zone géographique
 
-Cette architecture découplée offre un bon équilibre entre simplicité de développement pour un MVP et possibilités d'évolution futures.
+Le lancement du projet est prévu exclusivement dans le département des **Pyrénées-Orientales (66)**.
 
-## Liste des Technologies utilisées pour le projet
+Cette approche permet :
 
-_(🟥 tout ne sera peut être pas utilisé)_
+- de concentrer les efforts de communication ;
+- d'obtenir une masse critique d'utilisateurs plus rapidement ;
+- de valider le modèle économique avant une éventuelle extension régionale ou nationale.
 
-## BackEnd💻
+---
 
-#### RunTime & Framework
+## Sports concernés au lancement
 
-_Choix_
+### Sports individuels ou semi-collectifs
 
-- **Node.js** : Environnement d'exécution JavaScript côté serveur
-- **Express.js** : Framework web minimal et flexible
-- **TypeScript** : Langage typé pour une meilleure robustesse
+- Vélo de route
+- VTT
+- Running
+- Trail
+- Tennis
+- Padel
+- Badminton
+- Randonnée
 
-_Justification_
+### Évolutions futures
 
-- **Écosystème mature** : Millions de packages NPM
-- **Performance** : Event loop non-bloquant
-- **Cohérence** : Même langage frontend/backend
-- **Équipe** : Compétences JavaScript déjà acquises
+- Escalade
+- Surf
+- Kitesurf
+- Natation
+- Sports collectifs
 
-#### Infrastructure & Déploiement
+---
 
-_Choix_
+# II. Fonctionnalités du projet ⚙️
 
-- **Docker** : Containerisation complète (obligatoire V1.0)
-- **Nginx** : Reverse proxy et SSL termination (obligatoire V1.0)
-- **Docker Compose** : Orchestration multi-conteneurs
+## II-1. MVP (Minimum Viable Product)
 
-_Justification_
+L'objectif du MVP est de valider l'intérêt du marché et de permettre aux utilisateurs de trouver rapidement un partenaire sportif.
 
--**Docker/ Docker Compose**:
+### Gestion des comptes
 
-- **Mise en production** : Contrainte projet, déploiement requis
-- **Environnement uniforme** : Équipe de 4, standardisation obligatoire
-- **Isolation** : PostgreSQL + Redis + App + Nginx séparés
-- **Reproductibilité** : Builds identiques dev/prod
-- **CI/CD** : Pipeline automatisé plus fiable
+- Création de compte
+- Connexion
+- Déconnexion
+- Réinitialisation du mot de passe
+- Modification du profil
 
--**Nginx**:
+### Gestion du profil sportif
 
-- **SSL/HTTPS** : Sécurité production non négociable
-- **Performance** : Cache statique et compression
-- **Sécurité** : Rate limiting et proxy reverse
-- **Monitoring** : Logs d'accès et métriques
-- **Évolutivité** : Load balancing prêt si besoin
+- Photo de profil
+- Description
+- Sports pratiqués
+- Niveau sportif
+- Ville de résidence
+- Disponibilités
 
-### Base de Donnéesℹ️
+### Gestion des activités sportives
 
-_Choix_
+- Création d'une activité
+- Modification d'une activité
+- Suppression d'une activité
+- Consultation des activités disponibles
 
-- **PostgreSQL** : SGBD relationnel avec support JSON natif (conteneur Docker)
-- **Redis** : Cache et sessions haute performance (conteneur Docker)
-- **Sequelize** : ORM pour Node.js avec protection anti-injection SQL
+### Recherche et filtrage
 
-_Justification_ -**PostgreSQL**:
+Recherche selon :
 
-- **ACID complet** : Transactions sécurisées critiques
-- **JSON natif** : Stockage métadonnées Google Books
-- **Full-text search** : Recherche optimisée livres
-- **Extensions** : UUID, crypto, indexation avancée
-- **Gratuit** : Heroku, Railway, Supabase
+- Sport
+- Niveau
+- Date
+- Distance
+- Localisation
 
--**Sequelize**:
+### Gestion des participations
 
-- **Mature** : Écosystème établi, debugging facile
-- **TypeScript** : Support natif excellent
-- **Migrations** : Gestion schéma robuste
-- **Documentation** : Très complète
+- Demande de participation
+- Acceptation ou refus par l'organisateur
+- Liste des participants
+- Annulation d'une participation
 
-## FrontEnd🌈
+### Messagerie
 
-#### Framework & Build
+- Conversation privée entre participants
+- Historique des messages
 
-- **React 18** : Bibliothèque UI avec hooks et concurrent features
-- **Vite** : Build tool ultra-rapide avec HMR optimisé
-- **TypeScript** : Cohérence avec backend, types automatiques
+### Avis et notation
 
-### Authentification/Autorisation👮
+À l'issue d'une activité :
 
-#### Authentification ㊙️
+- Note sur 5 étoiles
+- Commentaire
+- Calcul d'un score de fiabilité
 
-- **Argon2** : Algorithme de hachage sécurisé (inclus dans Better Auth)
-- **Better Auth** : Solution d'authentification moderne TypeScript-first
+---
 
-#### Validation & Sécurité🔐
+## Règles métier principales
 
-- **Zod** : Validation de schémas avec typage automatique
-- **Helmet** : Headers de sécurité HTTP
-- **CORS** : Gestion Cross-Origin Resource Sharing via Nginx
-- **SSL/TLS** : HTTPS obligatoire en production via Nginx
+- Un utilisateur doit être authentifié pour créer une activité.
+- Une activité possède un organisateur unique.
+- Une activité ne peut dépasser son nombre maximum de participants.
+- Seuls les participants d'une activité peuvent accéder à la messagerie associée.
+- Un utilisateur ne peut laisser un avis qu'après avoir participé à une activité commune.
+- Une activité passée ne peut plus être modifiée.
 
-#### Sécurité & Authentification🔐 ㊙️
+---
 
-- **OWASP Top 10 compliant** par défaut
-- **TypeScript natif** avec types automatiques
-- **Multi-provider** : Email/password + OAuth ready
-- **CSRF intégré** : Protection automatique
-- **Sessions sécurisées** : Gestion tokens et refresh
-- **Rate limiting** : Protection brute force intégrée
-- **Argon2** : Hachage moderne recommandé OWASP
+## II-2. Version 1.1
 
-#### Tests & Qualité 🧪
+### Notifications
 
-- **Jest** : Framework de tests unitaires et d'intégration
-- **Supertest** : Tests spécialisés pour endpoints API
-- **@faker-js/faker** : Génération de données de test réalistes
-- **ESLint + Prettier** : Qualité et formatage du code
+- Notification de demande de participation
+- Notification d'acceptation
+- Notification de message reçu
 
-## Cible 🎯
+### Optimisation UX
 
-### Cible principale (utilisateurs visés)
-
-**Lecteurs occasionnels ou débutants :**
-
-Besoins : Suivre facilement leurs lectures, découvrir des livres populaires ou adaptés à leurs goûts.
-Intérêt : Interface simple, recommandations, organisation de leur bibliothèque sans complexité.
-
-**Lecteurs réguliers et passionnés :**
-
-Besoins : Gérer une collection plus large, retrouver des livres lus, donner leur avis.
-Intérêt : Organisation précise, espace pour noter et commenter, découvrir d’autres passionnés.
-
-**Communauté de lecteurs :**
-
-Besoins : Partager, discuter, se recommander des lectures.
-Intérêt : Plateforme sociale dédiée à la lecture, moins impersonnelle qu’Amazon ou Goodreads.
-
-Médiateurs culturels (facultatif) :
-
-Exemples : Professeurs, bibliothécaires, clubs de lecture.
-Intérêt : Suivre des groupes de lecture, recommander des ouvrages à des élèves ou adhérents.
-
-## Navigateurs compatibles 🌐
-
-L'application BlaBlaBook sera compatible avec les navigateurs web modernes les plus récents. La liste précise des versions supportées sera affinée au fur et à mesure de l'avancement du projet, en fonction des technologies et fonctionnalités spécifiques qui seront implémentées.
-Support prévu :
-
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-Note : Internet Explorer ne sera pas supporté, conformément aux standards actuels du développement web moderne.
-Cette approche nous permet de nous concentrer sur les navigateurs représentant la majorité du trafic web actuel tout en bénéficiant des dernières fonctionnalités et standards web pour offrir une expérience utilisateur optimale.
+- Recherche avancée
+- Favoris
+- Historique des activités
+- Suggestions de partenaires
 
 ## Arborescence de l'application 🌳
 
