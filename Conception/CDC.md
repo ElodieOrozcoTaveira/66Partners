@@ -16,15 +16,20 @@
 
 - Gestion des comptes utilisateurs
 - Gestion des profils sportifs
+- Gestion des sports
 - Gestion des activités sportives
 - Gestion des participations
-- Messagerie entre utilisateurs
-- Avis et notation
 
 ### II-2. Version 1.1
 
-- Notifications temps réel
-- Optimisation de l'expérience utilisateur
+#### Communication
+
+- Messagerie entre participants
+
+#### Système communautaire
+
+- Avis et notation des utilisateurs
+- Score de fiabilité
 
 ## III. Évolutions potentielles ↗️
 
@@ -210,7 +215,7 @@ L'objectif du MVP est de valider l'intérêt du marché et de permettre aux util
 ### Gestion des comptes
 
 - Création de compte
-- Connexion
+- Connexion (mail)
 - Déconnexion
 - Réinitialisation du mot de passe
 - Modification du profil
@@ -265,6 +270,12 @@ Recherche selon :
 
 ## Règles métier principales
 
+- Un utilisateur ne peut pas rejoindre sa propre activité.
+- Une activité doit être planifiée dans le futur.
+- Une participation est unique par utilisateur et par activité.
+- Une activité ne peut pas dépasser son nombre maximum de participants.
+- Seul le créateur de l'activité peut accepter ou refuser une participation.
+- Une activité annulée n'accepte plus de nouvelles participations.
 - Un utilisateur doit être authentifié pour créer une activité.
 - Une activité possède un organisateur unique.
 - Une activité ne peut dépasser son nombre maximum de participants.
@@ -276,22 +287,16 @@ Recherche selon :
 
 ## II-2. Version 1.1
 
-### Notifications
+### Communication
 
-- Notification de demande de participation
-- Notification d'acceptation
-- Notification de message reçu
+- Messagerie entre participants
 
-### Optimisation UX
 
-- Recherche avancée
-- Favoris
-- Historique des activités
-- Suggestions de partenaires
+### Système communautaire
 
-## Arborescence de l'application 🌳
+- Avis et notation des utilisateurs
+- Score de fiabilité
 
-![Arborescence du site](./arborescence.png)
 
 ## Listes des routes de l'application 🛣️
 
@@ -299,72 +304,64 @@ Recherche selon :
 | ------- | -------------------- | ----------------------- | ---------------------------------------------------- |
 | POST    | `/api/auth/register` | Inscription utilisateur | `{ firstname, lastname, username, email, password }` |
 | POST    | `/api/auth/login`    | Connexion utilisateur   | `{ email, password }` OU `{ username, password }`    |
-| POST    | `/api/auth/logout`   | Déconnexion utilisateur | -                                                    |
+| POST    | `/api/auth/logout`   | Déconnexion utilisateur | 
+-                                                    |
 
 ### Gestion utilisateur
 
 | Méthode | Route               | Description         | Données attendues                              |
 | ------- | ------------------- | ------------------- | ---------------------------------------------- |
-| GET     | `/api/user/profile` | Récupérer le profil | -                                              |
-| PUT     | `/api/user/profile` | Modifier le profil  | `{ firstname?, lastname?, username?, email? }` |
-| DELETE  | `/api/user/account` | Supprimer le compte | -                                              |
+| PUT    | `/api/me/profile`   | modifier le profil | 
+| GET    | `/api/me`   |  récupérer le profil            | 
+| DELETE    | `/api/me`   |  supprimer le profil            | 
+                                             |
 
-### Livres (Recherche)
+### Sports
 
 | Méthode | Route               | Description           | Données attendues                     |
 | ------- | ------------------- | --------------------- | ------------------------------------- |
-| GET     | `/api/books/search` | Rechercher des livres | Query: `q` (terme), `limit?` (nombre) |
-| GET     | `/api/books/:id`    | Détails d'un livre    | Param: `id` (ID livre)                |
+| GET     | `/api/sports:id` | rechercher un sport |  |
+| GET     | `/api/sports`    | 
+| POST     | `/api/sports/:id`    | Ajouter un sport    |                |             |
+| DELETE     | `/api/sports/:id`    | Supprimer un sport    | 
 
-### Bibliothèque personnelle
+### Activités
 
 | Méthode | Route                  | Description               | Données attendues                                                 |
 | ------- | ---------------------- | ------------------------- | ----------------------------------------------------------------- |
-| GET     | `/api/library`         | Récupérer sa bibliothèque | Query: `name?` (nom bibliothèque)                                 |
-| POST    | `/api/library`         | Ajouter un livre          | `{ id_book, name? }` (name pour créer bibliothèque si nécessaire) |
-| DELETE  | `/api/library/:bookId` | Retirer un livre          | Param: `bookId`                                                   |
+| GET     | `/api/activities`         | Récupérer une activité |                                |
+| GET    | `/api/activities/:id`         |  Récupérer une activité         |  |
+| DELETE  | `/api/activities/:id` | Supprimer une activité          |                                                 |
+| PUT  | `/api/activities/:id` | Modifier une activité          |                                                 |
+| POST  | `/api/activities` | Ajouter une activité          |                                    
+### Participation
 
-### Liste de lecture
+             |
+| Méthode | Route | Description |
+|----------|----------|----------|
+| POST | `/api/activities/:id/join` | Demande de participation |
+| PUT | `/api/participations/:id/accept` | Accepter une demande |
+| PUT | `/api/participations/:id/refuse` | Refuser une demande |
+| DELETE | `/api/participations/:id` | Annuler une participation |
+
+
+### Messages
 
 | Méthode | Route                                  | Description            | Données attendues                                |
 | ------- | -------------------------------------- | ---------------------- | ------------------------------------------------ |
-| GET     | `/api/reading-lists`                   | Récupérer ses listes   | Query: `statut?` (true/false pour actif/inactif) |
-| POST    | `/api/reading-lists`                   | Créer une liste        | `{ name, description?, statut?, id_library }`    |
-| GET     | `/api/reading-lists/:id`               | Détails d'une liste    | Param: `id`                                      |
-| PUT     | `/api/reading-lists/:id`               | Modifier une liste     | `{ name?, description?, statut? }`               |
-| DELETE  | `/api/reading-lists/:id`               | Supprimer une liste    | Param: `id`                                      |
-| POST    | `/api/reading-lists/:id/books`         | Ajouter livre à liste  | Param: `id`, Body: `{ id_book }`                 |
-| DELETE  | `/api/reading-lists/:id/books/:bookId` | Retirer livre de liste | Params: `id`, `bookId`                           |
+| GET     | `/api/conversations`                   | Récupérer les conversations   |  |
+| GET    | `/api/conversations/:id/message`                   | Récupérer un message       |   |
+| POST     | `/api/conversations/:id/message`               | Ajouter un message                      |
 
 ### Avis et notes
 
 | Méthode | Route                    | Description               | Données attendues                               |
 | ------- | ------------------------ | ------------------------- | ----------------------------------------------- |
-| GET     | `/api/books/:id/notices` | Récupérer avis d'un livre | Param: `id` (ID livre)                          |
-| POST    | `/api/books/:id/notices` | Créer un avis             | Param: `id`, Body: `{ comment }`                |
-| PUT     | `/api/notices/:id`       | Modifier son avis         | Param: `id`, Body: `{ comment }`                |
-| DELETE  | `/api/notices/:id`       | Supprimer son avis        | Param: `id`                                     |
-| POST    | `/api/books/:id/rate`    | Noter un livre            | Param: `id`, Body: `{ rate, id_reading_list? }` |
-| PUT     | `/api/rates/:id`         | Modifier sa note          | Param: `id`, Body: `{ rate }`                   |
-| DELETE  | `/api/rates/:id`         | Supprimer sa note         | Param: `id`                                     |
+| POST     | `/api/reviews` | Ajouter un avis |
+| DELETE    | `/api/reviews/:id` | Supprimer un avis |                           |
 
-### Gestion des auteurs/genres (Admin)
 
-| Méthode | Route          | Description       | Données attendues                  |
-| ------- | -------------- | ----------------- | ---------------------------------- |
-| GET     | `/api/authors` | Liste des auteurs | Query: `search?` (terme recherche) |
-| POST    | `/api/authors` | Créer un auteur   | `{ firstname?, lastname }`         |
-| GET     | `/api/genres`  | Liste des genres  | -                                  |
-| POST    | `/api/genres`  | Créer un genre    | `{ name }`                         |
 
-### Légende
-
-- `?` = Optionnel
-- `Query` = Paramètres URL (?param=value)
-- `Param` = Paramètres de route (/api/route/:param)
-- `Body` = Données dans le corps de la requête
-- `rate` = Entier de 1 à 5
-- `statut` = Boolean (true=actif, false=inactif)
 
 # UserStories 👥
 
@@ -380,25 +377,12 @@ Recherche selon :
 
 | En tant que                      | Je souhaite que                                                                                     | Afin de                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| **US-V01**: En tant que visiteur | je veux voir une page d'accueil présentant BlaBlaBook et quelques livres aléatoires                 | afin de découvrir rapidement l'application et m'inciter à m'inscrire         |
+| **US-V01**: En tant que visiteur | je veux voir une page d'accueil présentant 66Partners afin de découvrir rapidement l'application et m'inciter à m'inscrire         |
 | **US-V02**: En tant que visiteur | je veux m'inscrire avec un email et un mot de passe                                                 | afin de créer un compte sécurisé et accéder aux fonctionnalités personnelles |
 | **US-V03**: En tant que visiteur | je veux me connecter avec mes identifiants                                                          | afin d'accéder à mon compte existant                                         |
-| **US-V04**: En tant que visiteur | je veux rechercher des livres via un moteur de recherche                                            | afin de découvrir de nouveaux titres sans inscription                        |
-| **US-V05**: En tant que visiteur | je veux accéder à une page de détail d'un livre avec ses informations (titre, auteur, résumé, etc.) | afin d'en savoir plus sur un livre                                           |
+| **US-V04**: En tant que visiteur | je veux pouvoir réinitialiser mon mot de passe |               |
 
-### 🌱 V1.1 - Améliorations Rapides
 
-| En tant que                      | Je souhaite que                                                                       | Afin de                                                                      |
-| -------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------- |
-| **US-V06**: En tant que visiteur | je veux filtrer les résultats de recherche par genre, note, date de publication, etc. | afin de trouver plus précisément des livres qui m'intéressent                |
-| **US-V07**:                      | En tant que visiteur                                                                  | je veux voir des résultats de recherche dynamiques dans une liste déroulante | afin d'améliorer l'expérience de recherche en temps réel |
-| **US-V08**: En tant que visiteur | je veux consulter les mentions légales et la politique RGPD                           | afin de connaître mes droits concernant mes données personnelles             |
-
-### 🌍 V1.3 - Fonctionnalités Avancées (Algorithmiques)
-
-| **US-V09**: En tant que | Je souhaite que                                                                       | Afin de                                           |
-| ----------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| En tant que visiteur    | je veux basculer l'application entre plusieurs langues (au moins français et anglais) | afin d'accéder au contenu dans ma langue préférée |
 
 ## 👥 Rôle : Utilisateurs
 
@@ -406,40 +390,33 @@ Recherche selon :
 
 | En tant que                                 | Je souhaite que                                                                            | Afin de                                         |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------- |
-| **US-U01**: En tant qu'utilisateur connecté | je veux accéder à ma bibliothèque personnelle                                              | afin de voir mes livres organisés (lus/à lire). |
-| **US-U02**: En tant qu'utilisateur connecté | je veux ajouter un livre à ma liste de livres lus ou à lire                                | afin de gérer ma bibliothèque personnelle..     |
-| **US-U03**: En tant qu'utilisateur connecté | je veux retirer un livre de ma liste personnelle (sans le supprimer de la base de données) | afin de mettre à jour ma bibliothèque.          |
+| **US-U01**: En tant qu'utilisateur connecté | je veux voir les sport populaires autour de chez moi                                            | afin de mieux m'orienter |
+| **US-U02**: En tant qu'utilisateur connecté | je veux voir les activités autour de chez moi                  | afin d'y participer     |
+| **US-U03**: En tant qu'utilisateur connecté | je veux pouvoir ajouter un sport si celui ci n'apparait pas | afin de pouvoir créer des activités          |
 | **US-U04**: En tant qu'utilisateur connecté | je veux me déconnecter de manière sécurisée                                                | afin de protéger mes données personnelles.      |
 | **US-U05**: En tant qu'utilisateur connecté | je veux modifier mes informations de profil                                                | afin de maintenir mes données à jour.           |
+| **US-U06**: En tant qu'utilisateur connecté | je veux pouvoir supprimer mon profil                                                |       |
+| **US-U07**: En tant qu'utilisateur connecté | je veux pouvoir demander à participer à une activité                                  | afin de faire de nouvelles connaissances          |
+| **US-U08**: En tant qu'utilisateur connecté | je veux pouvoir me retirer d'une activité                                          |           |
+| **US-U09**: En tant qu'utilisateur connecté | je veux accéder à ma messagerie                                          | afin de me tenir au courant de mes participations |
+| **US-U10** | En tant qu'utilisateur connecté | je veux créer une activité sportive | afin de trouver des partenaires |
+| **US-U11** | En tant qu'utilisateur connecté | je veux modifier une activité dont je suis l'organisateur | afin de mettre à jour ses informations |
+| **US-U12** | En tant qu'utilisateur connecté | je veux supprimer une activité dont je suis l'organisateur | afin d'annuler une sortie |
+| **US-U13** | En tant qu'utilisateur connecté | je veux accepter une demande de participation | afin de constituer mon groupe |
+| **US-U14** | En tant qu'utilisateur connecté | je veux refuser une demande de participation | afin de contrôler les participants |
 
 ### 🌱 V1.1 - Améliorations Rapides
 
 | En tant que                                 | Je souhaite que                                                                                      | Afin de                                                        |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| **US-U06**: En tant qu'utilisateur connecté | je veux laisser une note et un avis sur un livre                                                     | afin de partager mon opinion et aider les autres utilisateurs. |
-| **US-U07**: En tant qu'utilisateur connecté | je veux consulter des statistiques sur ma bibliothèque (nombre de livres lus, genres préférés, etc.) | afin d'analyser mes habitudes de lecture                       |
-| **US-U08**: En tant qu'utilisateur connecté | je veux récupérer l'historique de ma bibliothèque et mes données personnelles                        | afin de garder une sauvegarde ou changer de service.           |
-| **US-U09**: En tant qu'utilisateur connecté | je veux supprimer mon compte et toutes mes données                                                   | afin d'exercer mon droit à l'oubli.                            |
-
-### 👥 V1.2 - Fonctionnalités Sociales
-
-| En tant que                                 | Je souhaite que                                                        | Afin de                                                     |
-| ------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------- |
-| **US-U10**: En tant qu'utilisateur connecté | je veux rendre ma bibliothèque publique (entièrement ou partiellement) | afin de partager mes lectures avec d'autres.                |
-| **US-U11**: En tant qu'utilisateur connecté | je veux participer à un forum de discussion sur les livres             | afin d'échanger des idées avec la communauté.               |
-| **US-U12**: En tant qu'utilisateur connecté | je veux discuter en chat direct avec d'autres utilisateurs             | afin d'avoir des interactions en temps réel sur des livres. |
-| **US-U13**: En tant qu'utilisateur connecté | je veux créer ou rejoindre des groupes de lecture thématiques          | afin de partager des expériences collectives.               |
-
-### 🤖 V1.3 - Fonctionnalités Avancées (Algorithmiques)
-| En tant que | Je souhaite que | Afin de |
-| -------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------- |
-|**US-U14**: En tant qu'utilisateur connecté | je veux recevoir des recommandations simples de livres (basées sur mes genres préférés et notes) | afin de découvrir de nouveaux livres susceptibles de m'intéresser.|
+| **US-U06**: En tant qu'utilisateur connecté | je veux partager mes sorties sur Strava                                                     | afin de partager mes résultats avec mes abonnés|
+| **US-U07**: En tant qu'utilisateur connecté | je veux pouvoir payer une version premium si il y a                     |
 
 ### 📱 V2.0 - Extension Mobile
 
 | En tant que                                 | Je souhaite que                                   | Afin de                                        |
 | ------------------------------------------- | ------------------------------------------------- | ---------------------------------------------- |
-| **US-U15**: En tant qu'utilisateur connecté | je veux scanner un livre via l'application mobile | afin de l'ajouter facilement à ma bibliothèque |
+| **US-U15**: En tant qu'utilisateur connecté | je veux pouvoir lancer le arcours via strava | afin de l'ajouter directement dans l'application |
 
 ## 👥 Rôle : Administrateur
 
@@ -447,14 +424,14 @@ Recherche selon :
 
 | En tant que                           | Je souhaite que                                                                                  | Afin de                                                             |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| **US-A01**: En tant qu'administrateur | je veux me connecter avec des identifiants spécifiques et des permissions élevées                | afin de gérer la plateforme de manière sécurisée.                   |
-| **US-A02**: En tant qu'administrateur | je veux ajouter ou supprimer des livres de la base de données globale                            | afin de maintenir un catalogue à jour et précis.                    |
-| **US-A03**: En tant qu'administrateur | je veux gérer les comptes utilisateurs (suspendre ou supprimer en cas d'abus)                    | afin d'assurer la sécurité de la plateforme.                        |
-| **US-A04**: En tant qu'administrateur | je veux que l'application respecte les standards de sécurité OWASP Top 10                        | afin de protéger la plateforme contre les vulnérabilités critiques. |
-| **US-A05**: En tant qu'administrateur | je veux surveiller et logger les tentatives d'accès suspects, puis consulter ces logs d'activité | afin de détecter, analyser et prévenir les attaques.                |
-| **US-A06**: En tant qu'administrateur | je veux gérer les demandes RGPD des utilisateurs (export/suppression de données)                 | afin de respecter la réglementation.                                |
+| **US-A01**: En tant qu'administrateur |consulter les utilisateurs inscrits    | superviser la plateforme.                   |
+| **US-A02**: En tant qu'administrateur | suspendre un utilisateur   | limiter les abus                |
+| **US-A03**: En tant qu'administrateur | supprimer un utilisateur                | respecter les règles de la plateforme |                 |
+| **US-A04**: En tant qu'administrateur | ajouter un sport             |maintenir le catalogue  |
+| **US-A05**: En tant qu'administrateur | supprimer un sport |  maintenir le catalogue              |
 
-### 🌱 V1.1 - Améliorations Rapides
+
+### 🌱 V1.2 - Améliorations Rapides
 
 | En tant que                           | Je souhaite que                                                                                                        | Afin de                                                                |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -468,50 +445,17 @@ Recherche selon :
 | **US-A09**: En tant qu'administrateur  | je veux configurer les paramètres de sécurité de l'application   | afin de protéger la plateforme contre les vulnérabilités. |
 | **US-A010**: En tant qu'administrateur | je veux créer et gérer différents niveaux d'accès administrateur | afin d'organiser la gestion de l'équipe                   |
 
-## Analyses des Risques
 
-### API et services externes
 
-| Risque                        | Probabilité | Impact | Mitigation                                 |
-| ----------------------------- | ----------- | ------ | ------------------------------------------ |
-| API Google Books indisponible | Faible      | Fort   | Cache local + message d'erreur utilisateur |
-| Quotas API dépassés           | Moyenne     | Moyen  | Cache local + limite de requêtes           |
 
-### Base de données
 
-| Risque                   | Probabilité | Impact | Mitigation                                     |
-| ------------------------ | ----------- | ------ | ---------------------------------------------- |
-| Perte de données         | Faible      | Fort   | Sauvegardes régulières + environnement de test |
-| Problèmes de performance | Moyenne     | Moyen  | Index + pagination                             |
-
-### Sécurité
-
-| Risque                     | Probabilité | Impact | Mitigation                                           |
-| -------------------------- | ----------- | ------ | ---------------------------------------------------- |
-| Failles d'authentification | Moyenne     | Fort   | Hachage argon2 + Better Auth + validation des inputs |
-| Injection SQL              | Faible      | Fort   | ORM Sequelize + validation données                   |
-
-### Infrastructure
-
-| Risque                         | Probabilité | Impact | Mitigation                                 |
-| ------------------------------ | ----------- | ------ | ------------------------------------------ |
-| Problèmes de déploiement       | Moyenne     | Moyen  | Docker + Documentation                     |
-| Environnement de développement | Forte       | Faible | Docker Compose + variables d'environnement |
-
-## Rôle de l'équipe 🧑‍🤝‍🧑🧑‍🤝‍🧑
-
-L'équipe est composée de 4 développeurs concepteurs.
-
-- Lucas: LeadDev / Développeur Front-End
-- Elodie: Scrum Master / Développeur Front-End
-- Jonathan: Designer / Développeur Back-End
-- Stéphane: DevOps/ Développeur Back-End
+                           |
 
 ## RGPD (Réglement Général sur la protection des données) ⚠️
 
 ## **1**. Inventorier les données personnelles collectées:
 
-- Liste toutes les données collectées : nom, prénom, email, mot de passe, listes de livres, avis, adresse IP, cookies, etc. Ne collecte que ce qui est nécessaire au fonctionnement de la plateforme (principe de minimisation).
+- Liste toutes les données collectées : nom, prénom, email, mot de passe, , avis, adresse IP, cookies, etc. Ne collecte que ce qui est nécessaire au fonctionnement de la plateforme (principe de minimisation).
 
 ## **2**.Afficher une politique de confidentialité:
 
@@ -519,7 +463,12 @@ L'équipe est composée de 4 développeurs concepteurs.
 
 - Qui est responsable du traitement des données
 
-- Les finalités des traitements (inscription, gestion bibliothèque, avis, etc.)
+- Les finalités des traitements (inscription,- Profil sportif
+- Sports pratiqués
+- Activités créées
+- Participations
+- Messagerie
+- Avis et notations)
 
 - Les bases légales (ex : exécution du contrat ou consentement)
 
@@ -572,12 +521,92 @@ Toute personne ayant accès aux données doit être sensibilisée à la protecti
   ** À la loi française "Informatique et Libertés" modifiée (loi n°78-17 du 6 janvier 1978) : articles 82 à 84 sur la sécurité des données
   ** Au Code pénal français : articles 323-1 à 323-7 sur les atteintes aux systèmes de traitement automatisé de données
 ```
+# XI. Modèle de données
+
+## Entités principales
+
+### User
+
+- id
+- email
+- password
+- pseudo
+- city
+- bio
+- avatar
+- createdAt
+- updatedAt
+
+### Sport
+
+- id
+- name
+
+### UserSport
+
+- userId
+- sportId
+- level
+
+### Activity
+
+- id
+- title
+- description
+- city
+- startDate
+- levelRequired
+- maxParticipants
+- creatorId
+- sportId
+
+### Participation
+
+- id
+- userId
+- activityId
+- status
+
+# XV. Roadmap MVP
+
+## Phase 1
+
+- Architecture backend
+- Docker
+- PostgreSQL
+- Prisma
+
+## Phase 2
+
+- Authentification
+- Gestion profil
+
+## Phase 3
+
+- Sports
+- Activités
+
+## Phase 4
+
+- Participations
+
+## Phase 5
+
+- Déploiement Beta
+
+### Hors MVP
+
+- Messagerie
+- Avis
+- Notifications
+- Mobile
+- Strava
 
 # Documents de Conception
 
-## <p align="center" p> Diagramme ERD (entité relationnel de données)
+## <p align="center" p> MPD (Modele Physique de Données)
 
-![ERD](../ERD/erd-v2.png)
+![MPD](../ERD/erd-v2.png)
 
 ## <p align="center" p> Diagramme de Séquence
 
@@ -591,368 +620,5 @@ Toute personne ayant accès aux données doit être sensibilisée à la protecti
 
 ![Diagramme d'activité](../Diagrammes/Diagramme%20Activité/diagrammeActivité.png)
 
-## Dictionnaire de données
 
-### 0. Contexte technique
 
-Ce dictionnaire des données a été conçu pour une utilisation avec l'ORM **Sequelize** (Node.js). Les types de données et contraintes sont optimisés pour cette technologie :
-
-- **Types simplifiés** : Privilégiation de TEXT sur VARCHAR pour la flexibilité
-- **Contraintes ORM** : Validation côté application plutôt que base de données
-- **Dates** : Type DATE géré automatiquement par Sequelize (timestamps inclus)
-- **JSON natif** : Support des colonnes JSON pour les données complexes
-
----
-
-### 1. Vue d'ensemble
-
-#### 1.1 Entités du système
-
-| Code         | Libellé          | Description                                 |
-| ------------ | ---------------- | ------------------------------------------- |
-| USER         | Utilisateur      | Comptes utilisateurs de l'application       |
-| ROLE         | Rôle             | Rôles du système RBAC                       |
-| PERMISSION   | Permission       | Permissions du système RBAC                 |
-| BOOK         | Livre            | Informations sur les livres                 |
-| LIBRARY      | Bibliothèque     | Bibliothèques personnelles des utilisateurs |
-| READING_LIST | Liste de lecture | Collections thématiques de livres           |
-| NOTICE       | Avis             | Avis/critiques sur les livres               |
-| RATE         | Note             | Notes numériques attribuées aux livres      |
-| AUTHOR       | Auteur           | Informations sur les auteurs de livres      |
-| GENRE        | Genre            | Genres littéraires                          |
-
-#### 1.2 Tables de relations
-
-| Code            | Libellé            | Entité 1 | Entité 2     | Description                            |
-| --------------- | ------------------ | -------- | ------------ | -------------------------------------- |
-| USER_ROLE       | Utilisateur-Rôle   | USER     | ROLE         | Attribution des rôles aux utilisateurs |
-| ROLE_PERMISSION | Rôle-Permission    | ROLE     | PERMISSION   | Attribution des permissions aux rôles  |
-| BOOK_LIBRARY    | Livre-Bibliothèque | BOOK     | LIBRARY      | Livres dans les bibliothèques          |
-| BOOK_IN_LIST    | Livre-Liste        | BOOK     | READING_LIST | Livres dans les listes de lecture      |
-| BOOK_AUTHOR     | Livre-Auteur       | BOOK     | AUTHOR       | Auteurs des livres                     |
-| BOOK_GENRE      | Livre-Genre        | BOOK     | GENRE        | Genres des livres                      |
-
----
-
-### 2. Description des entités
-
-#### USER
-
-| Code         | Libellé           | Type    | Taille | Contraintes                    | Commentaire                       |
-| ------------ | ----------------- | ------- | ------ | ------------------------------ | --------------------------------- |
-| id_user      | ID utilisateur    | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL   | Clé primaire                      |
-| firstname    | Prénom            | TEXT    | -      | NOT NULL                       | Prénom de l'utilisateur           |
-| lastname     | Nom               | TEXT    | -      | NOT NULL                       | Nom de famille                    |
-| username     | Nom d'utilisateur | TEXT    | -      | UNIQUE, NOT NULL               | Identifiant unique                |
-| email        | Email             | TEXT    | -      | UNIQUE, NOT NULL               | Adresse email                     |
-| password     | Mot de passe      | TEXT    | -      | NOT NULL                       | Hash du mot de passe              |
-| connected_at | Date connexion    | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Dernière connexion                |
-| created_at   | Date création     | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Date de création                  |
-| deleted_at   | Date suppression  | DATE    | -      | NULL                           | Date de suppression (soft delete) |
-
-**Domaines de valeurs :**
-
-- username : Identifiant unique de l'utilisateur
-- email : Adresse email valide
-- password : Hash argon2 ou similaire
-
-#### ROLE
-
-| Code        | Libellé       | Type    | Taille | Contraintes                    | Commentaire         |
-| ----------- | ------------- | ------- | ------ | ------------------------------ | ------------------- |
-| id_role     | ID rôle       | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL   | Clé primaire        |
-| name        | Nom           | TEXT    | -      | UNIQUE, NOT NULL               | Nom du rôle         |
-| description | Description   | TEXT    | -      | NOT NULL                       | Description du rôle |
-| created_at  | Date création | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Date de création    |
-
-**Domaines de valeurs :**
-
-- name : USER, MODERATOR, ADMIN
-
-#### PERMISSION
-
-| Code          | Libellé       | Type    | Taille | Contraintes                  | Commentaire                  |
-| ------------- | ------------- | ------- | ------ | ---------------------------- | ---------------------------- |
-| id_permission | ID permission | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire                 |
-| label         | Libellé       | TEXT    | -      | UNIQUE, NOT NULL             | Nom de la permission         |
-| action        | Action        | TEXT    | -      | NULL                         | Description de la permission |
-
-**Domaines de valeurs :**
-
-- label : CREATE, READ, UPDATE, DELETE, MODERATE
-
-#### BOOK
-
-| Code         | Libellé          | Type    | Taille | Contraintes                  | Commentaire                    |
-| ------------ | ---------------- | ------- | ------ | ---------------------------- | ------------------------------ |
-| id_book      | ID livre         | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire                   |
-| isbn         | Code ISBN        | TEXT    | -      | UNIQUE, NULL                 | Code ISBN du livre             |
-| title        | Titre            | TEXT    | -      | NOT NULL                     | Titre du livre                 |
-| image        | Image disponible | BOOLEAN | -      | NOT NULL, DEFAULT FALSE      | Indicateur de présence d'image |
-| summary      | Résumé           | TEXT    | -      | NULL                         | Résumé du livre                |
-| nb_pages     | Nombre de pages  | INTEGER | -      | NULL                         | Nombre de pages                |
-| published_at | Date publication | DATE    | -      | NULL                         | Date de publication            |
-
-**Domaines de valeurs :**
-
-- isbn : Code ISBN-10 ou ISBN-13 (optionnel)
-- title : Titre complet du livre
-- nb_pages : Nombre entier positif
-
-#### LIBRARY
-
-| Code       | Libellé           | Type    | Taille | Contraintes                    | Commentaire            |
-| ---------- | ----------------- | ------- | ------ | ------------------------------ | ---------------------- |
-| id_library | ID bibliothèque   | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL   | Clé primaire           |
-| id_user    | ID utilisateur    | INTEGER | -      | FK, NOT NULL                   | Référence USER         |
-| name       | Nom               | TEXT    | -      | UNIQUE, NOT NULL               | Nom de la bibliothèque |
-| created_at | Date création     | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Date de création       |
-| updated_at | Date modification | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Date de modification   |
-| deleted_at | Date suppression  | DATE    | -      | NULL                           | Date de suppression    |
-
-**Domaines de valeurs :**
-
-- name : Nom personnalisé de la bibliothèque
-
-#### READING_LIST
-
-| Code            | Libellé           | Type    | Taille | Contraintes                    | Commentaire             |
-| --------------- | ----------------- | ------- | ------ | ------------------------------ | ----------------------- |
-| id_reading_list | ID liste          | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL   | Clé primaire            |
-| id_library      | ID bibliothèque   | INTEGER | -      | FK, NOT NULL                   | Référence LIBRARY       |
-| name            | Nom               | TEXT    | -      | NOT NULL                       | Nom de la liste         |
-| description     | Description       | TEXT    | -      | NULL                           | Description de la liste |
-| statut          | Statut            | BOOLEAN | -      | NOT NULL                       | Statut actif/inactif    |
-| created_at      | Date création     | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Date de création        |
-| updated_at      | Date modification | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Date de modification    |
-| deleted_at      | Date suppression  | DATE    | -      | NULL                           | Date de suppression     |
-
-**Domaines de valeurs :**
-
-- statut : true (active), false (inactive)
-
-#### NOTICE
-
-| Code         | Libellé           | Type    | Taille | Contraintes                    | Commentaire          |
-| ------------ | ----------------- | ------- | ------ | ------------------------------ | -------------------- |
-| id_notice    | ID avis           | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL   | Clé primaire         |
-| id_user      | ID utilisateur    | INTEGER | -      | FK, NOT NULL                   | Référence USER       |
-| id_book      | ID livre          | INTEGER | -      | FK, NOT NULL                   | Référence BOOK       |
-| comment      | Commentaire       | TEXT    | -      | NOT NULL                       | Texte de l'avis      |
-| published_at | Date publication  | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Date de publication  |
-| updated_at   | Date modification | DATE    | -      | NULL                           | Date de modification |
-
-**Domaines de valeurs :**
-
-- comment : Texte libre de l'avis utilisateur
-
-#### RATE
-
-| Code            | Libellé           | Type    | Taille | Contraintes                               | Commentaire            |
-| --------------- | ----------------- | ------- | ------ | ----------------------------------------- | ---------------------- |
-| id_rate         | ID note           | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL              | Clé primaire           |
-| id_user         | ID utilisateur    | INTEGER | -      | FK, NOT NULL                              | Référence USER         |
-| id_book         | ID livre          | INTEGER | -      | FK, NOT NULL                              | Référence BOOK         |
-| id_reading_list | ID liste          | INTEGER | -      | FK, NULL                                  | Référence READING_LIST |
-| rate            | Note              | INTEGER | -      | NOT NULL, CHECK (rate >= 1 AND rate <= 5) | Note de 1 à 5          |
-| published_at    | Date publication  | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE            | Date de publication    |
-| updated_at      | Date modification | DATE    | -      | NULL                                      | Date de modification   |
-
-**Domaines de valeurs :**
-
-- rate : Entier de 1 à 5 étoiles
-
-#### AUTHOR
-
-| Code      | Libellé   | Type    | Taille | Contraintes                  | Commentaire        |
-| --------- | --------- | ------- | ------ | ---------------------------- | ------------------ |
-| id_author | ID auteur | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire       |
-| firstname | Prénom    | TEXT    | -      | NULL                         | Prénom de l'auteur |
-| lastname  | Nom       | TEXT    | -      | NOT NULL                     | Nom de famille     |
-
-**Domaines de valeurs :**
-
-- firstname : Prénom de l'auteur (optionnel)
-- lastname : Nom de famille de l'auteur (obligatoire)
-
-#### GENRE
-
-| Code     | Libellé  | Type    | Taille | Contraintes                  | Commentaire  |
-| -------- | -------- | ------- | ------ | ---------------------------- | ------------ |
-| id_genre | ID genre | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire |
-| name     | Nom      | TEXT    | -      | UNIQUE, NOT NULL             | Nom du genre |
-
-**Domaines de valeurs :**
-
-- name : Fiction, Non-fiction, Science-fiction, Romance, Thriller, Fantasy, etc.
-
----
-
-### 3. Tables de relations
-
-#### USER_ROLE (Utilisateur - Rôle)
-
-| Code         | Libellé        | Type    | Taille | Contraintes                  | Commentaire    |
-| ------------ | -------------- | ------- | ------ | ---------------------------- | -------------- |
-| id_user_role | ID relation    | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire   |
-| id_user      | ID utilisateur | INTEGER | -      | FK, NOT NULL                 | Référence USER |
-| id_role      | ID rôle        | INTEGER | -      | FK, NOT NULL                 | Référence ROLE |
-
-#### ROLE_PERMISSION (Rôle - Permission)
-
-| Code               | Libellé       | Type    | Taille | Contraintes                  | Commentaire          |
-| ------------------ | ------------- | ------- | ------ | ---------------------------- | -------------------- |
-| id_permission_role | ID relation   | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire         |
-| id_role            | ID rôle       | INTEGER | -      | FK, NOT NULL                 | Référence ROLE       |
-| id_permission      | ID permission | INTEGER | -      | FK, NOT NULL                 | Référence PERMISSION |
-
-#### BOOK_LIBRARY (Livre - Bibliothèque)
-
-| Code            | Libellé         | Type    | Taille | Contraintes                    | Commentaire       |
-| --------------- | --------------- | ------- | ------ | ------------------------------ | ----------------- |
-| id_book_library | ID relation     | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL   | Clé primaire      |
-| id_library      | ID bibliothèque | INTEGER | -      | FK, NOT NULL                   | Référence LIBRARY |
-| id_book         | ID livre        | INTEGER | -      | FK, NOT NULL                   | Référence BOOK    |
-| created_at      | Date ajout      | DATE    | -      | NOT NULL, DEFAULT CURRENT_DATE | Date d'ajout      |
-
-#### BOOK_IN_LIST (Livre - Liste de lecture)
-
-| Code            | Libellé     | Type    | Taille | Contraintes                  | Commentaire            |
-| --------------- | ----------- | ------- | ------ | ---------------------------- | ---------------------- |
-| id_book_in_list | ID relation | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire           |
-| id_reading_list | ID liste    | INTEGER | -      | FK, NOT NULL                 | Référence READING_LIST |
-| id_book         | ID livre    | INTEGER | -      | FK, NOT NULL                 | Référence BOOK         |
-
-#### BOOK_AUTHOR (Livre - Auteur)
-
-| Code           | Libellé     | Type    | Taille | Contraintes                  | Commentaire      |
-| -------------- | ----------- | ------- | ------ | ---------------------------- | ---------------- |
-| id_book_author | ID relation | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire     |
-| id_book        | ID livre    | INTEGER | -      | FK, NOT NULL                 | Référence BOOK   |
-| id_author      | ID auteur   | INTEGER | -      | FK, NOT NULL                 | Référence AUTHOR |
-
-#### BOOK_GENRE (Livre - Genre)
-
-| Code          | Libellé     | Type    | Taille | Contraintes                  | Commentaire     |
-| ------------- | ----------- | ------- | ------ | ---------------------------- | --------------- |
-| id_book_genre | ID relation | INTEGER | -      | PK, AUTO_INCREMENT, NOT NULL | Clé primaire    |
-| id_book       | ID livre    | INTEGER | -      | FK, NOT NULL                 | Référence BOOK  |
-| id_genre      | ID genre    | INTEGER | -      | FK, NOT NULL                 | Référence GENRE |
-
----
-
-### 4. Contraintes d'intégrité
-
-#### 4.1 Contraintes référentielles
-
-**Clés étrangères principales :**
-
-- LIBRARY.id_user → USER.id_user (CASCADE DELETE)
-- READING_LIST.id_library → LIBRARY.id_library (CASCADE DELETE)
-- NOTICE.id_user → USER.id_user (CASCADE DELETE)
-- NOTICE.id_book → BOOK.id_book (RESTRICT DELETE)
-- RATE.id_user → USER.id_user (CASCADE DELETE)
-- RATE.id_book → BOOK.id_book (RESTRICT DELETE)
-
-#### 4.2 Contraintes fonctionnelles
-
-**Contraintes d'unicité :**
-
-- **UK_USER_USERNAME** : UNIQUE(username)
-
-  - _Un nom d'utilisateur unique dans le système_
-
-- **UK_USER_EMAIL** : UNIQUE(email)
-
-  - _Un email unique par utilisateur_
-
-- **UK_ROLE_NAME** : UNIQUE(name)
-
-  - _Un nom de rôle unique_
-
-- **UK_PERMISSION_LABEL** : UNIQUE(label)
-
-  - _Un libellé de permission unique_
-
-- **UK_BOOK_ISBN** : UNIQUE(isbn)
-
-  - _Un code ISBN unique par livre_
-
-- **UK_LIBRARY_NAME** : UNIQUE(name)
-
-  - _Un nom de bibliothèque unique_
-
-- **UK_GENRE_NAME** : UNIQUE(name)
-  - _Un nom de genre unique_
-
-**Contraintes de validation :**
-
-- **CK_RATE_VALUE** : CHECK (rate >= 1 AND rate <= 5)
-
-  - _La note doit être comprise entre 1 et 5_
-
-- **CK_BOOK_PAGES** : CHECK (nb_pages > 0)
-  - _Le nombre de pages doit être positif_
-
-#### 4.3 Implémentation Sequelize
-
-```javascript
-// Exemple pour la table RATE
-const Rate = sequelize.define('Rate', {
-  id_rate: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  rate: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    validate: {
-      min: 1,
-      max: 5,
-    },
-  },
-});
-
-// Exemple de contrainte d'unicité composite
-const BookLibrary = sequelize.define(
-  'BookLibrary',
-  {
-    // ... définitions des colonnes
-  },
-  {
-    indexes: [
-      {
-        unique: true,
-        fields: ['id_library', 'id_book'],
-        name: 'uk_library_book',
-      },
-    ],
-  }
-);
-```
-
----
-
-### 5. Notes d'implémentation
-
-#### 5.1 Index recommandés
-
-Pour optimiser les performances :
-
-```sql
--- Index sur les clés étrangères fréquemment utilisées
-CREATE INDEX idx_notice_user ON NOTICE(id_user);
-CREATE INDEX idx_notice_book ON NOTICE(id_book);
-CREATE INDEX idx_rate_user ON RATE(id_user);
-CREATE INDEX idx_rate_book ON RATE(id_book);
-CREATE INDEX idx_library_user ON LIBRARY(id_user);
-```
-
-#### 5.2 Triggers suggérés
-
-```sql
--- Trigger pour mettre à jour updated_at automatiquement
-CREATE TRIGGER update_library_timestamp
-BEFORE UPDATE ON LIBRARY
-FOR EACH ROW SET NEW.updated_at = CURRENT_DATE;

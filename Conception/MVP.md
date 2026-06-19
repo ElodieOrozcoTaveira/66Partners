@@ -13,7 +13,7 @@
 * messagerie simple
 * notation après sortie
 
-### Stack conseillée :
+### Stack utilisée :
 
 * Backend : Node.js, Express
 * Base de données : PostgreSQL
@@ -94,7 +94,7 @@ backend/
     │
     ├── utils/
     │   ├── jwt.ts
-    │   ├── bcrypt.ts
+    │   ├── argon.ts
     │   ├── pagination.ts
     │   ├── geo.ts
     │   ├── date.ts
@@ -118,7 +118,7 @@ tsconfig.json
 * participations
 * messages
 * reviews
-* notifications
+* notifications  v1.2
 
 #### **Modèles principaux :**
 
@@ -134,14 +134,17 @@ tsconfig.json
 #### **Endpoints MVP :**
 
 ***Auth***
-- POST /auth/register
-- POST /auth/login
-- GET /me
-- PUT /me/profile
+- POST api/auth/register
+- POST api/auth/login
+- POST api/auth/logout
+- GET api/me/profile
+- PUT api/me/profile
+- DELETE api/me/profile
 
 ***Sports***
 
 - GET /sports
+- POST /sports
 
 ***Activities***
 
@@ -164,6 +167,8 @@ tsconfig.json
 ***Reviews***
 
 - POST /reviews
+- DELETE /reviews
+
 
 ### **Phase 3 — Base de données**
 
