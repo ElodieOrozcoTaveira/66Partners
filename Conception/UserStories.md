@@ -1,8 +1,8 @@
 # User Stories
 Ce que souhaite chaque utilisateur lorsqu'il accède à l'applicaition web ou mobile.
 
- **Visiteur** : Utilisateur non connecté découvrant l'application
-- **Utilisateur** : Utilisateur connecté gérant sa bibliothèque personnelle
+- **Visiteur** : Utilisateur non connecté découvrant l'application
+- **Utilisateur** : Utilisateur connecté gérant son prfil sportif ainsi que ses sorties
 - **Administrateur** : Rôle de modération et gestion globale
 
 ## 👥 Rôle : Visiteur (non connecté)
@@ -50,7 +50,7 @@ Ce que souhaite chaque utilisateur lorsqu'il accède à l'applicaition web ou mo
 
 | En tant que                                 | Je souhaite que                                   | Afin de                                        |
 | ------------------------------------------- | ------------------------------------------------- | ---------------------------------------------- |
-| **US-U15**: En tant qu'utilisateur connecté | je veux pouvoir lancer le arcours via strava | afin de l'ajouter directement dans l'application |
+| **US-U15**: En tant qu'utilisateur connecté | je veux pouvoir lancer le parcours via strava | afin de l'ajouter directement dans l'application |
 
 ## 👥 Rôle : Administrateur
 

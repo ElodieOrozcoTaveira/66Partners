@@ -1,7 +1,7 @@
 # <p align="center">66Partners</p>
 
 <p align="center">
-  <img src="./Maquettes/logoappli.png" alt="logoappli" />
+  <img src="./Maquettes/maquette1.png" alt="logoappli" />
 </p>
 
 <p align="center">
@@ -86,7 +86,7 @@ Le projet est développé dans un premier temps sous forme d'**application web**
 
 ### Application mobile
 
-![Application Mobile](/Conception/Maquettes/logoappli.png)
+![Application Mobile](/Conception/Maquettes/maquetteappli2.png)
 
 ### Maquettes
 
@@ -316,4 +316,4 @@ npm run docker:prod:shell
 
 ### Slogan
 
-> **Trouve ton partenaire de sport dans le 66.**
+> **Ton partenaire, ton sport, ton 66.**

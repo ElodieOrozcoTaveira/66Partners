@@ -610,15 +610,36 @@ Toute personne ayant accès aux données doit être sensibilisée à la protecti
 
 ## <p align="center" p> Diagramme de Séquence
 
-![DiagrammeSéquence](../Diagrammes/exemple-diagramme-sequence.png)
+![DiagrammeSéquence](./UML/Diagrammes/Diagrammes%20Séquence/CréationInscriptionSortie/Inscription%20sortie/CréationInscriptionSortie.png)
+
+### Description
+
+1. L'organisateur crée une sortie avec les informations clés (sport, date, lieu, niveau, nombre de places).
+2. L'événement est enregistré en base, puis Socket.io diffuse une notification aux utilisateurs concernés (proximité géographique, sport pratiqué).
+3. Un participant intéressé consulte le détail de la sortie via l'API.
+4. Lors de l'inscription, l'API vérifie d'abord qu'il reste des places disponibles.
+5. Si une place est libre, le participant est ajouté en base et tous les membres de la room Socket.io de l'événement (organisateur compris) reçoivent une mise à jour en temps réel.
+6. Si la sortie est complète, une erreur claire est renvoyée à l'utilisateur.
+
+![DiagrammeSéquence](./UML/Diagrammes/Diagrammes%20Séquence/RecherchePartenaire/RecherchePartenaire.png)
+
+
+#### Description
+
+1. L'utilisateur lance une recherche de partenaire (sport, niveau, rayon de recherche).
+2. L'API interroge PostgreSQL avec PostGIS pour récupérer les profils dans la zone géographique demandée.
+3. Redis est consulté pour connaître les disponibilités en temps réel (mis à jour en cache).
+4. Les résultats triés sont renvoyés et affichés à l'utilisateur.
+5. L'utilisateur envoie une demande de match à un profil.
+6. La demande est enregistrée en base, puis Socket.io notifie instantanément l'utilisateur cible.
 
 ## <p align="center" p> Use Case
 
-![UseCase](../Diagrammes/UseCase/UseCase.png)
+![UseCase](./UML/Diagrammes/UseCase/useCase.png)
 
 ## <p align="center" p> Diagramme d'Activité
 
-![Diagramme d'activité](../Diagrammes/Diagramme%20Activité/diagrammeActivité.png)
+![Diagramme d'activité](./UML/Diagrammes/DiagramActivity/diagramActivity.png)
 
 
 
