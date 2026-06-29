@@ -66,27 +66,25 @@
 
 ## VII. Cible 🎯
 
-### VII-1. Utilisateurs visés
-
 ### VII-2. Navigateurs compatibles
 
-## VIII. Architecture fonctionnelle 🌳
+## VIII. Routes de l'application 🛣️
 
-## IX. Routes de l'application 🛣️
+### VIII-1. Authentification
 
-### IX-1. Authentification
+### VIII-2. Gestion utilisateur
 
-### IX-2. Gestion utilisateur
+### VIII-3. Sports
 
-### IX-3. Activités sportives
+### VIII-4. Activités sportives
 
-### IX-4. Participations
+### VIII-5. Participations
 
-### IX-5. Messagerie
+### VIII-6. Messagerie
 
-### IX-6. Avis & Notations
+### VIII-7. Avis & Notations
 
-## X. User Stories 👥
+## IX. User Stories 👥
 
 ### Rôle : Visiteur
 
@@ -94,35 +92,15 @@
 
 ### Rôle : Administrateur
 
-## XI. Modèle de données 🗄️
+## X. Modèle de données 🗄️
 
-### MCD
+### X-1 MCD
 
-### MLD
+### X-2 MLD
 
-### MPD
+### X-3 MPD
 
-## XII. Analyse des risques ⚠️
-
-### Infrastructure
-
-### Base de données
-
-### Sécurité
-
-### Services tiers
-
-## XIII. RGPD ⚖️
-
-### Inventaire des données
-
-### Consentement
-
-### Droit à l'oubli
-
-### Export des données
-
-### Sécurité des données
+## XI. RGPD ⚖️
 
 ## XIV. Documents de conception 📄
 
@@ -136,7 +114,6 @@
 
 # I. Présentation 👋
 
-## Contexte
 
 La pratique sportive est souvent freinée par une difficulté récurrente : trouver des partenaires ayant le même niveau, les mêmes disponibilités ou pratiquant la même activité.
 
@@ -145,8 +122,6 @@ Dans les Pyrénées-Orientales, de nombreux sportifs pratiquent régulièrement 
 **66Partners** a pour objectif de répondre à ce besoin en proposant une plateforme locale de mise en relation sportive.
 
 ---
-
-## Présentation du projet
 
 **66Partners** est une plateforme web permettant aux habitants des Pyrénées-Orientales de trouver facilement des partenaires de sport selon :
 
@@ -203,6 +178,7 @@ Cette approche permet :
 - Kitesurf
 - Natation
 - Sports collectifs
+- Tout sport ajouté par un utilisateur
 
 ---
 
@@ -253,18 +229,7 @@ Recherche selon :
 - Liste des participants
 - Annulation d'une participation
 
-### Messagerie
 
-- Conversation privée entre participants
-- Historique des messages
-
-### Avis et notation
-
-À l'issue d'une activité :
-
-- Note sur 5 étoiles
-- Commentaire
-- Calcul d'un score de fiabilité
 
 ---
 
@@ -297,73 +262,198 @@ Recherche selon :
 - Avis et notation des utilisateurs
 - Score de fiabilité
 
+## III. Évolutions potentielles ↗️
 
-## Listes des routes de l'application 🛣️
+- Messagerie
+- Avis
+- Notifications
+- Mobile
+- Strava
 
-| Méthode | Route                | Description             | Données attendues                                    |
-| ------- | -------------------- | ----------------------- | ---------------------------------------------------- |
-| POST    | `/api/auth/register` | Inscription utilisateur | `{ firstname, lastname, username, email, password }` |
-| POST    | `/api/auth/login`    | Connexion utilisateur   | `{ email, password }` OU `{ username, password }`    |
-| POST    | `/api/auth/logout`   | Déconnexion utilisateur | 
--                                                    |
+### III-1. Version 2.0
 
-### Gestion utilisateur
-
-| Méthode | Route               | Description         | Données attendues                              |
-| ------- | ------------------- | ------------------- | ---------------------------------------------- |
-| PUT    | `/api/me/profile`   | modifier le profil | 
-| GET    | `/api/me`   |  récupérer le profil            | 
-| DELETE    | `/api/me`   |  supprimer le profil            | 
-                                             |
-
-### Sports
-
-| Méthode | Route               | Description           | Données attendues                     |
-| ------- | ------------------- | --------------------- | ------------------------------------- |
-| GET     | `/api/sports:id` | rechercher un sport |  |
-| GET     | `/api/sports`    | 
-| POST     | `/api/sports/:id`    | Ajouter un sport    |                |             |
-| DELETE     | `/api/sports/:id`    | Supprimer un sport    | 
-
-### Activités
-
-| Méthode | Route                  | Description               | Données attendues                                                 |
-| ------- | ---------------------- | ------------------------- | ----------------------------------------------------------------- |
-| GET     | `/api/activities`         | Récupérer une activité |                                |
-| GET    | `/api/activities/:id`         |  Récupérer une activité         |  |
-| DELETE  | `/api/activities/:id` | Supprimer une activité          |                                                 |
-| PUT  | `/api/activities/:id` | Modifier une activité          |                                                 |
-| POST  | `/api/activities` | Ajouter une activité          |                                    
-### Participation
-
-             |
-| Méthode | Route | Description |
-|----------|----------|----------|
-| POST | `/api/activities/:id/join` | Demande de participation |
-| PUT | `/api/participations/:id/accept` | Accepter une demande |
-| PUT | `/api/participations/:id/refuse` | Refuser une demande |
-| DELETE | `/api/participations/:id` | Annuler une participation |
+- Application mobile React Native
+- Intégration Strava
+- Groupes sportifs
+- Système Premium
+- Suggestions intelligentes de partenaires
 
 
-### Messages
+## IV. Architecture du projet 🏗️
+J'ai opté pour une architecture client-serveur (ou architecture découplée) afin de séparer clairement les responsabilités entre le frontend et le backend, garantissant ainsi une meilleure maintenabilité et évolutivité du projet. Cette approche consiste en une API REST développée avec Node.js et Express, qui communique avec une Single Page Application (SPA) développée en React.
 
-| Méthode | Route                                  | Description            | Données attendues                                |
-| ------- | -------------------------------------- | ---------------------- | ------------------------------------------------ |
-| GET     | `/api/conversations`                   | Récupérer les conversations   |  |
-| GET    | `/api/conversations/:id/message`                   | Récupérer un message       |   |
-| POST     | `/api/conversations/:id/message`               | Ajouter un message                      |
+Le backend, orchestré avec Drizzle pour la gestion de la base de données PostgreSQL, expose des endpoints REST pour toutes les fonctionnalités métier : gestion des utilisateurs, sports, activités, participations, avis, review et notifcations pour les évolutions potentielles de l'application. Le frontend React consomme cette API via des requêtes HTTP (Axios), offrant une interface utilisateur dynamique et réactive.
 
-### Avis et notes
+Cette séparation  permet une plus grande flexibilité : le frontend peut évoluer indépendamment du backend, et l'API peut potentiellement servir d'autres clients (application mobile, autres interfaces). L'ensemble est orchestré via Docker pour assurer l'isolation des services et la portabilité entre environnements.
 
-| Méthode | Route                    | Description               | Données attendues                               |
-| ------- | ------------------------ | ------------------------- | ----------------------------------------------- |
-| POST     | `/api/reviews` | Ajouter un avis |
-| DELETE    | `/api/reviews/:id` | Supprimer un avis |                           |
+Pour les données de sport, sera utilisée une table locale afin de recenser tous les sports pouvant être pratiqué par les utilisateurs qui le souhaitent. Et l'API Géo du Gouvernement Français afin de récupérer toutes les communes du département .Le backend servant de passerelle pour filtrer et enrichir ces données avant de les exposer au frontend. 
+
+Cette architecture découplée offre un bon équilibre entre simplicité de développement pour un MVP et possibilités d'évolution futures.
+
+## V. Technologies utilisées 🛠️
+### V-1. Backend
+- **Node.js** : Environnement d'exécution JavaScript côté serveur
+- **Express.js** : Framework web minimal et flexible
+- **TypeScript** : Langage typé pour une meilleure robustesse
+
+#### Infrastructure & Déploiement
+- **Docker** : Containerisation complète (obligatoire V1.0)
+- **Nginx** : Reverse proxy et SSL termination (obligatoire V1.0) (à voir)
+- **Docker Compose** : Orchestration multi-conteneurs
+
+### V-2. Base de données
+- **PostgreSQL** : SGBD relationnel avec support JSON natif (conteneur Docker)
+- **Redis** : Cache et sessions haute performance (conteneur Docker)
+- **Drizzle** : ORM pour Node.js avec protection anti-injection SQL
+
+### V-3. Frontend
+- **React 18** : Bibliothèque UI avec hooks et concurrent features
+- **Vite** : Build tool ultra-rapide avec HMR optimisé
+- **TypeScript** : Cohérence avec backend, types automatiques
 
 
+## VI. Authentification & Sécurité 👮
+### VI-1. Authentification
+- **Argon2** : Algorithme de hachage sécurisé 
+- **JWT**
+
+### VI-2. Validation & Sécurité
+
+- **Zod** : Validation de schémas avec typage automatique
+- **Helmet** : Headers de sécurité HTTP
+- **CORS** : Gestion Cross-Origin Resource Sharing via Nginx
+- **SSL/TLS** : HTTPS obligatoire en production via Nginx
+
+### VI-3. Qualité & Tests
+
+- **Jest** : Framework de tests unitaires et d'intégration
+- **Supertest** : Tests spécialisés pour endpoints API
+- **@faker-js/faker** : Génération de données de test réalistes
+- **ESLint + Prettier** : Qualité et formatage du code
+
+## VII. Cible 🎯
+
+Du sportif amateur au sportif de compétition.
+
+### VII-2. Navigateurs compatibles
+
+L'application **66Partners** sera compatible avec les navigateurs web modernes les plus récents. La liste précise des versions supportées sera affinée au fur et à mesure de l'avancement du projet, en fonction des technologies et fonctionnalités spécifiques qui seront implémentées.
+Support prévu :
+
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+Note : Internet Explorer ne sera pas supporté, conformément aux standards actuels du développement web moderne.
+Cette approche nous permet de nous concentrer sur les navigateurs représentant la majorité du trafic web actuel tout en bénéficiant des dernières fonctionnalités et standards web pour offrir une expérience utilisateur optimale.
 
 
-# UserStories 👥
+## VIII. Routes de l'application 🛣️
+
+### VIII-1. Authentification
+
+| Méthode | Route                 | Description                          | Données attendues                                     |
+| ------- | ---------------------- | ------------------------------------- | ------------------------------------------------------ |
+| POST    | `/api/auth/register`   | Inscription utilisateur               | `{ firstname, lastname, username, email, password }`   |
+| POST    | `/api/auth/login`      | Connexion utilisateur                 | `{ email, password }` OU `{ username, password }`      |
+| POST    | `/api/auth/logout`     | Déconnexion utilisateur               | -                                                       |
+| POST    | `/api/auth/refresh`    | Rafraîchir le token d'accès           | `{ refreshToken }`                                      |
+| POST    | `/api/auth/forgot-password` | Demande de réinitialisation      | `{ email }`                                             |
+| POST    | `/api/auth/reset-password`  | Réinitialisation du mot de passe | `{ token, newPassword }`                                |
+
+### VIII-2. Gestion utilisateur
+
+| Méthode | Route                | Description                    | Données attendues                                       |
+| ------- | --------------------- | -------------------------------- | -------------------------------------------------------- |
+| GET     | `/api/me`             | Récupérer le profil connecté     | -                                                          |
+| PUT     | `/api/me/profile`     | Modifier le profil               | `{ pseudo, city, bio, avatar, location }`                 |
+| DELETE  | `/api/me`             | Supprimer le profil               | -                                                          |
+| GET     | `/api/users/:id`      | Consulter le profil public d'un utilisateur | -                                            |
+
+### VIII-3. Sports
+
+| Méthode | Route                  | Description                   | Données attendues          |
+| ------- | ----------------------- | -------------------------------- | ---------------------------- |
+| GET     | `/api/sports`           | Lister tous les sports            | -                              |
+| GET     | `/api/sports/:id`       | Récupérer un sport                | -                              |
+| POST    | `/api/sports`           | Ajouter un sport                  | `{ name }`                    |
+| DELETE  | `/api/sports/:id`       | Supprimer un sport                | -                              |
+
+### VIII-4. Sports pratiqués par l'utilisateur (UserSport)
+
+| Méthode | Route                          | Description                            | Données attendues          |
+| ------- | -------------------------------- | ----------------------------------------- | ---------------------------- |
+| GET     | `/api/me/sports`                 | Lister les sports pratiqués (avec niveau) | -                              |
+| POST    | `/api/me/sports`                 | Ajouter un sport pratiqué                 | `{ sportId, level }`          |
+| PUT     | `/api/me/sports/:sportId`        | Modifier le niveau pour un sport          | `{ level }`                    |
+| DELETE  | `/api/me/sports/:sportId`        | Retirer un sport pratiqué                 | -                              |
+
+### VIII-5. Activités sportives
+
+| Méthode | Route                  | Description                          | Données attendues                                                                 |
+| ------- | ----------------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
+| GET     | `/api/activities`       | Lister les activités (filtrage + pagination) | Query params : `?sport=&level=&date=&radius=&city=&page=&limit=`               |
+| GET     | `/api/activities/:id`   | Récupérer le détail d'une activité       | -                                                                                       |
+| POST    | `/api/activities`       | Créer une activité                       | `{ title, description, city, location, startDate, levelRequired, maxParticipants, sportId }` |
+| PUT     | `/api/activities/:id`   | Modifier une activité                    | `{ title, description, city, startDate, levelRequired, maxParticipants }`            |
+| DELETE  | `/api/activities/:id`   | Supprimer/annuler une activité           | -                                                                                       |
+
+### VIII-6. Participations
+
+| Méthode | Route                                  | Description                | Données attendues |
+| ------- | ----------------------------------------- | ----------------------------- | -------------------- |
+| GET     | `/api/activities/:id/participations`      | Lister les participants d'une activité | -        |
+| POST    | `/api/activities/:id/join`                | Demande de participation       | -                    |
+| PUT     | `/api/participations/:id/accept`          | Accepter une demande           | -                    |
+| PUT     | `/api/participations/:id/refuse`          | Refuser une demande            | -                    |
+| DELETE  | `/api/participations/:id`                 | Annuler une participation      | -                    |
+
+### VIII-7. Messagerie
+
+| Méthode | Route                                  | Description                  | Données attendues   |
+| ------- | ----------------------------------------- | -------------------------------- | ---------------------- |
+| GET     | `/api/conversations`                      | Lister les conversations          | -                       |
+| GET     | `/api/conversations/:id/messages`         | Lister les messages d'une conversation (pagination) | Query params : `?page=&limit=` |
+| POST    | `/api/conversations/:id/messages`         | Envoyer un message                | `{ content }`           |
+
+### VIII-8. Avis & Notations
+
+| Méthode | Route                  | Description           | Données attendues                       |
+| ------- | ----------------------- | ------------------------ | ------------------------------------------ |
+| GET     | `/api/users/:id/reviews` | Lister les avis reçus par un utilisateur | -                          |
+| POST    | `/api/reviews`           | Ajouter un avis           | `{ targetUserId, activityId, rating, comment }` |
+| DELETE  | `/api/reviews/:id`       | Supprimer un avis         | -                                            |
+
+### VIII-9. Notifications
+
+| Méthode | Route                            | Description                       | Données attendues |
+| ------- | ----------------------------------- | -------------------------------------- | -------------------- |
+| GET     | `/api/notifications`                | Lister les notifications de l'utilisateur (pagination) | Query params : `?page=&limit=&unreadOnly=` |
+| PUT     | `/api/notifications/:id/read`       | Marquer une notification comme lue     | -                    |
+| PUT     | `/api/notifications/read-all`       | Marquer toutes les notifications comme lues | -               |
+
+### VIII-10. Administration
+
+| Méthode | Route                          | Description                       | Données attendues |
+| ------- | --------------------------------- | -------------------------------------- | -------------------- |
+| GET     | `/api/admin/users`                 | Lister les utilisateurs inscrits (pagination) | Query params : `?page=&limit=` |
+| PUT     | `/api/admin/users/:id/suspend`     | Suspendre un utilisateur               | -                    |
+| DELETE  | `/api/admin/users/:id`             | Supprimer un utilisateur               | -                    |
+| POST    | `/api/admin/sports`                | Ajouter un sport (catalogue)           | `{ name }`            |
+| DELETE  | `/api/admin/sports/:id`            | Supprimer un sport (catalogue)         | -                    |
+
+---
+
+### Notes
+
+- Toutes les routes sauf `/api/auth/*` et `GET /api/activities`, `GET /api/sports` nécessitent un token JWT valide (header `Authorization: Bearer <token>`).
+- Les routes `/api/admin/*` nécessitent en plus un rôle `admin`.
+- La pagination par défaut est fixée à `page=1&limit=20` si non spécifiée.
+- Pensez à préfixer l'ensemble des routes par une version d'API, ex. `/api/v1/...`, pour faciliter les évolutions futures.
+
+
+## IX. User Stories 👥
 
 #### Rôles Utilisateurs
 
@@ -409,8 +499,8 @@ Recherche selon :
 
 | En tant que                                 | Je souhaite que                                                                                      | Afin de                                                        |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| **US-U06**: En tant qu'utilisateur connecté | je veux partager mes sorties sur Strava                                                     | afin de partager mes résultats avec mes abonnés|
-| **US-U07**: En tant qu'utilisateur connecté | je veux pouvoir payer une version premium si il y a                     |
+| **US-U15**: En tant qu'utilisateur connecté | je veux partager mes sorties sur Strava                                                     | afin de partager mes résultats avec mes abonnés|
+| **US-U16**: En tant qu'utilisateur connecté | je veux pouvoir payer une version premium si il y a                     |
 
 ### 📱 V2.0 - Extension Mobile
 
@@ -451,6 +541,62 @@ Recherche selon :
 
                            |
 
+                           
+## X. Modèle de données 🗄️
+### X-1 MCD
+## Entités principales
+
+### User
+
+- id
+- email
+- password
+- pseudo
+- city
+- bio
+- avatar
+- createdAt
+- updatedAt
+- location
+
+### Sport
+
+- id
+- name
+
+
+### Activity
+
+- id
+- title
+- description
+- city
+- startDate
+- levelRequired
+- maxParticipants
+- creatorId
+- sportId
+- location
+
+### Participation
+
+- id
+- userId
+- activityId
+- status
+
+### Notification
+- id
+- type
+- isRead
+- userId
+- relatedId
+- createdAt
+
+### X-2 MLD
+
+### X-3 MPD
+
 ## RGPD (Réglement Général sur la protection des données) ⚠️
 
 ## **1**. Inventorier les données personnelles collectées:
@@ -482,7 +628,7 @@ Recherche selon :
 
 - Ajoute des cases à cocher pour le consentement lors de l’inscription ou de l’ajout d’options (ex : recevoir une newsletter).
 
-- _Cookie banner_: informe clairement sur la présence de cookies et leur utilisation, et permets un choix granulaire (nécessaires, statistiques, marketing…).
+- _Cookie banner_: informe clairement sur la présence de cookies et leur utilisation, et permets un choVIII granulaire (nécessaires, statistiques, marketing…).
 
 ## **4.** Faciliter l’exercice des droits des personnes.
 
@@ -521,92 +667,14 @@ Toute personne ayant accès aux données doit être sensibilisée à la protecti
   ** À la loi française "Informatique et Libertés" modifiée (loi n°78-17 du 6 janvier 1978) : articles 82 à 84 sur la sécurité des données
   ** Au Code pénal français : articles 323-1 à 323-7 sur les atteintes aux systèmes de traitement automatisé de données
 ```
-# XI. Modèle de données
 
-## Entités principales
 
-### User
-
-- id
-- email
-- password
-- pseudo
-- city
-- bio
-- avatar
-- createdAt
-- updatedAt
-
-### Sport
-
-- id
-- name
-
-### UserSport
-
-- userId
-- sportId
-- level
-
-### Activity
-
-- id
-- title
-- description
-- city
-- startDate
-- levelRequired
-- maxParticipants
-- creatorId
-- sportId
-
-### Participation
-
-- id
-- userId
-- activityId
-- status
-
-# XV. Roadmap MVP
-
-## Phase 1
-
-- Architecture backend
-- Docker
-- PostgreSQL
-- Prisma
-
-## Phase 2
-
-- Authentification
-- Gestion profil
-
-## Phase 3
-
-- Sports
-- Activités
-
-## Phase 4
-
-- Participations
-
-## Phase 5
-
-- Déploiement Beta
-
-### Hors MVP
-
-- Messagerie
-- Avis
-- Notifications
-- Mobile
-- Strava
 
 # Documents de Conception
 
 ## <p align="center" p> MPD (Modele Physique de Données)
 
-![MPD](../ERD/erd-v2.png)
+![MPD]()
 
 ## <p align="center" p> Diagramme de Séquence
 

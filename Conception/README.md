@@ -65,7 +65,7 @@ Le projet est développé dans un premier temps sous forme d'**application web**
 - Node.js
 - Express
 - TypeScript
-- Prisma ORM
+- Drizzle ORM
 
 ### Base de données
 
