@@ -1,7 +1,7 @@
 # <p align="center">66Partners</p>
 
 <p align="center">
-  <img src="./Maquettes/maquette1.png" alt="logoappli" />
+  <img src="./Conception/Maquettes/maquettelogoV1.png" alt="logoappli" />
 </p>
 
 <p align="center">
