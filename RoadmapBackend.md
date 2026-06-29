@@ -22,14 +22,14 @@ Installer les dépendances :
 
 ```bash
 npm install express cors helmet dotenv
-npm install prisma @prisma/client
-npm install zod bcrypt jsonwebtoken
+npm install drizzle-orm pg
+npm install zod argon2 jsonwebtoken
 ```
 
 Installer les dépendances dev :
 
 ```bash
-npm install -D typescript tsx nodemon @types/node @types/express @types/cors @types/bcrypt @types/jsonwebtoken
+npm install -D typescript tsx nodemon drizzle-kit @types/node @types/express @types/cors @types/pg @types/jsonwebtoken
 ```
 
 Initialiser TypeScript :
@@ -38,10 +38,19 @@ Initialiser TypeScript :
 npx tsc --init
 ```
 
-Initialiser Prisma :
+Créer `drizzle.config.ts` à la racine du backend :
 
-```bash
-npx prisma init
+```ts
+import { defineConfig } from "drizzle-kit";
+
+export default defineConfig({
+  schema: "./src/db/schema.ts",
+  out: "./drizzle",
+  dialect: "postgresql",
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
+});
 ```
 
 ---
@@ -53,7 +62,7 @@ backend/
 └── src/
     ├── config/
     │   ├── env.ts
-    │   └── prisma.ts
+    │   └── Drizzle.ts
     │
     ├── controllers/
     │   ├── auth.controller.ts
@@ -121,7 +130,7 @@ backend/
 
 ---
 
-## Étape 4 — Configurer Prisma + PostgreSQL
+## Étape 4 — Configurer Drizzle + PostgreSQL
 
 ### `.env`
 
@@ -131,108 +140,79 @@ JWT_SECRET="secret_dev"
 PORT=3000
 ```
 
-### Modèles Prisma MVP V1
+### Schéma Drizzle MVP V1 (`src/db/schema.ts`)
 
-```prisma
-model User {
-  id             String          @id @default(uuid())
-  email          String          @unique
-  password       String
-  pseudo         String
-  city           String?
-  bio            String?
-  avatar         String?
+```ts
+import {
+  pgTable, uuid, varchar, text, timestamp, integer, pgEnum, unique, primaryKey,
+} from "drizzle-orm/pg-core";
 
-  sports         UserSport[]
-  activities     Activity[]
-  participations Participation[]
+export const sportLevelEnum = pgEnum("sport_level", ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"]);
+export const participationStatusEnum = pgEnum("participation_status", ["PENDING", "ACCEPTED", "REFUSED"]);
 
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-}
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  pseudo: varchar("pseudo", { length: 100 }).notNull(),
+  city: varchar("city", { length: 100 }),
+  bio: text("bio"),
+  avatar: varchar("avatar", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
-model Sport {
-  id        String      @id @default(uuid())
-  name      String      @unique
+export const sports = pgTable("sports", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
-  users     UserSport[]
-  activities Activity[]
+export const userSports = pgTable("user_sports", {
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sportId: uuid("sport_id").notNull().references(() => sports.id, { onDelete: "cascade" }),
+  level: sportLevelEnum("level").notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.sportId] }),
+}));
 
-  createdAt DateTime    @default(now())
-}
+export const activities = pgTable("activities", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: varchar("title", { length: 150 }).notNull(),
+  description: text("description"),
+  city: varchar("city", { length: 100 }).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  levelRequired: sportLevelEnum("level_required").notNull(),
+  maxParticipants: integer("max_participants").notNull(),
+  sportId: uuid("sport_id").notNull().references(() => sports.id),
+  creatorId: uuid("creator_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
-model UserSport {
-  userId  String
-  sportId String
-  level   SportLevel
-
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sport   Sport  @relation(fields: [sportId], references: [id], onDelete: Cascade)
-
-  @@id([userId, sportId])
-}
-
-model Activity {
-  id              String          @id @default(uuid())
-  title           String
-  description     String?
-  city            String
-  startDate       DateTime
-  levelRequired   SportLevel
-  maxParticipants Int
-
-  sportId         String
-  sport           Sport           @relation(fields: [sportId], references: [id])
-
-  creatorId       String
-  creator         User            @relation(fields: [creatorId], references: [id])
-
-  participations  Participation[]
-
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-}
-
-model Participation {
-  id         String              @id @default(uuid())
-  userId     String
-  activityId String
-  status     ParticipationStatus @default(PENDING)
-
-  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activity   Activity            @relation(fields: [activityId], references: [id], onDelete: Cascade)
-
-  createdAt  DateTime            @default(now())
-
-  @@unique([userId, activityId])
-}
-
-enum SportLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-  EXPERT
-}
-
-enum ParticipationStatus {
-  PENDING
-  ACCEPTED
-  REFUSED
-}
+export const participations = pgTable("participations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  activityId: uuid("activity_id").notNull().references(() => activities.id, { onDelete: "cascade" }),
+  status: participationStatusEnum("status").notNull().default("PENDING"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqueUserActivity: unique().on(t.userId, t.activityId),
+}));
 ```
 
 Puis :
 
 ```bash
-npx prisma migrate dev --name init
-npx prisma generate
+npx drizzle-kit generate
+npx drizzle-kit migrate
 ```
 
 ---
 
 ## Étape 5 — Seed des sports
 
-Créer un fichier `prisma/seed.ts`.
+Créer un fichier `src/db/seed.ts` qui insère les sports via `db.insert(sports).values([...])`.
 
 Sports à ajouter :
 
@@ -250,7 +230,7 @@ Randonnée
 Commande :
 
 ```bash
-npx prisma db seed
+npx tsx src/db/seed.ts
 ```
 
 ---
@@ -432,7 +412,7 @@ Ordre de test :
 - validation Zod
 - protection des routes privées
 - suppression du password dans les réponses
-- gestion des erreurs Prisma
+- gestion des erreurs Drizzle
 
 ---
 
@@ -461,7 +441,7 @@ Checklist :
 - `.env.example`
 - Dockerfile backend
 - docker-compose avec PostgreSQL
-- migrations Prisma OK
+- migrations Drizzle OK
 - seed des sports OK
 - API accessible sur `/health`
 
@@ -487,7 +467,7 @@ Réponse :
 ```txt
 1. Initialisation backend
 2. Structure dossiers
-3. Express + Prisma
+3. Express + Drizzle
 4. Modèles User / Sport / UserSport / Activity / Participation
 5. Migration database
 6. Seed sports

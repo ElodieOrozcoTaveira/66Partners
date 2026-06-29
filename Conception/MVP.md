@@ -17,7 +17,7 @@
 
 * Backend : Node.js, Express
 * Base de données : PostgreSQL
-* ORM : Prisma
+* ORM : Drizzle
 * Auth : JWT + refresh token
 * Front web : React
 * UI : SCSS , à voir Bootstrap 
@@ -75,8 +75,8 @@ backend/
     │   ├── notification.service.ts
     │   └── email.service.ts
     │
-    ├── prisma/
-    │   ├── schema.prisma
+    ├── Drizzle/
+    │   ├── schema.Drizzle
     │   ├── migrations/
     │   └── seed.ts
     │
@@ -172,7 +172,7 @@ tsconfig.json
 
 ### **Phase 3 — Base de données**
 
-* PostgreSQL + Prisma.
+* PostgreSQL + Drizzle.
 
 
 ### **MCD**
@@ -239,7 +239,7 @@ Après la sortie, chacun peut laisser un avis.
 - backend Express
 - frontend React
 - PostgreSQL
-- Prisma
+- Drizzle
 - architecture propre
 
 ### Sprint 2 — Auth
