@@ -48,7 +48,6 @@ export const activities = pgTable("activities", {
   maxParticipants: integer("max_participants").notNull(),
   status: activitiesStatusEnum("status").notNull().default("PENDING"),
   sportId: uuid("sport_id").notNull().references(() => sports.id),
-  usersId: uuid("users_id").notNull().references(()=>users.id),
   creatorId: uuid("creator_id").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
