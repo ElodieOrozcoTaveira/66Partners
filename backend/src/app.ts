@@ -9,6 +9,8 @@ import sportRoutes from './routes/sport.routes.js';
 import participationRoutes from './routes/participation.routes.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import { helmetOptions, verifyOrigin } from './middlewares/security.middleware.js';
+import swaggerUi from 'swagger-ui-express';
+import { openApiDocument } from '../docs/openApi.ts';
 
 dotenv.config();
 
@@ -29,11 +31,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => res.send('Hello 66Partners!'));
 
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/sports', sportRoutes);
 app.use('/api/participations', participationRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 // Route de santé
 app.get('/api/health', (req, res) => {
