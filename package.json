@@ -14,6 +14,19 @@
     "build:backend": "npm run build --workspace shared && npm run build --workspace backend",
     "build:frontend": "npm run build --workspace shared && npm run build --workspace frontend",
     "lint": "npm run lint --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up",
+    "docker:dev:build": "docker compose -f docker-compose.dev.yml build --no-cache",
+    "docker:dev:clean": "docker compose -f docker-compose.dev.yml down -v && docker system prune -f",
+    "docker:dev:install:backend": "docker compose -f docker-compose.dev.yml run --rm api npm install",
+    "docker:dev:install:frontend": "docker compose -f docker-compose.dev.yml run --rm client npm install",
+    "docker:dev:shell": "docker compose -f docker-compose.dev.yml run --rm api sh",
+    "docker:prod": "docker compose -f docker-compose.prod.yml up -d",
+    "docker:prod:build": "docker compose -f docker-compose.prod.yml build --no-cache",
+    "docker:prod:clean": "docker compose -f docker-compose.prod.yml down -v",
+    "docker:prod:shell": "docker compose -f docker-compose.prod.yml run --rm api sh"
+  },
+  "devDependencies": {
+    "@types/sanitize-html": "^2.16.1"
   }
 }

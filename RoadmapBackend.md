@@ -99,7 +99,7 @@ backend/
     │
     ├── utils/
     │   ├── jwt.ts
-    │   ├── bcrypt.ts
+    │   ├── argon2.ts
     │   └── response.ts
     │
     ├── app.ts
@@ -248,7 +248,7 @@ GET /auth/me
 ### À faire
 
 - validation Zod
-- hash du mot de passe avec bcrypt
+- hash du mot de passe avec Argon2
 - génération JWT
 - middleware `auth`
 - récupération utilisateur connecté

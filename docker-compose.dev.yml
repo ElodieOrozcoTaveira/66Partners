@@ -1,35 +1,36 @@
 services:
   client:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: frontend/Dockerfile.dev
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app/frontend
+      - .:/app
+      - /app/node_modules
       - /app/frontend/node_modules
-
+    environment:
+      - VITE_API_URL=http://localhost:3000
     depends_on:
       - api
 
   api:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: backend/Dockerfile.dev
     ports:
       - "3000:3000"
     volumes:
-      - ./backend:/app/backend
+      - .:/app
+      - /app/node_modules
       - /app/backend/node_modules
     environment:
       - NODE_ENV=${NODE_ENV}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
       - PORT=${PORT}
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
       - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN}
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,7 +38,7 @@ services:
         condition: service_started
 
   postgres:
-    image: postgis/postgis:17-alpine
+    image: postgis/postgis:17-3.5-alpine
     restart: always
     ports:
       - "5432:5432"
