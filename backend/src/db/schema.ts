@@ -65,6 +65,7 @@ export const participations = pgTable("participations", {
 
 export const conversations = pgTable("conversations", {
     id:uuid("id").defaultRandom().primaryKey(),
+    activityId: uuid("activity_id").notNull().references(() => activities.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

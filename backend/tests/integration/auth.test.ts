@@ -4,6 +4,7 @@ import app from "../../src/app.js";
 import { signToken } from "../../src/utils/jwt.js";
 import { resetUsers, closeTestDb } from "../helpers/db.js";
 
+
 const validRegisterBody = {
   pseudo: "testuser",
   email: "test@example.com",

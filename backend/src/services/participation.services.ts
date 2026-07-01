@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { activities, participations } from "../db/schema.js";
+import { activities, conversations, participations } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -178,6 +178,17 @@ export class ParticipationService {
         "PARTICIPATION_NOT_FOUND",
         404
       );
+    }
+
+    // Ouvre la conversation de groupe dès la première acceptation
+    const [existingConversation] = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.activityId, activity.id))
+      .limit(1);
+
+    if (!existingConversation) {
+      await db.insert(conversations).values({ activityId: activity.id });
     }
 
     return updatedParticipation;

@@ -1,0 +1,47 @@
+# ── Stage 1 : build ──────────────────────────────────────────────────────────
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Manifests workspace en premier pour profiter du cache layer
+COPY package.json package-lock.json ./
+COPY shared/package.json      ./shared/
+COPY backend/package.json     ./backend/
+COPY frontend/package.json    ./frontend/
+
+RUN npm ci
+
+# Sources
+COPY shared/  ./shared/
+COPY backend/ ./backend/
+
+# Compile shared puis backend (script défini dans le package.json racine)
+RUN npm run build:backend
+
+# Supprimer les devDependencies avant de copier dans le stage final
+RUN npm prune --omit=dev
+
+# ── Stage 2 : production ──────────────────────────────────────────────────────
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Manifests requis par Node.js pour résoudre les workspaces
+COPY --from=builder /app/package.json      ./
+COPY --from=builder /app/shared/package.json  ./shared/
+COPY --from=builder /app/backend/package.json ./backend/
+
+# Dépendances de production (prunées dans stage 1)
+COPY --from=builder /app/node_modules      ./node_modules
+
+# Artefacts compilés
+COPY --from=builder /app/shared/dist  ./shared/dist
+COPY --from=builder /app/backend/dist ./backend/dist
+
+WORKDIR /app/backend
+
+ENV NODE_ENV=production
+
+EXPOSE 3000
+
+CMD ["node", "dist/server.js"]
