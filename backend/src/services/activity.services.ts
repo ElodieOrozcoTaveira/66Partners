@@ -1,11 +1,10 @@
 import "dotenv/config";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import {
   activities,
   activitiesStatusEnum,
   sportLevelEnum,
-  sports,
 } from "../db/schema.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -65,13 +64,10 @@ export class ActivityError extends Error {
 }
 
 async function assertSportExists(sportId: string): Promise<void> {
-  const [sport] = await db
-    .select({ id: sports.id })
-    .from(sports)
-    .where(eq(sports.id, sportId))
-    .limit(1);
-
-  if (!sport) {
+  const result = await db.execute(
+    sql`SELECT 1 FROM sports WHERE id = ${sportId}::uuid LIMIT 1`
+  );
+  if (result.rows.length === 0) {
     throw new ActivityError("Sport non trouvé", "SPORT_NOT_FOUND", 404);
   }
 }

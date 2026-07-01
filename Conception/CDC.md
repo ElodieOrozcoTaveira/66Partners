@@ -452,6 +452,7 @@ Cette approche nous permet de nous concentrer sur les navigateurs représentant 
 - La pagination par défaut est fixée à `page=1&limit=20` si non spécifiée.
 - Pensez à préfixer l'ensemble des routes par une version d'API, ex. `/api/v1/...`, pour faciliter les évolutions futures.
 
+La documentation interactive complète de l'API est générée via **Swagger/OpenAPI** et accessible à l'adresse ***/api-docs*** une fois le serveur lancé
 
 ## IX. User Stories 👥
 
