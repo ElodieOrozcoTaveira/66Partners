@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { faker } from "@faker-js/faker";
-import { sports, users, userSports, activities } from "./schema.ts";
+import { sports, users, userSports, activities } from "./schema.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 

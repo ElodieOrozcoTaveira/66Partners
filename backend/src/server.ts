@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import app, { httpServer } from "./app.js";
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { initSocket } from './socket/index.ts';
+import { initSocket } from './socket/index.js';
 
 const db = drizzle(process.env.DATABASE_URL!);
 const PORT = process.env.PORT || 3000;
