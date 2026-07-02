@@ -12,11 +12,10 @@ COPY frontend/package.json    ./frontend/
 RUN npm ci
 
 # Sources
-COPY shared/  ./shared/
 COPY backend/ ./backend/
 
-# Compile shared puis backend (script défini dans le package.json racine)
-RUN npm run build:backend
+# Compile le backend directement (shared est vide, non utilisé)
+RUN npm run build --workspace backend
 
 # Supprimer les devDependencies avant de copier dans le stage final
 RUN npm prune --omit=dev
@@ -28,14 +27,12 @@ WORKDIR /app
 
 # Manifests requis par Node.js pour résoudre les workspaces
 COPY --from=builder /app/package.json      ./
-COPY --from=builder /app/shared/package.json  ./shared/
 COPY --from=builder /app/backend/package.json ./backend/
 
 # Dépendances de production (prunées dans stage 1)
 COPY --from=builder /app/node_modules      ./node_modules
 
 # Artefacts compilés
-COPY --from=builder /app/shared/dist  ./shared/dist
 COPY --from=builder /app/backend/dist ./backend/dist
 
 WORKDIR /app/backend
