@@ -33,7 +33,10 @@ COPY --from=builder /app/backend/package.json ./backend/
 COPY --from=builder /app/node_modules      ./node_modules
 
 # Artefacts compilés
-COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/backend/dist             ./backend/dist
+# Migrations Drizzle (SQL) + config pour drizzle-kit migrate
+COPY --from=builder /app/backend/drizzle          ./backend/drizzle
+COPY --from=builder /app/backend/drizzle.config.js ./backend/drizzle.config.js
 
 WORKDIR /app/backend
 
