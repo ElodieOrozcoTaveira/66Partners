@@ -12,7 +12,11 @@ RUN npm ci
 
 COPY frontend/ ./frontend/
 
-RUN npm run build:frontend
+# URL de l'API injectée au build (Vite remplace import.meta.env.VITE_API_URL)
+ARG VITE_API_URL=https://api.66partners.fr
+ENV VITE_API_URL=$VITE_API_URL
+
+RUN npm run build --workspace frontend
 
 # ── Stage 2 : nginx ───────────────────────────────────────────────────────────
 FROM nginx:1.29-alpine
