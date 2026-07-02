@@ -30,7 +30,7 @@ export class ConversationController {
         return;
       }
 
-      const { activityId } = req.params;
+      const { activityId } = req.params as { activityId: string };
 
       const conversation = await ConversationService.getOrCreateConversation(
         activityId,
@@ -74,9 +74,9 @@ export class ConversationController {
         return;
       }
 
-      const { id } = req.params;
-      const limit = Number(req.query.limit) || 50;
-      const offset = Number(req.query.offset) || 0;
+      const { id } = req.params as { id: string };
+      const limit = Number(req.query.limit as string | undefined) || 50;
+      const offset = Number(req.query.offset as string | undefined) || 0;
 
       const msgs = await ConversationService.getMessages(
         id,

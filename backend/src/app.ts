@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 //Socket
 import { createServer } from 'http';
-import { initSocket } from './socket/index.ts';
+import { initSocket } from './socket/index.js';
 
 //Routes
 import authRoutes from './routes/auth.routes.js';
@@ -18,7 +18,7 @@ import { helmetOptions, verifyOrigin } from './middlewares/security.middleware.j
 
 //Docs Swagger
 import swaggerUi from 'swagger-ui-express';
-import { openApiDocument } from '../docs/openApi.ts';
+import { openApiDocument } from '../docs/openApi.js';
 
 
 dotenv.config();
