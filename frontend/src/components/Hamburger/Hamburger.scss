@@ -1,0 +1,17 @@
+@use '../../styles/variables/variables.scss';
+
+
+.navbar-list{
+    display: none;
+}
+
+.navbar{
+    display: flex;
+    justify-content: right;
+    margin-top: 20px;
+    margin-right: 15px;
+}
+
+.navbar-burger{
+    color: variables.$nuit;
+}
