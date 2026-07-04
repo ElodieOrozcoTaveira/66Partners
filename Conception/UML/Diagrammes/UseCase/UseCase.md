@@ -78,6 +78,8 @@ User --> UC_CancelParticipation
 User --> UC_AcceptParticipation
 User --> UC_RefuseParticipation
 
+Admin --> Visitor
+Admin --> User 
 Admin --> UC_ViewUsers
 Admin --> UC_SuspendUser
 Admin --> UC_AdminDeleteUser
