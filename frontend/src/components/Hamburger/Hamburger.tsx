@@ -1,36 +1,51 @@
-import { Menu } from "lucide-react";
+import { Home, Info, Menu, MessageCircleQuestion, SportShoe } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import './Hamburger.scss';
-
+import "./Hamburger.scss";
 
 export default function Hamburger() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   return (
     <>
       <nav className="navbar">
-        <div className="navbar-burger" onClick={toggleMenu}>
+        <button
+          type="button"
+          className="navbar-burger"
+          onClick={toggleMenu}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-navigation"
+        >
           <Menu />
-        </div>
-        <ul className={`navbar-list ${isMenuOpen ? 'show' : ''}`}>
+        </button>
+        <ul
+          id="mobile-navigation"
+          className={`navbar-list ${isMenuOpen ? "show" : ""}`}
+        >
           <li className="navbar-item">
-            <NavLink to="/" onClick={toggleMenu}> Accueil</NavLink>
+            <NavLink to="/" onClick={toggleMenu}>
+             <Home size={18} color="#E6392E"/> Accueil
+            </NavLink>
           </li>
           <li className="navbar-item">
-            <NavLink to="/sports" onClick={toggleMenu}>Sports</NavLink>
+            <NavLink to="/sports" onClick={toggleMenu}>
+             <SportShoe size={18} color="#E6392E"/> Sports
+            </NavLink>
           </li>
           <li className="navbar-item">
-            <NavLink to='/howsworking' onClick={toggleMenu}>Comment ça marche</NavLink>
+            <NavLink to="/howsworking" onClick={toggleMenu}>
+               <MessageCircleQuestion size={18} color="#E6392E"/>Comment ça marche
+            </NavLink>
           </li>
           <li className="navbar-item">
-            <NavLink to='/about' onClick={toggleMenu}>A propos</NavLink>
+            <NavLink to="/about" onClick={toggleMenu}>
+              <Info size={18} color="#E6392E"/>A propos
+            </NavLink>
           </li>
         </ul>
       </nav>
-
     </>
   );
 }

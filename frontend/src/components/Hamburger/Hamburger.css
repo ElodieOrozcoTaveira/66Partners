@@ -4,17 +4,43 @@ Manrope: titre, boutons, logo, élements import
 Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 */
 /*Breakpoint*/
-.navbar-list {
-  display: none;
-}
-
 .navbar {
+  position: relative;
   display: flex;
   justify-content: right;
   margin-top: 20px;
   margin-right: 15px;
 }
 
+.navbar-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  list-style: none;
+  min-width: 220px;
+  z-index: 1000;
+}
+
+.navbar-list.show {
+  display: flex;
+}
+
+.navbar-item a {
+  color: #1F2937;
+  text-decoration: none;
+}
+
 .navbar-burger {
   color: #1F2937;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }/*# sourceMappingURL=Hamburger.css.map */
