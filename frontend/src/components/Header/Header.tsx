@@ -1,19 +1,25 @@
+import "../Header/Header.scss";
+
+import Hamburger from "../Hamburger/Hamburger";
+
 export default function Header() {
   return (
     <>
-      <div className="containe-header">
+      <header className="container-header">
         <section className="container-header__leftside">
           <img
-            src="/logo.png"
+            src="/logormbg.png"
             alt="logo 66partners"
             className="left-side__img"
-            width={250}
-            height={200}
+            width={100}
+            height={70}
             loading="lazy"
           />
         </section>
-        <section className="container-header__rightside"></section>
-      </div>
+        <section className="container-header__rightside">
+          <Hamburger />
+        </section>
+      </header>
     </>
   );
 }

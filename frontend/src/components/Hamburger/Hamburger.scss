@@ -1,17 +1,70 @@
-@use '../../styles/variables/variables.scss';
+@use "../../styles/variables/variables.scss";
 
-
-.navbar-list{
-    display: none;
+.navbar {
+  position: relative;
+  z-index: 1002;
 }
 
-.navbar{
-    display: flex;
-    justify-content: right;
-    margin-top: 20px;
-    margin-right: 15px;
+.navbar-list {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  width: min(18rem, calc(100vw - 2rem));
+  padding: 1rem 1rem 0.75rem;
+  background-color: variables.$beige;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  list-style: none;
+  z-index: 1000;
+  margin: 0;
+  min-height: auto;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0.25s ease;
 }
 
-.navbar-burger{
-    color: variables.$nuit;
+.navbar-list.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
 }
+
+.navbar-item {
+  width: 100%;
+}
+
+.navbar-item a {
+  color: variables.$nuit;
+  text-decoration: none;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: left;
+  padding: 0.7rem 0.2rem;
+  margin-bottom: 0.1rem;
+}
+
+.navbar-burger {
+  color: variables.$nuit;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  z-index: 1001;
+}
+
+// Version Tablette
