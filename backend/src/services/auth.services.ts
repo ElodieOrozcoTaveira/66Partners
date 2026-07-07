@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import argon2 from "argon2";
 import { users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
+import { sendWelcomeEmail } from "./mail.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -124,7 +125,12 @@ export class AuthService {
       );
     }
 
-    // 5. Retour des données utilisateur (sans le mot de passe)
+    // 5. Email de bienvenue (non bloquant)
+    sendWelcomeEmail(newUser).catch((err) =>
+      console.error("Erreur envoi email de bienvenue:", err),
+    );
+
+    // 6. Retour des données utilisateur (sans le mot de passe)
     return {
       id: newUser.id,
       email: newUser.email,

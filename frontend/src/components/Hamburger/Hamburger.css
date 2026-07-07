@@ -6,41 +6,107 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 /*Breakpoint*/
 .navbar {
   position: relative;
+  z-index: 1002;
+}
+
+.navbar-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: auto;
   display: flex;
-  justify-content: right;
-  margin-top: 20px;
-  margin-right: 15px;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 72vw;
+  height: 100vh;
+  padding: 1rem 1rem 0.75rem;
+  background-color: #FFF7EB;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.08);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(100%);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+}
+
+.navbar-panel.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
 }
 
 .navbar-list {
-  display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  gap: 0.35rem;
   list-style: none;
-  min-width: 220px;
-  z-index: 1000;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
-.navbar-list.show {
-  display: flex;
+.navbar-item {
+  width: 100%;
 }
 
 .navbar-item a {
   color: #1F2937;
   text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  text-align: right;
+  padding: 0.7rem 0.2rem;
+  margin-bottom: 0.1rem;
+  font-family: "Inter";
+}
+
+.navbar-item__arrow {
+  color: #E6392E;
+  order: 2;
+}
+
+.navbar-item__label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  order: 1;
+}
+
+.navbar-item:hover {
+  background-color: rgba(230, 57, 46, 0.12);
+}
+
+.navbar-item a:hover {
+  color: #C62828;
 }
 
 .navbar-burger {
   color: #1F2937;
-  background: transparent;
+  background-color: #FFF7EB;
   border: none;
+  border-radius: 999px;
   cursor: pointer;
-  padding: 0;
+  padding: 0.45rem;
+  position: relative;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.navbar-burger.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }/*# sourceMappingURL=Hamburger.css.map */

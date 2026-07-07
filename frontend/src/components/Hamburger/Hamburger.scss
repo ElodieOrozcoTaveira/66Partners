@@ -5,40 +5,46 @@
   z-index: 1002;
 }
 
-.navbar-list {
-  position: absolute;
-  top: calc(100% + 0.5rem);
+.navbar-panel {
+  position: fixed;
+  top: 0;
   right: 0;
   left: auto;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   justify-content: flex-start;
-  gap: 0.35rem;
-  width: min(18rem, calc(100vw - 2rem));
+  width: 72vw;
+  height: 100vh;
   padding: 1rem 1rem 0.75rem;
   background-color: variables.$beige;
-  border-radius: 0.75rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-  list-style: none;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(variables.$nuit, 0.08);
   z-index: 1000;
-  margin: 0;
-  min-height: auto;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-8px);
+  transform: translateX(100%);
   transition:
     opacity 0.25s ease,
     transform 0.25s ease,
     visibility 0.25s ease;
 }
 
-.navbar-list.show {
+.navbar-panel.show {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateY(0);
+  transform: translateX(0);
+}
+
+.navbar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 .navbar-item {
@@ -48,23 +54,66 @@
 .navbar-item a {
   color: variables.$nuit;
   text-decoration: none;
-  font-size: 1.2rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  text-align: right;
+  padding: 0.7rem 0.2rem;
+  margin-bottom: 0.1rem;
+  font-family: 'Inter';
+
+}
+
+
+.navbar-item__arrow {
+  color: variables.$rouge;
+  order: 2;
+}
+
+.navbar-item__label {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  text-align: left;
-  padding: 0.7rem 0.2rem;
-  margin-bottom: 0.1rem;
+  order: 1;
 }
+
+.navbar-item:hover{
+  background-color: rgba(230, 57, 46, 0.12);
+}
+
+.navbar-item a:hover{
+  color: variables.$rouge2;
+}
+
+
 
 .navbar-burger {
   color: variables.$nuit;
-  background: transparent;
+  background-color: variables.$beige;
   border: none;
+  border-radius: 999px;
   cursor: pointer;
-  padding: 0;
+  padding: 0.45rem;
   position: relative;
   z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+}
+
+.navbar-burger.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 // Version Tablette
