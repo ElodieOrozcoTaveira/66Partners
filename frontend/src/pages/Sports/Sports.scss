@@ -1,0 +1,54 @@
+@use '../../styles/variables/variables.scss';
+
+.sports-state {
+    text-align: center;
+    margin-top: 3rem;
+    font-family: 'Inter';
+    color: variables.$nuit;
+}
+
+.container-sports {
+    padding: 2rem 1rem;
+
+    &__titre {
+        font-family: 'Manrope';
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    &__list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.sport-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    min-width: 100px;
+    border-radius: 0.75rem;
+    background-color: variables.$beige;
+    box-shadow: 0 4px 16px rgba(variables.$nuit, 0.08);
+    font-family: 'Inter';
+    font-weight: bold;
+    color: variables.$nuit;
+    text-align: center;
+
+    &__circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+    }
+}

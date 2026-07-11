@@ -5,6 +5,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
+import Sports from "./pages/Sports/Sports";
+import Contact from "./pages/Contact/Contact";
 import NotFound from "./pages/NotFound/NotFound";
 
 
@@ -18,8 +20,9 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-           {/* <Route path="/sports" element= {<Sports />} />
-            <Route path="/howsworking" element= {<Howsworking />} />                        <Route path="/about" element= {<About />}*/} 
+            <Route path="/sports" element={<Sports />} />
+            <Route path="/contact" element={<Contact />} />
+           {/* <Route path="/howsworking" element= {<Howsworking />} />                        <Route path="/about" element= {<About />}*/}
 
 
 
