@@ -1,0 +1,11 @@
+
+@mixin gradient {
+    background: linear-gradient(
+        90deg,
+        #E6392E 0%,
+        #EF4B2D 35%,
+        #F66A1A 70%,
+        #F4A61D 100%
+    );
+
+}
