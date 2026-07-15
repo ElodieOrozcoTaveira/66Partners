@@ -15,7 +15,6 @@ import { NavLink } from "react-router-dom";
 import "./Hamburger.scss";
 import FollowUs from "../followUs/FollowUs";
 import Carre from "../Carré/Carre";
-import FooterBurger from "../FooterBurger/FooterBurger";
 import Connexion from "../Connexion/Connexion";
 
 export default function Hamburger() {
@@ -88,7 +87,7 @@ export default function Hamburger() {
               </NavLink>
             </li>
             <li className="navbar-item">
-              <NavLink to="/why66partners" onClick={toggleMenu}>
+              <NavLink to="/pourquoi66" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
                   <Star size={14} color="currentColor" />

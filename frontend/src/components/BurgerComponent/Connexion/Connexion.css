@@ -31,6 +31,7 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 .container-connexion__links1 {
   background: linear-gradient(90deg, #E6392E 0%, #EF4B2D 35%, #F66A1A 70%, #F4A61D 100%);
   color: white;
+  border: none;
   font-size: 12px;
 }
 .container-connexion__links2 {

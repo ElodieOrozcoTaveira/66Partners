@@ -8,6 +8,7 @@ import Register from "./pages/Register/Register";
 import Sports from "./pages/Sports/Sports";
 import Contact from "./pages/Contact/Contact";
 import NotFound from "./pages/NotFound/NotFound";
+import Pourquoi from "./pages/Pourquoi66/Pourquoi";
 
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/sports" element={<Sports />} />
+            <Route path="/pourquoi66" element={<Pourquoi />} />
             <Route path="/contact" element={<Contact />} />
            {/* <Route path="/howsworking" element= {<Howsworking />} />                        <Route path="/about" element= {<About />}*/}
 
