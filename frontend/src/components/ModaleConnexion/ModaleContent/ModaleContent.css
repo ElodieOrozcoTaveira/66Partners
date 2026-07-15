@@ -1,0 +1,186 @@
+@charset "UTF-8";
+/*Fonts
+Manrope: titre, boutons, logo, élements import
+Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
+*/
+/*Breakpoint*/
+.modale-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(31, 41, 55, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modale-content {
+  position: relative;
+  background-color: #FFF7EB;
+  border-radius: 1rem;
+  padding: 2.5rem 2rem 2rem;
+  min-width: 330px;
+  max-width: 90vw;
+  box-shadow: 0 12px 40px rgba(31, 41, 55, 0.2);
+}
+.modale-content__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1F2937;
+}
+.modale-content__close:hover {
+  color: #E6392E;
+}
+
+.container-modaleConnexion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.container-modaleConnexion__img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(230, 57, 46, 0.12);
+  border-radius: 50%;
+  padding: 15px;
+}
+.container-modaleConnexion__h4 {
+  font-size: 12px;
+  margin-top: -1rem;
+}
+.container-modaleConnexion__section {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+.container-modaleConnexion__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.container-modaleConnexion__label {
+  font-family: "Inter";
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #1F2937;
+  margin-top: 0.6rem;
+}
+.container-modaleConnexion__input {
+  font-family: "Inter";
+  font-size: 0.9rem;
+  padding: 0.6rem 0.8rem;
+  border: solid 1px #E6E6E6;
+  border-radius: 0.6rem;
+  background-color: white;
+  color: #1F2937;
+}
+.container-modaleConnexion__input:focus {
+  outline: none;
+  border-color: #E6392E;
+}
+.container-modaleConnexion__forgot {
+  align-self: flex-end;
+  margin-top: 0.4rem;
+  font-family: "Inter";
+  font-size: 0.75rem;
+  color: #C62828;
+  text-decoration: none;
+  font-weight: bold;
+}
+.container-modaleConnexion__forgot:hover {
+  color: #C62828;
+  text-decoration: underline;
+}
+.container-modaleConnexion__error {
+  font-family: "Inter";
+  font-size: 0.75rem;
+  color: #C62828;
+  margin: 0.5rem 0 0;
+}
+.container-modaleConnexion__submit {
+  margin-top: 1.25rem;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 30px;
+  color: white;
+  font-family: "Inter";
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: linear-gradient(90deg, #E6392E 0%, #EF4B2D 35%, #F66A1A 70%, #F4A61D 100%);
+}
+.container-modaleConnexion__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.container-modaleConnexion__submit:hover:not(:disabled) {
+  background-color: #C62828;
+}
+.container-modaleConnexion__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0 1rem;
+  font-family: "Inter";
+  font-size: 0.75rem;
+  color: #1E2A38;
+}
+.container-modaleConnexion__divider::before, .container-modaleConnexion__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: #E6E6E6;
+}
+.container-modaleConnexion__social {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.container-modaleConnexion__socialBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.6rem;
+  border: solid 1px #E6E6E6;
+  border-radius: 30px;
+  background-color: white;
+  color: #1F2937;
+  font-family: "Inter";
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.container-modaleConnexion__socialBtn:hover {
+  background-color: #F5F5F5;
+}
+.container-modaleConnexion__register {
+  margin-top: 1.5rem;
+  font-family: "Inter";
+  font-size: 0.8rem;
+  color: #1F2937;
+}
+.container-modaleConnexion__register .container-modaleConnexion__switch {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: #C62828;
+  font-weight: bold;
+  text-decoration: none;
+}
+.container-modaleConnexion__register .container-modaleConnexion__switch:hover {
+  text-decoration: underline;
+}/*# sourceMappingURL=ModaleContent.css.map */

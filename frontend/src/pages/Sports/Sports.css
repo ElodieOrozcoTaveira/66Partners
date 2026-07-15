@@ -44,4 +44,12 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
   font-weight: bold;
   color: #1F2937;
   text-align: center;
+}
+.sport-card__circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
 }/*# sourceMappingURL=Sports.css.map */

@@ -1,0 +1,78 @@
+@charset "UTF-8";
+/*Fonts
+Manrope: titre, boutons, logo, élements import
+Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
+*/
+/*Breakpoint*/
+.container-contact {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+.container-contact__titre {
+  font-family: "Manrope";
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.container-contact__soustitre {
+  font-family: "Inter";
+  font-size: 0.9rem;
+  color: #1F2937;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.container-contact__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.container-contact__label {
+  font-family: "Inter";
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #1F2937;
+  margin-top: 0.6rem;
+}
+.container-contact__input, .container-contact__textarea {
+  font-family: "Inter";
+  font-size: 0.9rem;
+  padding: 0.6rem 0.8rem;
+  border: solid 1px #E6E6E6;
+  border-radius: 0.6rem;
+  background-color: white;
+  color: #1F2937;
+  resize: vertical;
+}
+.container-contact__input:focus, .container-contact__textarea:focus {
+  outline: none;
+  border-color: #E6392E;
+}
+.container-contact__success {
+  font-family: "Inter";
+  font-size: 0.8rem;
+  color: #1F2937;
+  margin: 0.5rem 0 0;
+}
+.container-contact__error {
+  font-family: "Inter";
+  font-size: 0.8rem;
+  color: #C62828;
+  margin: 0.5rem 0 0;
+}
+.container-contact__submit {
+  margin-top: 1.25rem;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 30px;
+  color: white;
+  font-family: "Inter";
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: linear-gradient(90deg, #E6392E 0%, #EF4B2D 35%, #F66A1A 70%, #F4A61D 100%);
+}
+.container-contact__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}/*# sourceMappingURL=Contact.css.map */

@@ -1,0 +1,100 @@
+@charset "UTF-8";
+/*Fonts
+Manrope: titre, boutons, logo, élements import
+Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
+*/
+/*Breakpoint*/
+.container-pourquoicomp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 3rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .container-pourquoicomp {
+    flex-direction: row;
+    align-items: center;
+    gap: 3.5rem;
+    padding: 5rem 3rem;
+  }
+}
+.container-pourquoicomp__left {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+@media (min-width: 768px) {
+  .container-pourquoicomp__left {
+    width: 50%;
+  }
+}
+.container-pourquoicomp__h2 {
+  position: relative;
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  font-size: 1.75rem;
+  line-height: 1.25;
+  color: #1F2937;
+  padding-bottom: 1rem;
+  margin: 0;
+}
+.container-pourquoicomp__h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 3.5rem;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #E6392E 0%, #EF4B2D 35%, #F66A1A 70%, #F4A61D 100%);
+}
+@media (min-width: 768px) {
+  .container-pourquoicomp__h2 {
+    font-size: 2.5rem;
+  }
+}
+.container-pourquoicomp__p {
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(31, 41, 55, 0.75);
+  max-width: 42ch;
+  margin: 0;
+}
+@media (min-width: 768px) {
+  .container-pourquoicomp__p {
+    font-size: 1.1rem;
+  }
+}
+.container-pourquoicomp__right {
+  width: 100%;
+  max-width: 420px;
+}
+@media (min-width: 768px) {
+  .container-pourquoicomp__right {
+    width: 50%;
+    max-width: none;
+  }
+}
+.container-pourquoicomp__img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1672/941;
+  -o-object-fit: cover;
+     object-fit: cover;
+  -o-object-position: 50% 50%;
+     object-position: 50% 50%;
+  border-radius: 1.25rem;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
+}
+@media (min-width: 768px) {
+  .container-pourquoicomp__img {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%);
+    mask-image: linear-gradient(to right, transparent 0%, black 18%);
+  }
+}/*# sourceMappingURL=PourquoiComp.css.map */
