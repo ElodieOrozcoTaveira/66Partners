@@ -70,7 +70,7 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 }
 
 .navbar-item a {
-  color: #1F2937;
+  color: #242a36;
   text-decoration: none;
   font-size: 0.7rem;
   font-weight: bold;
@@ -85,7 +85,7 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 }
 
 .navbar-item__arrow {
-  color: orangered;
+  color: #C62828;
   order: 2;
 }
 
@@ -107,12 +107,14 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 }
 
 .navbar-item:hover .navbar-item__icon {
-  background-color: orangered;
+  background: linear-gradient(135deg, #7d0a18 0%, #9d1222 15%, #b71c1c 35%, #d62828 55%, #e6392e 75%, #f05a28 90%, #f4a61d 100%);
+  box-shadow: 0 12px 40px rgba(230, 57, 46, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
   color: white;
 }
 
 .navbar-item a[aria-current=page] .navbar-item__icon {
-  background-color: orangered;
+  background: linear-gradient(135deg, #7d0a18 0%, #9d1222 15%, #b71c1c 35%, #d62828 55%, #e6392e 75%, #f05a28 90%, #f4a61d 100%);
+  box-shadow: 0 12px 40px rgba(230, 57, 46, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
   color: white;
 }
 

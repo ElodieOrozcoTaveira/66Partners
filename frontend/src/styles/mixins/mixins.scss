@@ -1,11 +1,15 @@
-
 @mixin gradient {
-    background: linear-gradient(
-        90deg,
-        #E6392E 0%,
-        #EF4B2D 35%,
-        #F66A1A 70%,
-        #F4A61D 100%
-    );
-
+  background: linear-gradient(
+    135deg,
+    #7d0a18 0%,
+    #9d1222 15%,
+    #b71c1c 35%,
+    #d62828 55%,
+    #e6392e 75%,
+    #f05a28 90%,
+    #f4a61d 100%
+  );
+  box-shadow:
+    0 12px 40px rgba(230, 57, 46, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
 }
