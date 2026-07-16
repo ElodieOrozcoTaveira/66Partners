@@ -1,4 +1,4 @@
-import { User } from "lucide-react";
+import { LockKeyhole, User } from "lucide-react";
 import ModaleContent from "../ModaleContent/ModaleContent";
 import "./Modale.scss";
 
@@ -17,7 +17,7 @@ export default function ModaleBtn({ isOpen, onOpen, onClose, onSwitchToRegister 
         className="container-connexion__links1 modale-trigger"
         onClick={onOpen}
       >
-        Se connecter <User size={16} />
+        <LockKeyhole size={16} />Se connecter 
       </button>
       <ModaleContent isOpen={isOpen} onClose={onClose} onSwitchToRegister={onSwitchToRegister} />
     </>

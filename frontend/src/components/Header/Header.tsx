@@ -8,11 +8,11 @@ export default function Header() {
       <section className="container-header__leftside">
         <Link to="/">
           <img
-            src="/logo66remove.png"
+            src="/logormv2.png"
             alt="logo 66partners"
             className="left-side__img"
-            width={90}
-            height={70}
+            width={170}
+            height={90}
             loading="lazy"
           />
         </Link>

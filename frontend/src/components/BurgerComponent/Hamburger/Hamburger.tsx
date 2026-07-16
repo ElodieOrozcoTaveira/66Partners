@@ -5,9 +5,7 @@ import {
   Info,
   Map,
   Menu,
-  MessageCircleQuestion,
-  Phone,
-  SportShoe,
+  Mail,
   Star,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -16,9 +14,11 @@ import "./Hamburger.scss";
 import FollowUs from "../followUs/FollowUs";
 import Carre from "../Carré/Carre";
 import Connexion from "../Connexion/Connexion";
+import Bonjour from "../Bonjour/Bonjour";
 
 export default function Hamburger() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
   const navRef = useRef<HTMLElement>(null);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
@@ -49,14 +49,23 @@ export default function Hamburger() {
         >
           <Menu />
         </button>
+        <div
+          className={`navbar-overlay ${isMenuOpen ? "show" : ""}`}
+          onClick={toggleMenu}
+          aria-hidden="true"
+        />
         <div className={`navbar-panel ${isMenuOpen ? "show" : ""}`}>
+          <Bonjour />
+
           <ul id="mobile-navigation" className="navbar-list">
-        <Connexion/>
             <li className="navbar-item">
               <NavLink to="/" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
-                  <Home size={14} color="currentColor" /> Accueil
+                  <span className="navbar-item__icon">
+                    <Home size={14} color="currentColor" />
+                  </span>
+                  Accueil
                 </span>
               </NavLink>
             </li>
@@ -64,7 +73,9 @@ export default function Hamburger() {
               <NavLink to="/sports" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
-                  <Bike size={14} color="currentColor" />
+                  <span className="navbar-item__icon">
+                    <Bike size={14} color="currentColor" />
+                  </span>
                   Sports
                 </span>
               </NavLink>
@@ -73,7 +84,9 @@ export default function Hamburger() {
               <NavLink to="/howsworking" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
-                  <Map size={14} color="currentColor" />
+                  <span className="navbar-item__icon">
+                    <Map size={14} color="currentColor" />
+                  </span>
                   Comment ça marche
                 </span>
               </NavLink>
@@ -82,7 +95,10 @@ export default function Hamburger() {
               <NavLink to="/about" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
-                  <Info size={14} color="currentColor" />A propos
+                  <span className="navbar-item__icon">
+                    <Info size={14} color="currentColor" />
+                  </span>
+                  A propos
                 </span>
               </NavLink>
             </li>
@@ -90,7 +106,9 @@ export default function Hamburger() {
               <NavLink to="/pourquoi66" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
-                  <Star size={14} color="currentColor" />
+                  <span className="navbar-item__icon">
+                    <Star size={14} color="currentColor" />
+                  </span>
                   Pourquoi 66Partners?
                 </span>
               </NavLink>
@@ -99,7 +117,9 @@ export default function Hamburger() {
               <NavLink to="/FAQ" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
-                  <CircleQuestionMark size={14} color="currentColor" />
+                  <span className="navbar-item__icon">
+                    <CircleQuestionMark size={14} color="currentColor" />
+                  </span>
                   FAQ
                 </span>
               </NavLink>
@@ -108,14 +128,22 @@ export default function Hamburger() {
               <NavLink to="/contact" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
-                  <Phone size={14} color="currentColor" />
+                  <span className="navbar-item__icon">
+                    <Mail size={14} color="currentColor" />
+                  </span>
                   Contact
                 </span>
               </NavLink>
             </li>
           </ul>
-          <FollowUs />
-          <Carre />
+          <Connexion
+            activeModal={activeModal}
+            onOpenLogin={() => setActiveModal("login")}
+            onOpenRegister={() => setActiveModal("register")}
+            onClose={() => setActiveModal(null)}
+          />
+
+          <FollowUs/>
         </div>
       </nav>
     </>

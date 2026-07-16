@@ -3,8 +3,10 @@
 .container-header {
   position: relative;
   z-index: 1003;
-  background-color: variables.$beige;
   width: 100vw;
+  height: 100px;
+  border-bottom: 1.5px solid rgb(238, 238, 238);
+
   margin: 0;
   padding: 0;
   display: flex;
