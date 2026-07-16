@@ -12,7 +12,7 @@ export default function FollowUs() {
 
             <div className="container-followUs__divider">
                 <span className="container-followUs__line" />
-                <Mountain size={20} color="#ff4500" />
+                <Mountain size={20} color="#C62828" />
                 <span className="container-followUs__line" />
             </div>
 
@@ -26,7 +26,7 @@ export default function FollowUs() {
                     aria-label="Suivez-nous sur Instagram"
                     className="container-followUs__icon"
                 >
-                    <SiInstagram size={18} color="#ff4500" />
+                    <SiInstagram size={18} color="#C62828" />
                 </a>
                 <a
                     href="https://www.facebook.com/66partners/"
@@ -35,7 +35,7 @@ export default function FollowUs() {
                     aria-label="Suivez-nous sur Facebook"
                     className="container-followUs__icon"
                 >
-                    <FaFacebook size={20} color="#ff4500" />
+                    <FaFacebook size={20} color="#C62828" />
                 </a>
             </div>
 

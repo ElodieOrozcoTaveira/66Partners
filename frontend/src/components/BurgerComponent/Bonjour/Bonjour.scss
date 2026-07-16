@@ -16,12 +16,13 @@
   height: 130px;
   box-sizing: border-box;
   border-bottom: 1.5px solid rgb(238, 238, 238);
-  background-image: url('/montagne1.png');
+  background-image: url('/canigou2.png');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: top 10% right 20%;
   border-bottom-right-radius: 50px;
+  filter: sepia(0.2) brightness(1) contrast(0.7);
   &__img {
     border-radius: 50%;
     object-fit: cover;
@@ -32,7 +33,7 @@
     margin-bottom: -0.2rem;
   }
   &__p {
-    color: grey;
+    color: whitesmoke;
     text-shadow: 2px 2px 2px orange;
     font-weight: 600;
     font-size: 12px;

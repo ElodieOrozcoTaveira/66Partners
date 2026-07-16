@@ -20,7 +20,11 @@ interface LoginResponse {
   token: string;
 }
 
-export default function ModaleContent({ isOpen, onClose, onSwitchToRegister }: ModaleContentProps) {
+export default function ModaleContent({
+  isOpen,
+  onClose,
+  onSwitchToRegister,
+}: ModaleContentProps) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,7 +63,10 @@ export default function ModaleContent({ isOpen, onClose, onSwitchToRegister }: M
     setError(null);
     setIsSubmitting(true);
     try {
-      const res = await api.post<LoginResponse>("/api/auth/login", { email, password });
+      const res = await api.post<LoginResponse>("/api/auth/login", {
+        email,
+        password,
+      });
       await login(res.data.token);
       onClose();
     } catch {
@@ -86,17 +93,21 @@ export default function ModaleContent({ isOpen, onClose, onSwitchToRegister }: M
           <X size={20} />
         </button>
         <div className="container-modaleConnexion">
-          <span className="container-modaleConnexion__img">
-            <LockKeyhole size={20} color="#C62828" />
-          </span>
           <h3 className="container-modaleConnexion__h3">Se connecter</h3>
           <h4 className="container-modaleConnexion__h4">
             Bienvenue chez 66Partners <HandMetal size={12} color="#F4B400" />
           </h4>
 
           <section className="container-modaleConnexion__section">
-            <form id="login-form" className="container-modaleConnexion__form" onSubmit={handleSubmit}>
-              <label htmlFor="email" className="container-modaleConnexion__label">
+            <form
+              id="login-form"
+              className="container-modaleConnexion__form"
+              onSubmit={handleSubmit}
+            >
+              <label
+                htmlFor="email"
+                className="container-modaleConnexion__label"
+              >
                 Adresse e-mail
               </label>
               <input
@@ -108,7 +119,10 @@ export default function ModaleContent({ isOpen, onClose, onSwitchToRegister }: M
                 className="container-modaleConnexion__input"
               />
 
-              <label htmlFor="password" className="container-modaleConnexion__label">
+              <label
+                htmlFor="password"
+                className="container-modaleConnexion__label"
+              >
                 Mot de passe
               </label>
               <input
@@ -120,13 +134,23 @@ export default function ModaleContent({ isOpen, onClose, onSwitchToRegister }: M
                 className="container-modaleConnexion__input"
               />
 
-              <NavLink to="/mot-de-passe-oublie" onClick={onClose} className="container-modaleConnexion__forgot">
+              <NavLink
+                to="/mot-de-passe-oublie"
+                onClick={onClose}
+                className="container-modaleConnexion__forgot"
+              >
                 Mot de passe oublié ?
               </NavLink>
 
-              {error && <p className="container-modaleConnexion__error">{error}</p>}
+              {error && (
+                <p className="container-modaleConnexion__error">{error}</p>
+              )}
 
-              <button type="submit" className="container-modaleConnexion__submit" disabled={isSubmitting}>
+              <button
+                type="submit"
+                className="container-modaleConnexion__submit"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Connexion..." : "Se connecter"}
               </button>
             </form>
@@ -136,17 +160,27 @@ export default function ModaleContent({ isOpen, onClose, onSwitchToRegister }: M
             </div>
 
             <div className="container-modaleConnexion__social">
-              <button type="button" className="container-modaleConnexion__socialBtn">
+              <button
+                type="button"
+                className="container-modaleConnexion__socialBtn"
+              >
                 <FcGoogle size={18} /> Google
               </button>
-              <button type="button" className="container-modaleConnexion__socialBtn">
+              <button
+                type="button"
+                className="container-modaleConnexion__socialBtn"
+              >
                 <FaFacebook size={18} color="#1877F2" /> Facebook
               </button>
             </div>
 
             <p className="container-modaleConnexion__register">
               Pas encore de compte ?{" "}
-              <button type="button" className="container-modaleConnexion__switch" onClick={onSwitchToRegister}>
+              <button
+                type="button"
+                className="container-modaleConnexion__switch"
+                onClick={onSwitchToRegister}
+              >
                 S'inscrire
               </button>
             </p>
@@ -154,6 +188,6 @@ export default function ModaleContent({ isOpen, onClose, onSwitchToRegister }: M
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

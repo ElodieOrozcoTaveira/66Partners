@@ -23,7 +23,7 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
   margin: 0;
 }
 .container-followUs__tagline span {
-  color: orangered;
+  color: #C62828;
 }
 .container-followUs__divider {
   display: flex;
@@ -34,7 +34,7 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 .container-followUs__line {
   flex: 1;
   height: 1px;
-  background-color: #ff4500;
+  background-color: #C62828;
   opacity: 0.4;
 }
 .container-followUs__label {
@@ -70,6 +70,6 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
   font-family: "Inter";
   font-size: 11px;
   font-weight: bold;
-  color: #E6392E;
+  color: #C62828;
   margin: 0;
 }/*# sourceMappingURL=FollowUs.css.map */

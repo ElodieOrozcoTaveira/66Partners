@@ -74,7 +74,7 @@
 }
 
 .navbar-item a {
-  color: variables.$nuit;
+  color: #242a36;
   text-decoration: none;
   font-size: 0.7rem;
   font-weight: bold;
@@ -89,7 +89,7 @@
 }
 
 .navbar-item__arrow {
-  color: orangered;
+  color: variables.$rouge2;
   order: 2;
 }
 
@@ -113,12 +113,12 @@
 }
 
 .navbar-item:hover .navbar-item__icon {
-  background-color: orangered;
+  @include mixins.gradient;
   color: white;
 }
 
 .navbar-item a[aria-current="page"] .navbar-item__icon {
-  background-color: orangered;
+  @include mixins.gradient;
   color: white;
 }
 

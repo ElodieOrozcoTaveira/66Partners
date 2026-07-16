@@ -31,14 +31,15 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
   background-color: rgb(246, 246, 240);
 }
 .container-connexion__links1 {
-  background: linear-gradient(90deg, #E6392E 0%, #EF4B2D 35%, #F66A1A 70%, #F4A61D 100%);
+  background: linear-gradient(135deg, #7D0A18 0%, #9D1222 15%, #B71C1C 35%, #D62828 55%, #E6392E 75%, #F05A28 90%, #F4A61D 100%);
+  box-shadow: 0 12px 40px rgba(230, 57, 46, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
   color: white;
   border: none;
   font-size: 12px;
 }
 .container-connexion__links2 {
   text-decoration: none;
-  color: orangered;
-  border: solid 1px orangered;
+  color: #C62828;
+  border: solid 1px #C62828;
   padding-right: 1.5rem;
 }/*# sourceMappingURL=Connexion.css.map */
