@@ -2,20 +2,21 @@
 @use '../../../styles/mixins/mixins.scss';
 
 .container-connexion {
-  margin-top: 2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  border-top: 1.5px solid rgb(238, 238, 238);
+  padding-top: 2rem;
   &__links1,
   &__links2 {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    width: 12rem;
+    width: 15rem;
     box-sizing: border-box;
     list-style-type: none;
     text-decoration: none;
@@ -24,6 +25,8 @@
     border-radius: 30px;
     font-size: 12px;
     font-weight: bold;
+    background-color: rgb(246, 246, 240)
+
 }
   &__links1 {
         @include mixins.gradient;
@@ -34,8 +37,8 @@
   }
   &__links2 {
     text-decoration: none;
-    color: variables.$nuit;
-    border: solid 1px variables.$nuit;
-    background-color: variables.$beige;
+    color: orangered;
+    border: solid 1px orangered;
+    padding-right: 1.5rem;
   }
 }

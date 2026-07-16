@@ -5,28 +5,71 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 */
 /*Breakpoint*/
 .container-followUs {
-  align-self: flex-start;
   width: 100%;
-  margin-top: 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  justify-content: space-around;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  margin-top: 2.5rem;
+  padding: 0 1rem;
 }
-.container-followUs__titre {
+.container-followUs__tagline {
+  font-style: italic;
+  font-family: "Inter";
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0;
+}
+.container-followUs__tagline span {
+  color: orangered;
+}
+.container-followUs__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+.container-followUs__line {
+  flex: 1;
+  height: 1px;
+  background-color: #ff4500;
+  opacity: 0.4;
+}
+.container-followUs__label {
+  font-family: "Inter";
+  font-size: 11px;
   font-weight: bold;
-  font-family: "Manrope";
-  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: grey;
+  margin: 0;
 }
-
 .container-followUs__reseaux {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
 }
-
-.container-followUs__insta {
+.container-followUs__icon {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+.container-followUs__desc {
+  font-family: "Inter";
+  font-size: 11px;
+  color: grey;
+  margin: 0.5rem 0 0;
+}
+.container-followUs__hashtag {
+  font-family: "Inter";
+  font-size: 11px;
+  font-weight: bold;
+  color: #E6392E;
+  margin: 0;
 }/*# sourceMappingURL=FollowUs.css.map */

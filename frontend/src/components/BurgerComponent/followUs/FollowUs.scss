@@ -1,28 +1,82 @@
 @use '../../../styles/variables/variables.scss';
 
 .container-followUs{
-    align-self: flex-start;
     width: 100%;
-    margin-top: 2.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    justify-content: space-around;
-    align-items: flex-start;
-    &__titre{
-        font-weight: bold;
-        font-family: 'Manrope';
-        font-size: 12px;
-    }
-}
-
-.container-followUs__reseaux{
-    display: flex;
     align-items: center;
-}
-
-.container-followUs__insta{
-    display: flex;
-    align-items: center;
+    text-align: center;
     gap: 0.75rem;
+    margin-top: 2.5rem;
+    padding: 0 1rem;
+
+    &__tagline{
+        font-style: italic;
+        font-family: 'Inter';
+        font-size: 14px;
+        font-weight: 600;
+        color: variables.$nuit;
+        margin: 0;
+
+        span{
+            color: orangered;
+        }
+    }
+
+    &__divider{
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        width: 100%;
+    }
+
+    &__line{
+        flex: 1;
+        height: 1px;
+        background-color: #ff4500;
+        opacity: 0.4;
+    }
+
+    &__label{
+        font-family: 'Inter';
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: grey;
+        margin: 0;
+    }
+
+    &__reseaux{
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    &__icon{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        transition: background-color 0.2s ease;
+
+        
+    }
+
+    &__desc{
+        font-family: 'Inter';
+        font-size: 11px;
+        color: grey;
+        margin: 0.5rem 0 0;
+    }
+
+    &__hashtag{
+        font-family: 'Inter';
+        font-size: 11px;
+        font-weight: bold;
+        color: variables.$rouge;
+        margin: 0;
+    }
 }

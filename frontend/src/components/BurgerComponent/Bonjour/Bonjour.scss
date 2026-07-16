@@ -1,0 +1,42 @@
+@use "../../../styles/variables/variables.scss";
+
+.container-bonjour {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-top: -1rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  margin-bottom: 1.5rem;
+  width: calc(100% + 2rem);
+  height: 130px;
+  box-sizing: border-box;
+  border-bottom: 1.5px solid rgb(238, 238, 238);
+  background-image: url('/montagne1.png');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top 10% right 20%;
+  border-bottom-right-radius: 50px;
+  &__img {
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  &__h3 {
+    color: orangered;
+    font-size: 16px;
+    margin-bottom: -0.2rem;
+  }
+  &__p {
+    color: grey;
+    text-shadow: 2px 2px 2px orange;
+    font-weight: 600;
+    font-size: 12px;
+    margin-right: 1rem;
+    text-align: left;
+  }
+}

@@ -5,20 +5,21 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 */
 /*Breakpoint*/
 .container-connexion {
-  margin-top: 2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  border-top: 1.5px solid rgb(238, 238, 238);
+  padding-top: 2rem;
 }
 .container-connexion__links1, .container-connexion__links2 {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  width: 12rem;
+  width: 15rem;
   box-sizing: border-box;
   list-style-type: none;
   text-decoration: none;
@@ -27,6 +28,7 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
   border-radius: 30px;
   font-size: 12px;
   font-weight: bold;
+  background-color: rgb(246, 246, 240);
 }
 .container-connexion__links1 {
   background: linear-gradient(90deg, #E6392E 0%, #EF4B2D 35%, #F66A1A 70%, #F4A61D 100%);
@@ -36,7 +38,7 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 }
 .container-connexion__links2 {
   text-decoration: none;
-  color: #1F2937;
-  border: solid 1px #1F2937;
-  background-color: #FFF7EB;
+  color: orangered;
+  border: solid 1px orangered;
+  padding-right: 1.5rem;
 }/*# sourceMappingURL=Connexion.css.map */

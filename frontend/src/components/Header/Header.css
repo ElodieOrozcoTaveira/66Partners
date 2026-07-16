@@ -7,8 +7,9 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 .container-header {
   position: relative;
   z-index: 1003;
-  background-color: #FFF7EB;
   width: 100vw;
+  height: 100px;
+  border-bottom: 1.5px solid rgb(238, 238, 238);
   margin: 0;
   padding: 0;
   display: flex;

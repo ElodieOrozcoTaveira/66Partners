@@ -10,7 +10,12 @@ interface ModaleRegisterBtnProps {
   onSwitchToLogin: () => void;
 }
 
-export default function ModaleRegisterBtn({ isOpen, onOpen, onClose, onSwitchToLogin }: ModaleRegisterBtnProps) {
+export default function ModaleRegisterBtn({
+  isOpen,
+  onOpen,
+  onClose,
+  onSwitchToLogin,
+}: ModaleRegisterBtnProps) {
   return (
     <>
       <button
@@ -18,9 +23,13 @@ export default function ModaleRegisterBtn({ isOpen, onOpen, onClose, onSwitchToL
         className="container-connexion__links2 modale-trigger"
         onClick={onOpen}
       >
-        S'inscrire <UserPlus size={16} />
+        <UserPlus size={16} /> S'inscrire
       </button>
-      <ModaleRegisterContent isOpen={isOpen} onClose={onClose} onSwitchToLogin={onSwitchToLogin} />
+      <ModaleRegisterContent
+        isOpen={isOpen}
+        onClose={onClose}
+        onSwitchToLogin={onSwitchToLogin}
+      />
     </>
   );
 }
