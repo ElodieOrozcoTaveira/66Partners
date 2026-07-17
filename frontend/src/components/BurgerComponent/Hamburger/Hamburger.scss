@@ -39,7 +39,7 @@
   height: 100vh;
   padding: 1rem 1rem 0.75rem;
   overflow-y: auto;
-  background-color: #fef8f3 ;
+  background-color: #fffbf7 ;
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
@@ -164,3 +164,22 @@
 }
 
 // Version Tablette
+
+@media screen and (min-width:variables.$tablet) and (max-width:1023px){
+  .navbar-panel{
+    width: 45vw;
+  }
+  .navbar-item a {
+    font-size: 0.9rem;
+    padding-bottom: 1.35rem;
+  }
+}
+
+@media (min-width:variables.$laptop){
+  .navbar{
+    display: none;
+  }
+  .navbar-list{
+    display: flex;
+  }
+}

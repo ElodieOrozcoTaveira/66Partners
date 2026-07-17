@@ -12,13 +12,14 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import "./Hamburger.scss";
 import FollowUs from "../followUs/FollowUs";
-import Carre from "../Carré/Carre";
 import Connexion from "../Connexion/Connexion";
 import Bonjour from "../Bonjour/Bonjour";
 
 export default function Hamburger() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
+  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
+    null,
+  );
   const navRef = useRef<HTMLElement>(null);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
@@ -91,17 +92,7 @@ export default function Hamburger() {
                 </span>
               </NavLink>
             </li>
-            <li className="navbar-item">
-              <NavLink to="/about" onClick={toggleMenu}>
-                <span className="navbar-item__arrow">&gt;</span>
-                <span className="navbar-item__label">
-                  <span className="navbar-item__icon">
-                    <Info size={14} color="currentColor" />
-                  </span>
-                  A propos
-                </span>
-              </NavLink>
-            </li>
+
             <li className="navbar-item">
               <NavLink to="/pourquoi66" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
@@ -143,7 +134,7 @@ export default function Hamburger() {
             onClose={() => setActiveModal(null)}
           />
 
-          <FollowUs/>
+          <FollowUs />
         </div>
       </nav>
     </>
