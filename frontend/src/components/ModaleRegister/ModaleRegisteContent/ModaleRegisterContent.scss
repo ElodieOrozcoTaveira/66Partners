@@ -1,294 +1,299 @@
-@use '../../../styles/variables/variables.scss';
+@use "../../../styles/variables/variables.scss";
 @use "../../../styles/mixins/mixins.scss";
 
 .modale-register-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(31, 41, 55, 0.35);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(31, 41, 55, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
 }
 
 .modale-register-content {
-    position: relative;
-    background-color: variables.$burger;
-    border-radius: 1rem;
-    padding: 2.5rem 2rem 2rem;
-    min-width: 330px;
-    max-width: 85vw;
-    max-height: 88vh;
-    overflow-y: auto;
-    box-shadow: 0 12px 40px rgba(variables.$nuit, 0.2);
+  position: relative;
+  border-radius: 1rem;
+  background-image: url("/canigou2.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top 35% right 70%;
+  border-bottom-right-radius: 35px;
+  filter: sepia(0.2) brightness(1) contrast(1);
+  padding: 2.5rem 2rem 2rem;
+  min-width: 100px;
+  max-width: 45vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(variables.$nuit, 0.2);
 
-    &__close {
-        position: absolute;
-        top: 0.75rem;
-        right: 0.75rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: variables.$nuit;
-
-        &:hover {
-            color: variables.$rouge;
-        }
-    }
-}
-
-.container-modaleRegister{
+  &__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    &__img{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(230, 57, 46, 0.12);
-        border-radius: 50%;
-        padding: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: variables.$nuit;
+
+    &:hover {
+      color: variables.$rouge;
     }
-    &__h4{
-        font-size: 12px;
-        margin-top: -0.8rem;
-        text-align: center;
-        font-weight: 300;
-    }
+  }
+}
 
-    &__section{
-        width: 100%;
-        margin-top: 1.5rem;
-    }
+.container-modaleRegister {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  &__h3 {
+    color: variables.$nuit;
+    font-size: 20px;
+  }
+  &__h4 {
+    font-size: 14px;
+    margin-top: -0.8rem;
+    text-align: center;
+    font-weight: 300;
+    color: variables.$nuit;
+  }
 
-    &__form{
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-    }
+  &__section {
+    width: 100%;
+    margin-top: 1.5rem;
+  }
 
-    &__label{
-        font-family: 'Inter';
-        font-size: 0.8rem;
-        font-weight: bold;
-        color: variables.$nuit;
-        margin-top: 0.6rem;
-    }
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
 
-    &__input{
-        font-family: 'Inter';
-        font-size: 0.9rem;
-        padding: 0.6rem 0.8rem;
-        border: solid 1px variables.$gris2;
-        border-radius: 0.6rem;
-        background-color: white;
-        color: variables.$nuit;
+  &__label {
+    font-family: "Inter";
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: variables.$nuit;
+    margin-top: 0.6rem;
+  }
 
-        &:focus{
-            outline: none;
-            border-color: variables.$rouge;
-        }
+  &__input {
+    font-family: "Inter";
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+    border: solid 1px variables.$gris2;
+    border-radius: 0.6rem;
+    background-color: white;
+    color: variables.$nuit;
 
-        &--error{
-            border-color: variables.$rouge2;
-
-            &:focus{
-                border-color: variables.$rouge2;
-            }
-        }
-    }
-
-    &__passwordHint{
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-        margin: 0.35rem 0 0;
-        font-family: 'Inter';
-        font-size: 0.7rem;
-        font-weight: bold;
-
-        &--error{
-            color: variables.$rouge2;
-        }
-
-        &--ok{
-            color: #2E7D32;
-        }
+    &:focus {
+      outline: none;
+      border-color: variables.$rouge;
     }
 
-    &__forgot{
-        align-self: flex-end;
-        margin-top: 0.4rem;
-        font-family: 'Inter';
-        font-size: 0.75rem;
+    &--error {
+      border-color: variables.$rouge2;
+
+      &:focus {
+        border-color: variables.$rouge2;
+      }
+    }
+  }
+
+  &__passwordHint {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0.35rem 0 0;
+    font-family: "Inter";
+    font-size: 0.7rem;
+    font-weight: bold;
+
+    &--error {
+      color: variables.$rouge2;
+    }
+
+    &--ok {
+      color: #2e7d32;
+    }
+  }
+
+  &__forgot {
+    align-self: flex-end;
+    margin-top: 0.4rem;
+    font-family: "Inter";
+    font-size: 0.75rem;
+    color: variables.$rouge2;
+    text-decoration: none;
+    font-weight: bold;
+
+    &:hover {
+      color: variables.$rouge2;
+      text-decoration: underline;
+    }
+  }
+
+  &__error {
+    font-family: "Inter";
+    font-size: 0.75rem;
+    color: variables.$rouge2;
+    margin: 0.5rem 0 0;
+  }
+
+  &__submit {
+    margin-top: 1.25rem;
+    padding: 0.7rem;
+    border: none;
+    border-radius: 30px;
+    color: white;
+    font-family: "Inter";
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    @include mixins.gradient;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: variables.$rouge2;
+    }
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0 1rem;
+    font-family: "Inter";
+    font-size: 0.75rem;
+    color: variables.$nuit2;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background-color: variables.$gris2;
+    }
+  }
+
+  &__social {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  &__socialBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.6rem;
+    border: solid 1px variables.$gris2;
+    border-radius: 30px;
+    background-color: white;
+    color: variables.$nuit;
+    font-family: "Inter";
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: variables.$gris;
+    }
+  }
+
+  &__register {
+    margin-top: 1.5rem;
+    font-family: "Inter";
+    font-size: 0.8rem;
+    color: variables.$nuit;
+
+    .container-modaleRegister__switch {
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+      color: variables.$rouge2;
+      font-weight: bold;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__terms {
+    margin-top: 1.25rem;
+    font-family: "Inter";
+    font-size: 0.7rem;
+    color: variables.$nuit;
+    text-align: center;
+
+    a {
+      color: variables.$rouge;
+      text-shadow: 1px 1px 2px whitesmoke;
+      text-decoration: underline;
+
+      font-weight: bold;
+
+      &:hover {
         color: variables.$rouge2;
-        text-decoration: none;
-        font-weight: bold;
-
-        &:hover{
-            color: variables.$rouge2;
-            text-decoration: underline;
-        }
+      }
     }
-
-    &__error{
-        font-family: 'Inter';
-        font-size: 0.75rem;
-        color: variables.$rouge2;
-        margin: 0.5rem 0 0;
-    }
-
-    &__submit{
-        margin-top: 1.25rem;
-        padding: 0.7rem;
-        border: none;
-        border-radius: 30px;
-        color: white;
-        font-family: 'Inter';
-        font-weight: bold;
-        font-size: 0.9rem;
-        cursor: pointer;
-        @include mixins.gradient;
-
-        &:disabled{
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        &:hover:not(:disabled){
-            background-color: variables.$rouge2;
-        }
-    }
-
-    &__divider{
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin: 1.5rem 0 1rem;
-        font-family: 'Inter';
-        font-size: 0.75rem;
-        color: variables.$nuit2;
-
-        &::before,
-        &::after{
-            content: "";
-            flex: 1;
-            height: 1px;
-            background-color: variables.$gris2;
-        }
-    }
-
-    &__social{
-        display: flex;
-        flex-direction: column;
-        gap: 0.6rem;
-    }
-
-    &__socialBtn{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.6rem;
-        padding: 0.6rem;
-        border: solid 1px variables.$gris2;
-        border-radius: 30px;
-        background-color: white;
-        color: variables.$nuit;
-        font-family: 'Inter';
-        font-weight: bold;
-        font-size: 0.85rem;
-        cursor: pointer;
-
-        &:hover{
-            background-color: variables.$gris;
-        }
-    }
-
-    &__register{
-        margin-top: 1.5rem;
-        font-family: 'Inter';
-        font-size: 0.8rem;
-        color: variables.$nuit;
-
-        .container-modaleRegister__switch{
-            border: none;
-            background: none;
-            padding: 0;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: inherit;
-            color: variables.$rouge2;
-            font-weight: bold;
-            text-decoration: none;
-
-            &:hover{
-                text-decoration: underline;
-            }
-        }
-    }
-
-    &__terms{
-        margin-top: 1.25rem;
-        font-family: 'Inter';
-        font-size: 0.7rem;
-        color: variables.$nuit;
-        text-align: center;
-
-        a{
-            color: variables.$rouge;
-            text-decoration: underline;
-            font-weight: bold;
-
-            &:hover{
-                color: variables.$rouge2;
-            }
-        }
-    }
+  }
 }
 
 @media (max-width: variables.$mobile) {
-    .modale-register-content {
-        padding: 2rem 1.25rem 1.5rem;
-        max-height: 92vh;
+  .modale-register-content {
+    padding: 2rem 1.25rem 1.5rem;
+    max-height: 92vh;
+  }
+
+  .container-modaleRegister {
+    &__section {
+      margin-top: 1rem;
     }
 
-    .container-modaleRegister {
-        &__section {
-            margin-top: 1rem;
-        }
-
-        &__form {
-            gap: 0.2rem;
-        }
-
-        &__label {
-            margin-top: 0.4rem;
-        }
-
-        &__submit {
-            margin-top: 0.9rem;
-        }
-
-        &__divider {
-            margin: 1rem 0 0.75rem;
-        }
-
-        &__social {
-            gap: 0.4rem;
-        }
-
-        &__register {
-            margin-top: 1rem;
-        }
-
-        &__terms {
-            margin-top: 0.9rem;
-        }
+    &__form {
+      gap: 0.2rem;
     }
+
+    &__label {
+      margin-top: 0.4rem;
+    }
+
+    &__submit {
+      margin-top: 0.9rem;
+    }
+
+    &__divider {
+      margin: 1rem 0 0.75rem;
+    }
+
+    &__social {
+      gap: 0.4rem;
+    }
+
+    &__register {
+      margin-top: 1rem;
+    }
+
+    &__terms {
+      margin-top: 0.9rem;
+    }
+  }
 }
