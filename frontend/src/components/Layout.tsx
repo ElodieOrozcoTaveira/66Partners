@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Header from "./Header/Header";
+import Footer from "./Footer/Footer";
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -17,6 +18,7 @@ export default function Layout() {
       <main>
         <Outlet />
       </main>
+      <Footer/>
     </>
   );
 }

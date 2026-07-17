@@ -15,11 +15,7 @@
 
 .modale-content {
   position: relative;
-  background-image: url("/canigou2.png");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: top 35% right 70%;
+  @include mixins.background;
   border-bottom-right-radius: 35px;
   filter: sepia(0.2) brightness(1) contrast(1);
   border-radius: 1rem;
