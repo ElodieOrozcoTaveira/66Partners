@@ -79,4 +79,31 @@
         color: variables.$rouge2;
         margin: 0;
     }
+
+    &--onDark{
+        .container-followUs__tagline{
+            color: variables.$beige2;
+
+            span{
+                color: variables.$jaune2;
+            }
+        }
+
+        .container-followUs__line{
+            background-color: rgba(247, 243, 236, 0.35);
+            opacity: 1;
+        }
+
+        .container-followUs__label{
+            color: rgba(247, 243, 236, 0.75);
+        }
+
+        .container-followUs__icon{
+            background-color: rgba(247, 243, 236, 0.1);
+        }
+
+        .container-followUs__desc{
+            color: rgba(247, 243, 236, 0.65);
+        }
+    }
 }
