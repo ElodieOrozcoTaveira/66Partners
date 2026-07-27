@@ -1,0 +1,108 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.container-reponse {
+  margin: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding-left: 1rem;
+  @include mixins.gradient;
+  border-radius: 10px;
+  &__h3 {
+    padding-top: 1rem;
+    text-align: left;
+    color: whitesmoke;
+    font-family: "Manrope", sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 0.2rem;
+  }
+  &__h4 {
+    margin-top: 0.2rem;
+    text-align: left;
+    color: whitesmoke;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  &__btn {
+    padding: 0.7rem;
+    border-radius: 10px;
+    background-color: whitesmoke;
+    margin-bottom: 2rem;
+    text-decoration: none;
+    color: hsl(16, 100%, 50%);
+    font-size: 14px;
+    font-weight: bold;
+    animation: button-border-pulse 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes button-border-pulse {
+  0%,
+  100% {
+    border-color: orangered;
+    box-shadow:
+      2px 1px 1px whitesmoke,
+      0 0 0 0 orangered;
+  }
+  50% {
+    border-color: orangered;
+    box-shadow:
+      1px 1px 1px rgba(orangered, 0.35),
+      0 0 0 3px orangered;
+  }
+}
+
+@media screen and (min-width: variables.$tablet) and (max-width: 1023px) {
+  .container-reponse {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-right: 1.5rem;
+
+    &__text {
+      text-align: left;
+    }
+
+    &__btn {
+      display: flex;
+      flex-shrink: 0;
+      width: 12rem;
+      justify-content: center;
+      margin-bottom: 0;
+      margin-left: 1.5rem;
+    }
+  }
+}
+
+@media (min-width: variables.$laptop) {
+  .container-reponse {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 800px;
+    margin: 3.5rem auto;
+    padding: 1rem 2rem;
+
+    &__text {
+      text-align: left;
+    }
+
+    &__btn {
+      display: flex;
+      flex-shrink: 0;
+      width: 12rem;
+      justify-content: center;
+      margin-bottom: 0;
+      margin-left: 1.5rem;
+    }
+  }
+}
+

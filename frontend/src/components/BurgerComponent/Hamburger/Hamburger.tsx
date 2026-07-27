@@ -2,7 +2,6 @@ import {
   Bike,
   CircleQuestionMark,
   Home,
-  Info,
   Map,
   Menu,
   Mail,
@@ -82,7 +81,7 @@ export default function Hamburger() {
               </NavLink>
             </li>
             <li className="navbar-item">
-              <NavLink to="/howsworking" onClick={toggleMenu}>
+              <NavLink to="/fonctionnement" onClick={toggleMenu}>
                 <span className="navbar-item__arrow">&gt;</span>
                 <span className="navbar-item__label">
                   <span className="navbar-item__icon">

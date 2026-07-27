@@ -11,14 +11,17 @@ import {
   Flag,
   Footprints,
   Goal,
+  Grip,
   HandFist,
   Mountain,
   MountainSnow,
   PersonStanding,
   Route,
+  Signpost,
   Swords,
   Target,
   Volleyball,
+  Waves,
 } from "lucide-react";
 
 export interface SportVisual {
@@ -49,6 +52,9 @@ const sportVisuals: Record<string, SportVisual> = {
   Gravel: { icon: Compass, color: "#E6392E" },
   VTT: { icon: Route, color: "#F4B400" },
   Squash: { icon: Swords, color: "#E6392E" },
+  Pickleball: { icon: Grip, color: "#F4A61D" },
+  Paddle: { icon: Waves, color: "#E6392E" },
+  Marche: { icon: Signpost, color: "#F4A61D" },
 };
 
 export function getSportVisual(sportName: string): SportVisual {

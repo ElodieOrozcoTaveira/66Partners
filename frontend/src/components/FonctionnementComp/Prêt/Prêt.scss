@@ -1,0 +1,104 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.container-prêt {
+  display: flex;
+  height: 180px;
+  width: 20rem;
+  flex-direction: column;
+  align-items: center;
+  gap: -1.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 4rem;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  border-radius: 1rem;
+  @include mixins.gradient;
+
+  @media (min-width: variables.$tablet) {
+    margin: 2.5rem 2rem 0;
+  }
+}
+
+.container-prêt__h3 {
+  margin-left: 3rem;
+  margin-right: 3rem;
+  color: whitesmoke;
+  font-size: 18px;
+  font-family: "Manrope", sans-serif;
+}
+
+.container-prêt__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #ff4500;
+  font-family: "Inter";
+  font-weight: bold;
+  background-color: whitesmoke;
+  animation: button-border-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes button-border-pulse {
+  0%,
+  100% {
+    border-color: orangered;
+    box-shadow:
+      2px 1px 1px whitesmoke,
+      0 0 0 0 orangered;
+  }
+  50% {
+    border-color: orangered;
+    box-shadow:
+      1px 1px 1px rgba(orangered, 0.35),
+      0 0 0 3px orangered;
+  }
+}
+
+@media screen and (min-width: variables.$tablet) and (max-width: 1023px) {
+  .container-prêt {
+    height: auto;
+    max-width: 26rem;
+    width: 100%;
+    gap: 0.75rem;
+    margin: 3rem auto;
+    padding: 1.25rem 2rem;
+  }
+
+  .container-prêt__h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .container-prêt__link {
+    padding: 0.6rem 1.5rem;
+    animation: none;
+  }
+}
+
+@media (min-width: variables.$laptop) {
+  .container-prêt {
+    height: auto;
+    max-width: 26rem;
+    width: 100%;
+    gap: 0.75rem;
+    margin: 3rem auto;
+    padding: 1.25rem 2rem;
+  }
+
+  .container-prêt__h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .container-prêt__link {
+    padding: 0.6rem 1.5rem;
+    animation: none;
+  }
+}

@@ -1,0 +1,102 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.modale-bienvenue-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(31, 41, 55, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modale-bienvenue-content {
+  position: relative;
+  @include mixins.background;
+  border-bottom-right-radius: 35px;
+  filter: sepia(0.2) brightness(1) contrast(1);
+  border-radius: 1rem;
+  padding: 2.5rem 2rem 2rem;
+  min-width: 330px;
+  max-width: 90vw;
+  width: 420px;
+  box-shadow: 0 12px 40px rgba(variables.$nuit, 0.2);
+
+  &__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: variables.$nuit;
+
+    &:hover {
+      color: variables.$rouge;
+    }
+  }
+}
+
+.container-modaleBienvenue {
+  text-align: center;
+
+  &__h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: variables.$nuit;
+    font-size: 22px;
+    font-family: "Manrope", sans-serif;
+    margin: 0 0 0.75rem;
+  }
+
+  &__h4 {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: variables.$nuit;
+    margin: 0 0 1.75rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__submit {
+    display: block;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 30px;
+    color: white;
+    font-family: "Inter";
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    @include mixins.gradient;
+  }
+
+  &__later {
+    background: none;
+    border: none;
+    padding: 0.4rem;
+    font-family: "Inter";
+    font-size: 0.85rem;
+    color: variables.$nuit2;
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+      color: variables.$rouge2;
+    }
+  }
+}

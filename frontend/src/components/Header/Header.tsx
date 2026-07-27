@@ -3,20 +3,22 @@ import { Link, NavLink } from "react-router-dom";
 import "../Header/Header.scss";
 import Hamburger from "../BurgerComponent/Hamburger/Hamburger";
 import Connexion from "../BurgerComponent/Connexion/Connexion";
+import { useHideOnScroll } from "../../hooks/useHideOnScroll";
 
 export default function Header() {
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
+  const hidden = useHideOnScroll();
 
   return (
-    <header className="container-header">
+    <header className={`container-header${hidden ? " container-header--hidden" : ""}`}>
       <section className="container-header__leftside">
         <Link to="/">
           <img
-            src="/logormv2.png"
+            src="/newLogo.png"
             alt="logo 66partners"
             className="left-side__img"
-            width={170}
-            height={90}
+            width={130}
+            height={100}
             loading="lazy"
           />
         </Link>
@@ -24,7 +26,7 @@ export default function Header() {
       <nav className="container-header__nav">
         <NavLink to="/">Accueil</NavLink>
         <NavLink to="/sports">Sports</NavLink>
-        <NavLink to="/howsworking">Comment ça marche</NavLink>
+        <NavLink to="/fonctionnement">Comment ça marche</NavLink>
         <NavLink to="/pourquoi66">Pourquoi 66Partners?</NavLink>
         <NavLink to="/FAQ">FAQ</NavLink>
         <NavLink to="/contact">Contact</NavLink>

@@ -4,8 +4,10 @@ import { NavLink } from "react-router-dom";
 import { Check, X } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { isAxiosError } from "axios";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
+import ModaleBienvenue from "../../ModaleBienvenue/ModaleBienvenue";
 import "./ModaleRegisterContent.scss";
 
 interface ModaleContentProps {
@@ -28,6 +30,7 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
@@ -59,6 +62,18 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
     }
   }, [isOpen]);
 
+  if (showWelcome) {
+    return (
+      <ModaleBienvenue
+        isOpen={showWelcome}
+        onClose={() => {
+          setShowWelcome(false);
+          onClose();
+        }}
+      />
+    );
+  }
+
   if (!isOpen) return null;
 
   async function handleSubmit(event: FormEvent) {
@@ -79,8 +94,13 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
       });
       await login(res.data.token);
       onClose();
-    } catch {
-      setError("Impossible de créer le compte. Vérifiez vos informations.");
+      setShowWelcome(true);
+    } catch (err) {
+      const message =
+        isAxiosError<{ message?: string }>(err) && err.response?.data?.message
+          ? err.response.data.message
+          : "Impossible de créer le compte. Vérifiez vos informations.";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }

@@ -35,7 +35,7 @@ export default function FollowUs({ onDark = false }: FollowUsProps) {
                     <SiInstagram size={18} color={accentColor} />
                 </a>
                 <a
-                    href="https://www.facebook.com/66partners/"
+                    href="https://www.facebook.com/66Partners"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Suivez-nous sur Facebook"

@@ -1,10 +1,12 @@
-import PourquoiComp from '../../components/Pourquoi/PourquoiComp';
-import './Pourquoi.scss';
+import Cases from "../../components/PourquoiComp/Cases/Cases";
+import PourquoiComp from "../../components/PourquoiComp/PourquoiComp/PourquoiComp";
+import "./Pourquoi.scss";
 
 export default function Pourquoi() {
-    return(
-        <>
-        <PourquoiComp/>
-        </>
-    )
+  return (
+    <>
+      <PourquoiComp />
+      <Cases/>
+    </>
+  );
 }

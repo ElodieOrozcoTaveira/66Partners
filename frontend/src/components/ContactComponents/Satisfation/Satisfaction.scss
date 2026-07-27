@@ -1,0 +1,28 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.container-satisfaction {
+  margin-top: -2rem;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff6f2;
+  padding-left: 1rem;
+  &__h3 {
+    margin-top: -1rem;
+    text-align: left;
+    color: variables.$nuit;
+    font-family: "Manrope", sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    margin-bottom: 0.2rem;
+  }
+  &__p {
+    text-align: left;
+    color: grey;
+    font-weight: 500;
+    font-size: 14px;
+    padding-bottom: 2rem;
+  }
+}
