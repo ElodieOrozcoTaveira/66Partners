@@ -9,6 +9,9 @@ import Sports from "./pages/Sports/Sports";
 import Contact from "./pages/Contact/Contact";
 import NotFound from "./pages/NotFound/NotFound";
 import Pourquoi from "./pages/Pourquoi66/Pourquoi";
+import Explorer from "./pages/Explorer/Explorer";
+import Faq from "./pages/FAQ/Faq";
+import Fonctionnement from "./pages/Fonctionnement/Fonctionnement";
 
 
 export default function App() {
@@ -18,18 +21,21 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             {/* Routes publiques */}
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home/>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/sports" element={<Sports />} />
             <Route path="/pourquoi66" element={<Pourquoi />} />
             <Route path="/contact" element={<Contact />} />
-           {/* <Route path="/howsworking" element= {<Howsworking />} />                        <Route path="/about" element= {<About />}*/}
+            <Route path="/FAQ" element={<Faq />} />
+
+           <Route path="/fonctionnement" element= {<Fonctionnement />} />                        {/*<Route path="/about" element= {<About />}*/}
 
 
 
             {/* Routes protégées */}
             <Route element={<ProtectedRoute />}>
+              <Route path="/explorer" element={<Explorer />} />
               <Route path="/activities" element={<div>Activités — Phase 4</div>} />
               <Route path="/profile" element={<div>Profil — Phase 3</div>} />
             </Route>

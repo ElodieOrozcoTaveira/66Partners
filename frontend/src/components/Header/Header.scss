@@ -2,16 +2,24 @@
 @use "../../styles/mixins/mixins.scss";
 
 .container-header {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   z-index: 1003;
   width: 100vw;
-  height: 100px;
+  height: variables.$header-height;
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
+  transition: transform 0.35s ease;
+  background-color: white;
+
+  &--hidden {
+    transform: translateY(-100%);
+  }
 
   &::after {
     content: "";
@@ -69,8 +77,8 @@
         color: whitesmoke;
         @include mixins.gradient;
         padding: 0.7rem 0.9rem;
-        border-radius: 30px;
-        transition-duration: 0.7s;
+        border-radius: 15px;
+        transition-duration: 1.2s;
       }
 
       &[aria-current="page"] {

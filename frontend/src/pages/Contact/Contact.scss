@@ -1,6 +1,37 @@
 @use '../../styles/variables/variables.scss';
 @use '../../styles/mixins/mixins.scss';
 
+.container-contact-row {
+    &__divider {
+        display: none;
+    }
+
+    @media (min-width: variables.$tablet) {
+        display: flex;
+        align-items: stretch;
+        gap: 1.5rem;
+        margin: 2rem;
+
+        .container-avantcontact,
+        .container-satisfaction {
+            flex: 1;
+            margin: 0;
+        }
+
+        &__divider {
+            display: block;
+            width: 1px;
+            align-self: stretch;
+            background-color: rgb(227, 227, 227);
+        }
+    }
+
+    @media (min-width: variables.$laptop) {
+        max-width: 60rem;
+        margin: 3rem auto;
+    }
+}
+
 .container-contact {
     max-width: 480px;
     margin: 0 auto;
@@ -8,9 +39,11 @@
 
     &__titre {
         font-family: 'Manrope';
-        font-weight: bold;
+        font-weight: 300;
         text-align: center;
+        font-size: 25px;
         margin-bottom: 0.5rem;
+        
     }
 
     &__soustitre {
@@ -43,7 +76,7 @@
         border: solid 1px variables.$gris2;
         border-radius: 0.6rem;
         background-color: white;
-        color: variables.$nuit;
+        color: variables.$nuit2;
         resize: vertical;
 
         &:focus {

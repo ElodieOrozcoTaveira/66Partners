@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from "react";
 import api from "../../lib/axios";
 import "./Contact.scss";
-import { Send } from "lucide-react";
+import { Send, SendHorizonal } from "lucide-react";
 import HeroComponent from "../../components/ContactComponents/HeroComponent/HeroComponent";
+import AvantContact from "../../components/ContactComponents/AvantContact/AvantContact";
+import Satisfaction from "../../components/ContactComponents/Satisfation/Satisfaction";
+import Question from "../../components/ContactComponents/Question/Question";
 
 interface ContactResponse {
   success: boolean;
@@ -34,9 +37,15 @@ export default function Contact() {
   return (
     <>
       <HeroComponent />
+      <div className="container-contact-row">
+        <AvantContact/>
+        <div className="container-contact-row__divider"></div>
+        <Satisfaction/>
+      </div>
+
       <div className="container-contact">
         <h1 className="container-contact__titre">
-          <Send size={18} color="#C62828" /> Envoyez-nous un message
+          <Send size={20} color="#C62828" /> Envoyez-nous un message
         </h1>
         <p className="container-contact__soustitre">
           Une question ? Écrivez-nous, on vous répond au plus vite.
@@ -56,7 +65,7 @@ export default function Contact() {
           />
 
           <label htmlFor="email" className="container-contact__label">
-            Adresse e-mail
+            Adresse e-mail 
           </label>
           <input
             id="email"
@@ -96,10 +105,11 @@ export default function Contact() {
             className="container-contact__submit"
             disabled={status === "sending"}
           >
-            {status === "sending" ? "Envoi..." : "Envoyer"}
+            {status === "sending" ? "Envoi..." : "Envoyer le message "}
           </button>
         </form>
       </div>
+      <Question/>
     </>
   );
 }

@@ -1,0 +1,109 @@
+@use '../../styles/variables/variables.scss';
+
+.explorer-state {
+    text-align: center;
+    margin-top: 3rem;
+    font-family: 'Inter';
+    color: variables.$nuit;
+}
+
+.container-explorer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+
+    &__titre {
+        font-family: 'Manrope';
+        font-weight: bold;
+        text-align: center;
+        color: variables.$nuit;
+        margin-bottom: 0.5rem;
+    }
+
+    &__soustitre {
+        font-family: 'Inter';
+        text-align: center;
+        color: rgba(variables.$nuit, 0.7);
+        margin-bottom: 2rem;
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.activity-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    background-color: variables.$beige;
+    box-shadow: 0 4px 16px rgba(variables.$nuit, 0.08);
+
+    &__circle {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+    }
+
+    &__body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__title {
+        font-family: 'Manrope';
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: variables.$nuit;
+        margin: 0 0 0.25rem;
+    }
+
+    &__meta {
+        font-family: 'Inter';
+        font-size: 0.9rem;
+        color: rgba(variables.$nuit, 0.7);
+        margin: 0 0 0.75rem;
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    &__tag {
+        font-family: 'Inter';
+        font-size: 0.75rem;
+        font-weight: bold;
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        background-color: white;
+        color: variables.$nuit;
+
+        &--confirmed {
+            background-color: variables.$jaune2;
+            color: variables.$nuit;
+        }
+
+        &--cancelled {
+            background-color: variables.$rouge2;
+            color: white;
+        }
+
+        &--completed {
+            background-color: variables.$gris2;
+            color: rgba(variables.$nuit, 0.6);
+        }
+    }
+}

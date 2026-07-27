@@ -12,43 +12,124 @@
 
     &__titre {
         font-family: 'Manrope';
-        font-weight: bold;
+        font-weight:bold;
         text-align: center;
         margin-bottom: 1.5rem;
     }
 
     &__list {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 1rem;
+        flex-direction: column;
+        gap: 0.85rem;
+        max-width: 700px;
+        margin: 0 auto;
         list-style: none;
-        margin: 0;
         padding: 0;
     }
 }
 
 .sport-card {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    min-width: 100px;
-    border-radius: 0.75rem;
-    background-color: variables.$beige;
-    box-shadow: 0 4px 16px rgba(variables.$nuit, 0.08);
+    align-items: stretch;
+    min-height: 110px;
+    gap: 1.5rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 2px 3px rgba(red, 0.6);
     font-family: 'Inter';
-    font-weight: bold;
-    color: variables.$nuit;
-    text-align: center;
 
-    &__circle {
+    &__thumb {
+        position: relative;
+        flex-shrink: 0;
+        width: 96px;
+    }
+
+    &__photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    &__badge {
+        position: absolute;
+        z-index: 1;
+        bottom: 6px;
+        left: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 44px;
-        height: 44px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    &__name {
+        flex: 1;
+        min-width: 0;
+        align-self: center;
+        margin: 0;
+        font-family: 'Manrope', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: variables.$nuit;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__stats {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-self: center;
+        gap: 0.25rem;
+        flex-shrink: 0;
+        margin: 0.6rem 0.6rem 0.6rem 0;
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.6rem;
+        background-color: variables.$beige;
+    }
+
+    &__stat {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: rgba(31, 41, 55, 0.7);
+        white-space: nowrap;
     }
 }
+
+@media screen and (min-width: variables.$tablet) and (max-width: 1023px){
+    .container-sports__list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem;
+        max-width: 760px;
+    }
+}
+
+@media (min-width:variables.$laptop){
+    .container-sports__list{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 1800px;
+        min-height: 1200px;
+        gap: 3rem;
+    }
+    .sport-card{
+        &__photo{
+            width: 150px;
+        }
+        &__name{
+            margin-left: 2.5rem;
+        }
+    }
+}
+
+    

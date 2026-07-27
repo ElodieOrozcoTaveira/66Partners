@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { sports } from "../db/schema.js";
+import { activities, participations, sports } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -13,6 +13,11 @@ const db = drizzle(process.env.DATABASE_URL!);
  */
 
 export type Sport = typeof sports.$inferSelect;
+
+export type SportWithStats = Sport & {
+  activitiesCount: number;
+  participantsCount: number;
+};
 
 export interface SportCreateInput {
   name: string;
@@ -36,10 +41,29 @@ export class SportError extends Error {
 
 export class SportService {
   /**
-   * Liste de tous les sports
+   * Liste de tous les sports, avec le nombre d'activités et de participants
+   * réels associés à chacun (calculé à la volée, pas stocké).
    */
-  static async listSports(): Promise<Sport[]> {
-    return db.select().from(sports);
+  static async listSports(): Promise<SportWithStats[]> {
+    const rows = await db
+      .select({
+        id: sports.id,
+        name: sports.name,
+        createdAt: sports.createdAt,
+        activitiesCount: sql<number>`count(distinct ${activities.id})`,
+        participantsCount: sql<number>`count(distinct ${participations.id})`,
+      })
+      .from(sports)
+      .leftJoin(activities, eq(activities.sportId, sports.id))
+      .leftJoin(participations, eq(participations.activityId, activities.id))
+      .groupBy(sports.id)
+      .orderBy(sports.name);
+
+    return rows.map((row) => ({
+      ...row,
+      activitiesCount: Number(row.activitiesCount),
+      participantsCount: Number(row.participantsCount),
+    }));
   }
 
   /**

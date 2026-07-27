@@ -1,0 +1,35 @@
+@use '../../../styles/variables/variables.scss';
+@use '../../../styles/mixins/mixins.scss';
+
+.container-question{
+    margin: 2rem 1.5rem 2rem 1.5rem;
+    padding: 1.5rem 1em 1.5rem 1rem;
+    @include mixins.gradient;
+    border-radius: 15px;
+    &__h2{
+        color: white; 
+        font-size: 20px;
+    }
+    &__p{
+        color: white;
+        font-size: 14px;
+    }
+}
+
+@media (min-width:variables.$tablet) and (max-width:1023px ){
+    .container-question{
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 30rem;
+    }
+}
+
+@media (min-width: variables.$laptop){
+    .container-question{
+        width: 28em;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
