@@ -45,7 +45,7 @@ export default function Hamburger() {
           onClick={toggleMenu}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-navigation"
-          color="#1E2A38"
+          aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
         >
           <Menu />
         </button>

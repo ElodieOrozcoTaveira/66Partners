@@ -17,7 +17,7 @@ export default function Header() {
             src="/newLogo.png"
             alt="logo 66partners"
             className="left-side__img"
-            width={130}
+            width={153}
             height={100}
             loading="lazy"
           />

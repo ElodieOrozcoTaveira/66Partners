@@ -132,7 +132,7 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
           <section className="container-modaleRegister__section">
             <form id="register-form" className="container-modaleRegister__form" onSubmit={handleSubmit}>
               <label htmlFor="pseudo" className="container-modaleRegister__label">
-                Nom
+                Pseudo
               </label>
               <input
                 id="pseudo"

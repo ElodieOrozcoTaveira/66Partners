@@ -4,7 +4,9 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import {
   activities,
   activitiesStatusEnum,
+  participations,
   sportLevelEnum,
+  sports,
 } from "../db/schema.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -19,6 +21,11 @@ const db = drizzle(process.env.DATABASE_URL!);
 export type ActivityLevel = (typeof sportLevelEnum.enumValues)[number];
 export type ActivityStatus = (typeof activitiesStatusEnum.enumValues)[number];
 export type Activity = typeof activities.$inferSelect;
+
+export type ActivityWithDetails = Activity & {
+  sportName: string;
+  participantsCount: number;
+};
 
 export interface ActivityCreateInput {
   title: string;
@@ -115,9 +122,10 @@ export class ActivityService {
   }
 
   /**
-   * Liste des activités, avec filtres optionnels
+   * Liste des activités, avec filtres optionnels. Inclut le nom du sport et
+   * le nombre réel de participants acceptés (calculé à la volée).
    */
-  static async listActivities(filters: ActivityFilters = {}): Promise<Activity[]> {
+  static async listActivities(filters: ActivityFilters = {}): Promise<ActivityWithDetails[]> {
     const { city, sportId, status } = filters;
 
     const conditions = [
@@ -126,10 +134,36 @@ export class ActivityService {
       status ? eq(activities.status, status) : undefined,
     ].filter((condition) => condition !== undefined);
 
-    return db
-      .select()
+    const rows = await db
+      .select({
+        id: activities.id,
+        title: activities.title,
+        description: activities.description,
+        city: activities.city,
+        startDate: activities.startDate,
+        latitude: activities.latitude,
+        longitude: activities.longitude,
+        levelRequired: activities.levelRequired,
+        maxParticipants: activities.maxParticipants,
+        status: activities.status,
+        sportId: activities.sportId,
+        creatorId: activities.creatorId,
+        createdAt: activities.createdAt,
+        updatedAt: activities.updatedAt,
+        sportName: sports.name,
+        participantsCount: sql<number>`count(distinct case when ${participations.status} = 'ACCEPTED' then ${participations.id} end)`,
+      })
       .from(activities)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
+      .innerJoin(sports, eq(sports.id, activities.sportId))
+      .leftJoin(participations, eq(participations.activityId, activities.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .groupBy(activities.id, sports.name)
+      .orderBy(activities.startDate);
+
+    return rows.map((row) => ({
+      ...row,
+      participantsCount: Number(row.participantsCount),
+    }));
   }
 
   /**

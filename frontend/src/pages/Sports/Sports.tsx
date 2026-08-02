@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState, type SyntheticEvent } from "react";
-import { Calendar, Users } from "lucide-react";
+import { Calendar, Heart, Users } from "lucide-react";
 import api from "../../lib/axios";
-import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
+import { useAuth } from "../../contexts/AuthContext";
+import { getIconColor, getSportShadow, getSportVisual } from "../../lib/sportVisuals";
 import { getSportPhoto } from "../../lib/sportPhotos";
+import ModaleContent from "../../components/ModaleConnexion/ModaleContent/ModaleContent";
+import ModaleRegisterContent from "../../components/ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
 import "./Sports.scss";
 import HeroSport from "../../components/SportsComponents/HeroSport/HeroSport";
 import Recherche from "../../components/SportsComponents/Recherche/Recheche";
 import ContactSport from "../../components/SportsComponents/ContactSport/ContactSport";
 
-const DEFAULT_PHOTO = "/montagne.png";
+const DEFAULT_PHOTO = "/montagne.webp";
 
 function handlePhotoError(event: SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.onerror = null;
@@ -20,6 +23,7 @@ interface Sport {
   name: string;
   activitiesCount: number;
   participantsCount: number;
+  favoritesCount: number;
 }
 
 interface SportsResponse {
@@ -27,11 +31,19 @@ interface SportsResponse {
   sports: Sport[];
 }
 
+interface FavoritesResponse {
+  success: boolean;
+  sportIds: string[];
+}
+
 export default function Sports() {
+  const { user } = useAuth();
   const [sports, setSports] = useState<Sport[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
 
   useEffect(() => {
     api
@@ -40,6 +52,63 @@ export default function Sports() {
       .catch(() => setError("Impossible de charger la liste des sports."))
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setFavoriteIds(new Set());
+      return;
+    }
+
+    api
+      .get<FavoritesResponse>("/api/sports/favorites/mine")
+      .then((res) => setFavoriteIds(new Set(res.data.sportIds)))
+      .catch(() => setFavoriteIds(new Set()));
+  }, [user]);
+
+  function handleToggleFavorite(sportId: string) {
+    if (!user) {
+      setActiveModal("login");
+      return;
+    }
+
+    const wasFavorited = favoriteIds.has(sportId);
+
+    setFavoriteIds((prev) => {
+      const next = new Set(prev);
+      if (wasFavorited) {
+        next.delete(sportId);
+      } else {
+        next.add(sportId);
+      }
+      return next;
+    });
+    setSports((prev) =>
+      prev.map((sport) =>
+        sport.id === sportId
+          ? { ...sport, favoritesCount: sport.favoritesCount + (wasFavorited ? -1 : 1) }
+          : sport
+      )
+    );
+
+    api.post(`/api/sports/${sportId}/favorite`).catch(() => {
+      setFavoriteIds((prev) => {
+        const next = new Set(prev);
+        if (wasFavorited) {
+          next.add(sportId);
+        } else {
+          next.delete(sportId);
+        }
+        return next;
+      });
+      setSports((prev) =>
+        prev.map((sport) =>
+          sport.id === sportId
+            ? { ...sport, favoritesCount: sport.favoritesCount + (wasFavorited ? 1 : -1) }
+            : sport
+        )
+      );
+    });
+  }
 
   const filteredSports = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -62,7 +131,11 @@ export default function Sports() {
           {filteredSports.map((sport) => {
             const { icon: Icon, color } = getSportVisual(sport.name);
             return (
-              <li key={sport.id} className="sport-card">
+              <li
+                key={sport.id}
+                className="sport-card"
+                style={{ boxShadow: `0 4px 14px ${getSportShadow(color)}` }}
+              >
                 <div className="sport-card__thumb">
                   <img
                     src={getSportPhoto(sport.name)}
@@ -87,6 +160,20 @@ export default function Sports() {
                     {sport.participantsCount} participant{sport.participantsCount === 1 ? "" : "s"}
                   </span>
                 </div>
+
+                <button
+                  type="button"
+                  className={`sport-card__favorite${favoriteIds.has(sport.id) ? " sport-card__favorite--active" : ""}`}
+                  onClick={() => handleToggleFavorite(sport.id)}
+                  aria-label={
+                    favoriteIds.has(sport.id)
+                      ? `Retirer ${sport.name} des favoris`
+                      : `Ajouter ${sport.name} aux favoris`
+                  }
+                  aria-pressed={favoriteIds.has(sport.id)}
+                >
+                  <Heart size={16} fill={favoriteIds.has(sport.id) ? "currentColor" : "none"} />
+                </button>
               </li>
             );
           })}
@@ -94,6 +181,17 @@ export default function Sports() {
       )}
     </div>
     <ContactSport/>
+
+    <ModaleContent
+      isOpen={activeModal === "login"}
+      onClose={() => setActiveModal(null)}
+      onSwitchToRegister={() => setActiveModal("register")}
+    />
+    <ModaleRegisterContent
+      isOpen={activeModal === "register"}
+      onClose={() => setActiveModal(null)}
+      onSwitchToLogin={() => setActiveModal("login")}
+    />
     </>
   );
 }

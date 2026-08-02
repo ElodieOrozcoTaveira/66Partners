@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { activities, participations, sports } from "../db/schema.js";
+import { activities, participations, sportFavorites, sports } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -17,6 +17,7 @@ export type Sport = typeof sports.$inferSelect;
 export type SportWithStats = Sport & {
   activitiesCount: number;
   participantsCount: number;
+  favoritesCount: number;
 };
 
 export interface SportCreateInput {
@@ -52,10 +53,12 @@ export class SportService {
         createdAt: sports.createdAt,
         activitiesCount: sql<number>`count(distinct ${activities.id})`,
         participantsCount: sql<number>`count(distinct ${participations.id})`,
+        favoritesCount: sql<number>`count(distinct ${sportFavorites.userId})`,
       })
       .from(sports)
       .leftJoin(activities, eq(activities.sportId, sports.id))
       .leftJoin(participations, eq(participations.activityId, activities.id))
+      .leftJoin(sportFavorites, eq(sportFavorites.sportId, sports.id))
       .groupBy(sports.id)
       .orderBy(sports.name);
 
@@ -63,7 +66,48 @@ export class SportService {
       ...row,
       activitiesCount: Number(row.activitiesCount),
       participantsCount: Number(row.participantsCount),
+      favoritesCount: Number(row.favoritesCount),
     }));
+  }
+
+  /**
+   * Ajoute ou retire un sport des favoris de l'utilisateur (toggle).
+   * Retourne le nouvel état (favori ou non).
+   */
+  static async toggleFavorite(userId: string, sportId: string): Promise<boolean> {
+    const [sport] = await db
+      .select({ id: sports.id })
+      .from(sports)
+      .where(eq(sports.id, sportId))
+      .limit(1);
+
+    if (!sport) {
+      throw new SportError("Sport non trouvé", "SPORT_NOT_FOUND", 404);
+    }
+
+    const deletedRows = await db
+      .delete(sportFavorites)
+      .where(and(eq(sportFavorites.userId, userId), eq(sportFavorites.sportId, sportId)))
+      .returning({ sportId: sportFavorites.sportId });
+
+    if (deletedRows.length > 0) {
+      return false;
+    }
+
+    await db.insert(sportFavorites).values({ userId, sportId });
+    return true;
+  }
+
+  /**
+   * Liste des identifiants de sports mis en favori par l'utilisateur.
+   */
+  static async listFavoriteSportIds(userId: string): Promise<string[]> {
+    const rows = await db
+      .select({ sportId: sportFavorites.sportId })
+      .from(sportFavorites)
+      .where(eq(sportFavorites.userId, userId));
+
+    return rows.map((row) => row.sportId);
   }
 
   /**

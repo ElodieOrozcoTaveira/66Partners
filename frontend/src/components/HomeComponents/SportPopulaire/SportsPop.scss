@@ -1,0 +1,126 @@
+@use '../../../styles/variables/variables.scss';
+@use '../../../styles/mixins/mixins.scss';
+
+.container-sportpop {
+  padding: 2rem 1.5rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+
+  &__h2 {
+    position: relative;
+    margin: 0;
+    padding-bottom: 0.75rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: variables.$nuit;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 2.5rem;
+      height: 3px;
+      border-radius: 2px;
+      @include mixins.gradient;
+    }
+  }
+
+  &__btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: variables.$rouge;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__list {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.sportpop-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  width: 180px;
+  height: 200px;
+  text-decoration: none;
+  text-align: center;
+
+  &__thumb {
+    position: relative;
+    width: 100%;
+    height: 140px;
+  }
+
+  &__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 1rem;
+    object-fit: cover;
+  }
+
+  &__badge {
+    position: absolute;
+    z-index: 1000;
+    bottom:-12px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  &__name {
+    margin-top: 0.6rem;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: variables.$nuit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__membres {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    color: rgba(31, 41, 55, 0.7);
+  }
+}
+
+ @media (min-width: 1023px){
+    .container-sportpop__list{
+        flex-wrap: wrap;
+        overflow-x: visible;
+        padding-bottom: 0;
+    }
+ }

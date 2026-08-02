@@ -1,0 +1,194 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.container-principe {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  padding: 3rem 1.5rem;
+
+  @media (min-width: variables.$tablet) {
+    padding: 3rem 3rem;
+  }
+
+  @media (min-width: variables.$laptop) {
+    width: 100%;
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+
+  &__h2 {
+    position: relative;
+    font-family: "Manrope", sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1.25;
+    color: variables.$rouge;
+    padding-bottom: 1rem;
+    margin: 0;
+    text-transform: uppercase;
+    text-align: left;
+
+    @media (min-width: variables.$tablet) {
+      font-size: 1rem;
+      
+      }
+   }
+
+   
+
+  &__p {
+    position: relative;
+    font-family: "Inter", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.7;
+    color: variables.$nuit;
+    margin: 0;
+    padding-bottom: 1rem;
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 3.5rem;
+      height: 4px;
+      border-radius: 2px;
+      @include mixins.gradient;
+    }
+
+    
+
+    @media (min-width: variables.$tablet) {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    margin-top: 3rem;
+
+    @media (min-width: variables.$tablet) {
+      flex-direction: row;
+      align-items: stretch;
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+    }
+  }
+}
+
+.principe-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(variables.$nuit, 0.2);
+
+  @media (min-width: variables.$tablet) {
+    flex: 1;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__circle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    @include mixins.gradient;
+  }
+
+  &__badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: white;
+    color: variables.$nuit;
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(variables.$nuit, 0.2);
+  }
+
+  &__titre {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: variables.$nuit;
+  }
+
+  &__p {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(31, 41, 55, 0.7);
+    text-align: left;
+  }
+}
+
+// Versions compositées (transform/opacity) : l'animation précédente changeait
+// filter/box-shadow directement, ce qui force un repaint à chaque frame.
+@keyframes badge-pulse-scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes badge-ring-glow {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.principe-item__badge {
+  animation: badge-pulse-scale 1.4s ease-in-out infinite;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 12px 4px rgba(255, 255, 255, 0.7);
+    animation: badge-ring-glow 1.4s ease-in-out infinite;
+  }
+}
+
+.principe-item:nth-child(1) .principe-item__badge {
+  animation-delay: 0s;
+}
+
+.principe-item:nth-child(2) .principe-item__badge {
+  animation-delay: 1.5s;
+}
+
+.principe-item:nth-child(3) .principe-item__badge {
+  animation-delay: 3s;
+}

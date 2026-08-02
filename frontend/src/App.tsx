@@ -12,6 +12,8 @@ import Pourquoi from "./pages/Pourquoi66/Pourquoi";
 import Explorer from "./pages/Explorer/Explorer";
 import Faq from "./pages/FAQ/Faq";
 import Fonctionnement from "./pages/Fonctionnement/Fonctionnement";
+import { PolitiqueConfidentialite } from "./pages/Confidentalité/Confidentialite";
+import { MentionsLegales } from "./pages/MentionsLegales/MentionsLegales";
 
 
 export default function App() {
@@ -28,6 +30,8 @@ export default function App() {
             <Route path="/pourquoi66" element={<Pourquoi />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/FAQ" element={<Faq />} />
+            <Route path="/confidentialite" element={<PolitiqueConfidentialite/>} />
+            <Route path="/mentionslegales" element={<MentionsLegales/>} />
 
            <Route path="/fonctionnement" element= {<Fonctionnement />} />                        {/*<Route path="/about" element= {<About />}*/}
 

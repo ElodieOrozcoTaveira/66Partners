@@ -77,5 +77,30 @@
         font-size: 12px;
         text-align: center;
     }
-    
+
+    &__docs{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+    }
+
+    &__doclink{
+        color: rgba(245, 245, 245, 0.75);
+        font-size: 11px;
+        text-decoration: none;
+
+        &:hover{
+            color: whitesmoke;
+            text-decoration: underline;
+        }
+    }
+
+    &__docsep{
+        color: rgba(245, 245, 245, 0.4);
+        font-size: 11px;
+    }
+
 }

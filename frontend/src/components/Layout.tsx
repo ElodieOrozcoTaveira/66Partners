@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
+import GoogleAnalytics from "./Analytics/Analytics";
 import "./Layout.scss";
 
 export default function Layout() {
@@ -16,6 +17,7 @@ export default function Layout() {
 
   return (
     <div className="app-shell">
+      <GoogleAnalytics/>
       <Header/>
       <main>
         <div className="page-transition" key={location.pathname}>
