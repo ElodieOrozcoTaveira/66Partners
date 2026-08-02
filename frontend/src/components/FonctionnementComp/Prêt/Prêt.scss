@@ -30,6 +30,7 @@
 }
 
 .container-prêt__link {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,22 +43,39 @@
   font-family: "Inter";
   font-weight: bold;
   background-color: whitesmoke;
-  animation: button-border-pulse 1.8s ease-in-out infinite;
+  animation: button-pulse-scale 1.8s ease-in-out infinite;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid orangered;
+    animation: button-ring-pulse 1.8s ease-in-out infinite;
+    pointer-events: none;
+  }
 }
 
-@keyframes button-border-pulse {
+// Versions compositées (transform/opacity) de l'ancien pulse animé sur
+// border-color/box-shadow, qui forçait un repaint à chaque frame.
+@keyframes button-pulse-scale {
   0%,
   100% {
-    border-color: orangered;
-    box-shadow:
-      2px 1px 1px whitesmoke,
-      0 0 0 0 orangered;
+    transform: scale(1);
   }
   50% {
-    border-color: orangered;
-    box-shadow:
-      1px 1px 1px rgba(orangered, 0.35),
-      0 0 0 3px orangered;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes button-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
   }
 }
 

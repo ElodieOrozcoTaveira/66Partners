@@ -9,7 +9,7 @@ export default function Bonjour() {
       <div className="container-bonjour">
         <section className="container-bonjour__leftside">
           <img
-            src={user?.avatar || "/montagne.png"}
+            src={user?.avatar || "/montagne.webp"}
             alt={user ? `Photo de profil de ${user.pseudo}` : "logo de montagne"}
             height={70}
             width={70}

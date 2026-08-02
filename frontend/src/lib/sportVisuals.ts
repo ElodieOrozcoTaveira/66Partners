@@ -31,41 +31,70 @@ export interface SportVisual {
 
 const DEFAULT_VISUAL: SportVisual = { icon: Dumbbell, color: "#1F2937" };
 
+
+const ROUGE = "#EF5350";
+const JAUNE = "#FDD835";
+const VERT = "#66BB6A";
+const BLEU = "#42A5F5";
+const VIOLET = "#AB47BC";
+const ORANGE = "#FFA726";
+const ROSE = "#EC407A";
+const TURQUOISE = "#26C6DA";
+
 // Clés alignées sur `sports.name` en base (voir backend/src/db/seed.ts)
+// Couleurs volontairement toutes différentes d'un sport au suivant
+// (dans l'ordre alphabétique affiché sur la page Sports).
 const sportVisuals: Record<string, SportVisual> = {
-  Football: { icon: Goal, color: "#E6392E" },
-  Basketball: { icon: CircleDot, color: "#F4A61D" },
-  Tennis: { icon: Target, color: "#E6392E" },
-  Running: { icon: Footprints, color: "#F4A61D" },
-  Cyclisme: { icon: Bike, color: "#E6392E" },
-  Natation: { icon: Droplets, color: "#F4A61D" },
-  Musculation: { icon: Dumbbell, color: "#E6392E" },
-  Yoga: { icon: PersonStanding, color: "#F4A61D" },
-  Escalade: { icon: Mountain, color: "#E6392E" },
-  Badminton: { icon: Feather, color: "#F4A61D" },
-  Volleyball: { icon: Volleyball, color: "#E6392E" },
-  "Randonnée": { icon: MountainSnow, color: "#F4A61D" },
-  Boxe: { icon: HandFist, color: "#E6392E" },
-  Padel: { icon: Disc, color: "#F4A61D" },
-  Golf: { icon: Flag, color: "#E6392E" },
-  "Pétanque": { icon: Circle, color: "#F4B400" },
-  Gravel: { icon: Compass, color: "#E6392E" },
-  VTT: { icon: Route, color: "#F4B400" },
-  Squash: { icon: Swords, color: "#E6392E" },
-  Pickleball: { icon: Grip, color: "#F4A61D" },
-  Paddle: { icon: Waves, color: "#E6392E" },
-  Marche: { icon: Signpost, color: "#F4A61D" },
+  Badminton: { icon: Feather, color: ROUGE },
+  Basketball: { icon: CircleDot, color: JAUNE },
+  Boxe: { icon: HandFist, color: VERT },
+  Cyclisme: { icon: Bike, color: BLEU },
+  Escalade: { icon: Mountain, color: VIOLET },
+  Football: { icon: Goal, color: ORANGE },
+  Golf: { icon: Flag, color: ROSE },
+  Gravel: { icon: Compass, color: TURQUOISE },
+  Marche: { icon: Signpost, color: ROUGE },
+  Musculation: { icon: Dumbbell, color: JAUNE },
+  Natation: { icon: Droplets, color: VERT },
+  Paddle: { icon: Waves, color: BLEU },
+  Padel: { icon: Disc, color: VIOLET },
+  Pickleball: { icon: Grip, color: ORANGE },
+  "Pétanque": { icon: Circle, color: ROSE },
+  "Randonnée": { icon: MountainSnow, color: TURQUOISE },
+  Running: { icon: Footprints, color: ROUGE },
+  Squash: { icon: Swords, color: JAUNE },
+  Tennis: { icon: Target, color: VERT },
+  VTT: { icon: Route, color: BLEU },
+  Volleyball: { icon: Volleyball, color: VIOLET },
+  Yoga: { icon: PersonStanding, color: ORANGE },
 };
 
 export function getSportVisual(sportName: string): SportVisual {
   return sportVisuals[sportName] ?? DEFAULT_VISUAL;
 }
 
-const YELLOW_SHADES = new Set(["#F4A61D", "#F4B400"]);
 const NUIT = "#1F2937";
 const WHITE = "#FFFFFF";
 
+// Luminance relative (WCAG) pour choisir un icône foncé ou blanc
+// selon que le fond du badge soit clair ou sombre.
+function getRelativeLuminance(hexColor: string): number {
+  const channels = hexColor.replace("#", "").match(/.{2}/g) ?? [];
+  const [r, g, b] = channels.map((hex) => {
+    const value = parseInt(hex, 16) / 255;
+    return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0);
+}
+
 // Contraste du dessin de l'icône selon la couleur du cercle qui la porte
 export function getIconColor(circleColor: string): string {
-  return YELLOW_SHADES.has(circleColor) ? NUIT : WHITE;
+  return getRelativeLuminance(circleColor) > 0.5 ? NUIT : WHITE;
+}
+
+// Ombre douce teintée de la couleur du sport (ex: pour box-shadow de carte)
+export function getSportShadow(circleColor: string, alpha = 0.28): string {
+  const channels = circleColor.replace("#", "").match(/.{2}/g) ?? [];
+  const [r, g, b] = channels.map((hex) => parseInt(hex, 16));
+  return `rgba(${r ?? 0}, ${g ?? 0}, ${b ?? 0}, ${alpha})`;
 }

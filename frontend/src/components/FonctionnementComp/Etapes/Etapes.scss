@@ -110,20 +110,39 @@
   }
 }
 
-@keyframes badge-glow {
+// Versions compositées (transform/opacity) : l'animation précédente changeait
+// filter/box-shadow directement, ce qui force un repaint à chaque frame.
+@keyframes badge-pulse-scale {
   0%,
   100% {
-    filter: brightness(1);
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    transform: scale(1);
   }
   50% {
-    filter: brightness(1.4);
-    box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.55);
+    transform: scale(1.12);
+  }
+}
+
+@keyframes badge-ring-glow {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
 .etape__badge {
-  animation: badge-glow 2.4s ease-in-out infinite;
+  animation: badge-pulse-scale 2.4s ease-in-out infinite;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 12px 4px rgba(255, 255, 255, 0.7);
+    animation: badge-ring-glow 2.4s ease-in-out infinite;
+  }
 }
 
 .etape:nth-child(1) .etape__badge {

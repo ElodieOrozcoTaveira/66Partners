@@ -5,6 +5,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import ModaleContent from "../../components/ModaleConnexion/ModaleContent/ModaleContent";
 import ModaleRegisterContent from "../../components/ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
 import "./Home.scss";
+import Principe from "../../components/HomeComponents/Principe/Principe";
+import SportsPop from "../../components/HomeComponents/SportPopulaire/SportsPop";
+import ActivitésProche from "../../components/HomeComponents/ActivitésProche/AcitivtésProche";
+import PourquoiHome from "../../components/HomeComponents/Pourquoi/PourquoiHome";
 
 export default function Home() {
   const { user } = useAuth();
@@ -64,6 +68,10 @@ export default function Home() {
         onClose={() => setActiveModal(null)}
         onSwitchToLogin={() => setActiveModal("login")}
       />
+      <Principe/>
+      <SportsPop/>
+      <ActivitésProche/>
+      <PourquoiHome/>
     </>
   );
 }

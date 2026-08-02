@@ -2,106 +2,116 @@
 @use "../../../styles/mixins/mixins.scss";
 
 .container-contactsport {
-  margin: 2.5rem;
+  margin: 1.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  padding-left: 1rem;
+  gap: 0.75rem;
+  padding: 1rem;
   @include mixins.gradient;
   border-radius: 10px;
   &__h3 {
-    padding-top: 0.5rem;
     text-align: center;
     color: whitesmoke;
     font-family: "Manrope", sans-serif;
     font-weight: 500;
-    font-size: 18px;
-    margin-bottom: 0.2rem;
+    font-size: 15px;
+    margin: 0;
   }
   &__h4 {
-    margin-top: 0.5rem;
+    margin: 0;
     text-align: center;
     color: whitesmoke;
     font-weight: 500;
-    font-size: 14px;
+    font-size: 12px;
   }
   &__btn {
-    padding: 0.7rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
     border-radius: 10px;
     background-color: whitesmoke;
-    margin-bottom: 2rem;
     text-decoration: none;
     color: hsl(16, 100%, 50%);
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
-    animation: button-border-pulse 1.8s ease-in-out infinite;
+    animation: button-pulse-scale 1.8s ease-in-out infinite;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 2px solid orangered;
+      animation: button-ring-pulse 1.8s ease-in-out infinite;
+      pointer-events: none;
+    }
   }
 }
 
-@keyframes button-border-pulse {
+// Versions compositées (transform/opacity) de l'ancien pulse animé sur
+// border-color/box-shadow, qui forçait un repaint à chaque frame.
+@keyframes button-pulse-scale {
   0%,
   100% {
-    border-color: orangered;
-    box-shadow:
-      2px 1px 1px whitesmoke,
-      0 0 0 0 orangered;
+    transform: scale(1);
   }
   50% {
-    border-color: orangered;
-    box-shadow:
-      1px 1px 1px rgba(orangered, 0.35),
-      0 0 0 3px orangered;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes button-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
   }
 }
 
 @media screen and (min-width: variables.$tablet) and (max-width: 1023px) {
   .container-contactsport {
-    display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
-    max-width: 700px;
+    max-width: 620px;
     margin-left: auto;
     margin-right: auto;
-    padding-right: 1.5rem;
+    padding: 0.85rem 1.25rem;
 
     &__text {
       text-align: left;
     }
 
     &__btn {
-      display: flex;
       flex-shrink: 0;
-      width: 12rem;
+      width: 9rem;
       justify-content: center;
-      margin-bottom: 0;
-      margin-left: 1.5rem;
     }
   }
 }
 
 @media (min-width: variables.$laptop) {
   .container-contactsport {
-    display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
-    max-width: 800px;
-    margin: 3.5rem auto;
-    padding: 1rem 2rem;
+    max-width: 700px;
+    margin: 2.5rem auto;
+    padding: 0.85rem 1.5rem;
 
     &__text {
       text-align: left;
     }
 
     &__btn {
-      display: flex;
       flex-shrink: 0;
-      width: 12rem;
+      width: 9rem;
       justify-content: center;
-      margin-bottom: 0;
-      margin-left: 1.5rem;
     }
   }
 }

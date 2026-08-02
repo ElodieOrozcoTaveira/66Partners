@@ -13,7 +13,7 @@
   padding-bottom: 1rem;
   background-image:
     linear-gradient(to right, white 0%, white 35%, rgba(255, 255, 255, 0) 85%),
-    url('/canigou1.png');
+    url('/canigou1.webp');
   background-position: center, top 10% right 40%;
   background-size: cover, cover;
   background-repeat: no-repeat, no-repeat;
@@ -30,7 +30,7 @@
 
   }
   &__p{
-    color: grey;
+    color: rgba(31, 41, 55, 0.7);
     font-weight: 600;
     font-size: 12px;
     margin-right: 4rem;

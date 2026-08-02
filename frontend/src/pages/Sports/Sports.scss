@@ -9,6 +9,7 @@
 
 .container-sports {
     padding: 2rem 1rem;
+    display: flex;
 
     &__titre {
         font-family: 'Manrope';
@@ -18,9 +19,9 @@
     }
 
     &__list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.85rem;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.85rem;
         max-width: 700px;
         margin: 0 auto;
         list-style: none;
@@ -28,21 +29,22 @@
     }
 }
 
+// Mobile : carte verticale (photo pleine largeur en haut, contenu en dessous)
+// pour tenir dans une colonne de grille à 2 par ligne.
 .sport-card {
+    position: relative;
     display: flex;
-    align-items: stretch;
-    min-height: 110px;
-    gap: 1.5rem;
+    flex-direction: column;
     border-radius: 1rem;
-    overflow: hidden;
     background-color: white;
-    box-shadow: 0 2px 3px rgba(red, 0.6);
     font-family: 'Inter';
+    min-height: 200px;
+    min-width: 150px;
 
     &__thumb {
         position: relative;
-        flex-shrink: 0;
-        width: 96px;
+        width: 100%;
+        height: 100px;
     }
 
     &__photo {
@@ -50,14 +52,15 @@
         inset: 0;
         width: 100%;
         height: 100%;
+        border-radius: 1rem 1rem 0 0;
         object-fit: cover;
     }
 
     &__badge {
         position: absolute;
         z-index: 1;
-        bottom: 6px;
-        left: 6px;
+        bottom: -6px;
+        left: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -68,12 +71,9 @@
     }
 
     &__name {
-        flex: 1;
-        min-width: 0;
-        align-self: center;
-        margin: 0;
+        margin: 0.6rem 0.6rem 0;
         font-family: 'Manrope', sans-serif;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         font-weight: 700;
         color: variables.$nuit;
         overflow: hidden;
@@ -84,31 +84,119 @@
     &__stats {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        align-self: center;
-        gap: 0.25rem;
-        flex-shrink: 0;
-        margin: 0.6rem 0.6rem 0.6rem 0;
-        padding: 0.4rem 0.6rem;
-        border-radius: 0.6rem;
-        background-color: variables.$beige;
+        gap: 0.2rem;
+        margin: 0.4rem 0.6rem 0.6rem;
+        padding: 0;
+        background-color: transparent;
     }
 
     &__stat {
         display: flex;
         align-items: center;
         gap: 0.3rem;
-        font-size: 0.68rem;
+        font-size: 0.62rem;
         font-weight: 600;
         color: rgba(31, 41, 55, 0.7);
         white-space: nowrap;
+    }
+
+    &__favorite {
+        position: absolute;
+        z-index: 1;
+        top: 6px;
+        right: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.85);
+        color: rgba(31, 41, 55, 0.4);
+        cursor: pointer;
+        transition: color 0.2s ease, transform 0.15s ease;
+
+        &:hover {
+            color: variables.$rouge2;
+        }
+
+        &:active {
+            transform: scale(0.88);
+        }
+
+        &--active {
+            color: variables.$rouge2;
+        }
+    }
+}
+
+// À partir de la tablette : carte en ligne horizontale (photo à gauche,
+// contenu à droite), plus confortable une fois la colonne assez large.
+@media (min-width: variables.$tablet) {
+    .sport-card {
+        flex-direction: row;
+        align-items: stretch;
+        min-height: 110px;
+        gap: 1.5rem;
+
+        &__thumb {
+            flex-shrink: 0;
+            width: 96px;
+            height: auto;
+        }
+
+        &__photo {
+            border-radius: 1rem 0 0 1rem;
+        }
+
+        &__badge {
+            top: auto;
+            bottom: -6px;
+            left: -6px;
+            right: auto;
+        }
+
+        &__name {
+            flex: 1;
+            min-width: 0;
+            align-self: center;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        &__stats {
+            flex-direction: column;
+            justify-content: center;
+            align-self: center;
+            flex-shrink: 0;
+            gap: 0.25rem;
+            margin: 0.6rem 0.6rem 0.6rem 0;
+            padding: 0.4rem 0.6rem;
+            border-radius: 0.6rem;
+            background-color: variables.$beige;
+        }
+
+        &__stat {
+            font-size: 0.68rem;
+        }
+
+        &__favorite {
+            position: static;
+            align-self: center;
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            margin-right: 0.75rem;
+            background: none;
+        }
     }
 }
 
 @media screen and (min-width: variables.$tablet) and (max-width: 1023px){
     .container-sports__list {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
         gap: 2.5rem;
         max-width: 760px;
     }
@@ -116,7 +204,6 @@
 
 @media (min-width:variables.$laptop){
     .container-sports__list{
-        display: grid;
         grid-template-columns: repeat(4, 1fr);
         max-width: 1800px;
         min-height: 1200px;

@@ -1,0 +1,167 @@
+@use '../../styles/variables/variables.scss';
+@use '../../styles/mixins/mixins.scss';
+
+.legal-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+  font-family: 'Inter', sans-serif;
+  color: variables.$nuit;
+
+  @media (min-width: variables.$tablet) {
+    padding: 4rem 2rem 5rem;
+  }
+}
+
+.legal-title {
+  position: relative;
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: variables.$nuit;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 3.5rem;
+    height: 4px;
+    border-radius: 2px;
+    @include mixins.gradient;
+  }
+
+  @media (min-width: variables.$tablet) {
+    font-size: 2rem;
+  }
+}
+
+.legal-intro {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(31, 41, 55, 0.75);
+}
+
+.legal-divider {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid variables.$gris2;
+}
+
+.legal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legal-subtitle {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: variables.$rouge2;
+}
+
+.legal-subtitle-sm {
+  margin: 0.5rem 0 0;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: variables.$nuit;
+}
+
+.legal-text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: rgba(31, 41, 55, 0.85);
+}
+
+.legal-bold {
+  font-weight: 700;
+  color: variables.$nuit;
+}
+
+.legal-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(31, 41, 55, 0.85);
+
+  li {
+    padding-left: 0.25rem;
+  }
+}
+
+.legal-label {
+  font-weight: 700;
+  color: variables.$nuit;
+}
+
+.legal-link {
+  color: variables.$rouge2;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  display: block;
+
+  @media (min-width: variables.$tablet) {
+    display: table;
+  }
+}
+
+.legal-th {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: white;
+  background-color: variables.$nuit2;
+  white-space: nowrap;
+
+  &:first-child {
+    border-radius: 0.4rem 0 0 0;
+  }
+
+  &:last-child {
+    border-radius: 0 0.4rem 0 0;
+  }
+}
+
+.legal-tr {
+  &:nth-child(even) {
+    background-color: variables.$gris;
+  }
+}
+
+.legal-td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid variables.$gris2;
+  color: rgba(31, 41, 55, 0.85);
+  vertical-align: top;
+}
+
+.legal-update {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: rgba(31, 41, 55, 0.55);
+}

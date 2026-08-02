@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import type { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { SportService, SportError } from "../services/sport.services.js";
 
 /**
@@ -173,6 +174,84 @@ export class SportController {
       res.status(500).json({
         success: false,
         message: "Erreur interne lors de la suppression du sport",
+      });
+    }
+  }
+
+  /**
+   * POST /api/sports/:id/favorite
+   * Ajoute ou retire le sport des favoris de l'utilisateur connecté
+   */
+  static async toggleFavorite(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
+      const { id } = req.params;
+
+      if (typeof id !== "string" || !id) {
+        res.status(400).json({
+          success: false,
+          message: "Identifiant de sport requis",
+          code: "MISSING_SPORT_ID",
+        });
+        return;
+      }
+
+      const favorited = await SportService.toggleFavorite(req.userId, id);
+
+      res.status(200).json({
+        success: true,
+        favorited,
+        message: favorited ? "Sport ajouté aux favoris" : "Sport retiré des favoris",
+      });
+    } catch (error) {
+      if (error instanceof SportError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de la mise à jour du favori:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la mise à jour du favori",
+      });
+    }
+  }
+
+  /**
+   * GET /api/sports/favorites/mine
+   * Liste des identifiants de sports favoris de l'utilisateur connecté
+   */
+  static async listMyFavorites(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
+      const sportIds = await SportService.listFavoriteSportIds(req.userId);
+
+      res.status(200).json({ success: true, sportIds });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des favoris:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération des favoris",
       });
     }
   }
