@@ -1,9 +1,9 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "f5b2b72f-8491-4f80-9983-fd2d3a725c0d",
+  "id": "fdc44353-e4bf-42bd-83cc-bf5f5749ecde",
   "prevIds": [
-    "1a3aca5c-fe0b-49bb-995d-aaad40ccd472"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -71,6 +71,12 @@
     {
       "isRlsEnabled": false,
       "name": "participations",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "sport_favorites",
       "entityType": "tables",
       "schema": "public"
     },
@@ -591,6 +597,45 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sport_favorites"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "sport_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sport_favorites"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sport_favorites"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
       "default": "gen_random_uuid()",
       "generated": null,
       "identity": null,
@@ -972,6 +1017,40 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
+      "name": "sport_favorites_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "sport_favorites"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "sport_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "sports",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "sport_favorites_sport_id_sports_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "sport_favorites"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "user_sports_user_id_users_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -993,6 +1072,17 @@
       "entityType": "fks",
       "schema": "public",
       "table": "user_sports"
+    },
+    {
+      "columns": [
+        "user_id",
+        "sport_id"
+      ],
+      "nameExplicit": false,
+      "name": "sport_favorites_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "sport_favorites"
     },
     {
       "columns": [
@@ -1096,6 +1186,17 @@
       "entityType": "uniques",
       "schema": "public",
       "table": "participations"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "activity_id"
+      ],
+      "nullsNotDistinct": false,
+      "name": "conversations_activity_id_key",
+      "schema": "public",
+      "table": "conversations",
+      "entityType": "uniques"
     },
     {
       "nameExplicit": false,
