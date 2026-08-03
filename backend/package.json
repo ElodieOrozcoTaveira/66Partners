@@ -7,8 +7,10 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_QUIET=true jest --forceExit",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:migrate:init": "tsx src/db/migrate.ts --init",
     "db:migrate:prod": "node dist/src/db/migrate.js",
+    "db:migrate:prod:init": "node dist/src/db/migrate.js --init",
     "db:seed": "npm run db:migrate && tsx src/db/seed.ts"
   },
   "keywords": [],

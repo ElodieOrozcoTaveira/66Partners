@@ -13,7 +13,6 @@ CREATE TABLE "activities" (
 	"max_participants" integer NOT NULL,
 	"status" "activities_status" DEFAULT 'PENDING'::"activities_status" NOT NULL,
 	"sport_id" uuid NOT NULL,
-	"users_id" uuid NOT NULL,
 	"creator_id" uuid NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -21,6 +20,7 @@ CREATE TABLE "activities" (
 --> statement-breakpoint
 CREATE TABLE "conversations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"activity_id" uuid NOT NULL UNIQUE,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -58,6 +58,13 @@ CREATE TABLE "participations" (
 	CONSTRAINT "participations_user_id_activity_id_unique" UNIQUE("user_id","activity_id")
 );
 --> statement-breakpoint
+CREATE TABLE "sport_favorites" (
+	"user_id" uuid,
+	"sport_id" uuid,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "sport_favorites_pkey" PRIMARY KEY("user_id","sport_id")
+);
+--> statement-breakpoint
 CREATE TABLE "sports" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" varchar(100) NOT NULL UNIQUE,
@@ -86,13 +93,15 @@ CREATE TABLE "users" (
 );
 --> statement-breakpoint
 ALTER TABLE "activities" ADD CONSTRAINT "activities_sport_id_sports_id_fkey" FOREIGN KEY ("sport_id") REFERENCES "sports"("id");--> statement-breakpoint
-ALTER TABLE "activities" ADD CONSTRAINT "activities_users_id_users_id_fkey" FOREIGN KEY ("users_id") REFERENCES "users"("id");--> statement-breakpoint
 ALTER TABLE "activities" ADD CONSTRAINT "activities_creator_id_users_id_fkey" FOREIGN KEY ("creator_id") REFERENCES "users"("id");--> statement-breakpoint
+ALTER TABLE "conversations" ADD CONSTRAINT "conversations_activity_id_activities_id_fkey" FOREIGN KEY ("activity_id") REFERENCES "activities"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "messages" ADD CONSTRAINT "messages_users_id_users_id_fkey" FOREIGN KEY ("users_id") REFERENCES "users"("id");--> statement-breakpoint
 ALTER TABLE "messages" ADD CONSTRAINT "messages_conversations_id_conversations_id_fkey" FOREIGN KEY ("conversations_id") REFERENCES "conversations"("id");--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_users_id_users_id_fkey" FOREIGN KEY ("users_id") REFERENCES "users"("id");--> statement-breakpoint
 ALTER TABLE "opinion" ADD CONSTRAINT "opinion_users_id_users_id_fkey" FOREIGN KEY ("users_id") REFERENCES "users"("id");--> statement-breakpoint
 ALTER TABLE "participations" ADD CONSTRAINT "participations_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "participations" ADD CONSTRAINT "participations_activity_id_activities_id_fkey" FOREIGN KEY ("activity_id") REFERENCES "activities"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "sport_favorites" ADD CONSTRAINT "sport_favorites_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "sport_favorites" ADD CONSTRAINT "sport_favorites_sport_id_sports_id_fkey" FOREIGN KEY ("sport_id") REFERENCES "sports"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_sports" ADD CONSTRAINT "user_sports_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_sports" ADD CONSTRAINT "user_sports_sport_id_sports_id_fkey" FOREIGN KEY ("sport_id") REFERENCES "sports"("id") ON DELETE CASCADE;
