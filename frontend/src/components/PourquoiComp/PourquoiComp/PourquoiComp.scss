@@ -1,0 +1,141 @@
+@use '../../../styles/variables/variables.scss';
+@use '../../../styles/mixins/mixins.scss';
+
+.container-pourquoicomp {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    padding: 3rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-image: url('/canigou.webp');
+    background-position: center;
+    background-size: cover;
+
+    &::after {
+    // Ton dégradé blanc du bas
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(to bottom, transparent, whitesmoke);
+    pointer-events: none;
+    z-index: 2;
+  }
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background: radial-gradient(
+            ellipse 75% 90% at 20% 50%,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 255, 255, 0.85) 45%,
+            rgba(255, 255, 255, 0.45) 68%,
+            rgba(255, 255, 255, 0) 85%
+        );
+    }
+
+    @media (min-width: variables.$tablet) {
+        flex-direction: row;
+        align-items: center;
+        gap: 3.5rem;
+        padding: 5rem 3rem;
+    }
+
+    &__left {
+        position: relative;
+        z-index: 1;
+        width: 67%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+
+        @media (min-width: variables.$tablet) {
+            width: 50%;
+        }
+    }
+
+    &__h2 {
+        position: relative;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: 1.75rem;
+        line-height: 1.25;
+        color: variables.$nuit;
+        padding-bottom: 1rem;
+        margin: 0;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 3.5rem;
+            height: 4px;
+            border-radius: 2px;
+            @include mixins.gradient;
+        }
+
+        @media (min-width: variables.$tablet) {
+            font-size: 2.5rem;
+        }
+    }
+
+    &__p {
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        line-height: 1.7;
+        color: variables.$nuit;
+        max-width: 42ch;
+        margin: 0;
+        text-align: left;
+
+        @media (min-width: variables.$tablet) {
+            font-size: 1.1rem;
+        }
+    }
+
+    &__right {
+        width: 100%;
+        max-width: 420px;
+
+        @media (min-width: variables.$tablet) {
+            width: 50%;
+            max-width: none;
+        }
+    }
+
+    &__img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1672 / 941;
+        object-fit: cover;
+        object-position: 50% 50%;
+        border-radius: 1.25rem;
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
+                mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
+
+        @media (min-width: variables.$tablet) {
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%);
+                    mask-image: linear-gradient(to right, transparent 0%, black 18%);
+        }
+    }
+}
+
+
+@media (min-width: variables.$laptop) {
+  .container-pourquoicomp {
+    max-width: none;
+    width: 100%;
+    height: auto;
+    min-height: 480px;
+    background-position: center right;
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+}

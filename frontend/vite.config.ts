@@ -6,5 +6,14 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    // Nécessaire pour que le dev server accepte les requêtes arrivant via
+    // un tunnel ngrok (Host header différent de localhost).
+    allowedHosts: true,
+    proxy: {
+      "/api": {
+        target: "http://api:3000",
+        changeOrigin: true,
+      },
+    },
   },
 });

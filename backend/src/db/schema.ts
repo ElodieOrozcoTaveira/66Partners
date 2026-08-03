@@ -36,6 +36,16 @@ export const userSports = pgTable("user_sports", {
   pk: primaryKey({ columns: [t.userId, t.sportId] }),
 }));
 
+// Sports mis en favori par un utilisateur (indépendant de userSports, qui
+// sert au profil "sports pratiqués + niveau"). Sert au comptage "membres".
+export const sportFavorites = pgTable("sport_favorites", {
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sportId: uuid("sport_id").notNull().references(() => sports.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.sportId] }),
+}));
+
 export const activities = pgTable("activities", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: varchar("title", { length: 150 }).notNull(),
@@ -65,7 +75,7 @@ export const participations = pgTable("participations", {
 
 export const conversations = pgTable("conversations", {
     id:uuid("id").defaultRandom().primaryKey(),
-    activityId: uuid("activity_id").notNull().references(() => activities.id, { onDelete: "cascade" }),
+    activityId: uuid("activity_id").notNull().unique().references(() => activities.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

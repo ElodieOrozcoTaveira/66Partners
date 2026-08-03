@@ -1,2 +1,0 @@
-ALTER TABLE "conversations" ADD COLUMN "activity_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "conversations" ADD CONSTRAINT "conversations_activity_id_activities_id_fkey" FOREIGN KEY ("activity_id") REFERENCES "activities"("id") ON DELETE CASCADE;

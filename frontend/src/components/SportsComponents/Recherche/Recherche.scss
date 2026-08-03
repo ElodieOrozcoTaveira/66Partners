@@ -1,0 +1,44 @@
+@use '../../../styles/variables/variables.scss';
+@use '../../../styles/mixins/mixins.scss';
+
+.container-search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 420px;
+    margin: 0 auto 2rem;
+    margin-top: 3rem;
+    padding: 0.65rem 1.1rem;
+    border-radius: 30px;
+    background-color: white;
+    border: solid 1px variables.$gris2;
+    box-shadow: 0 2px 10px rgba(variables.$nuit2, 0.06);
+
+    &__icon {
+        flex-shrink: 0;
+        color: variables.$rouge2;
+    }
+
+    &__input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: none;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        color: variables.$nuit;
+
+        &::placeholder {
+            color: rgba(31, 41, 55, 0.5);
+        }
+
+        &::-webkit-search-cancel-button {
+            cursor: pointer;
+        }
+    }
+
+    &:focus-within {
+        border-color: variables.$rouge2;
+    }
+}
+

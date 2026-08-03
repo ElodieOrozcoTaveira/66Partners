@@ -1,0 +1,51 @@
+@charset "UTF-8";
+/*Fonts
+Manrope: titre, boutons, logo, élements import
+Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
+*/
+/*Breakpoint*/
+.container-carre {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(31, 41, 55, 0.08);
+  background-color: rgba(248, 233, 223, 0.703);
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+  background-image: linear-gradient(to right, white 0%, white 35%, rgba(255, 255, 255, 0) 85%), url("/canigou1.png");
+  background-position: center, top 10% right 40%;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
+  border-radius: 20px;
+}
+.container-carre__h3 {
+  color: orangered;
+  font-size: 13px;
+  font-weight: bold;
+  margin-left: 1rem;
+  margin-bottom: -0.2rem;
+}
+.container-carre__p {
+  color: grey;
+  font-weight: 600;
+  font-size: 12px;
+  margin-right: 4rem;
+  margin-left: 1rem;
+  text-align: left;
+}
+.container-carre__h4 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  color: orangered;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 1rem;
+}/*# sourceMappingURL=Carre.css.map */

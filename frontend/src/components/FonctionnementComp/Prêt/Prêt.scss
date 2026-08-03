@@ -1,0 +1,122 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.container-prêt {
+  display: flex;
+  height: 180px;
+  width: 20rem;
+  flex-direction: column;
+  align-items: center;
+  gap: -1.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 4rem;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  border-radius: 1rem;
+  @include mixins.gradient;
+
+  @media (min-width: variables.$tablet) {
+    margin: 2.5rem 2rem 0;
+  }
+}
+
+.container-prêt__h3 {
+  margin-left: 3rem;
+  margin-right: 3rem;
+  color: whitesmoke;
+  font-size: 18px;
+  font-family: "Manrope", sans-serif;
+}
+
+.container-prêt__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #ff4500;
+  font-family: "Inter";
+  font-weight: bold;
+  background-color: whitesmoke;
+  animation: button-pulse-scale 1.8s ease-in-out infinite;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid orangered;
+    animation: button-ring-pulse 1.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+// Versions compositées (transform/opacity) de l'ancien pulse animé sur
+// border-color/box-shadow, qui forçait un repaint à chaque frame.
+@keyframes button-pulse-scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes button-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@media screen and (min-width: variables.$tablet) and (max-width: 1023px) {
+  .container-prêt {
+    height: auto;
+    max-width: 26rem;
+    width: 100%;
+    gap: 0.75rem;
+    margin: 3rem auto;
+    padding: 1.25rem 2rem;
+  }
+
+  .container-prêt__h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .container-prêt__link {
+    padding: 0.6rem 1.5rem;
+    animation: none;
+  }
+}
+
+@media (min-width: variables.$laptop) {
+  .container-prêt {
+    height: auto;
+    max-width: 26rem;
+    width: 100%;
+    gap: 0.75rem;
+    margin: 3rem auto;
+    padding: 1.25rem 2rem;
+  }
+
+  .container-prêt__h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .container-prêt__link {
+    padding: 0.6rem 1.5rem;
+    animation: none;
+  }
+}

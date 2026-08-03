@@ -1,0 +1,106 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.container-footer {
+  position: relative;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  isolation: isolate;
+  width: 100%;
+  min-height: 300px;
+  padding: 1.5rem 2rem 2rem;
+  @include mixins.background;
+&::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 7px;
+    @include mixins.gradient;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(15, 18, 26, 0.55) 95%,
+      rgba(15, 18, 26, 0.75) 99%,
+      rgba(15, 18, 26, 0.88) 100%
+    );
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+    &__h2{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: whitesmoke;
+        text-align: center;
+        font-size: 16px;
+    }
+    &__span{
+        color: variables.$jaune;
+    }
+    &__img{
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 1.5rem;
+    }
+    &__underline{
+        width: 3.5rem;
+        height: 2px;
+        border-radius: 2px;
+        margin: 0.75rem auto 0;
+        @include mixins.gradient;
+    }
+    &__h2bis{
+        font-size: 12px;
+        text-align: center;
+        
+        color: whitesmoke;
+        font-weight: 200;
+        font-family: 'Inter';
+    }
+    &__lieux{
+        color: whitesmoke;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    &__docs{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+    }
+
+    &__doclink{
+        color: rgba(245, 245, 245, 0.75);
+        font-size: 11px;
+        text-decoration: none;
+
+        &:hover{
+            color: whitesmoke;
+            text-decoration: underline;
+        }
+    }
+
+    &__docsep{
+        color: rgba(245, 245, 245, 0.4);
+        font-size: 11px;
+    }
+
+}

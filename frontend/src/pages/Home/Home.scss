@@ -1,0 +1,104 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+@keyframes home-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container-home {
+  position: relative;
+  isolation: isolate;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: variables.$nuit;
+  background-image: url("/accueil.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top 20% left 30%;
+  padding-top: 8rem;
+  animation: home-fade-in 0.9s ease both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+      100deg,
+      rgba(15, 18, 26, 0.8) 0%,
+      rgba(15, 18, 26, 0.6) 30%,
+      rgba(15, 18, 26, 0.25) 55%,
+      rgba(15, 18, 26, 0) 75%
+    );
+  }
+
+  &__leftside {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    width: 70%;
+    max-width: 32rem;
+    padding-left: clamp(1.5rem, 6vw, 5rem);
+    padding-right: clamp(1.5rem, 6vw, 3rem);
+  }
+  &__h3 {
+    margin: 0;
+    color: orangered;
+    text-transform: uppercase;
+    font-size: 16px;
+  }
+  &__h4 {
+    margin: 0;
+    color: whitesmoke;
+    text-transform: uppercase;
+    font-size: 16px;
+
+  }
+  &__h1 {
+    margin: 0;
+    color: whitesmoke;
+    font-size: 31px;
+    margin-bottom: 2rem;
+  }
+  &__span {
+    color: variables.$jaune2;
+  }
+  &__p {
+    margin-bottom: 0.5rem;
+    color: whitesmoke;
+  }
+  &__explorer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 330px;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+    padding: 0.85rem 1.5rem;
+    @include mixins.gradient;
+    border-radius:18px;
+    text-decoration: none;
+    color: whitesmoke;
+    font-family: "Inter";
+    font-weight: bold;
+  }
+}
+
+

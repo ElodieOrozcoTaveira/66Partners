@@ -1,0 +1,45 @@
+@charset "UTF-8";
+/*Fonts
+Manrope: titre, boutons, logo, élements import
+Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
+*/
+/*Breakpoint*/
+.container-connexion {
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1.5px solid rgb(238, 238, 238);
+  padding-top: 2rem;
+}
+.container-connexion__links1, .container-connexion__links2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 15rem;
+  box-sizing: border-box;
+  list-style-type: none;
+  text-decoration: none;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: bold;
+  background-color: rgb(246, 246, 240);
+}
+.container-connexion__links1 {
+  background: linear-gradient(135deg, #7D0A18 0%, #9D1222 15%, #B71C1C 35%, #D62828 55%, #E6392E 75%, #F05A28 90%, #F4A61D 100%);
+  box-shadow: 0 12px 40px rgba(230, 57, 46, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  color: white;
+  border: none;
+  font-size: 12px;
+}
+.container-connexion__links2 {
+  text-decoration: none;
+  color: #C62828;
+  border: solid 1px #C62828;
+  padding-right: 1.5rem;
+}/*# sourceMappingURL=Connexion.css.map */

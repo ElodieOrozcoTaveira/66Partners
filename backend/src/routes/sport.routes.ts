@@ -10,8 +10,10 @@ import {
 
 /*
 GET /sports
+GET /sports/favorites/mine
 GET /sports/:id
 POST /sports
+POST /sports/:id/favorite
 PATCH /sports/:id
 DELETE /sports/:id
 */
@@ -19,7 +21,14 @@ DELETE /sports/:id
 const router = Router();
 
 router.get("/", SportController.list);
+router.get("/favorites/mine", requireAuth, SportController.listMyFavorites);
 router.get("/:id", validate({ params: sportIdParamSchema }), SportController.getById);
+router.post(
+  "/:id/favorite",
+  requireAuth,
+  validate({ params: sportIdParamSchema }),
+  SportController.toggleFavorite
+);
 router.post(
   "/",
   requireAuth,

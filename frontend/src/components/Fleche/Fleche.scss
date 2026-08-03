@@ -1,0 +1,46 @@
+@use "../../styles/variables/variables.scss";
+
+.btn-scrolltop {
+  position: fixed;
+  right: 1.25rem;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  background-color: variables.$jaune2;
+  box-shadow: 0 6px 16px rgba(variables.$jaune2, 0.4);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+
+  svg {
+    width: 45%;
+    height: 45%;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(variables.$jaune2, 0.5);
+    filter: brightness(1.05);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.95);
+  }
+
+  @media (min-width: variables.$tablet) {
+    width: 46px;
+    height: 46px;
+    right: 1.75rem;
+    bottom: calc(1.75rem + env(safe-area-inset-bottom));
+  }
+}

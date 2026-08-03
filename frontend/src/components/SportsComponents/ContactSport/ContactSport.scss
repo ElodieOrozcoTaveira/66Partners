@@ -1,0 +1,118 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.container-contactsport {
+  margin: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  @include mixins.gradient;
+  border-radius: 10px;
+  &__h3 {
+    text-align: center;
+    color: whitesmoke;
+    font-family: "Manrope", sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    margin: 0;
+  }
+  &__h4 {
+    margin: 0;
+    text-align: center;
+    color: whitesmoke;
+    font-weight: 500;
+    font-size: 12px;
+  }
+  &__btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    background-color: whitesmoke;
+    text-decoration: none;
+    color: hsl(16, 100%, 50%);
+    font-size: 12px;
+    font-weight: bold;
+    animation: button-pulse-scale 1.8s ease-in-out infinite;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 2px solid orangered;
+      animation: button-ring-pulse 1.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+  }
+}
+
+// Versions compositées (transform/opacity) de l'ancien pulse animé sur
+// border-color/box-shadow, qui forçait un repaint à chaque frame.
+@keyframes button-pulse-scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes button-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@media screen and (min-width: variables.$tablet) and (max-width: 1023px) {
+  .container-contactsport {
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.85rem 1.25rem;
+
+    &__text {
+      text-align: left;
+    }
+
+    &__btn {
+      flex-shrink: 0;
+      width: 9rem;
+      justify-content: center;
+    }
+  }
+}
+
+@media (min-width: variables.$laptop) {
+  .container-contactsport {
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 700px;
+    margin: 2.5rem auto;
+    padding: 0.85rem 1.5rem;
+
+    &__text {
+      text-align: left;
+    }
+
+    &__btn {
+      flex-shrink: 0;
+      width: 9rem;
+      justify-content: center;
+    }
+  }
+}
+

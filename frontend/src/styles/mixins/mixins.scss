@@ -1,0 +1,24 @@
+@mixin gradient {
+  background: linear-gradient(
+    135deg,
+    #7d0a18 0%,
+    #9d1222 15%,
+    #b71c1c 25%,
+    #d62828 45%,
+    #e6392e 65%,
+    #f05a28 80%,
+    #f8ff26 100%
+  );
+  box-shadow:
+    0 12px 40px rgba(230, 57, 46, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+@mixin background{
+
+  background-image: url("/canigou2.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top 35% right 70%;
+}

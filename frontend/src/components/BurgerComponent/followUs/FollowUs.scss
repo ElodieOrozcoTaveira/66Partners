@@ -1,0 +1,109 @@
+@use '../../../styles/variables/variables.scss';
+
+.container-followUs{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    padding: 0 1rem;
+
+    &__tagline{
+        font-style: italic;
+        font-family: 'Inter';
+        font-size: 14px;
+        font-weight: 600;
+        color: variables.$nuit;
+        margin: 0;
+
+        span{
+            color: variables.$rouge2;
+        }
+    }
+
+    &__divider{
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        width: 100%;
+    }
+
+    &__line{
+        flex: 1;
+        height: 1px;
+        background-color: variables.$rouge2;
+        opacity: 0.4;
+    }
+
+    &__label{
+        font-family: 'Inter';
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(31, 41, 55, 0.7);
+        margin: 0;
+    }
+
+    &__reseaux{
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    &__icon{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        transition: background-color 0.2s ease;
+
+        
+    }
+
+    &__desc{
+        font-family: 'Inter';
+        font-size: 11px;
+        color: rgba(31, 41, 55, 0.7);
+        margin: 0.5rem 0 0;
+    }
+
+    &__hashtag{
+        font-family: 'Inter';
+        font-size: 11px;
+        font-weight: bold;
+        color: variables.$rouge2;
+        margin: 0;
+    }
+
+    &--onDark{
+        .container-followUs__tagline{
+            color: variables.$beige2;
+
+            span{
+                color: variables.$jaune2;
+            }
+        }
+
+        .container-followUs__line{
+            background-color: rgba(247, 243, 236, 0.35);
+            opacity: 1;
+        }
+
+        .container-followUs__label{
+            color: rgba(247, 243, 236, 0.75);
+        }
+
+        .container-followUs__icon{
+            background-color: rgba(247, 243, 236, 0.1);
+        }
+
+        .container-followUs__desc{
+            color: rgba(247, 243, 236, 0.65);
+        }
+    }
+}

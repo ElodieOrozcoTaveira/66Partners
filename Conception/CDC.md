@@ -269,7 +269,7 @@ Recherche selon :
 - Notifications
 - Mobile
 - Strava
-
+- Partenaires référencés sur la plateforme, exemple => bases de mposors
 ### III-1. Version 2.0
 
 - Application mobile React Native

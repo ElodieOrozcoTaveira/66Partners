@@ -10,7 +10,10 @@ services:
       - /app/node_modules
       - /app/frontend/node_modules
     environment:
-      - VITE_API_URL=http://localhost:3000
+      # Vide : les requêtes passent en relatif (/api/...) et sont proxiées par
+      # Vite vers le service "api" (voir frontend/vite.config.ts). Fonctionne
+      # aussi bien en local qu'à travers un tunnel ngrok.
+      - VITE_API_URL=
     depends_on:
       - api
 

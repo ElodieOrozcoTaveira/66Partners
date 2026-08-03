@@ -1,0 +1,126 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.container-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1003;
+  width: 100vw;
+  height: variables.$header-height;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  transition: transform 0.35s ease;
+  background-color: white;
+
+  &--hidden {
+    transform: translateY(-100%);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 7px;
+    @include mixins.gradient;
+  }
+
+  &__leftside {
+    padding: 1rem;
+    transition:
+      transform 0.25s ease,
+      opacity 0.25s ease;
+  }
+
+  &__rightside {
+    padding: 1.5rem;
+  }
+
+  &__nav {
+    display: none;
+  }
+}
+
+.container-header__leftside img {
+  transition: transform 0.25s ease;
+  margin-left: -1rem;
+}
+
+.navbar-list.show ~ .container-header .container-header__leftside {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+@media (min-width: variables.$laptop) {
+  .container-header__nav {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 1.25rem;
+    margin: 0 1.5rem;
+
+    a {
+      color: variables.$nuit;
+      text-decoration: none;
+      font-family: "Inter";
+      font-size: 0.85rem;
+      font-weight: bold;
+      white-space: nowrap;
+
+      &:hover {
+        color: whitesmoke;
+        @include mixins.gradient;
+        padding: 0.7rem 0.9rem;
+        border-radius: 15px;
+        transition-duration: 1.2s;
+      }
+
+      &[aria-current="page"] {
+        color: variables.$rouge;
+      }
+    }
+
+    .container-connexion {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: 0;
+      margin-left: auto;
+      gap: 0.4rem;
+      padding-top: 0;
+      padding-left: 1.25rem;
+      border-top: none;
+      border-left: 1px solid rgb(238, 238, 238);
+
+      &__links1,
+      &__links2 {
+        width: auto;
+        padding: 0.4rem 0.9rem;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      &__links2 {
+        padding-right: 0.9rem;
+      }
+    }
+  }
+}
+
+@media (min-width: variables.$desktop){
+  .container-header__nav{
+    gap: 2.5rem;
+    a{
+      font-size: 1rem;
+    }
+  }
+  .container-header__leftside img {
+  margin-right: 22rem;
+}
+}

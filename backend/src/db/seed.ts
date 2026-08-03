@@ -25,6 +25,9 @@ const sportNames = [
   "Gravel",
   "VTT",
   "Squash",
+  "Pickleball",
+  "Paddle",
+  "Marche",
 ];
 
 // Coordonnées approximatives de villes du 66, pour des données géo réalistes

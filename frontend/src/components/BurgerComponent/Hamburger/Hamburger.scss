@@ -1,0 +1,185 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.navbar {
+  position: relative;
+  z-index: 1002;
+}
+
+.navbar-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(variables.$nuit, 0.25);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+    
+}
+
+.navbar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  
+}
+
+.navbar-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 72vw;
+  height: 100vh;
+  padding: 1rem 1rem 0.75rem;
+  overflow-y: auto;
+  background-color: #fffbf7 ;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(100%);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0.25s ease;
+}
+
+.navbar-panel.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.navbar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  border-radius: 20px;
+}
+
+.navbar-item {
+  width: 100%;
+}
+
+.navbar-item a {
+  color: #242a36;
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  text-align: right;
+  padding: 0.7rem 0.2rem;
+  margin-bottom: 0.1rem;
+  font-family: "Inter";
+}
+
+.navbar-item__arrow {
+  color: variables.$rouge2;
+  order: 2;
+}
+
+.navbar-item__label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  order: 1;
+}
+
+.navbar-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.navbar-item:hover .navbar-item__icon {
+  @include mixins.gradient;
+  color: white;
+}
+
+.navbar-item a[aria-current="page"] .navbar-item__icon {
+  @include mixins.gradient;
+  color: white;
+}
+
+.navbar-item:hover {
+  background: linear-gradient(
+        90deg,
+        rgba(230, 57, 46, 0.1) 0%,
+        rgba(239, 75, 45, 0.1) 35%,
+        rgba(246, 106, 26, 0.1) 70%,
+        rgba(244, 166, 29, 0.1) 100%
+    );
+  }
+    
+
+.navbar-item a:hover {
+  color: orangered;
+}
+
+.navbar-burger {
+  color: variables.$nuit;
+  background-color: white;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  padding: 0.45rem;
+  position: relative;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+}
+
+.navbar-burger.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+// Version Tablette
+
+@media screen and (min-width:variables.$tablet) and (max-width:1023px){
+  .navbar-panel{
+    width: 45vw;
+  }
+  .navbar-item a {
+    font-size: 0.9rem;
+    padding-bottom: 1.35rem;
+  }
+}
+
+@media (min-width:variables.$laptop){
+  .navbar{
+    display: none;
+  }
+  .navbar-list{
+    display: flex;
+  }
+}

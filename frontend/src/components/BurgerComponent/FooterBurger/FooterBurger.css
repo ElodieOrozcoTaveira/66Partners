@@ -1,0 +1,56 @@
+@charset "UTF-8";
+/*Fonts
+Manrope: titre, boutons, logo, élements import
+Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
+*/
+/*Breakpoint*/
+.container-footerburger {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid #E6E6E6;
+}
+.container-footerburger__copyright {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  color: #1F2937;
+  font-family: "Inter";
+  font-size: 0.7rem;
+}
+.container-footerburger__span {
+  font-weight: bold;
+  font-style: italic;
+}
+.container-footerburger__docs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.container-footerburger__docs li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.container-footerburger__docs li:not(:last-child)::after {
+  content: "|";
+  color: #E6E6E6;
+}
+.container-footerburger__docs a {
+  color: #1F2937;
+  font-family: "Inter";
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+.container-footerburger__docs a:hover {
+  color: #E6392E;
+  text-decoration: underline;
+}/*# sourceMappingURL=FooterBurger.css.map */

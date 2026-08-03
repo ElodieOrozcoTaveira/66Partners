@@ -1,0 +1,168 @@
+@use '../../../styles/variables/variables.scss';
+@use '../../../styles/mixins/mixins.scss';
+
+.container-etapes {
+  display: flex;
+  flex-direction: column;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.etape {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  position: relative;
+  margin-bottom: 2rem;
+
+  &:last-child {
+    margin-bottom: 0;
+
+    .etape__line {
+      display: none;
+    }
+  }
+
+  &__marker {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  &__circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid white;
+    color: white;
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 2;
+  }
+
+  &__line {
+    position: absolute;
+    top: 100%;
+    bottom: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 2px dashed variables.$gris2;
+  }
+
+  &__card {
+    flex: 1;
+    background-color: white;
+    border-radius: 1rem;
+    padding: 1.1rem 1.25rem;
+    box-shadow: 0 2px 10px rgba(variables.$nuit2, 0.08);
+  }
+
+  &__titre {
+    margin: 0 0 0.35rem;
+    font-family: 'Manrope', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: variables.$nuit;
+  }
+
+  &__p {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(31, 41, 55, 0.7);
+  }
+}
+
+@media (min-width: variables.$laptop) {
+  .container-etapes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 3rem;
+    max-width: 960px;
+    padding: 3rem 2rem 4rem;
+  }
+
+  .etape {
+    margin-bottom: 0;
+
+    &__line {
+      display: none;
+    }
+  }
+}
+
+// Versions compositées (transform/opacity) : l'animation précédente changeait
+// filter/box-shadow directement, ce qui force un repaint à chaque frame.
+@keyframes badge-pulse-scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes badge-ring-glow {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.etape__badge {
+  animation: badge-pulse-scale 2.4s ease-in-out infinite;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 12px 4px rgba(255, 255, 255, 0.7);
+    animation: badge-ring-glow 2.4s ease-in-out infinite;
+  }
+}
+
+.etape:nth-child(1) .etape__badge {
+  animation-delay: 0s;
+}
+
+.etape:nth-child(2) .etape__badge {
+  animation-delay: 0.5s;
+}
+
+.etape:nth-child(3) .etape__badge {
+  animation-delay: 1s;
+}
+
+.etape:nth-child(4) .etape__badge {
+  animation-delay: 1.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .etape__badge {
+    animation: none;
+  }
+}
