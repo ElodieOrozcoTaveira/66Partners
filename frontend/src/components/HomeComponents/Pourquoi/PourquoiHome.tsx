@@ -1,7 +1,5 @@
 import {
-  Calendar,
   CalendarPlus,
-  Locate,
   MapPin,
   ShieldAlert,
   Sparkles,
@@ -10,6 +8,7 @@ import {
 import "./PourquoiHome.scss";
 
 const ROUGE = "#E6392E";
+
 export default function PourquoiHome() {
   const choix = [
     {
@@ -43,34 +42,30 @@ export default function PourquoiHome() {
       icone: Sparkles,
       titre: "Gratuit & Accessible",
       description:
-        "L'inscription est gratuite et toutes les fonctionnalités de base aussi !.",
+        "L'inscription est gratuite et toutes les fonctionnalités de base aussi !",
     },
   ];
+
   return (
-    <>
-      <div className="container-pourquoiHome">
-        <div className="container-pourquoiHome__header">
-          <h2 className="container-pourquoiHome__h2">
-            Pourquoi choisir 66Partners?{" "}
-          </h2>
-        </div>
-      </div>
-      <div className="container-choice__grid">
+    <div className="container-pourquoiHome">
+      <h2 className="container-pourquoiHome__h2">Pourquoi choisir 66Partners</h2>
+      <p className="container-pourquoiHome__p">
+        Tout ce qu'il faut pour pratiquer ton sport, en toute confiance.
+      </p>
+
+      <div className="container-pourquoiHome__grid">
         {choix.map((choice) => {
           const Icon = choice.icone;
 
           return (
             <div key={choice.id} className="choice-item">
-              <div className="choice-item__header">
-                <Icon color={ROUGE} size={40} />
-
-                <h3 className="choice-item__titre">{choice.titre}</h3>
-              </div>
+              <Icon color={ROUGE} size={40} />
+              <h3 className="choice-item__titre">{choice.titre}</h3>
               <p className="choice-item__p">{choice.description}</p>
             </div>
           );
         })}
       </div>
-    </>
+    </div>
   );
 }

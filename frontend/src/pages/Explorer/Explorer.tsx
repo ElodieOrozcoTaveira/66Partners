@@ -76,17 +76,21 @@ export default function Explorer() {
 
   const sportsById = useMemo(
     () => new Map(sports.map((sport) => [sport.id, sport.name])),
-    [sports]
+    [sports],
   );
 
-  if (isLoading) return <p className="explorer-state">Chargement des activités...</p>;
+  if (isLoading)
+    return <p className="explorer-state">Chargement des activités...</p>;
   if (error) return <p className="explorer-state">{error}</p>;
 
   return (
     <div className="container-explorer">
-      <h1 className="container-explorer__titre">Les activités des 66Partners</h1>
+      <h1 className="container-explorer__titre">
+        Les activités des 66Partners
+      </h1>
       <p className="container-explorer__soustitre">
-        Découvre les sorties sportives proposées par la communauté près de chez toi.
+        Découvre les sorties sportives proposées par la communauté près de chez
+        toi.
       </p>
 
       {activities.length === 0 ? (
@@ -99,18 +103,28 @@ export default function Explorer() {
 
             return (
               <li key={activity.id} className="activity-card">
-                <span className="activity-card__circle" style={{ backgroundColor: color }}>
+                <span
+                  className="activity-card__circle"
+                  style={{ backgroundColor: color }}
+                >
                   <Icon color={getIconColor(color)} size={20} />
                 </span>
                 <div className="activity-card__body">
                   <h2 className="activity-card__title">{activity.title}</h2>
                   <p className="activity-card__meta">
-                    {sportName} · {activity.city} · {dateFormatter.format(new Date(activity.startDate))}
+                    {sportName} · {activity.city} ·{" "}
+                    {dateFormatter.format(new Date(activity.startDate))}
                   </p>
                   <div className="activity-card__tags">
-                    <span className="activity-card__tag">{LEVEL_LABELS[activity.levelRequired]}</span>
-                    <span className="activity-card__tag">Max {activity.maxParticipants} pers.</span>
-                    <span className={`activity-card__tag activity-card__tag--${activity.status.toLowerCase()}`}>
+                    <span className="activity-card__tag">
+                      {LEVEL_LABELS[activity.levelRequired]}
+                    </span>
+                    <span className="activity-card__tag">
+                      Max {activity.maxParticipants} pers.
+                    </span>
+                    <span
+                      className={`activity-card__tag activity-card__tag--${activity.status.toLowerCase()}`}
+                    >
                       {STATUS_LABELS[activity.status]}
                     </span>
                   </div>

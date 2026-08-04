@@ -38,9 +38,9 @@ export default function Contact() {
     <>
       <HeroComponent />
       <div className="container-contact-row">
-        <AvantContact/>
+        <AvantContact />
         <div className="container-contact-row__divider"></div>
-        <Satisfaction/>
+        <Satisfaction />
       </div>
 
       <div className="container-contact">
@@ -65,7 +65,7 @@ export default function Contact() {
           />
 
           <label htmlFor="email" className="container-contact__label">
-            Adresse e-mail 
+            Adresse e-mail
           </label>
           <input
             id="email"
@@ -109,7 +109,7 @@ export default function Contact() {
           </button>
         </form>
       </div>
-      <Question/>
+      <Question />
     </>
   );
 }
