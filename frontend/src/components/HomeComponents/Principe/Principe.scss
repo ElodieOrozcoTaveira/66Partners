@@ -7,15 +7,20 @@
   display: flex;
   flex-direction: column;
   padding: 3rem 1.5rem;
+  margin-bottom: 5rem;
 
   @media (min-width: variables.$tablet) {
     padding: 3rem 3rem;
+      margin-bottom: 5rem;
+
   }
 
   @media (min-width: variables.$laptop) {
     width: 100%;
-    padding-left: 6rem;
-    padding-right: 6rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 3rem;
+    padding-right: 3rem;
   }
 
   &__h2 {
@@ -30,13 +35,10 @@
     text-transform: uppercase;
     text-align: left;
 
-    @media (min-width: variables.$tablet) {
-      font-size: 1rem;
-      
-      }
+    @media (min-width: variables.$laptop) {
+      font-size: 1.1rem;
+    }
    }
-
-   
 
   &__p {
     position: relative;
@@ -58,10 +60,13 @@
       @include mixins.gradient;
     }
 
-    
-
     @media (min-width: variables.$tablet) {
       font-size: 1.5rem;
+    }
+
+    @media (min-width: variables.$laptop) {
+      font-size: 1.75rem;
+      max-width: 40ch;
     }
   }
 
@@ -76,6 +81,11 @@
       align-items: stretch;
       gap: 1.5rem;
       margin-top: 3.5rem;
+    }
+
+    @media (min-width: variables.$laptop) {
+      gap: 2rem;
+      margin-top: 3rem;
     }
   }
 }
@@ -93,6 +103,10 @@
     flex: 1;
   }
 
+  @media (min-width: variables.$laptop) {
+    padding: 2rem;
+  }
+
   &__header {
     display: flex;
     align-items: center;
@@ -108,6 +122,11 @@
     height: 64px;
     border-radius: 50%;
     @include mixins.gradient;
+
+    @media (min-width: variables.$laptop) {
+      width: 72px;
+      height: 72px;
+    }
   }
 
   &__badge {
@@ -134,6 +153,10 @@
     font-size: 1.1rem;
     font-weight: 700;
     color: variables.$nuit;
+
+    @media (min-width: variables.$laptop) {
+      font-size: 1.2rem;
+    }
   }
 
   &__p {
@@ -143,6 +166,10 @@
     line-height: 1.6;
     color: rgba(31, 41, 55, 0.7);
     text-align: left;
+
+    @media (min-width: variables.$laptop) {
+      font-size: 1rem;
+    }
   }
 }
 

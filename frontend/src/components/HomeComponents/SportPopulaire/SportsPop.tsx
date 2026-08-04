@@ -1,12 +1,13 @@
-import { useEffect, useState, type SyntheticEvent } from "react";
+import { useEffect, useRef, useState, type SyntheticEvent } from "react";
 import { NavLink } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import api from "../../../lib/axios";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import "./SportsPop.scss";
 
 const DEFAULT_PHOTO = "/montagne.webp";
-const RANDOM_COUNT = 6;
+const RANDOM_COUNT = 10;
 
 function handlePhotoError(event: SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.onerror = null;
@@ -31,6 +32,7 @@ interface SportsResponse {
 
 export default function SportsPop() {
   const [sports, setSports] = useState<Sport[]>([]);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api
@@ -38,6 +40,14 @@ export default function SportsPop() {
       .then((res) => setSports(pickRandom(res.data.sports, RANDOM_COUNT)))
       .catch(() => setSports([]));
   }, []);
+
+  function scrollByCards(direction: 1 | -1) {
+    const list = listRef.current;
+    if (!list) return;
+    const card = list.querySelector<HTMLElement>(".sportpop-item");
+    const step = card ? card.offsetWidth + 28 : list.clientWidth * 0.8;
+    list.scrollBy({ left: direction * step, behavior: "smooth" });
+  }
 
   return (
     <div className="container-sportpop">
@@ -48,33 +58,54 @@ export default function SportsPop() {
         </NavLink>
       </div>
 
-      <div className="container-sportpop__list">
-        {sports.map((sport) => {
-          const { icon: Icon, color } = getSportVisual(sport.name);
+      <div className="container-sportpop__carousel">
+        <button
+          type="button"
+          className="container-sportpop__arrow container-sportpop__arrow--left"
+          onClick={() => scrollByCards(-1)}
+          aria-label="Sports précédents"
+        >
+          <ChevronLeft size={20} />
+        </button>
 
-          return (
-            <NavLink key={sport.id} to="/sports" className="sportpop-item">
-              <div className="sportpop-item__thumb">
-                <img
-                  src={getSportPhoto(sport.name)}
-                  alt={sport.name}
-                  className="sportpop-item__photo"
-                  onError={handlePhotoError}
-                />
-                <span
-                  className="sportpop-item__badge"
-                  style={{ backgroundColor: color }}
-                >
-                  <Icon color={getIconColor(color)} size={14} />
+        <div className="container-sportpop__list" ref={listRef}>
+          {sports.map((sport) => {
+            const { icon: Icon, color } = getSportVisual(sport.name);
+
+            return (
+              <NavLink key={sport.id} to="/sports" className="sportpop-item">
+                <div className="sportpop-item__thumb">
+                  <img
+                    src={getSportPhoto(sport.name)}
+                    alt={sport.name}
+                    className="sportpop-item__photo"
+                    onError={handlePhotoError}
+                  />
+                  <span
+                    className="sportpop-item__badge"
+                    style={{ backgroundColor: color }}
+                  >
+                    <Icon color={getIconColor(color)} size={14} />
+                  </span>
+                </div>
+                <span className="sportpop-item__name">{sport.name}</span>
+                <span className="sportpop-item__membres">
+                  {sport.favoritesCount} membre
+                  {sport.favoritesCount === 1 ? "" : "s"}
                 </span>
-              </div>
-              <span className="sportpop-item__name">{sport.name}</span>
-              <span className="sportpop-item__membres">
-                {sport.favoritesCount} membre{sport.favoritesCount === 1 ? "" : "s"}
-              </span>
-            </NavLink>
-          );
-        })}
+              </NavLink>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          className="container-sportpop__arrow container-sportpop__arrow--right"
+          onClick={() => scrollByCards(1)}
+          aria-label="Sports suivants"
+        >
+          <ChevronRight size={20} />
+        </button>
       </div>
     </div>
   );

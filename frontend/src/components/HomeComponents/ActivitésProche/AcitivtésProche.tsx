@@ -29,7 +29,10 @@ interface ActivitiesResponse {
 
 const weekdayFormatter = new Intl.DateTimeFormat("fr-FR", { weekday: "short" });
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "short" });
-const timeFormatter = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
+const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 function formatWeekday(date: Date): string {
   return weekdayFormatter.format(date).replace(".", "").toUpperCase();
@@ -43,7 +46,9 @@ export default function ActivitésProche() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
+  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
+    null,
+  );
 
   useEffect(() => {
     api
@@ -71,7 +76,8 @@ export default function ActivitésProche() {
     return activities
       .filter(
         (activity) =>
-          new Date(activity.startDate).getTime() > now && activity.status !== "CANCELLED"
+          new Date(activity.startDate).getTime() > now &&
+          activity.status !== "CANCELLED",
       )
       .slice(0, UPCOMING_COUNT);
   }, [activities]);
@@ -79,8 +85,14 @@ export default function ActivitésProche() {
   return (
     <div className="container-activitesproche">
       <div className="container-activitesproche__header">
-        <h2 className="container-activitesproche__h2">Activités près de chez vous</h2>
-        <NavLink to="/explorer" className="container-activitesproche__btn" onClick={handleExplorerClick}>
+        <h2 className="container-activitesproche__h2">
+          Activités près de chez vous
+        </h2>
+        <NavLink
+          to="/explorer"
+          className="container-activitesproche__btn"
+          onClick={handleExplorerClick}
+        >
           Voir tout
         </NavLink>
       </div>
@@ -104,10 +116,16 @@ export default function ActivitésProche() {
                   className="activity-card__photo"
                 />
                 <div className="activity-card__date">
-                  <span className="activity-card__date-day">{formatWeekday(startDate)}</span>
+                  <span className="activity-card__date-day">
+                    {formatWeekday(startDate)}
+                  </span>
                   <div className="activity-card__date-body">
-                    <span className="activity-card__date-number">{startDate.getDate()}</span>
-                    <span className="activity-card__date-month">{formatMonth(startDate)}</span>
+                    <span className="activity-card__date-number">
+                      {startDate.getDate()}
+                    </span>
+                    <span className="activity-card__date-month">
+                      {formatMonth(startDate)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -116,8 +134,9 @@ export default function ActivitésProche() {
                 <h3 className="activity-card__title">{activity.title}</h3>
                 <p className="activity-card__meta">{activity.city} (66)</p>
                 <p className="activity-card__meta">
-                  {timeFormatter.format(startDate)} · {activity.participantsCount}/
-                  {activity.maxParticipants} participants
+                  {timeFormatter.format(startDate)} ·{" "}
+                  {activity.participantsCount}/{activity.maxParticipants}{" "}
+                  participants
                 </p>
                 <span
                   className="activity-card__sport"
@@ -131,7 +150,11 @@ export default function ActivitésProche() {
         })}
       </div>
 
-      <NavLink to="/explorer" className="container-activitesproche__cta" onClick={handleExplorerClick}>
+      <NavLink
+        to="/explorer"
+        className="container-activitesproche__cta"
+        onClick={handleExplorerClick}
+      >
         Voir toutes les activités
       </NavLink>
 

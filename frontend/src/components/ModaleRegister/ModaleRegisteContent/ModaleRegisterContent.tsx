@@ -22,7 +22,11 @@ interface RegisterResponse {
   token: string;
 }
 
-export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin }: ModaleContentProps) {
+export default function ModaleRegisterContent({
+  isOpen,
+  onClose,
+  onSwitchToLogin,
+}: ModaleContentProps) {
   const { login } = useAuth();
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
@@ -32,8 +36,10 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
 
-  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
-  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+  const passwordsMismatch =
+    confirmPassword.length > 0 && password !== confirmPassword;
+  const passwordsMatch =
+    confirmPassword.length > 0 && password === confirmPassword;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -123,15 +129,21 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
           <X size={20} />
         </button>
         <div className="container-modaleRegister">
-          
           <h3 className="container-modaleRegister__h3">Créer un compte</h3>
           <h4 className="container-modaleRegister__h4">
             Rejoignez la communauté 66Partners et vivez l'aventure avec nous !
           </h4>
 
           <section className="container-modaleRegister__section">
-            <form id="register-form" className="container-modaleRegister__form" onSubmit={handleSubmit}>
-              <label htmlFor="pseudo" className="container-modaleRegister__label">
+            <form
+              id="register-form"
+              className="container-modaleRegister__form"
+              onSubmit={handleSubmit}
+            >
+              <label
+                htmlFor="pseudo"
+                className="container-modaleRegister__label"
+              >
                 Pseudo
               </label>
               <input
@@ -143,7 +155,10 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
                 className="container-modaleRegister__input"
               />
 
-              <label htmlFor="email" className="container-modaleRegister__label">
+              <label
+                htmlFor="email"
+                className="container-modaleRegister__label"
+              >
                 Adresse e-mail
               </label>
               <input
@@ -155,7 +170,10 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
                 className="container-modaleRegister__input"
               />
 
-              <label htmlFor="password" className="container-modaleRegister__label">
+              <label
+                htmlFor="password"
+                className="container-modaleRegister__label"
+              >
                 Mot de passe
               </label>
               <input
@@ -167,7 +185,10 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
                 className="container-modaleRegister__input"
               />
 
-              <label htmlFor="confirmPassword" className="container-modaleRegister__label">
+              <label
+                htmlFor="confirmPassword"
+                className="container-modaleRegister__label"
+              >
                 Confirmation du mot de passe
               </label>
               <input
@@ -189,16 +210,26 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
                 </p>
               )}
 
-              {error && <p className="container-modaleRegister__error">{error}</p>}
+              {error && (
+                <p className="container-modaleRegister__error">{error}</p>
+              )}
 
-              <button type="submit" className="container-modaleRegister__submit" disabled={isSubmitting}>
+              <button
+                type="submit"
+                className="container-modaleRegister__submit"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
             </form>
 
             <p className="container-modaleRegister__register">
               Déjà un compte ?{" "}
-              <button type="button" className="container-modaleRegister__switch" onClick={onSwitchToLogin}>
+              <button
+                type="button"
+                className="container-modaleRegister__switch"
+                onClick={onSwitchToLogin}
+              >
                 Se connecter
               </button>
             </p>
@@ -208,10 +239,16 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
             </div>
 
             <div className="container-modaleRegister__social">
-              <button type="button" className="container-modaleRegister__socialBtn">
+              <button
+                type="button"
+                className="container-modaleRegister__socialBtn"
+              >
                 <FcGoogle size={18} /> Google
               </button>
-              <button type="button" className="container-modaleRegister__socialBtn">
+              <button
+                type="button"
+                className="container-modaleRegister__socialBtn"
+              >
                 <FaFacebook size={18} color="#1877F2" /> Facebook
               </button>
             </div>
@@ -231,6 +268,6 @@ export default function ModaleRegisterContent({ isOpen, onClose, onSwitchToLogin
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
