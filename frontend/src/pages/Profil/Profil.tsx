@@ -1,9 +1,12 @@
-import { Smile } from "lucide-react";
+import BottomNavBar from "../../components/BottomNavBar/BottomNavBar";
+import HeroProfile from "../../components/ProfilPage/HeroProfil/HeroProfile";
+import "./Profil.scss";
 
 export default function Profil() {
-    return(
-        <div>
-            Bienvenue sur ton profil <Smile size={40}/>
-        </div>
-    )
+  return (
+    <div className="profil-page">
+      <HeroProfile/>
+      <BottomNavBar />
+    </div>
+  );
 }

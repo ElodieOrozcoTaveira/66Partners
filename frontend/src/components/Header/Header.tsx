@@ -1,16 +1,22 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import "../Header/Header.scss";
 import Hamburger from "../BurgerComponent/Hamburger/Hamburger";
 import Connexion from "../BurgerComponent/Connexion/Connexion";
 import { useHideOnScroll } from "../../hooks/useHideOnScroll";
 
 export default function Header() {
-  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
+  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
+    null,
+  );
+  const location = useLocation();
   const hidden = useHideOnScroll();
+  const isProfilePage = location.pathname === "/profile";
 
   return (
-    <header className={`container-header${hidden ? " container-header--hidden" : ""}`}>
+    <header
+      className={`container-header${hidden && !isProfilePage ? " container-header--hidden" : ""}`}
+    >
       <section className="container-header__leftside">
         <Link to="/">
           <img

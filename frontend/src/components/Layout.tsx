@@ -10,6 +10,7 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const shouldShowFooter = !location.pathname.startsWith("/profile");
 
   function handleLogout() {
     logout();
@@ -18,15 +19,15 @@ export default function Layout() {
 
   return (
     <div className="app-shell">
-      <GoogleAnalytics/>
-      <CookieBanner/>
-      <Header/>
+      <GoogleAnalytics />
+      <CookieBanner />
+      <Header />
       <main>
         <div className="page-transition" key={location.pathname}>
           <Outlet />
         </div>
       </main>
-      <Footer/>
+      {shouldShowFooter && <Footer />}
     </div>
   );
 }

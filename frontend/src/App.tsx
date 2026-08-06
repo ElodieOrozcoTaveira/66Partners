@@ -44,6 +44,8 @@ export default function App() {
               <Route path="/activities" element={<div>Activités — Phase 4</div>} />
               <Route path="/profile" element={<Profil/>} />
             </Route>
+          
+            
 
             <Route path="*" element={<NotFound />} />
           </Route>
