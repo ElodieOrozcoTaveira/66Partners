@@ -15,7 +15,7 @@ import participationRoutes from './routes/participation.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import { activityConversationRouter, conversationRouter } from './routes/conversation.routes.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
-import { helmetOptions, verifyOrigin } from './middlewares/security.middleware.js';
+import { getAllowedOrigins, helmetOptions, verifyOrigin } from './middlewares/security.middleware.js';
 
 //Docs Swagger
 import swaggerUi from 'swagger-ui-express';
@@ -29,8 +29,9 @@ export const httpServer = createServer(app); // socket se met sur le serveur htt
 
 // Middleware de sécurité
 app.use(helmet(helmetOptions));
+const allowedOrigins = getAllowedOrigins();
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: allowedOrigins.length > 0 ? allowedOrigins : 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

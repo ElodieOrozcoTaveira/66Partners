@@ -14,6 +14,9 @@ services:
       # Vite vers le service "api" (voir frontend/vite.config.ts). Fonctionne
       # aussi bien en local qu'à travers un tunnel ngrok.
       - VITE_API_URL=
+      # Lorsque le client tourne dans Docker, forcer la cible du proxy vers
+      # le service `api` du même réseau compose.
+      - VITE_DEV_PROXY_TARGET=http://api:3000
     depends_on:
       - api
 
@@ -21,6 +24,8 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile.dev
+    env_file: 
+     - .env  
     ports:
       - "3000:3000"
     volumes:
@@ -39,6 +44,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    command: sh -c "npx drizzle-kit migrate && npm run dev"
 
   postgres:
     image: postgis/postgis:17-3.5-alpine

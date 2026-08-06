@@ -14,8 +14,8 @@ export function MentionsLegales() {
       <section className="legal-section">
         <h2 className="legal-subtitle">Éditeur du site</h2>
         <ul className="legal-list">
-          <li><span className="legal-label">Nom :</span> [Votre prénom et nom]</li>
-          <li><span className="legal-label">Adresse :</span> [Votre adresse postale]</li>
+          <li><span className="legal-label">Nom :</span> CanailleDev</li>
+          <li><span className="legal-label">Adresse :</span> Pyrénées-Orientales</li>
           <li>
             <span className="legal-label">Email :</span>{' '}
             <a className="legal-link" href="mailto:contact@66partners.fr">
@@ -31,8 +31,8 @@ export function MentionsLegales() {
       <section className="legal-section">
         <h2 className="legal-subtitle">Hébergeur</h2>
         <ul className="legal-list">
-          <li><span className="legal-label">Société :</span> [Hetzner Online GmbH ou OVH SAS]</li>
-          <li><span className="legal-label">Adresse :</span> [Adresse de l'hébergeur]</li>
+          <li><span className="legal-label">Société :</span> Hetzner Online GmbH </li>
+          <li><span className="legal-label">Adresse :</span> Industriestr. 25, 91710 Gunzenhausen, Allemagne</li>
           <li>
             <span className="legal-label">Site web :</span>{' '}
             <a className="legal-link" href="https://www.hetzner.com" target="_blank" rel="noopener noreferrer">

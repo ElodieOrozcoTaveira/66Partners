@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http";
+import { getAllowedOrigins } from "../middlewares/security.middleware.js";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, and } from "drizzle-orm";
 import { verifyToken } from "../utils/jwt.js";
@@ -48,7 +49,7 @@ const authMiddleware = (socket: Socket, next: (err?: Error) => void) => {
 
 const isParticipantOfConversation = async (
   userId: string,
-  conversationId: string
+  conversationId: string,
 ): Promise<boolean> => {
   const [conversation] = await db
     .select()
@@ -75,8 +76,8 @@ const isParticipantOfConversation = async (
       and(
         eq(participations.activityId, conversation.activityId),
         eq(participations.userId, userId),
-        eq(participations.status, "ACCEPTED")
-      )
+        eq(participations.status, "ACCEPTED"),
+      ),
     )
     .limit(1);
 
@@ -88,9 +89,12 @@ const isParticipantOfConversation = async (
 // ──────────────────────────────────────────────
 
 export const initSocket = (httpServer: HttpServer) => {
+  const allowedOrigins = getAllowedOrigins();
+
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+      origin:
+        allowedOrigins.length > 0 ? allowedOrigins : "http://localhost:5173",
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -124,11 +128,16 @@ export const initSocket = (httpServer: HttpServer) => {
         const { conversationId, contenu } = data;
 
         if (!contenu?.trim()) {
-          socket.emit("error", { message: "Le message ne peut pas être vide." });
+          socket.emit("error", {
+            message: "Le message ne peut pas être vide.",
+          });
           return;
         }
 
-        const allowed = await isParticipantOfConversation(userId, conversationId);
+        const allowed = await isParticipantOfConversation(
+          userId,
+          conversationId,
+        );
         if (!allowed) {
           socket.emit("error", { message: "Accès refusé." });
           return;
@@ -155,18 +164,24 @@ export const initSocket = (httpServer: HttpServer) => {
           });
         } catch (err) {
           console.error("Erreur envoi message:", err);
-          socket.emit("error", { message: "Erreur lors de l'envoi du message." });
+          socket.emit("error", {
+            message: "Erreur lors de l'envoi du message.",
+          });
         }
-      }
+      },
     );
 
     // ── Indicateur "en train d'écrire" ──────────
     socket.on("typing", (conversationId: string) => {
-      socket.to(`conversation:${conversationId}`).emit("user_typing", { userId });
+      socket
+        .to(`conversation:${conversationId}`)
+        .emit("user_typing", { userId });
     });
 
     socket.on("stop_typing", (conversationId: string) => {
-      socket.to(`conversation:${conversationId}`).emit("user_stop_typing", { userId });
+      socket
+        .to(`conversation:${conversationId}`)
+        .emit("user_stop_typing", { userId });
     });
 
     // ── Déconnexion ──────────────────────────────

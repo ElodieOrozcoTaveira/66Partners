@@ -12,12 +12,18 @@
   }
 
   @media (min-width: variables.$laptop) {
-    max-width: 1280px;
+    max-width: 1440px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 5rem;
     padding-left: 3rem;
     padding-right: 3rem;
+  }
+
+  @media (min-width: variables.$desktop) {
+    max-width: 1680px;
+    padding-left: 4rem;
+    padding-right: 4rem;
   }
 
   &__h2 {

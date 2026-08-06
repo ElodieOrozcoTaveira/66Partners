@@ -1,0 +1,7 @@
+@use "../../styles/mixins/mixins.scss";
+
+.cookie-banner {
+  @include mixins.gradient;
+  
+}
+
