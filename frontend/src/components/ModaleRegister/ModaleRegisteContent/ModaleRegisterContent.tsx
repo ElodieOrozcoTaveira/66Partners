@@ -255,8 +255,8 @@ export default function ModaleRegisterContent({
 
             <p className="container-modaleRegister__terms">
               En créant un compte, vous acceptez nos{" "}
-              <NavLink to="/cgu" onClick={onClose}>
-                Conditions d'utilisation
+              <NavLink to="/mentionslegales" onClick={onClose}>
+                Mentions Légales
               </NavLink>{" "}
               et notre{" "}
               <NavLink to="/confidentialite" onClick={onClose}>

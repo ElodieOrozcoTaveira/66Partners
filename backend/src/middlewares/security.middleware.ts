@@ -20,6 +20,18 @@ export const helmetOptions: HelmetOptions = {
 const STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 /**
+ * CORS_ORIGIN accepte une liste d'origines séparées par des virgules (ex:
+ * dev local + tunnel ngrok pour les tests mobile) en plus d'une origine
+ * unique.
+ */
+export function getAllowedOrigins(): string[] {
+  return (process.env.CORS_ORIGIN ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+/**
  * Garde-fou CSRF.
  *
  * Cette API authentifie via un JWT transmis dans l'en-tête
@@ -40,10 +52,10 @@ export function verifyOrigin(req: Request, res: Response, next: NextFunction): v
     return;
   }
 
-  const allowedOrigin = process.env.CORS_ORIGIN;
+  const allowedOrigins = getAllowedOrigins();
   const origin = req.headers.origin ?? req.headers.referer;
 
-  if (allowedOrigin && origin && !origin.startsWith(allowedOrigin)) {
+  if (allowedOrigins.length > 0 && origin && !allowedOrigins.some((allowed) => origin.startsWith(allowed))) {
     res.status(403).json({
       success: false,
       message: "Origine de la requête non autorisée",

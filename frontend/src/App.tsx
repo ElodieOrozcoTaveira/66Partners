@@ -14,6 +14,7 @@ import Faq from "./pages/FAQ/Faq";
 import Fonctionnement from "./pages/Fonctionnement/Fonctionnement";
 import { PolitiqueConfidentialite } from "./pages/Confidentalité/Confidentialite";
 import { MentionsLegales } from "./pages/MentionsLegales/MentionsLegales";
+import Profil from "./pages/Profil/Profil";
 
 
 export default function App() {
@@ -41,7 +42,7 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/explorer" element={<Explorer />} />
               <Route path="/activities" element={<div>Activités — Phase 4</div>} />
-              <Route path="/profile" element={<div>Profil — Phase 3</div>} />
+              <Route path="/profile" element={<Profil/>} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

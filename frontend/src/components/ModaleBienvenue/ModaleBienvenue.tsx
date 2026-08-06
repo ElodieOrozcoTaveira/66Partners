@@ -9,7 +9,11 @@ interface ModaleBienvenueProps {
   onClose: () => void;
 }
 
-export default function ModaleBienvenue({ isOpen, onClose }: ModaleBienvenueProps) {
+export default function ModaleBienvenue({
+  isOpen,
+  onClose,
+}: ModaleBienvenueProps) {
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -72,6 +76,6 @@ export default function ModaleBienvenue({ isOpen, onClose }: ModaleBienvenueProp
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

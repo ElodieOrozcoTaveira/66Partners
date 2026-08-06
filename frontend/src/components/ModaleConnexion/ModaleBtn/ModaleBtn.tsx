@@ -1,4 +1,4 @@
-import { LockKeyhole, User } from "lucide-react";
+import { LockKeyhole } from "lucide-react";
 import ModaleContent from "../ModaleContent/ModaleContent";
 import "./Modale.scss";
 

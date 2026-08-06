@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
-import { NavLink } from "react-router-dom";
-import { HandMetal, LockKeyhole, X } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { HandMetal, X } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import api from "../../../lib/axios";
@@ -26,6 +26,7 @@ export default function ModaleContent({
   onSwitchToRegister,
 }: ModaleContentProps) {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +70,7 @@ export default function ModaleContent({
       });
       await login(res.data.token);
       onClose();
+      navigate("/profile");
     } catch {
       setError("Email ou mot de passe incorrect.");
     } finally {

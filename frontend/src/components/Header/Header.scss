@@ -72,13 +72,16 @@
       font-size: 0.85rem;
       font-weight: bold;
       white-space: nowrap;
+      padding: 0.7rem 0.9rem;
+      border-radius: 15px;
+      transition:
+        color 0.25s ease,
+        transform 0.25s ease;
 
       &:hover {
         color: whitesmoke;
         @include mixins.gradient;
-        padding: 0.7rem 0.9rem;
-        border-radius: 15px;
-        transition-duration: 1.2s;
+        transform: translateY(-2px);
       }
 
       &[aria-current="page"] {
@@ -101,13 +104,13 @@
       &__links1,
       &__links2 {
         width: auto;
-        padding: 0.4rem 0.9rem;
-        font-size: 11px;
+        padding: 0.6rem 1.1rem;
+        font-size: 13px;
         white-space: nowrap;
       }
 
       &__links2 {
-        padding-right: 0.9rem;
+        padding-right: 1.1rem;
       }
     }
   }

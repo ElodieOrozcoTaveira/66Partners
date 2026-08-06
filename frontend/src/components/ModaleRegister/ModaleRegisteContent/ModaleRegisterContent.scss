@@ -20,7 +20,7 @@
 
   border-bottom-right-radius: 35px;
   filter: sepia(0.2) brightness(1) contrast(1);
-  padding: 2.5rem 2rem 2rem;
+  padding: 2rem 1.75rem 1.75rem;
   min-width: 330px;
   max-width: 90vw;
   max-height: 90vh;
@@ -64,13 +64,13 @@
 
   &__section {
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: 1.15rem;
   }
 
   &__form {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.25rem;
   }
 
   &__label {
@@ -78,7 +78,7 @@
     font-size: 0.8rem;
     font-weight: bold;
     color: variables.$nuit;
-    margin-top: 0.6rem;
+    margin-top: 0.45rem;
   }
 
   &__input {
@@ -145,8 +145,8 @@
   }
 
   &__submit {
-    margin-top: 1.25rem;
-    padding: 0.7rem;
+    margin-top: 0.9rem;
+    padding: 0.65rem;
     border: none;
     border-radius: 30px;
     color: white;
@@ -170,7 +170,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin: 1.5rem 0 1rem;
+    margin: 1.1rem 0 0.85rem;
     font-family: "Inter";
     font-size: 0.75rem;
     color: variables.$nuit2;
@@ -187,7 +187,7 @@
   &__social {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.5rem;
   }
 
   &__socialBtn {
@@ -211,7 +211,7 @@
   }
 
   &__register {
-    margin-top: 1.5rem;
+    margin-top: 1.1rem;
     font-family: "Inter";
     font-size: 0.8rem;
     color: variables.$nuit;
@@ -234,7 +234,7 @@
   }
 
   &__terms {
-    margin-top: 1.25rem;
+    margin-top: 0.9rem;
     font-family: "Inter";
     font-size: 0.7rem;
     color: variables.$nuit;
