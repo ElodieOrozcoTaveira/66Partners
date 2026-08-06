@@ -20,9 +20,19 @@
   background-position: top 35% right 20%;
   border-bottom-right-radius: 35px;
   filter: sepia(0.2) brightness(1) contrast(1);
+
+  &--clickable {
+    cursor: pointer;
+  }
+
   &__img {
     border-radius: 50%;
     object-fit: cover;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.03);
+    }
   }
   &__h3 {
     color: orangered;
@@ -53,13 +63,12 @@
     &__h3 {
       font-size: 20px;
     }
-    &__p{
+    &__p {
       font-size: 14px;
       margin-right: 10rem;
     }
   }
 }
 
-@media (min-width:variables.$desktop){
-
+@media (min-width: variables.$desktop) {
 }

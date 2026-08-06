@@ -55,7 +55,7 @@ export default function Hamburger() {
           aria-hidden="true"
         />
         <div className={`navbar-panel ${isMenuOpen ? "show" : ""}`}>
-          <Bonjour />
+          <Bonjour onNavigate={toggleMenu} />
 
           <ul id="mobile-navigation" className="navbar-list">
             <li className="navbar-item">

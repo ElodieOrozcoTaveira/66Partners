@@ -1,0 +1,17 @@
+@use "../../styles/variables/variables.scss";
+
+.profil-page {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-top: calc(variables.$header-height + 0.5rem);
+  padding-bottom: 84px;
+}
+
+.profil-page__content {
+  flex: 1;
+  padding: 1rem 1rem 5rem;
+}
