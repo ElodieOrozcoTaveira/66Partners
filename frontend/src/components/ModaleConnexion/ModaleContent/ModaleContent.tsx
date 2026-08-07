@@ -68,11 +68,19 @@ export default function ModaleContent({
         email,
         password,
       });
-      await login(res.data.token);
-      onClose();
-      navigate("/profile");
+      console.debug("ModaleContent: login response", res.data);
+      const ok = await login(res.data.token);
+      if (ok) {
+        onClose();
+        navigate("/profile");
+      } else {
+        setError("Impossible de récupérer le profil. Réessaie plus tard.");
+      }
     } catch {
       setError("Email ou mot de passe incorrect.");
+      // Si échec de connexion (mot de passe erroné ou compte inexistant),
+      // basculer vers la modale d'inscription au lieu de la page.
+      onSwitchToRegister();
     } finally {
       setIsSubmitting(false);
     }

@@ -46,6 +46,10 @@
 .container-modaleBienvenue {
   text-align: center;
 
+  &--form {
+    text-align: left;
+  }
+
   &__h3 {
     display: flex;
     align-items: center;
@@ -57,12 +61,57 @@
     margin: 0 0 0.75rem;
   }
 
+  &--form &__h3 {
+    justify-content: flex-start;
+  }
+
   &__h4 {
     font-size: 14px;
     font-weight: 400;
     line-height: 1.6;
     color: variables.$nuit;
     margin: 0 0 1.75rem;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: variables.$nuit;
+  }
+
+  &__input,
+  &__textarea {
+    width: 100%;
+    border: 1px solid rgba(variables.$nuit, 0.16);
+    border-radius: 14px;
+    padding: 0.8rem 0.9rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem;
+    color: variables.$nuit;
+    background: rgba(255, 255, 255, 0.9);
+    outline: none;
+
+    &:focus {
+      border-color: variables.$rouge;
+      box-shadow: 0 0 0 3px rgba(variables.$rouge, 0.14);
+    }
+  }
+
+  &__textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  &__error {
+    color: variables.$rouge;
+    font-size: 0.85rem;
+    margin: 0;
   }
 
   &__actions {
@@ -83,6 +132,11 @@
     text-decoration: none;
     cursor: pointer;
     @include mixins.gradient;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
   }
 
   &__later {

@@ -1,0 +1,26 @@
+@use "../../../styles/variables/variables.scss";
+@use '../../../styles/mixins/mixins.scss';
+
+.container-topProfile{
+    display: flex;
+    flex-direction: column;
+    margin-left: 1.8rem;
+    margin-top: 2rem;
+    &__h1{
+        font-size: 22px;
+        font-weight: bold;
+        font-family: 'Manrope',sans-serif;
+        margin-bottom: -1rem;
+        margin-left: 0.5rem;
+        color: variables.$nuit;
+    }
+    &__h2{
+        font-size: 16px;
+        color: gray;
+        margin-left: 0.5rem;
+        font-weight: 200;
+        font-family: 'Inter', sans-serif;
+        letter-spacing: -0.8px;
+
+    }
+}

@@ -1,5 +1,4 @@
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
 import GoogleAnalytics from "./Analytics/Analytics";
@@ -7,15 +6,8 @@ import "./Layout.scss";
 import CookieBanner from "./Cookie/Cookie";
 
 export default function Layout() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const shouldShowFooter = !location.pathname.startsWith("/profile");
-
-  function handleLogout() {
-    logout();
-    navigate("/login");
-  }
 
   return (
     <div className="app-shell">

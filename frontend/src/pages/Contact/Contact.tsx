@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import api from "../../lib/axios";
 import "./Contact.scss";
-import { Send, SendHorizonal } from "lucide-react";
+import { Send } from "lucide-react";
 import HeroComponent from "../../components/ContactComponents/HeroComponent/HeroComponent";
 import AvantContact from "../../components/ContactComponents/AvantContact/AvantContact";
 import Satisfaction from "../../components/ContactComponents/Satisfation/Satisfaction";
