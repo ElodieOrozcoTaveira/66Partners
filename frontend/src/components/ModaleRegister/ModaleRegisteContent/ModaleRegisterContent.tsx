@@ -98,9 +98,14 @@ export default function ModaleRegisterContent({
         email,
         password,
       });
-      await login(res.data.token);
-      onClose();
-      setShowWelcome(true);
+      console.debug("ModaleRegister: register response", res.data);
+      const ok = await login(res.data.token);
+      if (ok) {
+        onClose();
+        setShowWelcome(true);
+      } else {
+        setError("Impossible de récupérer le profil après inscription.");
+      }
     } catch (err) {
       const message =
         isAxiosError<{ message?: string }>(err) && err.response?.data?.message

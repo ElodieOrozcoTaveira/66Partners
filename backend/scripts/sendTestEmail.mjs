@@ -1,6 +1,18 @@
-export function welcomeEmailTemplate(pseudo: string): string {
-  return `
-<!doctype html>
+import "dotenv/config";
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  host: "ssl0.ovh.net",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+
+const pseudo = "El";
+const html = `<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="utf-8">
@@ -79,6 +91,21 @@ export function welcomeEmailTemplate(pseudo: string): string {
       </tr>
     </table>
   </body>
-</html>
-`;
+</html>`;
+
+async function main() {
+  try {
+    const info = await transporter.sendMail({
+      from: `"66Partners" <${process.env.SMTP_USER}>`,
+      to: "el.dasilva@yahoo.fr",
+      subject: "Test: Bienvenue sur 66Partners",
+      html,
+    });
+    console.log("Email envoyé — messageId:", info.messageId);
+  } catch (err) {
+    console.error("Erreur envoi email :", err);
+    process.exit(1);
+  }
 }
+
+main();
