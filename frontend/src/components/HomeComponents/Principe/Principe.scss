@@ -11,8 +11,7 @@
 
   @media (min-width: variables.$tablet) {
     padding: 3rem 3rem;
-      margin-bottom: 5rem;
-
+    margin-bottom: 5rem;
   }
 
   @media (min-width: variables.$laptop) {
@@ -29,32 +28,21 @@
     padding-right: 4rem;
   }
 
-  &__h2 {
-    position: relative;
-    font-family: "Manrope", sans-serif;
-    font-weight: 800;
-    font-size: 1rem;
-    line-height: 1.25;
-    color: variables.$rouge;
-    padding-bottom: 1rem;
-    margin: 0;
-    text-transform: uppercase;
-    text-align: left;
+  
 
-    @media (min-width: variables.$laptop) {
-      font-size: 1.1rem;
-    }
-   }
+   
+  
 
   &__p {
     position: relative;
-    font-family: "Inter", sans-serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1.7;
-    color: variables.$nuit;
     margin: 0;
-    padding-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: variables.$nuit;
     &::after {
       content: "";
       position: absolute;

@@ -1,15 +1,43 @@
-import { useAuth } from "../../../contexts/AuthContext";
+import { useState } from "react";
+import { Pen } from "lucide-react";
+import type { User } from "../../../contexts/AuthContext";
+import ModaleEditProfil from "../ModaleEditProfil/ModaleEditProfil";
 import "./TopProfil.scss";
 
-export default function TopProfile() {
-  const { user } = useAuth();
+interface TopProfileProps {
+  user: Pick<User, "pseudo" | "city"> | null;
+  isOwnProfile?: boolean;
+}
+
+export default function TopProfile({ user, isOwnProfile = true }: TopProfileProps) {
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const pseudo = user?.pseudo || "Nom";
   const city = user?.city || "Ville";
 
   return (
     <div className="container-topProfile">
-      <h1 className="container-topProfile__h1">{pseudo}</h1>
-      <h2 className="container-topProfile__h2">{city}</h2>
+      <div className="container-topProfile__info">
+        <h1 className="container-topProfile__h1">{pseudo}</h1>
+        <h2 className="container-topProfile__h2">{city}</h2>
+      </div>
+
+      {isOwnProfile && (
+        <>
+          <button
+            type="button"
+            className="container-topProfile__edit"
+            onClick={() => setIsEditOpen(true)}
+          >
+            <Pen size={13} strokeWidth={2.2} />
+            Modifier le profil
+          </button>
+
+          <ModaleEditProfil
+            isOpen={isEditOpen}
+            onClose={() => setIsEditOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 }

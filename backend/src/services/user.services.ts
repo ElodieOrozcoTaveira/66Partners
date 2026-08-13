@@ -27,7 +27,9 @@ export interface UserProfile {
   pseudo: string;
   city: string | null;
   bio: string | null;
+  dispo: string | null;
   avatar: string | null;
+  coverPhoto: string | null;
   latitude: number | null;
   longitude: number | null;
   createdAt: Date;
@@ -38,7 +40,9 @@ export interface UserUpdateInput {
   pseudo?: string;
   city?: string | null;
   bio?: string | null;
+  dispo?: string | null;
   avatar?: string | null;
+  coverPhoto?: string | null;
   latitude?: number | null;
   longitude?: number | null;
 }
@@ -62,7 +66,9 @@ function toProfile(user: typeof users.$inferSelect): UserProfile {
     pseudo: user.pseudo,
     city: user.city,
     bio: user.bio,
+    dispo: user.dispo,
     avatar: user.avatar,
+    coverPhoto: user.coverPhoto,
     latitude: user.latitude,
     longitude: user.longitude,
     createdAt: user.createdAt,

@@ -31,11 +31,8 @@ export default function Principe() {
 
   return (
     <div className="container-principe">
-      <h2 className="container-principe__h2">Le principe</h2>
-      <p className="container-principe__p">
-        Inscris-toi, crée ton activité et trouve tes partenaires !
-      </p>
-
+      <h2 className="container-principe__p">Le principe</h2>
+     
       <div className="container-principe__grid">
         {principes.map((principe) => {
           const Icon = principe.icone;

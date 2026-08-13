@@ -7,13 +7,15 @@ import {
 } from "react";
 import api from "../lib/axios";
 
-type User = {
+export type User = {
   id: string;
   pseudo: string;
   email: string;
   city: string | null;
   bio: string | null;
   avatar: string | null;
+  coverPhoto: string | null;
+  dispo: string | null;
 };
 
 type AuthContextType = {

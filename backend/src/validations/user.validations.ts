@@ -12,7 +12,9 @@ export const updateUserSchema = z
     pseudo: z.string().trim().min(1, "Le pseudo est requis").max(100).transform(sanitizeText),
     city: z.string().trim().min(1).max(100).transform(sanitizeText).nullable(),
     bio: z.string().trim().max(2000).transform(sanitizeText).nullable(),
+    dispo: z.string().trim().max(2000).transform(sanitizeText).nullable(),
     avatar: z.url("URL d'avatar invalide").max(255).nullable(),
+    coverPhoto: z.url("URL de couverture invalide").max(255).nullable(),
     latitude: z.number().min(-90).max(90).nullable(),
     longitude: z.number().min(-180).max(180).nullable(),
   })
