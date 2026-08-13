@@ -1,0 +1,45 @@
+@use "../../../styles/variables/variables.scss";
+@use '../../../styles/mixins/mixins.scss';
+
+.container-aproposProfile {
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(31, 41, 55, 0.08);
+
+  &__h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 0 0.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+
+    svg {
+      flex-shrink: 0;
+      color: variables.$rouge2;
+    }
+  }
+
+  &__text {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: variables.$nuit;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__empty {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+}

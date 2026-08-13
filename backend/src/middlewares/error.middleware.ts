@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler, Request, Response } from "express";
+import { MulterError } from "multer";
 import {
   PG_FOREIGN_KEY_VIOLATION,
   PG_NOT_NULL_VIOLATION,
@@ -82,6 +83,28 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
       success: false,
       message: error.message,
       code: error.code,
+    });
+    return;
+  }
+
+  if (error instanceof MulterError) {
+    const message =
+      error.code === "LIMIT_FILE_SIZE"
+        ? "L'image dépasse la taille maximale autorisée (5 Mo)"
+        : "Fichier invalide";
+    res.status(400).json({
+      success: false,
+      message,
+      code: "INVALID_FILE",
+    });
+    return;
+  }
+
+  if (error instanceof Error && error.message === "Format d'image non supporté") {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      code: "UNSUPPORTED_FILE_TYPE",
     });
     return;
   }

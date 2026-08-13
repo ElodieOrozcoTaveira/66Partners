@@ -2,6 +2,7 @@ import { Router } from "express";
 import { UserController } from "../controllers/user.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { validate, validateBody } from "../middlewares/validation.middleware.js";
+import { uploadImage } from "../middlewares/upload.middleware.js";
 import {
   setUserSportSchema,
   updateUserSchema,
@@ -13,6 +14,8 @@ import {
 GET /users/me
 PATCH /users/me
 DELETE /users/me
+POST /users/me/avatar
+POST /users/me/cover-photo
 GET /users/me/sports
 PUT /users/me/sports
 DELETE /users/me/sports/:sportId
@@ -25,6 +28,19 @@ const router = Router();
 router.get("/me", requireAuth, UserController.getMe);
 router.patch("/me", requireAuth, validateBody(updateUserSchema), UserController.updateMe);
 router.delete("/me", requireAuth, UserController.deleteMe);
+
+router.post(
+  "/me/avatar",
+  requireAuth,
+  uploadImage.single("file"),
+  UserController.uploadAvatar
+);
+router.post(
+  "/me/cover-photo",
+  requireAuth,
+  uploadImage.single("file"),
+  UserController.uploadCoverPhoto
+);
 
 router.get("/me/sports", requireAuth, UserController.listMySports);
 router.put(
@@ -40,9 +56,15 @@ router.delete(
   UserController.removeMySport
 );
 
-router.get("/:id", validate({ params: userIdParamSchema }), UserController.getUserById);
+router.get(
+  "/:id",
+  requireAuth,
+  validate({ params: userIdParamSchema }),
+  UserController.getUserById
+);
 router.get(
   "/:id/sports",
+  requireAuth,
   validate({ params: userIdParamSchema }),
   UserController.listUserSports
 );

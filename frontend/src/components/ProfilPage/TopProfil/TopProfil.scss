@@ -4,23 +4,63 @@
 .container-topProfile{
     display: flex;
     flex-direction: column;
-    margin-left: 1.8rem;
-    margin-top: 2rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    @media (min-width: variables.$tablet) {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    &__info{
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: 0;
+        max-width: 100%;
+    }
+
     &__h1{
+        margin: 0;
         font-size: 22px;
         font-weight: bold;
         font-family: 'Manrope',sans-serif;
-        margin-bottom: -1rem;
-        margin-left: 0.5rem;
         color: variables.$nuit;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     &__h2{
-        font-size: 16px;
-        color: gray;
-        margin-left: 0.5rem;
-        font-weight: 200;
+        margin: 0;
+        font-size: 15px;
+        color: #64748b;
+        font-weight: 500;
         font-family: 'Inter', sans-serif;
-        letter-spacing: -0.8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
+    &__edit{
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        flex-shrink: 0;
+        padding: 0.3rem 0.7rem;
+        border: 1px solid rgba(31, 41, 55, 0.15);
+        border-radius: 999px;
+        background: white;
+        color: variables.$nuit;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color 0.15s ease, color 0.15s ease;
+
+        &:hover{
+            border-color: variables.$rouge2;
+            color: variables.$rouge2;
+        }
     }
 }

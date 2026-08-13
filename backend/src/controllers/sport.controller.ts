@@ -255,4 +255,33 @@ export class SportController {
       });
     }
   }
+
+  /**
+   * GET /api/sports/favorites/:userId
+   * Liste des identifiants de sports favoris d'un utilisateur donné
+   */
+  static async listFavoritesForUser(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      if (typeof id !== "string" || !id) {
+        res.status(400).json({
+          success: false,
+          message: "Identifiant utilisateur requis",
+          code: "MISSING_USER_ID",
+        });
+        return;
+      }
+
+      const sportIds = await SportService.listFavoriteSportIds(id);
+
+      res.status(200).json({ success: true, sportIds });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des favoris:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération des favoris",
+      });
+    }
+  }
 }

@@ -7,11 +7,39 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  padding-top: calc(variables.$header-height + 0.5rem);
-  padding-bottom: 84px;
+  padding-top: calc(variables.$header-height + 0.25rem);
+  padding-bottom: 72px;
+
+  @media (min-width: variables.$laptop) {
+    padding-bottom: 0;
+  }
 }
 
 .profil-page__content {
   flex: 1;
   padding: 1rem 1rem 5rem;
+}
+
+.profil-page__state {
+  padding: calc(variables.$header-height + 2rem) 1.5rem;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  color: variables.$nuit;
+}
+
+.profil-page__body {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+
+  @media (min-width: variables.$laptop) {
+    max-width: 760px;
+    padding: 3rem 2rem 0;
+    gap: 1.5rem;
+  }
 }

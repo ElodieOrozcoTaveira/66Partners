@@ -50,7 +50,7 @@ export default function PourquoiHome() {
     <div className="container-pourquoiHome">
       <h2 className="container-pourquoiHome__h2">Pourquoi choisir 66Partners</h2>
       <p className="container-pourquoiHome__p">
-        Tout ce qu'il faut pour pratiquer ton sport, en toute confiance.
+        Tout ce qu'il faut savoir pour pratiquer ton sport, en toute confiance.
       </p>
 
       <div className="container-pourquoiHome__grid">

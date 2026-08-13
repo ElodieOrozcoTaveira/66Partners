@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'node:path';
 //Socket
 import { createServer } from 'http';
 import { initSocket } from './socket/index.js';
@@ -48,6 +49,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => res.send('Hello 66Partners!'));
 
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

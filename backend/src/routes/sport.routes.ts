@@ -7,10 +7,12 @@ import {
   sportIdParamSchema,
   updateSportSchema,
 } from "../validations/sport.validations.js";
+import { userIdParamSchema } from "../validations/user.validations.js";
 
 /*
 GET /sports
 GET /sports/favorites/mine
+GET /sports/favorites/:userId
 GET /sports/:id
 POST /sports
 POST /sports/:id/favorite
@@ -22,6 +24,12 @@ const router = Router();
 
 router.get("/", SportController.list);
 router.get("/favorites/mine", requireAuth, SportController.listMyFavorites);
+router.get(
+  "/favorites/:id",
+  requireAuth,
+  validate({ params: userIdParamSchema }),
+  SportController.listFavoritesForUser
+);
 router.get("/:id", validate({ params: sportIdParamSchema }), SportController.getById);
 router.post(
   "/:id/favorite",

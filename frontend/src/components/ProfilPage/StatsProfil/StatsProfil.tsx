@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../../contexts/AuthContext";
 import api from "../../../lib/axios";
 import "./StatsProfil.scss";
 
-export default function StatsProfil() {
-  const { user } = useAuth();
+interface StatsProfilProps {
+  userId: string | null;
+}
+
+export default function StatsProfil({ userId }: StatsProfilProps) {
   const [loading, setLoading] = useState(false);
   const [totalActivities, setTotalActivities] = useState<number | null>(null);
   const [partnersAccumulated, setPartnersAccumulated] = useState<number | null>(
@@ -12,8 +14,7 @@ export default function StatsProfil() {
   );
 
   useEffect(() => {
-    if (!user) return;
-    const userId = user.id;
+    if (!userId) return;
 
     let mounted = true;
     setLoading(true);
@@ -47,9 +48,9 @@ export default function StatsProfil() {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [userId]);
 
-  if (!user) return null;
+  if (!userId) return null;
 
   return (
     <div className="container-statprofil">

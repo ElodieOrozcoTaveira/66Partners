@@ -124,6 +124,110 @@ export class UserController {
   }
 
   /**
+   * POST /api/users/me/avatar
+   * Uploader la photo de profil de l'utilisateur authentifié
+   */
+  static async uploadAvatar(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({
+          success: false,
+          message: "Aucune image reçue",
+          code: "MISSING_FILE",
+        });
+        return;
+      }
+
+      const updatedUser = await UserService.updateUser(req.userId, {
+        avatar: `/uploads/${file.filename}`,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Photo de profil mise à jour",
+        user: updatedUser,
+      });
+    } catch (error) {
+      if (error instanceof UserError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de l'upload de la photo de profil:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de l'upload de la photo de profil",
+      });
+    }
+  }
+
+  /**
+   * POST /api/users/me/cover-photo
+   * Uploader la photo de couverture de l'utilisateur authentifié
+   */
+  static async uploadCoverPhoto(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({
+          success: false,
+          message: "Aucune image reçue",
+          code: "MISSING_FILE",
+        });
+        return;
+      }
+
+      const updatedUser = await UserService.updateUser(req.userId, {
+        coverPhoto: `/uploads/${file.filename}`,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Photo de couverture mise à jour",
+        user: updatedUser,
+      });
+    } catch (error) {
+      if (error instanceof UserError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de l'upload de la photo de couverture:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de l'upload de la photo de couverture",
+      });
+    }
+  }
+
+  /**
    * DELETE /api/users/me
    * Supprimer le compte de l'utilisateur authentifié
    */
