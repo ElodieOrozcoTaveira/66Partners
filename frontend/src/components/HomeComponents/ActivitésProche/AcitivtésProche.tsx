@@ -4,6 +4,7 @@ import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
+import { formatMonth, formatTime, formatWeekday } from "../../../lib/dateFormat";
 import ModaleContent from "../../ModaleConnexion/ModaleContent/ModaleContent";
 import ModaleRegisterContent from "../../ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
 import "./ActivitésProche.scss";
@@ -25,21 +26,6 @@ interface Activity {
 interface ActivitiesResponse {
   success: boolean;
   activities: Activity[];
-}
-
-const weekdayFormatter = new Intl.DateTimeFormat("fr-FR", { weekday: "short" });
-const monthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "short" });
-const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-function formatWeekday(date: Date): string {
-  return weekdayFormatter.format(date).replace(".", "").toUpperCase();
-}
-
-function formatMonth(date: Date): string {
-  return monthFormatter.format(date).replace(".", "").toUpperCase();
 }
 
 export default function ActivitésProche() {
@@ -134,7 +120,7 @@ export default function ActivitésProche() {
                 <h3 className="activity-card__title">{activity.title}</h3>
                 <p className="activity-card__meta">{activity.city} (66)</p>
                 <p className="activity-card__meta">
-                  {timeFormatter.format(startDate)} ·{" "}
+                  {formatTime(startDate)} ·{" "}
                   {activity.participantsCount}/{activity.maxParticipants}{" "}
                   participants
                 </p>

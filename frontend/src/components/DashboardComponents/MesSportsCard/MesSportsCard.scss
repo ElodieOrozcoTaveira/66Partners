@@ -1,0 +1,67 @@
+@use "../../../styles/variables/variables.scss";
+
+.container-messportscard {
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid rgba(31, 41, 55, 0.08);
+
+  &__h2 {
+    margin: 0 0 0.7rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+  }
+
+  &__empty {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.messportscard-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.25rem;
+  width: 52px;
+  text-decoration: none;
+
+  &__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  &__name {
+    max-width: 100%;
+    font-family: "Inter", sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: variables.$nuit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+}

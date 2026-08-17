@@ -1,0 +1,92 @@
+@use "../../../styles/variables/variables.scss";
+
+.container-prochaine {
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid rgba(31, 41, 55, 0.08);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.7rem;
+  }
+
+  &__h2 {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+  }
+
+  &__link {
+    font-family: "Inter", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: variables.$rouge2;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__empty {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
+}
+
+.prochaine-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-decoration: none;
+
+  &__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: variables.$nuit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    color: #64748b;
+  }
+
+  &__date {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: variables.$rouge2;
+  }
+}

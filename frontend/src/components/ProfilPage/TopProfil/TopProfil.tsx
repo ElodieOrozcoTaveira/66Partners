@@ -29,7 +29,9 @@ export default function TopProfile({ user, isOwnProfile = true }: TopProfileProp
             onClick={() => setIsEditOpen(true)}
           >
             <Pen size={13} strokeWidth={2.2} />
-            Modifier le profil
+            <span className="container-topProfile__editLabel">
+              Modifier le profil
+            </span>
           </button>
 
           <ModaleEditProfil

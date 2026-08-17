@@ -7,7 +7,9 @@ import CookieBanner from "./Cookie/Cookie";
 
 export default function Layout() {
   const location = useLocation();
-  const shouldShowFooter = !location.pathname.startsWith("/profile");
+  const shouldShowFooter =
+    !location.pathname.startsWith("/profile") &&
+    !location.pathname.startsWith("/dashboard");
 
   return (
     <div className="app-shell">
