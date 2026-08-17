@@ -8,7 +8,7 @@
   align-items: flex-end;
   gap: 0.75rem;
   width: 100%;
-  min-height: 140px;
+  min-height: 122px;
   @include mixins.background;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -24,15 +24,15 @@
 }
 
 .hero-profile__avatar-wrap {
-  width: 84px;
-  height: 84px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   overflow: visible;
   border: 3px solid #ffffff;
   flex-shrink: 0;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
   background: #f3f3f3;
-  margin-bottom: -44px;
+  margin-bottom: -36px;
   position: relative;
 }
 

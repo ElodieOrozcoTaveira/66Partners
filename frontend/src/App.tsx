@@ -16,6 +16,7 @@ import { PolitiqueConfidentialite } from "./pages/Confidentalité/Confidentialit
 import { MentionsLegales } from "./pages/MentionsLegales/MentionsLegales";
 import Profil from "./pages/Profil/Profil";
 import UserProfil from "./pages/UserProfil/UserProfil";
+import Dashboard from "./pages/Dashboard/Dashboard";
 
 
 export default function App() {
@@ -45,6 +46,7 @@ export default function App() {
               <Route path="/activities" element={<div>Activités — Phase 4</div>} />
               <Route path="/profile" element={<Profil/>} />
               <Route path="/profile/:userId" element={<UserProfil/>} />
+              <Route path="/dashboard" element={<Dashboard/>} />
             </Route>
           
             
