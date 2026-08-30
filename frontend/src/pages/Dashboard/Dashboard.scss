@@ -3,9 +3,15 @@
 .dashboard-page {
   min-height: 100dvh;
   box-sizing: border-box;
-  background-color: white;
-  padding-top: calc(variables.$header-height + 1rem);
+  overflow-x: hidden;
+  background-color: #ffffff;
   padding-bottom: 84px;
+
+  // Le Header réapparaît à partir de la tablette (masqué seulement en
+  // mobile, cf. Layout.tsx) : il faut donc à nouveau le dégager.
+  @media (min-width: variables.$tablet) {
+    padding-top: variables.$header-height;
+  }
 
   @media (min-width: variables.$laptop) {
     padding-bottom: 2rem;
@@ -20,10 +26,22 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
+
+  @media (min-width: variables.$tablet) {
+    max-width: 680px;
+    padding: 0 2rem;
+    gap: 1.6rem;
+  }
 
   @media (min-width: variables.$laptop) {
     max-width: 760px;
     padding: 0 2rem;
+    gap: 1.75rem;
+  }
+
+  @media (min-width: variables.$desktop) {
+    max-width: 900px;
+    gap: 2rem;
   }
 }

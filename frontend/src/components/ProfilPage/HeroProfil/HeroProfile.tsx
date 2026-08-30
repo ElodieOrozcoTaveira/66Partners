@@ -2,6 +2,8 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { Camera } from "lucide-react";
 import { useAuth, type User } from "../../../contexts/AuthContext";
 import api from "../../../lib/axios";
+import ImageCropModal from "../ImageCropModal/ImageCropModal";
+import Hamburger from "../../BurgerComponent/Hamburger/Hamburger";
 import "./HeroProfile.scss";
 
 interface HeroProfileProps {
@@ -9,27 +11,64 @@ interface HeroProfileProps {
   isOwnProfile?: boolean;
 }
 
+type CropTarget = "avatar" | "cover";
+
+const CROP_CONFIG: Record<
+  CropTarget,
+  {
+    aspect: number;
+    cropShape: "round" | "rect";
+    outputSize: { width: number; height: number };
+    title: string;
+  }
+> = {
+  avatar: {
+    aspect: 1,
+    cropShape: "round",
+    outputSize: { width: 400, height: 400 },
+    title: "Recadrer la photo de profil",
+  },
+  cover: {
+    aspect: 3,
+    cropShape: "rect",
+    outputSize: { width: 1200, height: 400 },
+    title: "Recadrer la photo de couverture",
+  },
+};
+
 export default function HeroProfile({ user, isOwnProfile = true }: HeroProfileProps) {
   const { refreshUser } = useAuth();
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState<"avatar" | "cover" | null>(null);
+  // Modification de la photo de couverture désactivée pour l'instant (cf. plus bas).
+  // const coverInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState<CropTarget | null>(null);
+  const [pendingCrop, setPendingCrop] = useState<{ target: CropTarget; src: string } | null>(
+    null,
+  );
 
   const avatarSrc = user?.avatar || "/montagne.webp";
-  const coverSrc = user?.coverPhoto;
+  const coverSrc = user?.coverPhoto || "/couverture.png";
 
-  async function handleFileChange(
-    event: ChangeEvent<HTMLInputElement>,
-    target: "avatar" | "cover",
-  ) {
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>, target: CropTarget) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
 
+    setPendingCrop({ target, src: URL.createObjectURL(file) });
+  }
+
+  function closeCropModal() {
+    if (pendingCrop) URL.revokeObjectURL(pendingCrop.src);
+    setPendingCrop(null);
+  }
+
+  async function handleCropValidate(blob: Blob) {
+    if (!pendingCrop) return;
+    const { target } = pendingCrop;
     const endpoint =
       target === "avatar" ? "/api/users/me/avatar" : "/api/users/me/cover-photo";
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", blob, `${target}.jpg`);
 
     setIsUploading(target);
     try {
@@ -37,6 +76,7 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
         headers: { "Content-Type": undefined },
       });
       await refreshUser();
+      closeCropModal();
     } catch (error) {
       console.error(`Impossible d'envoyer la photo (${target})`, error);
       window.alert("La photo n'a pas pu être envoyée.");
@@ -50,26 +90,35 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
       className="hero-profile"
       style={coverSrc ? { backgroundImage: `url(${coverSrc})` } : undefined}
     >
-      {isOwnProfile && (
-        <>
-          <button
-            type="button"
-            className="hero-profile__coverEdit"
-            onClick={() => coverInputRef.current?.click()}
-            disabled={isUploading !== null}
-            aria-label="Modifier la photo de couverture"
-          >
-            <Camera size={15} strokeWidth={2.2} />
-          </button>
-          <input
-            ref={coverInputRef}
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={(event) => handleFileChange(event, "cover")}
-          />
-        </>
-      )}
+      <div className="hero-profile__menu">
+        <Hamburger />
+      </div>
+
+      {/*
+        Modification de la photo de couverture désactivée pour l'instant.
+        Décommenter ce bloc (+ `coverInputRef` plus haut) pour la réactiver.
+
+        {isOwnProfile && (
+          <>
+            <button
+              type="button"
+              className="hero-profile__coverEdit"
+              onClick={() => coverInputRef.current?.click()}
+              disabled={isUploading !== null}
+              aria-label="Modifier la photo de couverture"
+            >
+              <Camera size={15} strokeWidth={2.2} />
+            </button>
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(event) => handleFileChange(event, "cover")}
+            />
+          </>
+        )}
+      */}
 
       <div className="hero-profile__avatar-wrap">
         <img
@@ -100,6 +149,19 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
       </div>
 
       <div className="hero-profile__content" />
+
+      {pendingCrop && (
+        <ImageCropModal
+          imageSrc={pendingCrop.src}
+          aspect={CROP_CONFIG[pendingCrop.target].aspect}
+          cropShape={CROP_CONFIG[pendingCrop.target].cropShape}
+          outputSize={CROP_CONFIG[pendingCrop.target].outputSize}
+          title={CROP_CONFIG[pendingCrop.target].title}
+          isSaving={isUploading !== null}
+          onCancel={closeCropModal}
+          onValidate={handleCropValidate}
+        />
+      )}
     </section>
   );
 }

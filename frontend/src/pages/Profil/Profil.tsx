@@ -1,6 +1,6 @@
-import BottomNavBar from "../../components/BottomNavBar/BottomNavBar";
 import AproposProfile from "../../components/ProfilPage/A propos/Apropos";
 import Dispo from "../../components/ProfilPage/Dispo/Dispo";
+import DernieresActivites from "../../components/ProfilPage/DernieresActivites/DernieresActivites";
 import HeroProfile from "../../components/ProfilPage/HeroProfil/HeroProfile";
 import MesSports from "../../components/ProfilPage/MesSports/MesSports";
 import StatsProfil from "../../components/ProfilPage/StatsProfil/StatsProfil";
@@ -16,12 +16,12 @@ export default function Profil() {
       <HeroProfile user={user} />
       <div className="profil-page__body">
         <TopProfile user={user} />
-        <StatsProfil userId={user?.id ?? null} />
         <AproposProfile bio={user?.bio ?? null} />
-        <Dispo dispo={user?.dispo ?? null} />
+        <StatsProfil userId={user?.id ?? null} />
         <MesSports userId={user?.id ?? null} />
+        <Dispo dispo={user?.dispo ?? null} />
+        <DernieresActivites userId={user?.id ?? null} />
       </div>
-      <BottomNavBar />
     </div>
   );
 }

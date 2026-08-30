@@ -1,8 +1,9 @@
 import "dotenv/config";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { activities, conversations, participations } from "../db/schema.js";
+import { activities, conversations, participations, users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
+import { NotificationService } from "./notification.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -14,6 +15,10 @@ const db = drizzle(process.env.DATABASE_URL!);
  */
 
 export type Participation = typeof participations.$inferSelect;
+export type ParticipationWithUser = Participation & {
+  userPseudo: string;
+  userAvatar: string | null;
+};
 
 // Erreurs métier personnalisées
 export class ParticipationError extends Error {
@@ -191,6 +196,15 @@ export class ParticipationService {
       await db.insert(conversations).values({ activityId: activity.id });
     }
 
+    NotificationService.create({
+      usersId: updatedParticipation.userId,
+      type: "PARTICIPATION_ACCEPTED",
+      contenu: `Ta demande pour rejoindre "${activity.title}" a été acceptée !`,
+      activityId: activity.id,
+    }).catch((err) =>
+      console.error("Erreur création notification (participation acceptée):", err),
+    );
+
     return updatedParticipation;
   }
 
@@ -249,5 +263,59 @@ export class ParticipationService {
     await db
       .delete(participations)
       .where(eq(participations.id, participationId));
+  }
+
+  /**
+   * Statut de participation de l'utilisateur pour une activité (ou null).
+   */
+  static async getMine(
+    activityId: string,
+    userId: string
+  ): Promise<Participation | null> {
+    const [participation] = await db
+      .select()
+      .from(participations)
+      .where(
+        and(
+          eq(participations.activityId, activityId),
+          eq(participations.userId, userId)
+        )
+      )
+      .limit(1);
+
+    return participation ?? null;
+  }
+
+  /**
+   * Liste des demandes de participation d'une activité (réservé au créateur).
+   */
+  static async listForActivity(
+    activityId: string,
+    requesterId: string
+  ): Promise<ParticipationWithUser[]> {
+    const activity = await getActivityOrThrow(activityId);
+
+    if (activity.creatorId !== requesterId) {
+      throw new ParticipationError(
+        "Seul le créateur de l'activité peut voir les demandes de participation",
+        "FORBIDDEN",
+        403
+      );
+    }
+
+    return db
+      .select({
+        id: participations.id,
+        userId: participations.userId,
+        activityId: participations.activityId,
+        status: participations.status,
+        createdAt: participations.createdAt,
+        userPseudo: users.pseudo,
+        userAvatar: users.avatar,
+      })
+      .from(participations)
+      .innerJoin(users, eq(users.id, participations.userId))
+      .where(eq(participations.activityId, activityId))
+      .orderBy(desc(participations.createdAt));
   }
 }

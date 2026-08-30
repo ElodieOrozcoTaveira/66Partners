@@ -1,33 +1,47 @@
 @use "../../../styles/variables/variables.scss";
-@use '../../../styles/mixins/mixins.scss';
 
 .container-dispo {
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba(31, 41, 55, 0.08);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
 
-  &__h2 {
+  &__icon {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
-    margin: 0 0 0.35rem;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #64748b;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(198, 40, 40, 0.1);
+    color: variables.$rouge2;
+  }
 
-    svg {
-      flex-shrink: 0;
-      color: variables.$rouge2;
-    }
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  &__label {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748b;
   }
 
   &__text {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     font-size: 0.85rem;
-    line-height: 1.4;
+    line-height: 1.35;
     color: variables.$nuit;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -38,7 +52,7 @@
 
   &__empty {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     font-size: 0.85rem;
     color: #94a3b8;
   }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import api from "../../../lib/axios";
-import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
+import { getSportVisual } from "../../../lib/sportVisuals";
 import "./MesSportsCard.scss";
 
 interface Sport {
@@ -66,7 +66,7 @@ export default function MesSportsCard({ userId }: MesSportsCardProps) {
       ) : (
         <div className="container-messportscard__list">
           {favoriteSports.map((sport) => {
-            const { icon: Icon, color } = getSportVisual(sport.name);
+            const { icon: Icon } = getSportVisual(sport.name);
             return (
               <NavLink
                 key={sport.id}
@@ -74,11 +74,8 @@ export default function MesSportsCard({ userId }: MesSportsCardProps) {
                 className="messportscard-item"
                 title={sport.name}
               >
-                <span
-                  className="messportscard-item__badge"
-                  style={{ backgroundColor: color }}
-                >
-                  <Icon color={getIconColor(color)} size={16} />
+                <span className="messportscard-item__badge">
+                  <Icon size={16} />
                 </span>
                 <span className="messportscard-item__name">{sport.name}</span>
               </NavLink>

@@ -10,6 +10,11 @@
     margin-top: 2.5rem;
     padding: 0 1rem;
 
+    @media (min-width: variables.$laptop) {
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+    }
+
     &__tagline{
         font-style: italic;
         font-family: 'Inter';

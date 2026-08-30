@@ -37,6 +37,9 @@
     flex-direction: column;
     border-radius: 1rem;
     background-color: white;
+    box-shadow:
+        -2px 3px 9px rgba(230, 57, 46, 0.22),
+        2px 4px 9px rgba(244, 166, 29, 0.3);
     font-family: 'Inter';
     min-height: 200px;
     min-width: 150px;
@@ -67,7 +70,12 @@
         width: 26px;
         height: 26px;
         border-radius: 50%;
+        background: #ffffff;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+
+        svg {
+            stroke: url(#sport-icon-gradient);
+        }
     }
 
     &__name {

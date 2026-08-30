@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import BottomNavBar from "../../components/BottomNavBar/BottomNavBar";
 import AproposProfile from "../../components/ProfilPage/A propos/Apropos";
 import Dispo from "../../components/ProfilPage/Dispo/Dispo";
 import HeroProfile from "../../components/ProfilPage/HeroProfil/HeroProfile";
@@ -75,7 +74,6 @@ export default function UserProfil() {
         <Dispo dispo={profileUser.dispo} isOwnProfile={false} />
         <MesSports userId={profileUser.id} isOwnProfile={false} />
       </div>
-      <BottomNavBar />
     </div>
   );
 }

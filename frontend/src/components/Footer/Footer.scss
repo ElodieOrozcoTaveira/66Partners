@@ -1,6 +1,14 @@
 @use "../../styles/variables/variables.scss";
 @use "../../styles/mixins/mixins.scss";
 
+.container-footer--laptop-only {
+  display: none;
+
+  @media (min-width: variables.$laptop) {
+    display: block;
+  }
+}
+
 .container-footer {
   position: relative;
   bottom: 0;
@@ -11,6 +19,16 @@
   min-height: 300px;
   padding: 1.5rem 2rem 2rem;
   @include mixins.background;
+  box-sizing: border-box;
+
+  @media (min-width: variables.$laptop) {
+    min-height: 0;
+    padding: 1.25rem 2rem 1.5rem;
+  }
+
+  @media (min-width: variables.$desktop) {
+    padding: 1rem 2rem 1.25rem;
+  }
 &::after {
     content: "";
     position: absolute;
@@ -56,6 +74,12 @@
         margin-left: auto;
         margin-right: auto;
         margin-top: 1.5rem;
+
+        @media (min-width: variables.$laptop) {
+            width: 90px;
+            height: 75px;
+            margin-top: 0.75rem;
+        }
     }
     &__underline{
         width: 3.5rem;
@@ -63,6 +87,10 @@
         border-radius: 2px;
         margin: 0.75rem auto 0;
         @include mixins.gradient;
+
+        @media (min-width: variables.$laptop) {
+            margin-top: 0.5rem;
+        }
     }
     &__h2bis{
         font-size: 12px;
@@ -85,6 +113,10 @@
         flex-wrap: wrap;
         gap: 0.5rem;
         margin-top: 1.25rem;
+
+        @media (min-width: variables.$laptop) {
+            margin-top: 0.75rem;
+        }
     }
 
     &__doclink{

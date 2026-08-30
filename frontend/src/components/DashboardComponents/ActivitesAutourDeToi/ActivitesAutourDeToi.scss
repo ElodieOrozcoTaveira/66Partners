@@ -3,12 +3,10 @@
 .container-autourdetoi {
   &__h2 {
     margin: 0 0 0.7rem;
-    font-family: "Inter", sans-serif;
-    font-size: 0.7rem;
+    font-family: "Manrope", sans-serif;
+    font-size: 1rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #64748b;
+    color: variables.$nuit;
   }
 
   &__empty {
@@ -36,6 +34,21 @@
 
     .activity-card {
       flex: 0 0 200px;
+      position: relative;
     }
   }
+}
+
+.autourdetoi-mine-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: variables.$rouge2;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
 }

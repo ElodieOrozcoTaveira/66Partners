@@ -62,12 +62,13 @@ export class ActivityController {
    */
   static async list(req: Request, res: Response): Promise<void> {
     try {
-      const { city, sportId, status } = req.query;
+      const { city, sportId, status, participantId } = req.query;
 
       const filters: Parameters<typeof ActivityService.listActivities>[0] = {};
       if (typeof city === "string") filters.city = city;
       if (typeof sportId === "string") filters.sportId = sportId;
       if (typeof status === "string") filters.status = status as ActivityStatus;
+      if (typeof participantId === "string") filters.participantId = participantId;
 
       const activitiesList = await ActivityService.listActivities(filters);
 

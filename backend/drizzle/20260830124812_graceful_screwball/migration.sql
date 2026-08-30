@@ -1,0 +1,4 @@
+ALTER TABLE "activities" DROP CONSTRAINT "activities_creator_id_users_id_fkey", ADD CONSTRAINT "activities_creator_id_users_id_fkey" FOREIGN KEY ("creator_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "messages" DROP CONSTRAINT "messages_users_id_users_id_fkey", ADD CONSTRAINT "messages_users_id_users_id_fkey" FOREIGN KEY ("users_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "messages" DROP CONSTRAINT "messages_conversations_id_conversations_id_fkey", ADD CONSTRAINT "messages_conversations_id_conversations_id_fkey" FOREIGN KEY ("conversations_id") REFERENCES "conversations"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "opinion" DROP CONSTRAINT "opinion_users_id_users_id_fkey", ADD CONSTRAINT "opinion_users_id_users_id_fkey" FOREIGN KEY ("users_id") REFERENCES "users"("id") ON DELETE CASCADE;

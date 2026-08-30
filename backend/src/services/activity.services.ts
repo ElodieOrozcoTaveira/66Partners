@@ -56,6 +56,8 @@ export interface ActivityFilters {
   city?: string;
   sportId?: string;
   status?: ActivityStatus;
+  /** Ne retourne que les activités où cet utilisateur a une participation acceptée */
+  participantId?: string;
 }
 
 // Erreurs métier personnalisées
@@ -111,14 +113,36 @@ export class ActivityService {
   /**
    * Récupération d'une activité par son ID
    */
-  static async getActivityById(activityId: string): Promise<Activity | null> {
+  static async getActivityById(activityId: string): Promise<ActivityWithDetails | null> {
     const [activity] = await db
-      .select()
+      .select({
+        id: activities.id,
+        title: activities.title,
+        description: activities.description,
+        city: activities.city,
+        startDate: activities.startDate,
+        latitude: activities.latitude,
+        longitude: activities.longitude,
+        levelRequired: activities.levelRequired,
+        maxParticipants: activities.maxParticipants,
+        status: activities.status,
+        sportId: activities.sportId,
+        creatorId: activities.creatorId,
+        createdAt: activities.createdAt,
+        updatedAt: activities.updatedAt,
+        sportName: sports.name,
+        participantsCount: sql<number>`count(distinct case when ${participations.status} = 'ACCEPTED' then ${participations.id} end)`,
+      })
       .from(activities)
+      .innerJoin(sports, eq(sports.id, activities.sportId))
+      .leftJoin(participations, eq(participations.activityId, activities.id))
       .where(eq(activities.id, activityId))
+      .groupBy(activities.id, sports.name)
       .limit(1);
 
-    return activity ?? null;
+    if (!activity) return null;
+
+    return { ...activity, participantsCount: Number(activity.participantsCount) };
   }
 
   /**
@@ -126,12 +150,20 @@ export class ActivityService {
    * le nombre réel de participants acceptés (calculé à la volée).
    */
   static async listActivities(filters: ActivityFilters = {}): Promise<ActivityWithDetails[]> {
-    const { city, sportId, status } = filters;
+    const { city, sportId, status, participantId } = filters;
 
     const conditions = [
       city ? eq(activities.city, city) : undefined,
       sportId ? eq(activities.sportId, sportId) : undefined,
       status ? eq(activities.status, status) : undefined,
+      participantId
+        ? sql`exists (
+            select 1 from ${participations} as participant_filter
+            where participant_filter.activity_id = ${activities.id}
+              and participant_filter.user_id = ${participantId}::uuid
+              and participant_filter.status = 'ACCEPTED'
+          )`
+        : undefined,
     ].filter((condition) => condition !== undefined);
 
     const rows = await db

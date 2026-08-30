@@ -21,6 +21,14 @@
     transform: translateY(-100%);
   }
 
+  &--hide-mobile {
+    display: none;
+
+    @media (min-width: variables.$tablet) {
+      display: flex;
+    }
+  }
+
   &::after {
     content: "";
     position: absolute;
@@ -57,35 +65,55 @@
   opacity: 0.95;
 }
 
-@media (min-width: variables.$laptop) {
+@media (min-width: variables.$tablet) {
   .container-header__nav {
     display: flex;
     align-items: center;
     flex: 1;
-    gap: 1.25rem;
-    margin: 0 1.5rem;
+    min-width: 0;
+    gap: 1rem;
+    margin: 0 0 0 1.5rem;
 
     a {
+      position: relative;
       color: variables.$nuit;
       text-decoration: none;
       font-family: "Inter";
       font-size: 0.85rem;
-      font-weight: bold;
+      font-weight: 600;
       white-space: nowrap;
-      padding: 0.7rem 0.9rem;
-      border-radius: 15px;
-      transition:
-        color 0.25s ease,
-        transform 0.25s ease;
+      padding: 0.5rem 0;
+      transition: color 0.2s ease;
+
+      &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -2px;
+        height: 3px;
+        border-radius: 3px;
+        background: variables.$rouge;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.2s ease;
+      }
 
       &:hover {
-        color: whitesmoke;
-        @include mixins.gradient;
-        transform: translateY(-2px);
+        color: variables.$rouge;
+
+        &::after {
+          transform: scaleX(1);
+        }
       }
 
       &[aria-current="page"] {
         color: variables.$rouge;
+        font-weight: 700;
+
+        &::after {
+          transform: scaleX(1);
+        }
       }
     }
 
@@ -95,22 +123,69 @@
       align-items: center;
       margin-bottom: 0;
       margin-left: auto;
-      gap: 0.4rem;
+      gap: 0.6rem;
       padding-top: 0;
-      padding-left: 1.25rem;
       border-top: none;
-      border-left: 1px solid rgb(238, 238, 238);
 
       &__links1,
       &__links2 {
         width: auto;
-        padding: 0.6rem 1.1rem;
-        font-size: 13px;
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
         white-space: nowrap;
+        box-sizing: border-box;
+      }
+
+      &__links1 {
+        border-radius: 999px;
+        box-shadow: 0 8px 20px rgba(variables.$rouge, 0.28);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 24px rgba(variables.$rouge, 0.36);
+        }
       }
 
       &__links2 {
-        padding-right: 1.1rem;
+        border-radius: 999px;
+        background: transparent;
+        border: 1.5px solid rgba(variables.$nuit, 0.18);
+        color: variables.$nuit;
+        transition: border-color 0.2s ease, color 0.2s ease;
+
+        &:hover {
+          border-color: variables.$rouge;
+          color: variables.$rouge;
+        }
+      }
+    }
+  }
+}
+
+// Plage tablette uniquement : la nav était pensée pour du laptop (1024px+),
+// on resserre pour que tout tienne entre 768 et 1023px.
+@media (min-width: variables.$tablet) and (max-width: 1023px) {
+  .container-header__leftside img {
+    width: 110px;
+    height: auto;
+  }
+
+  .container-header__nav {
+    gap: 0.6rem;
+    margin-left: 0.75rem;
+
+    a {
+      font-size: 0.78rem;
+    }
+
+    .container-connexion {
+      gap: 0.4rem;
+
+      &__links1,
+      &__links2 {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.72rem;
       }
     }
   }
@@ -118,12 +193,21 @@
 
 @media (min-width: variables.$desktop){
   .container-header__nav{
-    gap: 2.5rem;
+    gap: 2rem;
+    margin-left: 25rem;
+
     a{
       font-size: 1rem;
     }
+
+    .container-connexion {
+      gap: 0.75rem;
+
+      &__links1,
+      &__links2 {
+        padding: 0.75rem 1.4rem;
+        font-size: 0.85rem;
+      }
+    }
   }
-  .container-header__leftside img {
-  margin-right: 22rem;
-}
 }

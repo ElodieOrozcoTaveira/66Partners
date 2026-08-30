@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { Clock, MapPin, Users } from "lucide-react";
 import api from "../../lib/axios";
+import Recherche from "../../components/SportsComponents/Recherche/Recheche";
 import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
+import { getSportPhoto } from "../../lib/sportPhotos";
+import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
+import { formatMonth, formatWeekday } from "../../lib/dateFormat";
 import "./Explorer.scss";
+
+type ActivityStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
 interface Sport {
   id: string;
   name: string;
 }
-
-type ActivityLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
-type ActivityStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
 interface Activity {
   id: string;
@@ -19,8 +24,10 @@ interface Activity {
   startDate: string;
   levelRequired: ActivityLevel;
   maxParticipants: number;
+  participantsCount: number;
   status: ActivityStatus;
   sportId: string;
+  sportName: string;
 }
 
 interface SportsResponse {
@@ -33,13 +40,6 @@ interface ActivitiesResponse {
   activities: Activity[];
 }
 
-const LEVEL_LABELS: Record<ActivityLevel, string> = {
-  BEGINNER: "Débutant",
-  INTERMEDIATE: "Intermédiaire",
-  ADVANCED: "Avancé",
-  EXPERT: "Expert",
-};
-
 const STATUS_LABELS: Record<ActivityStatus, string> = {
   PENDING: "Ouverte",
   CONFIRMED: "Confirmée",
@@ -47,10 +47,7 @@ const STATUS_LABELS: Record<ActivityStatus, string> = {
   COMPLETED: "Terminée",
 };
 
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
+const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
   hour: "2-digit",
   minute: "2-digit",
 });
@@ -58,6 +55,8 @@ const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
 export default function Explorer() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
+  const [selectedSportId, setSelectedSportId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,10 +73,22 @@ export default function Explorer() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const sportsById = useMemo(
-    () => new Map(sports.map((sport) => [sport.id, sport.name])),
-    [sports],
+  const practicedSportIds = useMemo(
+    () => new Set(activities.map((activity) => activity.sportId)),
+    [activities],
   );
+
+  const availableSports = useMemo(
+    () => sports.filter((sport) => practicedSportIds.has(sport.id)),
+    [sports, practicedSportIds],
+  );
+
+  const filteredActivities = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return activities
+      .filter((activity) => !selectedSportId || activity.sportId === selectedSportId)
+      .filter((activity) => !query || activity.title.toLowerCase().includes(query));
+  }, [activities, selectedSportId, search]);
 
   if (isLoading)
     return <p className="explorer-state">Chargement des activités...</p>;
@@ -93,46 +104,127 @@ export default function Explorer() {
         toi.
       </p>
 
-      {activities.length === 0 ? (
-        <p className="explorer-state">Aucune activité pour le moment.</p>
+      <Recherche
+        value={search}
+        onChange={setSearch}
+        placeholder="Rechercher une activité..."
+      />
+
+      {availableSports.length > 0 && (
+        <div className="container-explorer__filters">
+          <button
+            type="button"
+            className={`filter-chip${selectedSportId === null ? " filter-chip--active" : ""}`}
+            onClick={() => setSelectedSportId(null)}
+          >
+            Tous
+          </button>
+          {availableSports.map((sport) => {
+            const { icon: Icon, color } = getSportVisual(sport.name);
+            const isActive = selectedSportId === sport.id;
+            return (
+              <button
+                key={sport.id}
+                type="button"
+                className={`filter-chip${isActive ? " filter-chip--active" : ""}`}
+                style={isActive ? { backgroundColor: color, borderColor: color } : undefined}
+                onClick={() => setSelectedSportId(sport.id)}
+              >
+                <Icon size={14} color={isActive ? getIconColor(color) : color} />
+                {sport.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {filteredActivities.length === 0 ? (
+        <p className="explorer-state">
+          {search.trim() || selectedSportId
+            ? "Aucune activité ne correspond à ta recherche."
+            : "Aucune activité pour le moment."}
+        </p>
       ) : (
-        <ul className="container-explorer__list">
-          {activities.map((activity) => {
-            const sportName = sportsById.get(activity.sportId) ?? "Sport";
-            const { icon: Icon, color } = getSportVisual(sportName);
+        <div className="container-explorer__grid">
+          {filteredActivities.map((activity) => {
+            const { icon: Icon, color } = getSportVisual(activity.sportName);
+            const startDate = new Date(activity.startDate);
+            const isFull = activity.participantsCount >= activity.maxParticipants;
 
             return (
-              <li key={activity.id} className="activity-card">
-                <span
-                  className="activity-card__circle"
-                  style={{ backgroundColor: color }}
-                >
-                  <Icon color={getIconColor(color)} size={20} />
-                </span>
-                <div className="activity-card__body">
-                  <h2 className="activity-card__title">{activity.title}</h2>
-                  <p className="activity-card__meta">
-                    {sportName} · {activity.city} ·{" "}
-                    {dateFormatter.format(new Date(activity.startDate))}
-                  </p>
-                  <div className="activity-card__tags">
-                    <span className="activity-card__tag">
-                      {LEVEL_LABELS[activity.levelRequired]}
-                    </span>
-                    <span className="activity-card__tag">
-                      Max {activity.maxParticipants} pers.
-                    </span>
+              <NavLink
+                key={activity.id}
+                to={`/activities/${activity.id}`}
+                className="activity-card"
+              >
+                <div className="activity-card__photo-wrap">
+                  <img
+                    src={getSportPhoto(activity.sportName)}
+                    alt={activity.sportName}
+                    className="activity-card__photo"
+                    loading="lazy"
+                  />
+                  <div className="activity-card__photo-overlay" />
+
+                  <span
+                    className="activity-card__sport-badge"
+                    style={{ backgroundColor: color }}
+                  >
+                    <Icon size={16} color={getIconColor(color)} />
+                    {activity.sportName}
+                  </span>
+
+                  {activity.status !== "PENDING" && (
                     <span
-                      className={`activity-card__tag activity-card__tag--${activity.status.toLowerCase()}`}
+                      className={`activity-card__status activity-card__status--${activity.status.toLowerCase()}`}
                     >
                       {STATUS_LABELS[activity.status]}
                     </span>
+                  )}
+
+                  <div className="activity-card__date">
+                    <span className="activity-card__date-day">
+                      {formatWeekday(startDate)}
+                    </span>
+                    <span className="activity-card__date-number">
+                      {startDate.getDate()}
+                    </span>
+                    <span className="activity-card__date-month">
+                      {formatMonth(startDate)}
+                    </span>
                   </div>
                 </div>
-              </li>
+
+                <div className="activity-card__body">
+                  <h2 className="activity-card__title">{activity.title}</h2>
+
+                  <div className="activity-card__meta">
+                    <span>
+                      <MapPin size={14} />
+                      {activity.city}
+                    </span>
+                    <span>
+                      <Clock size={14} />
+                      {timeFormatter.format(startDate)}
+                    </span>
+                  </div>
+
+                  <div className="activity-card__footer">
+                    <span className="activity-card__level">
+                      {LEVEL_LABELS[activity.levelRequired]}
+                    </span>
+                    <span
+                      className={`activity-card__participants${isFull ? " activity-card__participants--full" : ""}`}
+                    >
+                      <Users size={14} />
+                      {activity.participantsCount}/{activity.maxParticipants}
+                    </span>
+                  </div>
+                </div>
+              </NavLink>
             );
           })}
-        </ul>
+        </div>
       )}
     </div>
   );

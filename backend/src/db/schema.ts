@@ -20,6 +20,8 @@ export const users = pgTable("users", {
   coverPhoto: varchar("cover_photo", { length: 255 }),
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
+  resetPasswordTokenHash: varchar("reset_password_token_hash", { length: 64 }),
+  resetPasswordExpiresAt: timestamp("reset_password_expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -60,7 +62,7 @@ export const activities = pgTable("activities", {
   maxParticipants: integer("max_participants").notNull(),
   status: activitiesStatusEnum("status").notNull().default("PENDING"),
   sportId: uuid("sport_id").notNull().references(() => sports.id),
-  creatorId: uuid("creator_id").notNull().references(() => users.id),
+  creatorId: uuid("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -85,17 +87,26 @@ export const messages = pgTable("messages", {
     id: uuid("id").defaultRandom().primaryKey(),
     contenu: text("contenu"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    usersId: uuid("users_id").notNull().references(()=>users.id),
-    conversationsId: uuid("conversations_id").notNull().references(()=>conversations.id),
+    usersId: uuid("users_id").notNull().references(()=>users.id, { onDelete: "cascade" }),
+    conversationsId: uuid("conversations_id").notNull().references(()=>conversations.id, { onDelete: "cascade" }),
 })
+
+export const activityPhotos = pgTable("activity_photos", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  activityId: uuid("activity_id").notNull().references(() => activities.id, { onDelete: "cascade" }),
+  uploaderId: uuid("uploader_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  url: varchar("url", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
 export const notifications = pgTable("notifications", {
     id: uuid("id").defaultRandom().primaryKey(),
     type: varchar("type", { length: 100 }).notNull(),
     contenu: text("contenu"),
-    estLu: boolean("est_lu"),
+    estLu: boolean("est_lu").default(false),
+    activityId: uuid("activity_id").references(() => activities.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    usersId: uuid("users_id").notNull().references(()=>users.id),
+    usersId: uuid("users_id").notNull().references(()=>users.id, { onDelete: "cascade" }),
 })
 
 export const opinion = pgTable("opinion", {
@@ -103,7 +114,7 @@ export const opinion = pgTable("opinion", {
     notes: smallint("notes"),
     commentaire: text("commentaire"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    usersId: uuid("users_id").notNull().references(()=>users.id),
+    usersId: uuid("users_id").notNull().references(()=>users.id, { onDelete: "cascade" }),
 
 })
 

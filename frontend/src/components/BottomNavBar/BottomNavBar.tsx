@@ -1,25 +1,54 @@
-import { CalendarDays, House, MessageSquareMore, User } from "lucide-react";
+import { CalendarDays, House, MessageSquareMore, Plus, User } from "lucide-react";
 import { createPortal } from "react-dom";
 import { NavLink } from "react-router-dom";
+import { useNotifications } from "../../contexts/NotificationsContext";
 import "./BottomNavBar.scss";
 
-const NAV_ITEMS = [
+const NAV_ITEMS_LEFT = [
   { to: "/dashboard", icon: House, label: "Accueil" },
-  { to: "/homeActivities", icon: CalendarDays, label: "Activités" },
-  { to: "/homeMessages", icon: MessageSquareMore, label: "Messages" },
+  { to: "/mesactivités", icon: CalendarDays, label: "Activités" },
+];
+
+const NAV_ITEMS_RIGHT = [
+  { to: "/messages", icon: MessageSquareMore, label: "Messages" },
   { to: "/profile", icon: User, label: "Profil" },
 ];
 
 export default function BottomNavBar() {
+  const { unreadMessagesCount } = useNotifications();
+
+  function renderItem({
+    to,
+    icon: Icon,
+    label,
+  }: (typeof NAV_ITEMS_LEFT)[number]) {
+    return (
+      <NavLink key={to} to={to} className="container-bottomNavbar__link">
+        <span className="container-bottomNavbar__icon-wrap">
+          <Icon size={20} strokeWidth={2} />
+          {to === "/messages" && unreadMessagesCount > 0 && (
+            <span className="container-bottomNavbar__badge">
+              {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+            </span>
+          )}
+        </span>
+        <span className="container-bottomNavbar__label">{label}</span>
+      </NavLink>
+    );
+  }
+
   return createPortal(
     <div className="container-bottomNavbar">
       <nav className="container-bottomNavbar__nav">
-        {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
-          <NavLink key={to} to={to} className="container-bottomNavbar__link">
-            <Icon size={20} strokeWidth={2} />
-            <span className="container-bottomNavbar__label">{label}</span>
-          </NavLink>
-        ))}
+        {NAV_ITEMS_LEFT.map(renderItem)}
+        <NavLink
+          to="/mesactivités/nouvelle"
+          className="container-bottomNavbar__create"
+          aria-label="Créer une activité"
+        >
+          <Plus size={22} strokeWidth={2.4} />
+        </NavLink>
+        {NAV_ITEMS_RIGHT.map(renderItem)}
       </nav>
     </div>,
     document.body,

@@ -1,8 +1,10 @@
 @use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
 
 .container-bonjour {
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 0.5rem;
   padding: 2rem 1rem 1rem 1rem;
   margin-top: -1rem;
@@ -23,6 +25,30 @@
 
   &--clickable {
     cursor: pointer;
+    @include mixins.gradient;
+    filter: none;
+    border-bottom: none;
+
+    .container-bonjour__h3 {
+      color: #ffffff;
+      text-shadow: none;
+    }
+
+    .container-bonjour__p {
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: none;
+    }
+  }
+
+  &__rightside {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__chevron {
+    flex-shrink: 0;
+    margin-left: auto;
+    color: #ffffff;
   }
 
   &__img {

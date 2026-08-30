@@ -1,3 +1,4 @@
+import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import "./Bonjour.scss";
@@ -43,12 +44,15 @@ export default function Bonjour({ onNavigate }: BonjourProps) {
         </section>
         <section className="container-bonjour__rightside">
           <h3 className="container-bonjour__h3">
-            Bonjour {user ? user.pseudo : ""} !👋
+            {user ? user.pseudo : "Bonjour !👋"}
           </h3>
           <p className="container-bonjour__p">
-            Prêt pour de nouvelles aventures?{" "}
+            {user ? "Voir mon profil" : "Prêt pour de nouvelles aventures ?"}
           </p>
         </section>
+        {user && (
+          <ChevronRight className="container-bonjour__chevron" size={20} strokeWidth={2.4} />
+        )}
       </div>
     </>
   );

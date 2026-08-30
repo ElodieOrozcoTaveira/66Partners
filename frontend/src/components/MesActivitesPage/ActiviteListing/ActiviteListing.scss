@@ -1,0 +1,116 @@
+@use "../../../styles/variables/variables.scss";
+
+.activite-listing {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.activite-listing__empty {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.activite-listing__section-title {
+  margin: 0 0 0.7rem;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.activite-listing__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+
+  @media (min-width: variables.$laptop) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
+  }
+}
+
+.activite-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  text-decoration: none;
+
+  &__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: variables.$nuit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    color: #64748b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__pill {
+    align-self: flex-start;
+    margin-top: 0.1rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 20px;
+    background: rgba(102, 187, 106, 0.16);
+    color: #2e7d32;
+    font-family: "Inter", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  &__done {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(102, 187, 106, 0.16);
+    color: #2e7d32;
+  }
+}

@@ -8,9 +8,9 @@ import { verifyToken } from "../utils/jwt.js";
 import {
   activities,
   conversations,
-  messages,
   participations,
 } from "../db/schema.js";
+import { ConversationService, ConversationError } from "../services/conversation.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -134,26 +134,14 @@ export const initSocket = (httpServer: HttpServer) => {
           return;
         }
 
-        const allowed = await isParticipantOfConversation(
-          userId,
-          conversationId,
-        );
-        if (!allowed) {
-          socket.emit("error", { message: "Accès refusé." });
-          return;
-        }
-
         try {
-          const [newMessage] = await db
-            .insert(messages)
-            .values({
-              contenu,
-              usersId: userId,
-              conversationsId: conversationId,
-            })
-            .returning();
-
-          if (!newMessage) throw new Error("Insert message failed");
+          // Délègue au service partagé avec la route REST : autorisation,
+          // insertion et notification des autres participants en un seul endroit.
+          const newMessage = await ConversationService.sendMessage(
+            conversationId,
+            userId,
+            contenu,
+          );
 
           io.to(`conversation:${conversationId}`).emit("new_message", {
             id: newMessage.id,
@@ -163,6 +151,10 @@ export const initSocket = (httpServer: HttpServer) => {
             createdAt: newMessage.createdAt,
           });
         } catch (err) {
+          if (err instanceof ConversationError) {
+            socket.emit("error", { message: err.message });
+            return;
+          }
           console.error("Erreur envoi message:", err);
           socket.emit("error", {
             message: "Erreur lors de l'envoi du message.",
