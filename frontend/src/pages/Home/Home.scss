@@ -15,18 +15,30 @@
 .container-home {
   position: relative;
   isolation: isolate;
-  height: 100vh;
+  overflow: hidden;
+  min-height: 100vh;
   width: 100%;
+  box-sizing: border-box;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
   background-color: variables.$nuit;
-  background-image: url("/accueil.webp");
+  background-image: url("/accueil1.png");
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: top 20% left 30%;
-  padding-top: 8rem;
+  background-position: top 20% left 75%;
+  padding: calc(variables.$header-height + 2rem) 0 4rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0 0 40px 40px;
   animation: home-fade-in 0.9s ease both;
+
+  @media (min-width: variables.$tablet) {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 8rem 0 3rem;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;
@@ -50,15 +62,26 @@
     position: relative;
     z-index: 1;
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 0.85rem;
-    width: 70%;
-    max-width: 32rem;
+    width: 100%;
+    max-width: 30rem;
     padding-left: clamp(1.5rem, 6vw, 5rem);
     padding-right: clamp(1.5rem, 6vw, 3rem);
+    box-sizing: border-box;
+
+    @media (min-width: variables.$tablet) {
+      width: 70%;
+      max-width: 32rem;
+    }
+
+    @media (min-width: variables.$desktop) {
+      max-width: 38rem;
+    }
   }
   &__h3 {
-    margin: 0;
+    margin-top: 5rem;
     color: orangered;
     text-transform: uppercase;
     font-size: 16px;
@@ -68,37 +91,82 @@
     color: whitesmoke;
     text-transform: uppercase;
     font-size: 16px;
-
   }
   &__h1 {
     margin: 0;
     color: whitesmoke;
     font-size: 31px;
     margin-bottom: 2rem;
+
+    @media (min-width: variables.$desktop) {
+      font-size: 40px;
+    }
   }
   &__span {
-    color: variables.$jaune2;
+    background: linear-gradient(
+      90deg,
+      variables.$rouge 0%,
+      #f66a1a 55%,
+      variables.$jaune 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
   }
   &__p {
+    margin-top: auto;
     margin-bottom: 0.5rem;
     color: whitesmoke;
   }
-  &__explorer {
+
+  &__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  &__btn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    min-width: 330px;
     box-sizing: border-box;
-    margin-top: 0.5rem;
-    padding: 0.85rem 1.5rem;
-    @include mixins.gradient;
-    border-radius:18px;
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
     text-decoration: none;
-    color: whitesmoke;
     font-family: "Inter";
     font-weight: bold;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
+
+    &--primary {
+      @include mixins.gradient;
+      color: whitesmoke;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(variables.$rouge, 0.4);
+      }
+    }
+
+    &--secondary {
+      color: whitesmoke;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(2px);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.16);
+        border-color: whitesmoke;
+        transform: translateY(-2px);
+      }
+    }
   }
 }
-
-

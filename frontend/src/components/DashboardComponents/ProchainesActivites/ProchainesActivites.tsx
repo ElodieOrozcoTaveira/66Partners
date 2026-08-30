@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 import api from "../../../lib/axios";
+import { useAuth } from "../../../contexts/AuthContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { formatMonth, formatTime, formatWeekday } from "../../../lib/dateFormat";
 import "./ProchainesActivites.scss";
@@ -12,6 +13,7 @@ interface Activity {
   startDate: string;
   status: string;
   sportName: string;
+  creatorId: string;
 }
 
 interface ActivitiesResponse {
@@ -20,19 +22,34 @@ interface ActivitiesResponse {
 }
 
 export default function ProchainesActivites() {
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const { user } = useAuth();
+  const [organized, setOrganized] = useState<Activity[]>([]);
+  const [joined, setJoined] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
     let mounted = true;
+    setIsLoading(true);
 
-    api
-      .get<ActivitiesResponse>("/api/activities")
-      .then((res) => {
-        if (mounted) setActivities(res.data.activities);
+    Promise.all([
+      api.get<ActivitiesResponse>("/api/activities"),
+      api.get<ActivitiesResponse>("/api/activities", {
+        params: { participantId: user.id },
+      }),
+    ])
+      .then(([allRes, joinedRes]) => {
+        if (!mounted) return;
+        setOrganized(
+          allRes.data.activities.filter((activity) => activity.creatorId === user.id),
+        );
+        setJoined(joinedRes.data.activities);
       })
       .catch(() => {
-        if (mounted) setActivities([]);
+        if (mounted) {
+          setOrganized([]);
+          setJoined([]);
+        }
       })
       .finally(() => {
         if (mounted) setIsLoading(false);
@@ -41,11 +58,14 @@ export default function ProchainesActivites() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user]);
 
   const next = useMemo(() => {
     const now = Date.now();
-    return activities
+    const byId = new Map<string, Activity>();
+    [...organized, ...joined].forEach((activity) => byId.set(activity.id, activity));
+
+    return Array.from(byId.values())
       .filter(
         (activity) =>
           new Date(activity.startDate).getTime() > now &&
@@ -54,13 +74,13 @@ export default function ProchainesActivites() {
       .sort(
         (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
       )[0];
-  }, [activities]);
+  }, [organized, joined]);
 
   return (
     <div className="container-prochaine">
       <div className="container-prochaine__header">
         <h2 className="container-prochaine__h2">Prochaines activités</h2>
-        <NavLink to="/explorer" className="container-prochaine__link">
+        <NavLink to="/mesactivités" className="container-prochaine__link">
           Voir tout
         </NavLink>
       </div>
@@ -69,10 +89,10 @@ export default function ProchainesActivites() {
         <p className="container-prochaine__empty">Chargement...</p>
       ) : !next ? (
         <p className="container-prochaine__empty">
-          Aucune activité à venir pour le moment.
+          Tu n'as pas d'activité à venir pour le moment.
         </p>
       ) : (
-        <NavLink to="/explorer" className="prochaine-card">
+        <NavLink to={`/activities/${next.id}`} className="prochaine-card">
           {(() => {
             const { icon: Icon, color } = getSportVisual(next.sportName);
             const startDate = new Date(next.startDate);

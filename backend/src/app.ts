@@ -15,6 +15,8 @@ import sportRoutes from './routes/sport.routes.js';
 import participationRoutes from './routes/participation.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import { activityConversationRouter, conversationRouter } from './routes/conversation.routes.js';
+import { activityPhotoRouter, photoRouter } from './routes/activityPhoto.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import { getAllowedOrigins, helmetOptions, verifyOrigin } from './middlewares/security.middleware.js';
 
@@ -59,6 +61,9 @@ app.use('/api/participations', participationRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/activities', activityConversationRouter);
 app.use('/api/conversations', conversationRouter);
+app.use('/api/activities', activityPhotoRouter);
+app.use('/api/activity-photos', photoRouter);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 // Route de santé

@@ -5,16 +5,21 @@ import FollowUs from '../BurgerComponent/followUs/FollowUs';
 import { useRevealOnScroll } from '../../hooks/useRevealOnScroll';
 import Fleche from '../Fleche/Fleche';
 
-export default function Footer() {
+interface FooterProps {
+    /** Masqué en mobile/tablette, visible seulement à partir du laptop */
+    hideOnMobile?: boolean;
+}
+
+export default function Footer({ hideOnMobile = false }: FooterProps) {
     const { ref, visible } = useRevealOnScroll<HTMLElement>(0.1);
 
     return(
         <>
             <footer
                 ref={ref}
-                className={`container-footer reveal-on-scroll${visible ? ' is-visible' : ''}`}
+                className={`container-footer reveal-on-scroll${visible ? ' is-visible' : ''}${hideOnMobile ? ' container-footer--laptop-only' : ''}`}
             >
-                <img src="/newLogo.png" alt="logo de l'application"
+                <img src="/logo3.png" alt="logo de l'application"
                 height={100}
                 width={120} className="container-footer__img" />
                 <div className="container-footer__underline"></div>

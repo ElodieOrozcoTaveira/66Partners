@@ -1,0 +1,41 @@
+@use "../../styles/variables/variables.scss";
+
+.mesactivites-page {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  padding-top: calc(variables.$header-height + 1rem);
+  padding-bottom: 84px;
+
+  @media (min-width: variables.$laptop) {
+    padding-bottom: 2rem;
+  }
+}
+
+.mesactivites-page__body {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  @media (min-width: variables.$tablet) {
+    max-width: 680px;
+    padding: 0 2rem;
+    gap: 1.4rem;
+  }
+
+  @media (min-width: variables.$laptop) {
+    max-width: 760px;
+    padding: 0 2rem;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: variables.$desktop) {
+    max-width: 900px;
+    gap: 1.75rem;
+  }
+}

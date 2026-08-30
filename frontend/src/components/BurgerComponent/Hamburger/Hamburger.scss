@@ -122,7 +122,8 @@
   color: white;
 }
 
-.navbar-item:hover {
+.navbar-item:hover,
+.navbar-item:has(a[aria-current="page"]) {
   background: linear-gradient(
         90deg,
         rgba(230, 57, 46, 0.1) 0%,
@@ -130,8 +131,9 @@
         rgba(246, 106, 26, 0.1) 70%,
         rgba(244, 166, 29, 0.1) 100%
     );
+  border-radius: 12px;
   }
-    
+
 
 .navbar-item a:hover {
   color: orangered;
@@ -163,19 +165,10 @@
   pointer-events: none;
 }
 
-// Version Tablette
-
-@media screen and (min-width:variables.$tablet) and (max-width:1023px){
-  .navbar-panel{
-    width: 45vw;
-  }
-  .navbar-item a {
-    font-size: 0.9rem;
-    padding-bottom: 1.35rem;
-  }
-}
-
-@media (min-width:variables.$laptop){
+// À partir de la tablette, la navigation passe par le Header (liens visibles,
+// cf. Header.scss) plutôt que par le burger — cohérent avec la bottom nav qui
+// disparaît elle aussi à ce même seuil (cf. BottomNavBar.scss).
+@media (min-width:variables.$tablet){
   .navbar{
     display: none;
   }

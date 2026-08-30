@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pen } from "lucide-react";
+import { MapPin, Pen } from "lucide-react";
 import type { User } from "../../../contexts/AuthContext";
 import ModaleEditProfil from "../ModaleEditProfil/ModaleEditProfil";
 import "./TopProfil.scss";
@@ -18,7 +18,10 @@ export default function TopProfile({ user, isOwnProfile = true }: TopProfileProp
     <div className="container-topProfile">
       <div className="container-topProfile__info">
         <h1 className="container-topProfile__h1">{pseudo}</h1>
-        <h2 className="container-topProfile__h2">{city}</h2>
+        <h2 className="container-topProfile__h2">
+          <MapPin size={12} strokeWidth={2.4} />
+          {city}
+        </h2>
       </div>
 
       {isOwnProfile && (

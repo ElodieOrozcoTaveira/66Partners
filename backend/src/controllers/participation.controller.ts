@@ -223,4 +223,75 @@ export class ParticipationController {
       });
     }
   }
+
+  /**
+   * GET /api/activities/:id/my-participation
+   * Statut de la participation de l'utilisateur authentifié pour cette activité
+   */
+  static async getMine(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
+      const { id } = req.params as { id: string };
+      const participation = await ParticipationService.getMine(id, req.userId);
+
+      res.status(200).json({ success: true, participation });
+    } catch (error) {
+      console.error("Erreur lors de la récupération de ma participation:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération de ma participation",
+      });
+    }
+  }
+
+  /**
+   * GET /api/activities/:id/participations
+   * Liste des demandes de participation d'une activité (créateur uniquement)
+   */
+  static async listForActivity(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
+      const { id } = req.params as { id: string };
+      const participations = await ParticipationService.listForActivity(
+        id,
+        req.userId
+      );
+
+      res.status(200).json({ success: true, participations });
+    } catch (error) {
+      if (error instanceof ParticipationError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de la récupération des participations:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération des participations",
+      });
+    }
+  }
 }

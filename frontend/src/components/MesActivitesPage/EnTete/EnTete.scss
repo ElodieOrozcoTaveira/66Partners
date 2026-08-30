@@ -1,0 +1,34 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.entete-activites {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.entete-activites__title {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: variables.$nuit;
+}
+
+.entete-activites__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  @include mixins.gradient;
+
+  &:active {
+    transform: scale(0.94);
+  }
+}

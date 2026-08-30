@@ -1,10 +1,11 @@
 import "dotenv/config";
-import { eq } from "drizzle-orm";
+import crypto from "node:crypto";
+import { and, eq, gt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import argon2 from "argon2";
 import { users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
-import { sendWelcomeEmail } from "./mail.services.js";
+import { sendWelcomeEmail, sendResetPasswordEmail } from "./mail.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -41,9 +42,16 @@ export interface UserData {
 }
 
 const PASSWORD_MIN_LENGTH = 8;
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 heure
 
 function isPasswordStrong(password: string): boolean {
   return password.length >= PASSWORD_MIN_LENGTH;
+}
+
+// Le token brut part par email ; seul son hash est conservé en base
+// (comme pour un mot de passe : une fuite de la base ne permet pas de le rejouer).
+function hashResetToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
 // Erreurs métier personnalisées
@@ -255,5 +263,82 @@ export class AuthService {
     if (updatedRows.length === 0) {
       throw new AuthError("Utilisateur non trouvé", "USER_NOT_FOUND", 404);
     }
+  }
+
+  /**
+   * Demande de réinitialisation de mot de passe.
+   * Ne révèle jamais si l'email correspond à un compte existant (anti-énumération) :
+   * on retourne toujours normalement, l'email n'est envoyé que si un compte existe.
+   */
+  static async requestPasswordReset(email: string): Promise<void> {
+    const [user] = await db
+      .select({ id: users.id, email: users.email, pseudo: users.pseudo })
+      .from(users)
+      .where(eq(users.email, email.toLowerCase()))
+      .limit(1);
+
+    if (!user) return;
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = hashResetToken(rawToken);
+    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+
+    await db
+      .update(users)
+      .set({ resetPasswordTokenHash: tokenHash, resetPasswordExpiresAt: expiresAt })
+      .where(eq(users.id, user.id));
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetUrl = `${frontendUrl}/reinitialiser-mot-de-passe?token=${rawToken}`;
+
+    sendResetPasswordEmail(user, resetUrl).catch((err) =>
+      console.error("Erreur envoi email de réinitialisation:", err),
+    );
+  }
+
+  /**
+   * Finalise une réinitialisation de mot de passe à partir du token reçu par email.
+   */
+  static async resetPassword(token: string, newPassword: string): Promise<void> {
+    if (!isPasswordStrong(newPassword)) {
+      throw new AuthError(
+        "Le mot de passe ne respecte pas les critères de sécurité",
+        "WEAK_PASSWORD",
+        400
+      );
+    }
+
+    const tokenHash = hashResetToken(token);
+
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(
+          eq(users.resetPasswordTokenHash, tokenHash),
+          gt(users.resetPasswordExpiresAt, new Date())
+        )
+      )
+      .limit(1);
+
+    if (!user) {
+      throw new AuthError(
+        "Ce lien de réinitialisation est invalide ou a expiré",
+        "INVALID_OR_EXPIRED_TOKEN",
+        400
+      );
+    }
+
+    const hashedPassword = await argon2.hash(newPassword);
+
+    await db
+      .update(users)
+      .set({
+        password: hashedPassword,
+        resetPasswordTokenHash: null,
+        resetPasswordExpiresAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, user.id));
   }
 }

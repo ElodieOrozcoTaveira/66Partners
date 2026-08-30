@@ -1,16 +1,104 @@
 @use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
 
 .container-hello {
+  position: relative;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+
+  &__cover {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    @include mixins.background;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+    @media (min-width: variables.$tablet) {
+      height: 280px;
+      background-position: center 38%;
+    }
+
+    @media (min-width: variables.$laptop) {
+      height: 300px;
+      background-position: center 42%;
+    }
+
+    @media (min-width: variables.$desktop) {
+      height: 340px;
+      background-position: center 45%;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.3) 100%);
+    }
+  }
+
+  &__menu {
+    position: absolute;
+    z-index: 2;
+    top: 0.75rem;
+    right: 0.75rem;
+
+    .navbar-burger {
+      background-color: transparent;
+      color: #ffffff;
+    }
+  }
+
+  &__avatar {
+    position: absolute;
+    left: 50%;
+    bottom: -42px;
+    transform: translateX(-50%);
+    z-index: 1;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #f3f3f3;
+    border: 3px solid #ffffff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+    @media (min-width: variables.$tablet) {
+      width: 140px;
+      height: 140px;
+      bottom: -48px;
+    }
+
+    @media (min-width: variables.$desktop) {
+      width: 160px;
+      height: 160px;
+      bottom: -56px;
+    }
+  }
 
   &__text {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 0.2rem;
     min-width: 0;
+    margin-top: 3.25rem;
+    padding: 0 1.5rem;
+
+    @media (min-width: variables.$tablet) {
+      margin-top: 3.75rem;
+    }
+
+    @media (min-width: variables.$desktop) {
+      margin-top: 4.25rem;
+    }
   }
 
   &__h1 {
@@ -28,24 +116,204 @@
     color: #64748b;
   }
 
+  &__bell-wrap {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+
   &__bell {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    position: relative;
     width: 38px;
     height: 38px;
     border: none;
     border-radius: 50%;
-    background: white;
-    color: variables.$nuit;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: #f4a61d;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     cursor: pointer;
     transition: transform 0.15s ease;
 
     &:hover {
       transform: scale(1.05);
+    }
+
+    &--unread {
       color: variables.$rouge2;
+
+      svg {
+        animation: hello-bell-ring 0.6s ease;
+      }
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: variables.$rouge2;
+    border: 2px solid #ffffff;
+    color: white;
+    font-family: "Inter", sans-serif;
+    font-size: 0.6rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+}
+
+@keyframes hello-bell-ring {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-14deg); }
+  40% { transform: rotate(11deg); }
+  60% { transform: rotate(-7deg); }
+  80% { transform: rotate(4deg); }
+}
+
+.notifications-panel {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 0;
+  width: 320px;
+  max-width: calc(100vw - 3rem);
+  max-height: 420px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  overflow: hidden;
+  z-index: 1500;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(31, 41, 55, 0.07);
+  }
+
+  &__title {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: variables.$nuit;
+  }
+
+  &__markall {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: variables.$rouge2;
+    white-space: nowrap;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__empty {
+    margin: 0;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0.4rem;
+    overflow-y: auto;
+  }
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.6rem;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: rgba(variables.$nuit, 0.04);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(variables.$rouge2, 0.1);
+    color: variables.$rouge2;
+    margin-top: 0.1rem;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__text {
+    font-family: "Inter", sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: variables.$nuit;
+  }
+
+  &__time {
+    font-family: "Inter", sans-serif;
+    font-size: 0.7rem;
+    color: #94a3b8;
+  }
+
+  &__dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    margin-top: 0.35rem;
+    border-radius: 50%;
+    background: variables.$rouge2;
+  }
+
+  &--unread {
+    background: rgba(variables.$rouge2, 0.04);
+
+    .notification-item__text {
+      font-weight: 700;
     }
   }
 }

@@ -1,0 +1,445 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.creer-activite {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  padding: calc(variables.$header-height + 1rem) 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: variables.$laptop) {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+}
+
+.creer-activite__header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.creer-activite__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(variables.$nuit, 0.06);
+  color: variables.$nuit;
+  cursor: pointer;
+}
+
+.creer-activite__progress {
+  flex: 1;
+  height: 6px;
+  border-radius: 6px;
+  background: rgba(variables.$nuit, 0.08);
+  overflow: hidden;
+}
+
+.creer-activite__progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  @include mixins.gradient;
+  transition: width 0.25s ease;
+}
+
+.creer-activite__step-count {
+  flex-shrink: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.creer-activite__intro {
+  margin-top: 1.4rem;
+}
+
+.creer-activite__title {
+  margin: 0 0 0.3rem;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: variables.$nuit;
+}
+
+.creer-activite__subtitle {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.creer-activite__content {
+  flex: 1;
+  margin-top: 1.6rem;
+}
+
+.creer-activite__error {
+  margin: 1rem 0 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  color: variables.$rouge;
+}
+
+.creer-activite__footer {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.creer-activite__btn {
+  flex: 1;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 30px;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+
+  &--primary {
+    color: white;
+    @include mixins.gradient;
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+
+  &--ghost {
+    flex: 0.6;
+    background: rgba(variables.$nuit, 0.06);
+    color: variables.$nuit;
+  }
+}
+
+/* ---- Champs de formulaire partagés entre les étapes ---- */
+
+.etape-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.etape-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.etape-label {
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: variables.$nuit;
+}
+
+.etape-hint {
+  margin: 0.1rem 0 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+.etape-input,
+.etape-textarea,
+.sport-select__control {
+  width: 100%;
+  border: 1px solid rgba(variables.$nuit, 0.14);
+  border-radius: 14px;
+  padding: 0.75rem 0.95rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  color: variables.$nuit;
+  background: #ffffff;
+  outline: none;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: variables.$rouge;
+    box-shadow: 0 0 0 3px rgba(variables.$rouge, 0.14);
+  }
+}
+
+.etape-input--with-icon {
+  padding-left: 2.4rem;
+}
+
+.etape-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* ---- Sport select ---- */
+
+.sport-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sport-select__icon {
+  position: absolute;
+  left: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.sport-select__control {
+  appearance: none;
+  cursor: pointer;
+
+  &--with-icon {
+    padding-left: 2.9rem;
+  }
+}
+
+/* ---- Ville (autocomplétion INSEE) ---- */
+
+.ville-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ville-input__icon {
+  position: absolute;
+  left: 0.9rem;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+/* ---- Niveau ---- */
+
+.niveau-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.niveau-select__option {
+  padding: 0.55rem 0.95rem;
+  border: 1px solid rgba(variables.$nuit, 0.14);
+  border-radius: 20px;
+  background: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: variables.$nuit;
+  cursor: pointer;
+
+  &--active {
+    border-color: transparent;
+    color: white;
+    @include mixins.gradient;
+  }
+}
+
+/* ---- Nombre de participants ---- */
+
+.participants-stepper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.participants-stepper__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(variables.$nuit, 0.14);
+  border-radius: 50%;
+  background: #ffffff;
+  color: variables.$nuit;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.participants-stepper__value {
+  min-width: 2ch;
+  text-align: center;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: variables.$nuit;
+}
+
+/* ---- Aperçu ---- */
+
+.apercu-card {
+  border-radius: 20px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+}
+
+.apercu-card__photo-wrap {
+  position: relative;
+  height: 150px;
+}
+
+.apercu-card__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.apercu-card__badge {
+  position: absolute;
+  left: 1rem;
+  bottom: -18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.apercu-card__body {
+  padding: 1.6rem 1.15rem 1.25rem;
+}
+
+.apercu-card__title {
+  margin: 0 0 0.85rem;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: variables.$nuit;
+}
+
+.apercu-card__list {
+  list-style: none;
+  margin: 0 0 0.9rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    color: #475569;
+
+    svg {
+      flex-shrink: 0;
+      color: variables.$rouge;
+    }
+  }
+}
+
+.apercu-card__description {
+  margin: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(31, 41, 55, 0.08);
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+/* ---- Écran de succès ---- */
+
+.etape-succes {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: calc(variables.$header-height + 2rem) 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: #ffffff;
+
+  @media (min-width: variables.$laptop) {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
+.etape-succes__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  margin-bottom: 1.75rem;
+  color: white;
+  @include mixins.gradient;
+}
+
+.etape-succes__title {
+  margin: 0 0 0.6rem;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: variables.$nuit;
+}
+
+.etape-succes__subtitle {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  color: #64748b;
+  max-width: 320px;
+}
+
+.etape-succes__actions {
+  width: 100%;
+  margin-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.etape-succes__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 30px;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+
+  &--primary {
+    color: white;
+    @include mixins.gradient;
+  }
+
+  &--ghost {
+    background: rgba(variables.$nuit, 0.06);
+    color: variables.$nuit;
+  }
+}

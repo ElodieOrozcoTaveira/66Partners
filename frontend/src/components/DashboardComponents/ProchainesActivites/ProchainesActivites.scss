@@ -1,9 +1,6 @@
 @use "../../../styles/variables/variables.scss";
 
 .container-prochaine {
-  padding-bottom: 1.1rem;
-  border-bottom: 1px solid rgba(31, 41, 55, 0.08);
-
   &__header {
     display: flex;
     align-items: center;
@@ -13,12 +10,10 @@
 
   &__h2 {
     margin: 0;
-    font-family: "Inter", sans-serif;
-    font-size: 0.7rem;
+    font-family: "Manrope", sans-serif;
+    font-size: 1rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #64748b;
+    color: variables.$nuit;
   }
 
   &__link {
@@ -35,6 +30,11 @@
 
   &__empty {
     margin: 0;
+    padding: 1rem;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(31, 41, 55, 0.06);
     font-family: "Inter", sans-serif;
     font-size: 0.82rem;
     color: #94a3b8;
@@ -45,6 +45,11 @@
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
   text-decoration: none;
 
   &__badge {

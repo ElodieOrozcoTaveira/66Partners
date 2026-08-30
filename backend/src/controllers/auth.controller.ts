@@ -76,6 +76,60 @@ export class AuthController {
   }
 
   /**
+   * POST /api/auth/forgot-password
+   * Demande d'envoi d'un email de réinitialisation de mot de passe
+   */
+  static async forgotPassword(req: Request, res: Response): Promise<void> {
+    try {
+      await AuthService.requestPasswordReset(req.body.email);
+
+      // Réponse volontairement identique que le compte existe ou non
+      res.status(200).json({
+        success: true,
+        message:
+          "Si un compte existe avec cet email, un lien de réinitialisation vient de lui être envoyé.",
+      });
+    } catch (error) {
+      console.error("Erreur lors de la demande de réinitialisation:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la demande de réinitialisation",
+      });
+    }
+  }
+
+  /**
+   * POST /api/auth/reset-password
+   * Finalise la réinitialisation à partir du token reçu par email
+   */
+  static async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { token, password } = req.body;
+      await AuthService.resetPassword(token, password);
+
+      res.status(200).json({
+        success: true,
+        message: "Ton mot de passe a été mis à jour avec succès.",
+      });
+    } catch (error) {
+      if (error instanceof AuthError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de la réinitialisation du mot de passe:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la réinitialisation du mot de passe",
+      });
+    }
+  }
+
+  /**
    * GET /api/auth/me
    * Récupérer le profil de l'utilisateur authentifié (via le token JWT)
    */

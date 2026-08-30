@@ -33,9 +33,10 @@ export default function CookieBanner() {
       onDecline={handleDecline}
       containerClasses="cookie-banner"
       cookieName="66partners-cookie-consent"
-      style={{ 
+      style={{
         padding: "20px",
-        alignItems: "center"
+        alignItems: "center",
+        zIndex: 2000
       }}
       buttonStyle={{ 
         background: "#fff",

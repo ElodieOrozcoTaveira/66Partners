@@ -1,20 +1,21 @@
 @use '../../styles/variables/variables.scss';
+@use '../../styles/mixins/mixins.scss';
 
 .explorer-state {
     text-align: center;
-    margin-top: 3rem;
+    margin-top: calc(variables.$header-height + 2rem);
     font-family: 'Inter';
     color: variables.$nuit;
 }
 
 .container-explorer {
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem 4rem;
+    padding: calc(variables.$header-height + 1.5rem) 1.5rem 4rem;
 
     &__titre {
         font-family: 'Manrope';
-        font-weight: bold;
+        font-weight: 800;
         text-align: center;
         color: variables.$nuit;
         margin-bottom: 0.5rem;
@@ -23,87 +24,257 @@
     &__soustitre {
         font-family: 'Inter';
         text-align: center;
-        color: rgba(variables.$nuit, 0.7);
-        margin-bottom: 2rem;
+        color: rgba(variables.$nuit, 0.65);
+        margin-bottom: 1.75rem;
     }
 
-    &__list {
+    .container-search {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    &__filters {
         display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        list-style: none;
-        margin: 0;
-        padding: 0;
+        gap: 0.6rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.75rem;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+.filter-chip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1.5px solid rgba(variables.$nuit, 0.12);
+    background: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: variables.$nuit;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(variables.$nuit, 0.1);
+    }
+
+    &--active {
+        color: white;
+        border-color: transparent;
+        @include mixins.gradient;
     }
 }
 
 .activity-card {
     display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 1.25rem;
-    border-radius: 0.75rem;
-    background-color: variables.$beige;
-    box-shadow: 0 4px 16px rgba(variables.$nuit, 0.08);
+    flex-direction: column;
+    border-radius: 22px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(31, 41, 55, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
 
-    &__circle {
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.14);
+    }
+
+    &__photo-wrap {
+        position: relative;
+        height: 168px;
         flex-shrink: 0;
+    }
+
+    &__photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    &__photo-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(15, 23, 42, 0.32) 0%, rgba(15, 23, 42, 0) 45%);
+    }
+
+    &__sport-badge {
+        position: absolute;
+        top: 0.75rem;
+        left: 0.75rem;
         display: flex;
         align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-    }
-
-    &__body {
-        flex: 1;
-        min-width: 0;
-    }
-
-    &__title {
-        font-family: 'Manrope';
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: variables.$nuit;
-        margin: 0 0 0.25rem;
-    }
-
-    &__meta {
-        font-family: 'Inter';
-        font-size: 0.9rem;
-        color: rgba(variables.$nuit, 0.7);
-        margin: 0 0 0.75rem;
-    }
-
-    &__tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    &__tag {
-        font-family: 'Inter';
-        font-size: 0.75rem;
-        font-weight: bold;
-        padding: 0.25rem 0.65rem;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem 0.3rem 0.5rem;
         border-radius: 999px;
-        background-color: white;
+        color: white;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    }
+
+    &__status {
+        position: absolute;
+        top: 0.75rem;
+        right: 3.6rem;
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: white;
         color: variables.$nuit;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 
         &--confirmed {
-            background-color: variables.$jaune2;
+            background: variables.$jaune2;
             color: variables.$nuit;
         }
 
         &--cancelled {
-            background-color: variables.$rouge2;
+            background: variables.$rouge2;
             color: white;
         }
 
         &--completed {
-            background-color: variables.$gris2;
-            color: rgba(variables.$nuit, 0.6);
+            background: rgba(31, 41, 55, 0.75);
+            color: white;
+        }
+    }
+
+    &__date {
+        position: absolute;
+        top: 0.6rem;
+        right: 0.6rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+        line-height: 1;
+    }
+
+    &__date-day {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.55rem;
+        font-weight: 700;
+        color: variables.$rouge2;
+        letter-spacing: 0.02em;
+    }
+
+    &__date-number {
+        font-family: 'Manrope', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: variables.$nuit;
+        margin-top: 0.1rem;
+    }
+
+    &__date-month {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.55rem;
+        font-weight: 700;
+        color: rgba(variables.$nuit, 0.6);
+        letter-spacing: 0.02em;
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 1.1rem 1.15rem 1.25rem;
+    }
+
+    &__title {
+        font-family: 'Manrope', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: variables.$nuit;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    &__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.9rem;
+
+        span {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            color: #64748b;
+
+            svg {
+                flex-shrink: 0;
+                color: variables.$rouge2;
+            }
+        }
+    }
+
+    &__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 0.65rem;
+        border-top: 1px solid rgba(31, 41, 55, 0.07);
+    }
+
+    &__level {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.28rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(variables.$nuit, 0.06);
+        color: variables.$nuit;
+    }
+
+    &__participants {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #2e7d32;
+
+        svg {
+            flex-shrink: 0;
+        }
+
+        &--full {
+            color: variables.$rouge2;
         }
     }
 }

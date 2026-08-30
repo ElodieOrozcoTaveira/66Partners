@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Heart, X } from "lucide-react";
 import api from "../../../lib/axios";
-import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
+import { getSportVisual } from "../../../lib/sportVisuals";
 import "./MesSports.scss";
 
 interface Sport {
@@ -98,7 +98,7 @@ export default function MesSports({ userId, isOwnProfile = true }: MesSportsProp
             ) : (
                 <div className="container-mesSports__list">
                     {favoriteSports.map((sport) => {
-                        const { icon: Icon, color } = getSportVisual(sport.name);
+                        const { icon: Icon } = getSportVisual(sport.name);
                         return (
                             <div key={sport.id} className="mesSports-item">
                                 <div className="mesSports-item__badgeWrap">
@@ -108,11 +108,8 @@ export default function MesSports({ userId, isOwnProfile = true }: MesSportsProp
                                         title={sport.name}
                                         aria-label={sport.name}
                                     >
-                                        <span
-                                            className="mesSports-item__badge"
-                                            style={{ backgroundColor: color }}
-                                        >
-                                            <Icon color={getIconColor(color)} size={16} />
+                                        <span className="mesSports-item__badge">
+                                            <Icon size={16} />
                                         </span>
                                     </NavLink>
                                     {isOwnProfile && (

@@ -71,6 +71,7 @@ export const activityFiltersSchema = z.object({
   city: z.string().trim().min(1).optional(),
   sportId: z.uuid("Identifiant de sport invalide").optional(),
   status: statusSchema.optional(),
+  participantId: z.uuid("Identifiant de participant invalide").optional(),
 });
 
 export type ActivityFiltersInput = z.infer<typeof activityFiltersSchema>;

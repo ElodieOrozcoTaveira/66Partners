@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 import api from "../../../lib/axios";
+import { useAuth } from "../../../contexts/AuthContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { formatMonth, formatWeekday } from "../../../lib/dateFormat";
@@ -19,6 +20,7 @@ interface Activity {
   sportName: string;
   participantsCount: number;
   createdAt: string;
+  creatorId: string;
 }
 
 interface ActivitiesResponse {
@@ -27,16 +29,28 @@ interface ActivitiesResponse {
 }
 
 export default function ActivitesAutourDeToi() {
+  const { user } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
 
-    api
-      .get<ActivitiesResponse>("/api/activities")
-      .then((res) => {
-        if (mounted) setActivities(res.data.activities);
+    Promise.all([
+      api.get<ActivitiesResponse>("/api/activities"),
+      user
+        ? api.get<ActivitiesResponse>("/api/activities", {
+            params: { participantId: user.id },
+          })
+        : Promise.resolve(null),
+    ])
+      .then(([allRes, joinedRes]) => {
+        if (!mounted) return;
+        setActivities(allRes.data.activities);
+        setJoinedIds(
+          new Set((joinedRes?.data.activities ?? []).map((activity) => activity.id)),
+        );
       })
       .catch(() => {
         if (mounted) setActivities([]);
@@ -48,16 +62,21 @@ export default function ActivitesAutourDeToi() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user]);
 
   const recent = useMemo(() => {
+    const isMine = (activity: Activity) =>
+      activity.creatorId === user?.id || joinedIds.has(activity.id);
+
     return [...activities]
       .filter((activity) => activity.status !== "CANCELLED")
-      .sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
+      .sort((a, b) => {
+        const mineDiff = Number(isMine(b)) - Number(isMine(a));
+        if (mineDiff !== 0) return mineDiff;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      })
       .slice(0, RECENT_COUNT);
-  }, [activities]);
+  }, [activities, joinedIds, user]);
 
   return (
     <div className="container-autourdetoi">
@@ -74,15 +93,24 @@ export default function ActivitesAutourDeToi() {
           {recent.map((activity) => {
             const startDate = new Date(activity.startDate);
             const { color } = getSportVisual(activity.sportName);
+            const isMine =
+              activity.creatorId === user?.id || joinedIds.has(activity.id);
 
             return (
-              <NavLink key={activity.id} to="/explorer" className="activity-card">
+              <NavLink
+                key={activity.id}
+                to={`/activities/${activity.id}`}
+                className="activity-card"
+              >
                 <div className="activity-card__photo-wrap">
                   <img
                     src={getSportPhoto(activity.sportName)}
                     alt={activity.sportName}
                     className="activity-card__photo"
                   />
+                  {isMine && (
+                    <span className="autourdetoi-mine-badge">Inscrit·e</span>
+                  )}
                   <div className="activity-card__date">
                     <span className="activity-card__date-day">
                       {formatWeekday(startDate)}

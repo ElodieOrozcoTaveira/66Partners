@@ -72,7 +72,7 @@ export default function ModaleContent({
       const ok = await login(res.data.token);
       if (ok) {
         onClose();
-        navigate("/profile");
+        navigate("/dashboard");
       } else {
         setError("Impossible de récupérer le profil. Réessaie plus tard.");
       }

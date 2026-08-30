@@ -17,6 +17,8 @@ POST /activities
 PATCH /activities/:id
 DELETE /activities/:id
 POST /activities/:id/join
+GET /activities/:id/my-participation
+GET /activities/:id/participations
 */
 
 const router = Router();
@@ -46,6 +48,18 @@ router.post(
   requireAuth,
   validate({ params: activityIdParamSchema }),
   ParticipationController.join
+);
+router.get(
+  "/:id/my-participation",
+  requireAuth,
+  validate({ params: activityIdParamSchema }),
+  ParticipationController.getMine
+);
+router.get(
+  "/:id/participations",
+  requireAuth,
+  validate({ params: activityIdParamSchema }),
+  ParticipationController.listForActivity
 );
 
 export default router;

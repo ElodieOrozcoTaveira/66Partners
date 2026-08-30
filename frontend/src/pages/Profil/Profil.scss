@@ -7,8 +7,14 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  padding-top: variables.$header-height;
   padding-bottom: 60px;
+  background-color: #ffffff;
+
+  // Le Header réapparaît à partir de la tablette (masqué seulement en
+  // mobile, cf. Layout.tsx) : il faut donc à nouveau le dégager.
+  @media (min-width: variables.$tablet) {
+    padding-top: variables.$header-height;
+  }
 
   @media (min-width: variables.$laptop) {
     padding-bottom: 0;
@@ -21,7 +27,7 @@
 }
 
 .profil-page__state {
-  padding: calc(variables.$header-height + 2rem) 1.5rem;
+  padding: 2.5rem 1.5rem;
   text-align: center;
   font-family: 'Inter', sans-serif;
   color: variables.$nuit;
@@ -31,15 +37,25 @@
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 1.75rem 1.5rem 0;
+  padding: 1rem 1.5rem 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.65rem;
+
+  @media (min-width: variables.$tablet) {
+    max-width: 620px;
+    padding: 1.5rem 2rem 0;
+    gap: 1.1rem;
+  }
 
   @media (min-width: variables.$laptop) {
-    max-width: 760px;
+    max-width: 640px;
     padding: 3rem 2rem 0;
     gap: 1.5rem;
+  }
+
+  @media (min-width: variables.$desktop) {
+    max-width: 680px;
   }
 }

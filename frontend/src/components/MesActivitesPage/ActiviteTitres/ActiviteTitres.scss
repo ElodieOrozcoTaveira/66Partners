@@ -1,0 +1,43 @@
+@use "../../../styles/variables/variables.scss";
+
+.activite-titres {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid rgba(variables.$nuit, 0.08);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.activite-titres__tab {
+  flex-shrink: 0;
+  padding: 0 0 0.7rem;
+  border: none;
+  background: none;
+  font-family: "Inter", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  position: relative;
+
+  &--active {
+    color: variables.$nuit;
+    font-weight: 800;
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 3px;
+      border-radius: 3px 3px 0 0;
+      background: variables.$rouge;
+    }
+  }
+}

@@ -41,3 +41,25 @@ export const changePasswordSchema = z.object({
 });
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+/**
+ * POST /auth/forgot-password
+ */
+export const forgotPasswordSchema = z.object({
+  email: z.email("Email invalide"),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+/**
+ * POST /auth/reset-password
+ */
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Lien de réinitialisation invalide"),
+  password: z
+    .string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+    .max(128),
+});
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

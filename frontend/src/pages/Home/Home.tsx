@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { Compass } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import ModaleContent from "../../components/ModaleConnexion/ModaleContent/ModaleContent";
@@ -48,13 +48,16 @@ export default function Home() {
             Découvre, partage et vis des expériences sportives uniques près de
             chez toi.
           </p>
-          <NavLink
-            to="/explorer"
-            className="container-home__explorer"
-            onClick={handleExplorerClick}
-          >
-            Explorer les activités <ArrowRight size={12} color="#ffffff" />
-          </NavLink>
+
+          <div className="container-home__cta">
+            <NavLink
+              to="/explorer"
+              className="container-home__btn container-home__btn--primary"
+              onClick={handleExplorerClick}
+            >
+              <Compass size={16} /> Découvrir les activités
+            </NavLink>
+          </div>
         </section>
       </div>
 

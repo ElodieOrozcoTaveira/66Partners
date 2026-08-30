@@ -1,6 +1,7 @@
 import "dotenv/config";
 import nodemailer from "nodemailer";
 import { welcomeEmailTemplate } from "./emailTemplates/welcome.template.js";
+import { resetPasswordEmailTemplate } from "./emailTemplates/resetPassword.template.js";
 
 const transporter = nodemailer.createTransport({
   host: "ssl0.ovh.net",
@@ -19,6 +20,19 @@ export async function sendWelcomeEmail(user: { email: string; pseudo: string }) 
     to: user.email,
     subject: "Bienvenue sur 66Partners 🎉",
     html: welcomeEmailTemplate(user.pseudo),
+  });
+}
+
+export async function sendResetPasswordEmail(
+  user: { email: string; pseudo: string },
+  resetUrl: string,
+) {
+  await transporter.sendMail({
+    from: `"66Partners" <${process.env.SMTP_USER}>`,
+    replyTo: "contact@66partners.fr",
+    to: user.email,
+    subject: "Réinitialise ton mot de passe 66Partners",
+    html: resetPasswordEmailTemplate(user.pseudo, resetUrl),
   });
 }
 

@@ -1,0 +1,119 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.image-crop-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(31, 41, 55, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+  padding: 1rem;
+}
+
+.image-crop-content {
+  position: relative;
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem 1.5rem;
+  width: 420px;
+  max-width: 92vw;
+  box-shadow: 0 12px 40px rgba(variables.$nuit, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: variables.$nuit;
+
+    &:hover {
+      color: variables.$rouge;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+  }
+
+  &__title {
+    color: variables.$nuit;
+    font-size: 18px;
+    font-family: "Manrope", sans-serif;
+    margin: 0;
+  }
+
+  &__stage {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: variables.$gris;
+  }
+
+  &__zoom {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: variables.$nuit;
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: variables.$rouge;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  &__cancel,
+  &__submit {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 30px;
+    font-family: "Inter", sans-serif;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  &__cancel {
+    background: rgba(variables.$nuit, 0.08);
+    color: variables.$nuit;
+
+    &:hover {
+      background: rgba(variables.$nuit, 0.14);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+  }
+
+  &__submit {
+    color: white;
+    @include mixins.gradient;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+  }
+}
