@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, varchar, text, timestamp, integer, smallint, boolean, pgEnum, unique, primaryKey, doublePrecision,
+  pgTable, uuid, varchar, text, timestamp, integer, smallint, boolean, pgEnum, unique, primaryKey, doublePrecision, index,
 } from "drizzle-orm/pg-core";
 
 export const sportLevelEnum = pgEnum("sport_level", ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"]);
@@ -25,6 +25,35 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// Une déclinaison territoriale de la plateforme Partners (66Partners,
+// 34Partners, ...). isActive sert uniquement à déterminer le(s) territoire(s)
+// proposé(s) par défaut à un NOUVEL inscrit (cf. TerritoryService) — ça ne
+// déclenche jamais de rattachement rétroactif des comptes existants.
+export const territories = pgTable("territories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  code: varchar("code", { length: 10 }).notNull().unique(),
+  name: varchar("name", { length: 100 }).notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  brandName: varchar("brand_name", { length: 100 }).notNull(),
+  logoUrl: varchar("logo_url", { length: 255 }),
+  primaryColor: varchar("primary_color", { length: 20 }),
+  secondaryColor: varchar("secondary_color", { length: 20 }),
+  isActive: boolean("is_active").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Relation many-to-many : un compte utilisateur global peut être rattaché à
+// plusieurs territoires (aujourd'hui uniquement le 66).
+export const userTerritories = pgTable("user_territories", {
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  territoryId: uuid("territory_id").notNull().references(() => territories.id, { onDelete: "cascade" }),
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  isDefault: boolean("is_default").notNull().default(false),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.territoryId] }),
+}));
 
 export const sports = pgTable("sports", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -63,9 +92,15 @@ export const activities = pgTable("activities", {
   status: activitiesStatusEnum("status").notNull().default("PENDING"),
   sportId: uuid("sport_id").notNull().references(() => sports.id),
   creatorId: uuid("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // Territoire dans lequel l'activité se déroule (pas le territoire
+  // d'origine du créateur). Backfillé pour les données existantes
+  // (cf. seed-territories.ts) avant ce passage en NOT NULL.
+  territoryId: uuid("territory_id").notNull().references(() => territories.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => ({
+  territoryIdx: index("activities_territory_id_idx").on(t.territoryId),
+}));
 
 export const participations = pgTable("participations", {
   id: uuid("id").defaultRandom().primaryKey(),

@@ -6,6 +6,7 @@ import argon2 from "argon2";
 import { users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
 import { sendWelcomeEmail, sendResetPasswordEmail } from "./mail.services.js";
+import { TerritoryService } from "./territory.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -133,12 +134,17 @@ export class AuthService {
       );
     }
 
-    // 5. Email de bienvenue (non bloquant)
+    // 5. Rattachement aux territoires actuellement actifs (ex : le 66).
+    // Uniquement à l'inscription — un futur territoire qui devient actif ne
+    // rattache jamais rétroactivement les comptes déjà existants.
+    await TerritoryService.attachUserToActiveTerritories(newUser.id);
+
+    // 6. Email de bienvenue (non bloquant)
     sendWelcomeEmail(newUser).catch((err) =>
       console.error("Erreur envoi email de bienvenue:", err),
     );
 
-    // 6. Retour des données utilisateur (sans le mot de passe)
+    // 7. Retour des données utilisateur (sans le mot de passe)
     return {
       id: newUser.id,
       email: newUser.email,

@@ -2,6 +2,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { faker } from "@faker-js/faker";
 import { sports, users, userSports, activities } from "./schema.js";
+import { seedTerritory66 } from "./seed-territories.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -105,6 +106,11 @@ async function seed() {
   await db.insert(userSports).values(fakeUserSports).onConflictDoNothing();
   console.log(`${fakeUserSports.length} associations user/sport créées.`);
 
+  // Le territoire 66 doit exister avant les activités : territoryId est
+  // NOT NULL et cet insert est un bulk-insert direct (il ne passe pas par
+  // ActivityService, qui lui résout le territoire par défaut du créateur).
+  const territory66 = await seedTerritory66();
+
   console.log("Seeding activities...");
   const fakeActivities = Array.from({ length: 40 }, () => {
     const creator = faker.helpers.arrayElement(insertedUsers);
@@ -127,6 +133,7 @@ async function seed() {
       status: faker.helpers.arrayElement(activityStatuses),
       sportId: sport.id,
       creatorId: creator.id,
+      territoryId: territory66.id,
     };
   });
 
@@ -135,6 +142,11 @@ async function seed() {
     .values(fakeActivities)
     .returning();
   console.log(`${insertedActivities.length} activités créées.`);
+
+  // Les utilisateurs ci-dessus sont insérés en bulk (pas via
+  // AuthService.registerUser) : ils n'ont donc pas encore de ligne
+  // user_territories. Deuxième appel idempotent pour les rattacher au 66.
+  await seedTerritory66();
 
   console.log("Seed terminé avec succès.");
   process.exit(0);

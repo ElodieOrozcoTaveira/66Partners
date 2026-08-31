@@ -1,0 +1,1 @@
+CREATE INDEX "activities_territory_id_idx" ON "activities" ("territory_id");

@@ -1,0 +1,1 @@
+ALTER TABLE "activities" ALTER COLUMN "territory_id" SET NOT NULL;

@@ -7,7 +7,9 @@ import {
   participations,
   sportLevelEnum,
   sports,
+  territories,
 } from "../db/schema.js";
+import { TerritoryService } from "./territory.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -37,6 +39,10 @@ export interface ActivityCreateInput {
   levelRequired: ActivityLevel;
   maxParticipants: number;
   sportId: string;
+  /** Territoire où se déroule l'activité. Si absent, résolu depuis le territoire
+   *  par défaut du créateur — jamais fait confiance tel quel : l'appartenance
+   *  du créateur au territoire est toujours vérifiée côté serveur. */
+  territoryId?: string;
 }
 
 export interface ActivityUpdateInput {
@@ -58,6 +64,8 @@ export interface ActivityFilters {
   status?: ActivityStatus;
   /** Ne retourne que les activités où cet utilisateur a une participation acceptée */
   participantId?: string;
+  /** Code du territoire (ex: "66") */
+  territory?: string;
 }
 
 // Erreurs métier personnalisées
@@ -91,11 +99,38 @@ export class ActivityService {
   ): Promise<Activity> {
     await assertSportExists(data.sportId);
 
+    // Le territoire n'est jamais accepté tel quel : soit il est résolu depuis
+    // le territoire par défaut du créateur, soit — s'il est fourni par le
+    // client — son appartenance est vérifiée côté serveur avant d'être utilisée.
+    let territoryId = data.territoryId;
+
+    if (territoryId) {
+      const isMember = await TerritoryService.isUserMemberOf(creatorId, territoryId);
+      if (!isMember) {
+        throw new ActivityError(
+          "Vous n'êtes pas membre de ce territoire",
+          "NOT_TERRITORY_MEMBER",
+          403
+        );
+      }
+    } else {
+      const defaultTerritory = await TerritoryService.getDefaultTerritoryForUser(creatorId);
+      if (!defaultTerritory) {
+        throw new ActivityError(
+          "Aucun territoire par défaut pour cet utilisateur",
+          "NOT_TERRITORY_MEMBER",
+          403
+        );
+      }
+      territoryId = defaultTerritory.id;
+    }
+
     const [newActivity] = await db
       .insert(activities)
       .values({
         ...data,
         creatorId,
+        territoryId,
       })
       .returning();
 
@@ -128,6 +163,7 @@ export class ActivityService {
         status: activities.status,
         sportId: activities.sportId,
         creatorId: activities.creatorId,
+        territoryId: activities.territoryId,
         createdAt: activities.createdAt,
         updatedAt: activities.updatedAt,
         sportName: sports.name,
@@ -150,12 +186,13 @@ export class ActivityService {
    * le nombre réel de participants acceptés (calculé à la volée).
    */
   static async listActivities(filters: ActivityFilters = {}): Promise<ActivityWithDetails[]> {
-    const { city, sportId, status, participantId } = filters;
+    const { city, sportId, status, participantId, territory } = filters;
 
     const conditions = [
       city ? eq(activities.city, city) : undefined,
       sportId ? eq(activities.sportId, sportId) : undefined,
       status ? eq(activities.status, status) : undefined,
+      territory ? eq(territories.code, territory) : undefined,
       participantId
         ? sql`exists (
             select 1 from ${participations} as participant_filter
@@ -180,6 +217,7 @@ export class ActivityService {
         status: activities.status,
         sportId: activities.sportId,
         creatorId: activities.creatorId,
+        territoryId: activities.territoryId,
         createdAt: activities.createdAt,
         updatedAt: activities.updatedAt,
         sportName: sports.name,
@@ -187,6 +225,7 @@ export class ActivityService {
       })
       .from(activities)
       .innerJoin(sports, eq(sports.id, activities.sportId))
+      .innerJoin(territories, eq(territories.id, activities.territoryId))
       .leftJoin(participations, eq(participations.activityId, activities.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .groupBy(activities.id, sports.name)
