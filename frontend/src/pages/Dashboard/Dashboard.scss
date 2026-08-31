@@ -10,7 +10,7 @@
   // Le Header réapparaît à partir de la tablette (masqué seulement en
   // mobile, cf. Layout.tsx) : il faut donc à nouveau le dégager.
   @media (min-width: variables.$tablet) {
-    padding-top: variables.$header-height;
+    padding-top: var(--header-height);
   }
 
   @media (min-width: variables.$laptop) {

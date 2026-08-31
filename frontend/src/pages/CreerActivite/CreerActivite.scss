@@ -5,7 +5,7 @@
   min-height: 100dvh;
   box-sizing: border-box;
   background-color: #ffffff;
-  padding: calc(variables.$header-height + 1rem) 1.5rem 1.5rem;
+  padding: calc(var(--header-height) + 1rem) 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
 
@@ -371,7 +371,7 @@
 .etape-succes {
   min-height: 100dvh;
   box-sizing: border-box;
-  padding: calc(variables.$header-height + 2rem) 1.75rem 2rem;
+  padding: calc(var(--header-height) + 2rem) 1.75rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;

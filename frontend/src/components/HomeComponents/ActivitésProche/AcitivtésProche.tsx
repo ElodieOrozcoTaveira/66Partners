@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { formatMonth, formatTime, formatWeekday } from "../../../lib/dateFormat";
 import ModaleContent from "../../ModaleConnexion/ModaleContent/ModaleContent";
@@ -86,7 +85,6 @@ export default function ActivitésProche() {
       <div className="container-activitesproche__list">
         {upcoming.map((activity) => {
           const startDate = new Date(activity.startDate);
-          const { color } = getSportVisual(activity.sportName);
 
           return (
             <NavLink
@@ -124,10 +122,7 @@ export default function ActivitésProche() {
                   {activity.participantsCount}/{activity.maxParticipants}{" "}
                   participants
                 </p>
-                <span
-                  className="activity-card__sport"
-                  style={{ backgroundColor: color, color: getIconColor(color) }}
-                >
+                <span className="activity-card__sport">
                   {activity.sportName}
                 </span>
               </div>

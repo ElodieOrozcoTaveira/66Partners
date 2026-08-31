@@ -29,7 +29,7 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: top 20% left 75%;
-  padding: calc(variables.$header-height + 2rem) 0 4rem;
+  padding: calc(var(--header-height) + 2rem) 0 4rem;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0 0 40px 40px;
   animation: home-fade-in 0.9s ease both;

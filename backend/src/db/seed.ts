@@ -77,12 +77,6 @@ async function seed() {
       city: ville.city,
       bio: faker.lorem.sentence(),
       avatar: faker.image.avatar(),
-      latitude:
-        ville.latitude +
-        faker.number.float({ min: -0.01, max: 0.01, fractionDigits: 5 }),
-      longitude:
-        ville.longitude +
-        faker.number.float({ min: -0.01, max: 0.01, fractionDigits: 5 }),
     };
   });
 

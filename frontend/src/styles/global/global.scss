@@ -1,7 +1,19 @@
+@use "../variables/variables.scss";
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+:root {
+  --header-height: #{variables.$header-height};
+}
+
+@media (max-width: (variables.$tablet - 1px)) {
+  :root {
+    --header-height: 78px;
+  }
 }
 
 html {

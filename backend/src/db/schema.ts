@@ -18,8 +18,6 @@ export const users = pgTable("users", {
   dispo: text("dispo"),
   avatar: varchar("avatar", { length: 255 }),
   coverPhoto: varchar("cover_photo", { length: 255 }),
-  latitude: doublePrecision("latitude"),
-  longitude: doublePrecision("longitude"),
   resetPasswordTokenHash: varchar("reset_password_token_hash", { length: 64 }),
   resetPasswordExpiresAt: timestamp("reset_password_expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

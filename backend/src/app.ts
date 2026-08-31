@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import path from 'node:path';
 //Socket
 import { createServer } from 'http';
 import { initSocket } from './socket/index.js';
@@ -20,6 +19,7 @@ import notificationRoutes from './routes/notification.routes.js';
 import territoryRoutes from './routes/territory.routes.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import { getAllowedOrigins, helmetOptions, verifyOrigin } from './middlewares/security.middleware.js';
+import { FileController } from './controllers/file.controller.js';
 
 //Docs Swagger
 import swaggerUi from 'swagger-ui-express';
@@ -52,7 +52,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => res.send('Hello 66Partners!'));
 
-app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+// Ancien express.static remplacé par FileController : les photos d'activité
+// exigent désormais un jeton signé (cf. chantier RGPD F-02), avatars et
+// couvertures restent servis tels quels (données publiques du profil).
+app.get('/uploads/:filename', FileController.serve);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

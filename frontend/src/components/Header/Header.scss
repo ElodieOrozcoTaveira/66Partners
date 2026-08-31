@@ -7,7 +7,7 @@
   left: 0;
   z-index: 1003;
   width: 100vw;
-  height: variables.$header-height;
+  height: var(--header-height);
   margin: 0;
   padding: 0;
   display: flex;
@@ -63,6 +63,22 @@
 .navbar-list.show ~ .container-header .container-header__leftside {
   transform: translateY(-2px);
   opacity: 0.95;
+}
+
+// Téléphone : header plus compact (cf. --header-height réduit en global.scss).
+@media (max-width: (variables.$tablet - 1px)) {
+  .container-header__leftside {
+    padding: 0.5rem 1rem;
+  }
+
+  .container-header__leftside img {
+    width: 92px;
+    height: auto;
+  }
+
+  .container-header__rightside {
+    padding: 0.75rem;
+  }
 }
 
 @media (min-width: variables.$tablet) {

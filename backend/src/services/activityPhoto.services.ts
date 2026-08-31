@@ -2,6 +2,8 @@ import "dotenv/config";
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { activities, activityPhotos, participations, users } from "../db/schema.js";
+import { signFileUrl } from "../utils/fileAccessToken.js";
+import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -82,7 +84,7 @@ export class ActivityPhotoService {
   ): Promise<ActivityPhotoWithAuthor[]> {
     await assertUserCanAccessActivity(userId, activityId);
 
-    return db
+    const rows = await db
       .select({
         id: activityPhotos.id,
         activityId: activityPhotos.activityId,
@@ -96,6 +98,11 @@ export class ActivityPhotoService {
       .innerJoin(users, eq(users.id, activityPhotos.uploaderId))
       .where(eq(activityPhotos.activityId, activityId))
       .orderBy(desc(activityPhotos.createdAt));
+
+    // Le demandeur a déjà prouvé son droit d'accès ci-dessus (créateur ou
+    // participant accepté) : on signe l'URL pour que le fichier lui-même
+    // reste protégé même si le lien est partagé ou ouvert directement.
+    return rows.map((row) => ({ ...row, url: signFileUrl(row.url) }));
   }
 
   static async addPhoto(
@@ -119,7 +126,7 @@ export class ActivityPhotoService {
       );
     }
 
-    return created;
+    return { ...created, url: signFileUrl(created.url) };
   }
 
   static async deletePhoto(photoId: string, userId: string): Promise<void> {
@@ -142,5 +149,7 @@ export class ActivityPhotoService {
     }
 
     await db.delete(activityPhotos).where(eq(activityPhotos.id, photoId));
+
+    await deleteUploadedFileIfUnreferenced(photo.url);
   }
 }

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { formatMonth, formatWeekday } from "../../../lib/dateFormat";
 import "../../HomeComponents/ActivitésProche/ActivitésProche.scss";
@@ -92,7 +91,6 @@ export default function ActivitesAutourDeToi() {
         <div className="container-autourdetoi__list">
           {recent.map((activity) => {
             const startDate = new Date(activity.startDate);
-            const { color } = getSportVisual(activity.sportName);
             const isMine =
               activity.creatorId === user?.id || joinedIds.has(activity.id);
 
@@ -129,10 +127,7 @@ export default function ActivitesAutourDeToi() {
                 <div className="activity-card__body">
                   <h3 className="activity-card__title">{activity.title}</h3>
                   <p className="activity-card__meta">{activity.city} (66)</p>
-                  <span
-                    className="activity-card__sport"
-                    style={{ backgroundColor: color, color: getIconColor(color) }}
-                  >
+                  <span className="activity-card__sport">
                     {activity.sportName}
                   </span>
                 </div>

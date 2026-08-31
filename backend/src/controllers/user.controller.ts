@@ -62,7 +62,7 @@ export class UserController {
         return;
       }
 
-      const user = await UserService.getUserById(id);
+      const user = await UserService.getPublicUserById(id);
 
       if (!user) {
         res.status(404).json({

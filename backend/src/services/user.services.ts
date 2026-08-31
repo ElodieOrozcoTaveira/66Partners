@@ -1,7 +1,8 @@
 import "dotenv/config";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { sportLevelEnum, sports, userSports, users } from "../db/schema.js";
+import { activities, activityPhotos, sportLevelEnum, sports, userSports, users } from "../db/schema.js";
+import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -30,8 +31,23 @@ export interface UserProfile {
   dispo: string | null;
   avatar: string | null;
   coverPhoto: string | null;
-  latitude: number | null;
-  longitude: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Profil visible par un AUTRE utilisateur (GET /users/:id).
+ * Ne doit jamais contenir l'email ni la géolocalisation exacte du
+ * titulaire du compte — voir audit RGPD, chantier F-01.
+ */
+export interface PublicUserProfile {
+  id: string;
+  pseudo: string;
+  city: string | null;
+  bio: string | null;
+  dispo: string | null;
+  avatar: string | null;
+  coverPhoto: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,8 +59,6 @@ export interface UserUpdateInput {
   dispo?: string | null;
   avatar?: string | null;
   coverPhoto?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
 }
 
 // Erreurs métier personnalisées
@@ -69,8 +83,20 @@ function toProfile(user: typeof users.$inferSelect): UserProfile {
     dispo: user.dispo,
     avatar: user.avatar,
     coverPhoto: user.coverPhoto,
-    latitude: user.latitude,
-    longitude: user.longitude,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+}
+
+function toPublicProfile(user: typeof users.$inferSelect): PublicUserProfile {
+  return {
+    id: user.id,
+    pseudo: user.pseudo,
+    city: user.city,
+    bio: user.bio,
+    dispo: user.dispo,
+    avatar: user.avatar,
+    coverPhoto: user.coverPhoto,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -95,12 +121,36 @@ export class UserService {
   }
 
   /**
+   * Récupération du profil PUBLIC d'un utilisateur par son ID, tel que
+   * visible par un autre utilisateur (sans email ni géolocalisation).
+   */
+  static async getPublicUserById(userId: string): Promise<PublicUserProfile | null> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!user) {
+      return null;
+    }
+
+    return toPublicProfile(user);
+  }
+
+  /**
    * Mise à jour du profil d'un utilisateur
    */
   static async updateUser(
     userId: string,
     data: UserUpdateInput
   ): Promise<UserProfile> {
+    const [previousUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
     const [updatedUser] = await db
       .update(users)
       .set({ ...data, updatedAt: new Date() })
@@ -111,6 +161,18 @@ export class UserService {
       throw new UserError("Utilisateur non trouvé", "USER_NOT_FOUND", 404);
     }
 
+    // Remplacement d'avatar/couverture : l'ancien fichier n'est plus utile,
+    // on le nettoie du disque (sauf s'il reste référencé ailleurs) —
+    // cf. chantier RGPD F-03.
+    if (previousUser) {
+      if (data.avatar !== undefined && previousUser.avatar !== updatedUser.avatar) {
+        await deleteUploadedFileIfUnreferenced(previousUser.avatar);
+      }
+      if (data.coverPhoto !== undefined && previousUser.coverPhoto !== updatedUser.coverPhoto) {
+        await deleteUploadedFileIfUnreferenced(previousUser.coverPhoto);
+      }
+    }
+
     return toProfile(updatedUser);
   }
 
@@ -118,14 +180,35 @@ export class UserService {
    * Suppression d'un utilisateur
    */
   static async deleteUser(userId: string): Promise<void> {
-    const deletedRows = await db
-      .delete(users)
+    const [existingUser] = await db
+      .select()
+      .from(users)
       .where(eq(users.id, userId))
-      .returning({ id: users.id });
+      .limit(1);
 
-    if (deletedRows.length === 0) {
+    if (!existingUser) {
       throw new UserError("Utilisateur non trouvé", "USER_NOT_FOUND", 404);
     }
+
+    // Photos qui vont disparaître en cascade (uploadées par lui, ou
+    // appartenant à une activité qu'il a créée) : à capturer AVANT la
+    // suppression, sans quoi les lignes ne seront plus interrogeables —
+    // cf. chantier RGPD F-04.
+    const relatedPhotos = await db
+      .selectDistinct({ url: activityPhotos.url })
+      .from(activityPhotos)
+      .leftJoin(activities, eq(activities.id, activityPhotos.activityId))
+      .where(
+        or(eq(activityPhotos.uploaderId, userId), eq(activities.creatorId, userId))
+      );
+
+    await db.delete(users).where(eq(users.id, userId));
+
+    await deleteUploadedFileIfUnreferenced(existingUser.avatar);
+    await deleteUploadedFileIfUnreferenced(existingUser.coverPhoto);
+    await Promise.all(
+      relatedPhotos.map((photo) => deleteUploadedFileIfUnreferenced(photo.url))
+    );
   }
 
   /**

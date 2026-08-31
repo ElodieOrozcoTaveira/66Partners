@@ -7,7 +7,7 @@
     display: flex;
     align-items: center;
     gap: 2.5rem;
-    padding: 3rem 1.5rem;
+    padding: calc(var(--header-height) + 3rem) 1.5rem 3rem;
     max-width: 1200px;
     margin: 0 auto;
     background-image: url('/canigou.webp');
@@ -44,7 +44,7 @@
         flex-direction: row;
         align-items: center;
         gap: 3.5rem;
-        padding: 5rem 3rem;
+        padding: calc(var(--header-height) + 5rem) 3rem 5rem;
     }
 
     &__left {

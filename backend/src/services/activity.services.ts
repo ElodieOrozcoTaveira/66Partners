@@ -4,12 +4,14 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import {
   activities,
   activitiesStatusEnum,
+  activityPhotos,
   participations,
   sportLevelEnum,
   sports,
   territories,
 } from "../db/schema.js";
 import { TerritoryService } from "./territory.services.js";
+import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -297,6 +299,16 @@ export class ActivityService {
       );
     }
 
+    // Photos qui vont disparaître en cascade avec l'activité : à capturer
+    // AVANT la suppression, sans quoi les lignes ne seront plus
+    // interrogeables — cf. chantier RGPD F-04.
+    const photos = await db
+      .select({ url: activityPhotos.url })
+      .from(activityPhotos)
+      .where(eq(activityPhotos.activityId, activityId));
+
     await db.delete(activities).where(eq(activities.id, activityId));
+
+    await Promise.all(photos.map((photo) => deleteUploadedFileIfUnreferenced(photo.url)));
   }
 }

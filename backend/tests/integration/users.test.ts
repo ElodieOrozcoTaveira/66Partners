@@ -14,7 +14,7 @@ let sportId: string;
 
 beforeEach(async () => {
   await resetAll();
-  ({ userId, token } = await createUser({ email: "user@test.com" }));
+  ({ userId, token } = await createUser({ email: "user@test.com", pseudo: "user_cible" }));
   sportId = await createSport("Tennis");
 });
 
@@ -30,6 +30,15 @@ describe("GET /api/users/me", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.user.id).toBe(userId);
+  });
+
+  it("inclut l'email du propriétaire (donnée privée réservée à /me)", async () => {
+    const res = await request(app)
+      .get("/api/users/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.email).toBe("user@test.com");
   });
 
   it("refuse l'accès sans token", async () => {
@@ -97,21 +106,59 @@ describe("DELETE /api/users/me", () => {
 
 describe("GET /api/users/:id", () => {
   it("renvoie le profil public d'un utilisateur", async () => {
-    const res = await request(app).get(`/api/users/${userId}`);
+    const res = await request(app)
+      .get(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+
     expect(res.status).toBe(200);
     expect(res.body.user.id).toBe(userId);
+    expect(res.body.user.pseudo).toBe("user_cible");
+  });
+
+  it("ne renvoie jamais l'email ni la géolocalisation d'un autre utilisateur (F-01)", async () => {
+    // La cible enregistre une position exacte sur son propre profil...
+    await request(app)
+      .patch("/api/users/me")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ latitude: 42.5, longitude: 2.9 });
+
+    // ...un AUTRE utilisateur consulte ce profil : email et coordonnées
+    // ne doivent jamais apparaître dans la réponse, quels que soient les
+    // champs présents en base.
+    const { token: otherToken } = await createUser({ email: "other@test.com" });
+
+    const res = await request(app)
+      .get(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${otherToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user).not.toHaveProperty("email");
+    expect(res.body.user).not.toHaveProperty("latitude");
+    expect(res.body.user).not.toHaveProperty("longitude");
+    expect(res.body.user.pseudo).toBe("user_cible");
   });
 
   it("renvoie 404 pour un UUID inexistant", async () => {
-    const res = await request(app).get(`/api/users/${randomUUID()}`);
+    const res = await request(app)
+      .get(`/api/users/${randomUUID()}`)
+      .set("Authorization", `Bearer ${token}`);
+
     expect(res.status).toBe(404);
     expect(res.body.code).toBe("USER_NOT_FOUND");
   });
 
   it("renvoie 400 pour un UUID invalide", async () => {
-    const res = await request(app).get("/api/users/not-a-uuid");
+    const res = await request(app)
+      .get("/api/users/not-a-uuid")
+      .set("Authorization", `Bearer ${token}`);
+
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
+  });
+
+  it("refuse sans authentification", async () => {
+    const res = await request(app).get(`/api/users/${userId}`);
+    expect(res.status).toBe(401);
   });
 });
 
@@ -233,7 +280,10 @@ describe("GET /api/users/:id/sports", () => {
       .set("Authorization", `Bearer ${token}`)
       .send({ sportId, level: "BEGINNER" });
 
-    const res = await request(app).get(`/api/users/${userId}/sports`);
+    const res = await request(app)
+      .get(`/api/users/${userId}/sports`)
+      .set("Authorization", `Bearer ${token}`);
+
     expect(res.status).toBe(200);
     expect(res.body.sports).toHaveLength(1);
   });

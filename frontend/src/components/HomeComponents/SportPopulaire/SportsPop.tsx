@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type SyntheticEvent } from "react";
 import { NavLink } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import api from "../../../lib/axios";
-import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
+import { getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import "./SportsPop.scss";
 
@@ -70,7 +70,7 @@ export default function SportsPop() {
 
         <div className="container-sportpop__list" ref={listRef}>
           {sports.map((sport) => {
-            const { icon: Icon, color } = getSportVisual(sport.name);
+            const { icon: Icon } = getSportVisual(sport.name);
 
             return (
               <NavLink key={sport.id} to="/sports" className="sportpop-item">
@@ -81,11 +81,8 @@ export default function SportsPop() {
                     className="sportpop-item__photo"
                     onError={handlePhotoError}
                   />
-                  <span
-                    className="sportpop-item__badge"
-                    style={{ backgroundColor: color }}
-                  >
-                    <Icon color={getIconColor(color)} size={14} />
+                  <span className="sportpop-item__badge">
+                    <Icon size={14} />
                   </span>
                 </div>
                 <span className="sportpop-item__name">{sport.name}</span>
