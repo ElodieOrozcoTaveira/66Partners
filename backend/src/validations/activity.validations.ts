@@ -27,6 +27,7 @@ export const createActivitySchema = z.object({
     .int()
     .gt(1, "Le nombre maximum de participants doit être supérieur à 1"),
   sportId: z.uuid("Identifiant de sport invalide"),
+  territoryId: z.uuid("Identifiant de territoire invalide").optional(),
 });
 
 export type CreateActivityInput = z.infer<typeof createActivitySchema>;
@@ -72,6 +73,7 @@ export const activityFiltersSchema = z.object({
   sportId: z.uuid("Identifiant de sport invalide").optional(),
   status: statusSchema.optional(),
   participantId: z.uuid("Identifiant de participant invalide").optional(),
+  territory: z.string().trim().min(1).max(10).optional(),
 });
 
 export type ActivityFiltersInput = z.infer<typeof activityFiltersSchema>;
