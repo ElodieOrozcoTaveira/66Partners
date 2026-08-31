@@ -302,12 +302,17 @@ export default function DetailActivite() {
                   .filter((request) => request.status !== "REFUSED")
                   .map((request) => (
                     <div key={request.id} className="request-row">
-                      <img
-                        src={request.userAvatar || "/montagne.webp"}
-                        alt={request.userPseudo}
-                        className="request-row__avatar"
-                      />
-                      <span className="request-row__name">{request.userPseudo}</span>
+                      <NavLink
+                        to={`/profile/${request.userId}`}
+                        className="request-row__identity"
+                      >
+                        <img
+                          src={request.userAvatar || "/montagne.webp"}
+                          alt={request.userPseudo}
+                          className="request-row__avatar"
+                        />
+                        <span className="request-row__name">{request.userPseudo}</span>
+                      </NavLink>
                       {request.status === "PENDING" ? (
                         <div className="request-row__actions">
                           <button

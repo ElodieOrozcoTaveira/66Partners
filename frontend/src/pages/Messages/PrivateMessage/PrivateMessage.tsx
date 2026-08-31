@@ -129,17 +129,24 @@ export default function PrivateMessage() {
                 className={`message-row${isMine ? " message-row--mine" : ""}`}
               >
                 {!isMine && (
-                  <img
-                    src={message.authorAvatar || "/montagne.webp"}
-                    alt={message.authorPseudo}
-                    className="message-row__avatar"
-                  />
+                  <NavLink to={`/profile/${message.usersId}`}>
+                    <img
+                      src={message.authorAvatar || "/montagne.webp"}
+                      alt={message.authorPseudo}
+                      className="message-row__avatar"
+                    />
+                  </NavLink>
                 )}
                 <div
                   className={`message-bubble${isMine ? " message-bubble--mine" : ""}`}
                 >
                   {!isMine && (
-                    <span className="message-bubble__author">{message.authorPseudo}</span>
+                    <NavLink
+                      to={`/profile/${message.usersId}`}
+                      className="message-bubble__author"
+                    >
+                      {message.authorPseudo}
+                    </NavLink>
                   )}
                   <p className="message-bubble__text">{message.contenu}</p>
                   <span className="message-bubble__time">

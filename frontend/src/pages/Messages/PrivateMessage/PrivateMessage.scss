@@ -134,6 +134,11 @@
     font-size: 0.68rem;
     font-weight: 700;
     color: variables.$rouge2;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   &__text {
