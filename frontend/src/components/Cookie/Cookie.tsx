@@ -1,12 +1,17 @@
 // app/components/CookieConsent.tsx
 'use client';
 
-import CookieConsent from "react-cookie-consent"; 
+import CookieConsent from "react-cookie-consent";
+import { loadGoogleAnalytics } from "../Analytics/Analytics";
+import { COOKIE_CONSENT_NAME } from "../../lib/cookieConsent";
 import './Cookie.scss';
 
 export default function CookieBanner() {
   const handleAccept = () => {
-    // Activez Google Analytics seulement après acceptation
+    // Premier chargement réel du script GA, seulement maintenant que le
+    // consentement vient d'être donné explicitement (cf. P0-2).
+    loadGoogleAnalytics();
+
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('consent', 'update', {
         'analytics_storage': 'granted'
@@ -32,7 +37,7 @@ export default function CookieBanner() {
       onAccept={handleAccept}
       onDecline={handleDecline}
       containerClasses="cookie-banner"
-      cookieName="66partners-cookie-consent"
+      cookieName={COOKIE_CONSENT_NAME}
       style={{
         padding: "20px",
         alignItems: "center",

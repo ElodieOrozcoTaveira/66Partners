@@ -33,6 +33,11 @@ export const users = pgTable("users", {
   coverPhoto: varchar("cover_photo", { length: 255 }),
   resetPasswordTokenHash: varchar("reset_password_token_hash", { length: 64 }),
   resetPasswordExpiresAt: timestamp("reset_password_expires_at"),
+  // Preuve d'acceptation explicite des CGU/Mentions légales/Politique de
+  // confidentialité à l'inscription (cf. P1 audit RGPD). Nullable : les
+  // comptes créés avant l'introduction de cette exigence n'ont pas cette
+  // preuve et ne sont pas invités à l'accepter rétroactivement.
+  termsAcceptedAt: timestamp("terms_accepted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

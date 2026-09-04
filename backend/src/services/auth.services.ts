@@ -29,6 +29,7 @@ export interface UserRegistration {
   password: string;
   city?: string;
   avatar?: string;
+  termsAccepted: true;
 }
 
 export interface UserData {
@@ -113,6 +114,9 @@ export class AuthService {
           password: hashedPassword,
           city,
           avatar,
+          // La validation Zod (registerSchema) a déjà refusé toute valeur
+          // autre que `true` avant d'arriver ici — cf. P1 audit RGPD.
+          termsAcceptedAt: new Date(),
         })
         .returning();
     } catch (error) {

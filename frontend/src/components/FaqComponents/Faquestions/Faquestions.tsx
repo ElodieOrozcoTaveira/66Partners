@@ -44,7 +44,7 @@ export default function Faquestions() {
       icone: MessageSquareMore,
       question: "Comment signaler un comportement inapproprié ?",
       reponse:
-        "Rends-toi sur ton profil utilisateur, clique sur les trois petits point en haut à droite, et sélectionne 'Signaler'. Notre équipe examinera le signalement rapidement.",
+        "Pour l'instant, il n'existe pas encore de bouton de signalement directement dans l'application. Utilise le formulaire de contact pour nous décrire la situation : notre équipe l'examinera rapidement.",
     },
     {
       id: 7,

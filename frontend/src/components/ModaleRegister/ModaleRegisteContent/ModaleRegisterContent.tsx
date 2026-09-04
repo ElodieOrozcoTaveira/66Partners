@@ -32,6 +32,7 @@ export default function ModaleRegisterContent({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -63,6 +64,7 @@ export default function ModaleRegisterContent({
       setEmail("");
       setPassword("");
       setConfirmPassword("");
+      setTermsAccepted(false);
       setError(null);
       setIsSubmitting(false);
     }
@@ -91,12 +93,20 @@ export default function ModaleRegisterContent({
       return;
     }
 
+    if (!termsAccepted) {
+      setError(
+        "Tu dois accepter les Mentions Légales et la Politique de confidentialité pour créer un compte."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await api.post<RegisterResponse>("/api/auth/register", {
         pseudo,
         email,
         password,
+        termsAccepted,
       });
       console.debug("ModaleRegister: register response", res.data);
       const ok = await login(res.data.token);
@@ -215,6 +225,29 @@ export default function ModaleRegisterContent({
                 </p>
               )}
 
+              <label
+                htmlFor="termsAccepted"
+                className="container-modaleRegister__checkboxLabel"
+              >
+                <input
+                  id="termsAccepted"
+                  type="checkbox"
+                  required
+                  checked={termsAccepted}
+                  onChange={(event) => setTermsAccepted(event.target.checked)}
+                  className="container-modaleRegister__checkbox"
+                />
+                J'ai lu et j'accepte les{" "}
+                <NavLink to="/mentionslegales" onClick={onClose}>
+                  Mentions Légales
+                </NavLink>{" "}
+                et la{" "}
+                <NavLink to="/confidentialite" onClick={onClose}>
+                  Politique de confidentialité
+                </NavLink>{" "}
+                de 66Partners.
+              </label>
+
               {error && (
                 <p className="container-modaleRegister__error">{error}</p>
               )}
@@ -222,7 +255,7 @@ export default function ModaleRegisterContent({
               <button
                 type="submit"
                 className="container-modaleRegister__submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !termsAccepted}
               >
                 {isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
@@ -258,17 +291,6 @@ export default function ModaleRegisterContent({
               </button>
             </div>
 
-            <p className="container-modaleRegister__terms">
-              En créant un compte, vous acceptez nos{" "}
-              <NavLink to="/mentionslegales" onClick={onClose}>
-                Mentions Légales
-              </NavLink>{" "}
-              et notre{" "}
-              <NavLink to="/confidentialite" onClick={onClose}>
-                Politique de confidentialité
-              </NavLink>
-              .
-            </p>
           </section>
         </div>
       </div>

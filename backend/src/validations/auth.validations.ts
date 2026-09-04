@@ -15,6 +15,13 @@ export const registerSchema = z.object({
     .max(128),
   city: z.string().trim().min(1).max(100).transform(sanitizeText).optional(),
   avatar: z.url("URL d'avatar invalide").max(255).optional(),
+  // Acceptation explicite requise côté serveur : une valeur absente ou à
+  // `false` fait échouer la validation (400), pas de préréglage possible —
+  // cf. P1 audit RGPD.
+  termsAccepted: z.literal(
+    true,
+    "Tu dois accepter les Mentions Légales et la Politique de confidentialité pour créer un compte."
+  ),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
