@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { SportController } from "../controllers/sport.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
+import { requireAdminAuth } from "../middlewares/adminAuth.middleware.js";
 import { validate } from "../middlewares/validation.middleware.js";
 import {
   createSportSchema,
@@ -37,21 +38,24 @@ router.post(
   validate({ params: sportIdParamSchema }),
   SportController.toggleFavorite
 );
+// Le référentiel sports est une donnée globale, partagée par toute la
+// plateforme : sa modification est réservée à l'admin (cf. audit sécurité,
+// étape 3), et non plus accessible à tout utilisateur simplement authentifié.
 router.post(
   "/",
-  requireAuth,
+  requireAdminAuth,
   validate({ body: createSportSchema }),
   SportController.create
 );
 router.patch(
   "/:id",
-  requireAuth,
+  requireAdminAuth,
   validate({ params: sportIdParamSchema, body: updateSportSchema }),
   SportController.update
 );
 router.delete(
   "/:id",
-  requireAuth,
+  requireAdminAuth,
   validate({ params: sportIdParamSchema }),
   SportController.remove
 );
