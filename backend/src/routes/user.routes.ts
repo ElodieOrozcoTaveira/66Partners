@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user.controller.js";
+import { AvailabilityController } from "../controllers/availability.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { validate, validateBody } from "../middlewares/validation.middleware.js";
 import { uploadImage } from "../middlewares/upload.middleware.js";
@@ -9,6 +10,10 @@ import {
   userIdParamSchema,
   userSportIdParamSchema,
 } from "../validations/user.validations.js";
+import {
+  availabilityIdParamSchema,
+  createAvailabilitySchema,
+} from "../validations/availability.validations.js";
 
 /*
 GET /users/me
@@ -19,8 +24,12 @@ POST /users/me/cover-photo
 GET /users/me/sports
 PUT /users/me/sports
 DELETE /users/me/sports/:sportId
+GET /users/me/availabilities
+POST /users/me/availabilities
+DELETE /users/me/availabilities/:availabilityId
 GET /users/:id
 GET /users/:id/sports
+GET /users/:id/availabilities
 */
 
 const router = Router();
@@ -56,6 +65,20 @@ router.delete(
   UserController.removeMySport
 );
 
+router.get("/me/availabilities", requireAuth, AvailabilityController.listMine);
+router.post(
+  "/me/availabilities",
+  requireAuth,
+  validateBody(createAvailabilitySchema),
+  AvailabilityController.create
+);
+router.delete(
+  "/me/availabilities/:availabilityId",
+  requireAuth,
+  validate({ params: availabilityIdParamSchema }),
+  AvailabilityController.remove
+);
+
 router.get(
   "/:id",
   requireAuth,
@@ -67,6 +90,12 @@ router.get(
   requireAuth,
   validate({ params: userIdParamSchema }),
   UserController.listUserSports
+);
+router.get(
+  "/:id/availabilities",
+  requireAuth,
+  validate({ params: userIdParamSchema }),
+  AvailabilityController.listForUser
 );
 
 export default router;

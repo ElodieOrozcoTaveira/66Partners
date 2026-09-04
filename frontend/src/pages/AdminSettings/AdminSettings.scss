@@ -1,0 +1,152 @@
+@use "../../styles/variables/variables.scss";
+
+.admin-settings-page {
+  position: relative;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background-color: #f8f9fa;
+  padding-top: 1.25rem;
+  padding-bottom: 84px;
+
+  @media (min-width: variables.$laptop) {
+    padding-bottom: 2rem;
+  }
+}
+
+.admin-settings-page__body {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+
+  @media (min-width: variables.$tablet) {
+    max-width: 720px;
+    padding: 0 2rem;
+    gap: 1.6rem;
+  }
+
+  @media (min-width: variables.$desktop) {
+    max-width: 900px;
+  }
+}
+
+.admin-settings-page__header {
+  h1 {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: variables.$nuit;
+  }
+}
+
+.admin-settings-page__profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+}
+
+.admin-settings-page__avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-settings-page__avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(198, 40, 40, 0.1);
+  color: variables.$rouge2;
+}
+
+.admin-settings-page__profile-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+
+  strong {
+    font-family: "Manrope", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: variables.$nuit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-family: "Inter", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+}
+
+.admin-settings-page__logout {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  padding: 0.5rem 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(198, 40, 40, 0.08);
+  color: variables.$rouge2;
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(198, 40, 40, 0.14);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.admin-settings-page__toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 1100;
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  background: variables.$nuit;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  animation: admin-toast-in 0.2s ease;
+}
+
+@keyframes admin-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

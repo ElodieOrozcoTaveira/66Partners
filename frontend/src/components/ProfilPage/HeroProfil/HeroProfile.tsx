@@ -1,8 +1,9 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { Camera } from "lucide-react";
+import { Camera, Pen } from "lucide-react";
 import { useAuth, type User } from "../../../contexts/AuthContext";
 import api from "../../../lib/axios";
 import ImageCropModal from "../ImageCropModal/ImageCropModal";
+import ModaleEditProfil from "../ModaleEditProfil/ModaleEditProfil";
 import Hamburger from "../../BurgerComponent/Hamburger/Hamburger";
 import "./HeroProfile.scss";
 
@@ -45,9 +46,10 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
   const [pendingCrop, setPendingCrop] = useState<{ target: CropTarget; src: string } | null>(
     null,
   );
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const avatarSrc = user?.avatar || "/montagne.webp";
-  const coverSrc = user?.coverPhoto || "/couverture.png";
+  const coverSrc = user?.coverPhoto || "/couverture.webp";
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>, target: CropTarget) {
     const file = event.target.files?.[0];
@@ -86,6 +88,7 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
   }
 
   return (
+    <>
     <section
       className="hero-profile"
       style={coverSrc ? { backgroundImage: `url(${coverSrc})` } : undefined}
@@ -149,19 +152,42 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
       </div>
 
       <div className="hero-profile__content" />
-
-      {pendingCrop && (
-        <ImageCropModal
-          imageSrc={pendingCrop.src}
-          aspect={CROP_CONFIG[pendingCrop.target].aspect}
-          cropShape={CROP_CONFIG[pendingCrop.target].cropShape}
-          outputSize={CROP_CONFIG[pendingCrop.target].outputSize}
-          title={CROP_CONFIG[pendingCrop.target].title}
-          isSaving={isUploading !== null}
-          onCancel={closeCropModal}
-          onValidate={handleCropValidate}
-        />
-      )}
     </section>
+
+    {/*
+      Toujours rendu (même sans le bouton) : sa margin-top compense le
+      chevauchement de l'avatar sur la couverture, donc TopProfile en a
+      besoin dans les deux cas pour ne pas se retrouver sous la photo.
+    */}
+    <div className="hero-profile__editRow">
+      {isOwnProfile && (
+        <button
+          type="button"
+          className="hero-profile__editProfile"
+          onClick={() => setIsEditOpen(true)}
+        >
+          <Pen size={13} strokeWidth={2.2} />
+          Modifier le profil
+        </button>
+      )}
+    </div>
+
+    {isOwnProfile && (
+      <ModaleEditProfil isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} />
+    )}
+
+    {pendingCrop && (
+      <ImageCropModal
+        imageSrc={pendingCrop.src}
+        aspect={CROP_CONFIG[pendingCrop.target].aspect}
+        cropShape={CROP_CONFIG[pendingCrop.target].cropShape}
+        outputSize={CROP_CONFIG[pendingCrop.target].outputSize}
+        title={CROP_CONFIG[pendingCrop.target].title}
+        isSaving={isUploading !== null}
+        onCancel={closeCropModal}
+        onValidate={handleCropValidate}
+      />
+    )}
+    </>
   );
 }

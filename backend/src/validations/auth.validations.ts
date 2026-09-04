@@ -14,7 +14,6 @@ export const registerSchema = z.object({
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")
     .max(128),
   city: z.string().trim().min(1).max(100).transform(sanitizeText).optional(),
-  bio: z.string().trim().max(2000).transform(sanitizeText).optional(),
   avatar: z.url("URL d'avatar invalide").max(255).optional(),
 });
 

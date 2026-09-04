@@ -33,7 +33,7 @@ export default function Bonjour({ onNavigate }: BonjourProps) {
       >
         <section className="container-bonjour__leftside">
           <img
-            src={user?.avatar || "/montagne.webp"}
+            src={user?.avatar || "/avatardefault.webp"}
             alt={
               user ? `Photo de profil de ${user.pseudo}` : "logo de montagne"
             }

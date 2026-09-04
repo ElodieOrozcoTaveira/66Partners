@@ -3,6 +3,7 @@ import { NavLink, useParams } from "react-router-dom";
 import { ArrowLeft, Calendar, Check, MapPin, Plus, Trash2, Users, X } from "lucide-react";
 import api from "../../lib/axios";
 import { useAuth } from "../../contexts/AuthContext";
+import { ACTIVITY_NOTIFICATION_TYPES, useNotifications } from "../../contexts/NotificationsContext";
 import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
 import { getSportPhoto } from "../../lib/sportPhotos";
 import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
@@ -54,6 +55,7 @@ interface ParticipationRequest {
 export default function DetailActivite() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { notifications, markManyAsRead } = useNotifications();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activity, setActivity] = useState<ActivityDetail | null>(null);
@@ -89,6 +91,19 @@ export default function DetailActivite() {
       mounted = false;
     };
   }, [id]);
+
+  // Visiter cette activité vaut acquittement de ses notifications "activité"
+  // (demande de participation reçue / acceptée) : son badge dans la liste
+  // Mes activités se vide, sans toucher aux notifications des autres.
+  useEffect(() => {
+    if (!id) return;
+    const unreadActivityIds = notifications
+      .filter(
+        (notif) => ACTIVITY_NOTIFICATION_TYPES.has(notif.type) && notif.activityId === id && !notif.estLu,
+      )
+      .map((notif) => notif.id);
+    if (unreadActivityIds.length > 0) markManyAsRead(unreadActivityIds);
+  }, [id, notifications, markManyAsRead]);
 
   const loadPhotos = useCallback(() => {
     if (!id) return;

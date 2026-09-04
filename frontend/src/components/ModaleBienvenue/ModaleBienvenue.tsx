@@ -21,7 +21,9 @@ export default function ModaleBienvenue({
   const [step, setStep] = useState<"welcome" | "profile">("welcome");
   const [pseudo, setPseudo] = useState("");
   const [city, setCity] = useState("");
-  const [bio, setBio] = useState("");
+  const [headline, setHeadline] = useState("");
+  const [lookingFor, setLookingFor] = useState("");
+  const [openTo, setOpenTo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +48,9 @@ export default function ModaleBienvenue({
       setStep("welcome");
       setPseudo("");
       setCity("");
-      setBio("");
+      setHeadline("");
+      setLookingFor("");
+      setOpenTo("");
       setError(null);
       setIsSubmitting(false);
       return;
@@ -63,7 +67,13 @@ export default function ModaleBienvenue({
     event.preventDefault();
     setError(null);
 
-    if (!pseudo.trim() || !city.trim() || !bio.trim()) {
+    if (
+      !pseudo.trim() ||
+      !city.trim() ||
+      !headline.trim() ||
+      !lookingFor.trim() ||
+      !openTo.trim()
+    ) {
       setError("Tous les champs sont requis pour accéder à ton profil.");
       return;
     }
@@ -74,7 +84,9 @@ export default function ModaleBienvenue({
       await api.patch("/api/users/me", {
         pseudo: pseudo.trim(),
         city: city.trim(),
-        bio: bio.trim(),
+        headline: headline.trim(),
+        lookingFor: lookingFor.trim(),
+        openTo: openTo.trim(),
       });
       await refreshUser();
       onClose();
@@ -140,8 +152,8 @@ export default function ModaleBienvenue({
               Complétons ton profil
             </h3>
             <h4 className="container-modaleBienvenue__h4">
-              Renseigne ton nom, ta ville et quelques mots à propos de toi pour
-              découvrir les sportifs autour de chez toi.
+              Renseigne ton nom, ta ville et quelques infos à propos de toi
+              pour découvrir les sportifs autour de chez toi.
             </h4>
 
             <form
@@ -180,17 +192,50 @@ export default function ModaleBienvenue({
 
               <label
                 className="container-modaleBienvenue__label"
-                htmlFor="profile-bio"
+                htmlFor="profile-headline"
               >
-                À propos de moi
+                Ta présentation
               </label>
-              <textarea
-                id="profile-bio"
-                value={bio}
-                onChange={(event) => setBio(event.target.value)}
-                className="container-modaleBienvenue__textarea"
-                placeholder="Parle un peu de toi, de ton niveau et de ce que tu cherches"
-                rows={4}
+              <input
+                id="profile-headline"
+                type="text"
+                value={headline}
+                onChange={(event) => setHeadline(event.target.value)}
+                className="container-modaleBienvenue__input"
+                placeholder="Ex. Passionné de sport et de nouvelles rencontres."
+                maxLength={200}
+              />
+
+              <label
+                className="container-modaleBienvenue__label"
+                htmlFor="profile-lookingFor"
+              >
+                Ce que tu recherches
+              </label>
+              <input
+                id="profile-lookingFor"
+                type="text"
+                value={lookingFor}
+                onChange={(event) => setLookingFor(event.target.value)}
+                className="container-modaleBienvenue__input"
+                placeholder="Ex. Recherche des partenaires motivés et respectueux."
+                maxLength={200}
+              />
+
+              <label
+                className="container-modaleBienvenue__label"
+                htmlFor="profile-openTo"
+              >
+                Ton ouverture d'esprit
+              </label>
+              <input
+                id="profile-openTo"
+                type="text"
+                value={openTo}
+                onChange={(event) => setOpenTo(event.target.value)}
+                className="container-modaleBienvenue__input"
+                placeholder="Ex. Ouvert à de nouveaux sports et défis."
+                maxLength={200}
               />
 
               {error && (

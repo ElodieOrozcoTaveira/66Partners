@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { CalendarX } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getSportPhoto } from "../../../lib/sportPhotos";
+import { getSportVisual } from "../../../lib/sportVisuals";
 import { formatMonth, formatTime, formatWeekday } from "../../../lib/dateFormat";
 import ModaleContent from "../../ModaleConnexion/ModaleContent/ModaleContent";
 import ModaleRegisterContent from "../../ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
@@ -82,9 +84,23 @@ export default function ActivitésProche() {
         </NavLink>
       </div>
 
-      <div className="container-activitesproche__list">
+      {upcoming.length === 0 ? (
+        <div className="container-activitesproche__empty">
+          <span className="container-activitesproche__empty-icon">
+            <CalendarX size={26} />
+          </span>
+          <h3 className="container-activitesproche__empty-title">
+            Pas encore d'activité autour de toi
+          </h3>
+          <p className="container-activitesproche__empty-text">
+            Sois le premier à en créer une et lance le mouvement près de chez toi !
+          </p>
+        </div>
+      ) : (
+        <div className="container-activitesproche__list">
         {upcoming.map((activity) => {
           const startDate = new Date(activity.startDate);
+          const { color } = getSportVisual(activity.sportName);
 
           return (
             <NavLink
@@ -122,14 +138,18 @@ export default function ActivitésProche() {
                   {activity.participantsCount}/{activity.maxParticipants}{" "}
                   participants
                 </p>
-                <span className="activity-card__sport">
+                <span
+                  className="activity-card__sport"
+                  style={{ background: `${color}1F`, color }}
+                >
                   {activity.sportName}
                 </span>
               </div>
             </NavLink>
           );
         })}
-      </div>
+        </div>
+      )}
 
       <NavLink
         to="/explorer"

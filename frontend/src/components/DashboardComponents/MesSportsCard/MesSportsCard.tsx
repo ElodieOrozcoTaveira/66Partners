@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { ChevronRight, Plus } from "lucide-react";
 import api from "../../../lib/axios";
 import { getSportVisual } from "../../../lib/sportVisuals";
 import "./MesSportsCard.scss";
@@ -55,32 +56,43 @@ export default function MesSportsCard({ userId }: MesSportsCardProps) {
 
   return (
     <div className="container-messportscard">
-      <h2 className="container-messportscard__h2">Mes sports</h2>
+      <div className="container-messportscard__header">
+        <h2 className="container-messportscard__h2">Mes sports</h2>
+        <NavLink to="/sports" className="container-messportscard__manage">
+          Gérer mes sports
+          <ChevronRight size={14} strokeWidth={2.4} />
+        </NavLink>
+      </div>
 
       {isLoading ? (
         <p className="container-messportscard__empty">Chargement...</p>
-      ) : favoriteSports.length === 0 ? (
-        <p className="container-messportscard__empty">
-          Ajoute des sports favoris depuis la page Sports.
-        </p>
       ) : (
         <div className="container-messportscard__list">
           {favoriteSports.map((sport) => {
-            const { icon: Icon } = getSportVisual(sport.name);
+            const { icon: Icon, color } = getSportVisual(sport.name);
             return (
               <NavLink
                 key={sport.id}
                 to="/sports"
                 className="messportscard-item"
                 title={sport.name}
+                style={{ background: `${color}1F` }}
               >
                 <span className="messportscard-item__badge">
-                  <Icon size={16} />
+                  <Icon size={20} color={color} strokeWidth={2.2} />
                 </span>
                 <span className="messportscard-item__name">{sport.name}</span>
+                <span className="messportscard-item__bar" style={{ background: color }} />
               </NavLink>
             );
           })}
+
+          <NavLink to="/sports" className="messportscard-item messportscard-item--add">
+            <span className="messportscard-item__badge">
+              <Plus size={18} strokeWidth={2.4} />
+            </span>
+            <span className="messportscard-item__name">Ajouter un sport</span>
+          </NavLink>
         </div>
       )}
     </div>

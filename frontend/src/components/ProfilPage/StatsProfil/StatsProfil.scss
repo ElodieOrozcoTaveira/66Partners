@@ -2,9 +2,15 @@
 
 .container-statprofil {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  // minmax(0, 1fr) plutôt que 1fr : un enfant de grid a un min-width auto
+  // par défaut, donc du texte trop long (ex. « Activités organisées » dans
+  // une colonne étroite) pousse sinon la piste au-delà de sa part de 1fr et
+  // déborde silencieusement de la carte (visible seulement à l'écran, pas
+  // dans les DevTools sans y penser).
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   margin: 0;
+  box-sizing: border-box;
 }
 
 .container-statprofil__card {
@@ -13,11 +19,13 @@
   align-items: center;
   text-align: center;
   gap: 0.3rem;
+  min-width: 0;
   padding: 0.6rem 0.4rem;
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
   border: 1px solid rgba(31, 41, 55, 0.06);
+  box-sizing: border-box;
 }
 
 .container-statprofil__icon {
@@ -74,5 +82,35 @@
 
   .container-statprofil__card h4 {
     font-size: 0.75rem;
+  }
+}
+
+@media (min-width: variables.$laptop) {
+  .container-statprofil {
+    gap: 1.1rem;
+  }
+
+  .container-statprofil__card {
+    gap: 0.5rem;
+    padding: 1.35rem 1rem;
+    border-radius: 20px;
+  }
+
+  .container-statprofil__icon {
+    width: 42px;
+    height: 42px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .stat-value {
+    font-size: 1.85rem;
+  }
+
+  .container-statprofil__card h4 {
+    font-size: 0.85rem;
   }
 }

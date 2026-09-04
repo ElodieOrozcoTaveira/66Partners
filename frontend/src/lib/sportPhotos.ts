@@ -25,6 +25,7 @@ const sportPhotos: Record<string, string> = {
   Pickleball: "/sports/pickleball.webp",
   Paddle: "/sports/paddle.webp",
   Marche: "/sports/randonnee.webp",
+  Roller:"/sports/roller.webp",
 };
 
 export function getSportPhoto(sportName: string): string {

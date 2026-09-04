@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { MapPin, Users } from "lucide-react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
+import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { formatMonth, formatWeekday } from "../../../lib/dateFormat";
 import "../../HomeComponents/ActivitésProche/ActivitésProche.scss";
@@ -79,7 +81,12 @@ export default function ActivitesAutourDeToi() {
 
   return (
     <div className="container-autourdetoi">
-      <h2 className="container-autourdetoi__h2">Activités autour de toi</h2>
+      <div className="container-autourdetoi__header">
+        <h2 className="container-autourdetoi__h2">Activités autour de toi</h2>
+        <NavLink to="/explorer" className="container-autourdetoi__link">
+          Voir tout
+        </NavLink>
+      </div>
 
       {isLoading ? (
         <p className="container-autourdetoi__empty">Chargement...</p>
@@ -93,6 +100,7 @@ export default function ActivitesAutourDeToi() {
             const startDate = new Date(activity.startDate);
             const isMine =
               activity.creatorId === user?.id || joinedIds.has(activity.id);
+            const { icon: Icon, color } = getSportVisual(activity.sportName);
 
             return (
               <NavLink
@@ -106,6 +114,12 @@ export default function ActivitesAutourDeToi() {
                     alt={activity.sportName}
                     className="activity-card__photo"
                   />
+                  <span
+                    className="autourdetoi-sport-badge"
+                    style={{ backgroundColor: color, color: getIconColor(color) }}
+                  >
+                    <Icon size={14} strokeWidth={2.2} />
+                  </span>
                   {isMine && (
                     <span className="autourdetoi-mine-badge">Inscrit·e</span>
                   )}
@@ -126,8 +140,19 @@ export default function ActivitesAutourDeToi() {
 
                 <div className="activity-card__body">
                   <h3 className="activity-card__title">{activity.title}</h3>
-                  <p className="activity-card__meta">{activity.city} (66)</p>
-                  <span className="activity-card__sport">
+                  <p className="activity-card__meta">
+                    <MapPin size={12} strokeWidth={2.2} />
+                    {activity.city} (66)
+                  </p>
+                  <p className="activity-card__meta">
+                    <Users size={12} strokeWidth={2.2} />
+                    {activity.participantsCount} participant
+                    {activity.participantsCount > 1 ? "s" : ""}
+                  </p>
+                  <span
+                    className="activity-card__sport"
+                    style={{ background: `${color}1F`, color }}
+                  >
                     {activity.sportName}
                   </span>
                 </div>

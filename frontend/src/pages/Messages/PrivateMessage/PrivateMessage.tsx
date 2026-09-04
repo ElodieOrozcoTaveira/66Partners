@@ -3,6 +3,7 @@ import { NavLink, useParams } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useNotifications } from "../../../contexts/NotificationsContext";
 import { formatTime } from "../../../lib/dateFormat";
 import "./PrivateMessage.scss";
 
@@ -23,6 +24,7 @@ interface ActivityInfo {
 export default function PrivateMessage() {
   const { activityId } = useParams<{ activityId: string }>();
   const { user } = useAuth();
+  const { notifications, markManyAsRead } = useNotifications();
 
   const [activity, setActivity] = useState<ActivityInfo | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -72,6 +74,19 @@ export default function PrivateMessage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
+
+  // Visiter cette conversation vaut acquittement de ses notifications "nouveau
+  // message" : le badge de non-lus (liste des discussions, bottom nav) se vide.
+  useEffect(() => {
+    if (!activityId) return;
+    const unreadMessageIds = notifications
+      .filter(
+        (notif) =>
+          notif.type === "NEW_MESSAGE" && notif.activityId === activityId && !notif.estLu,
+      )
+      .map((notif) => notif.id);
+    if (unreadMessageIds.length > 0) markManyAsRead(unreadMessageIds);
+  }, [activityId, notifications, markManyAsRead]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();

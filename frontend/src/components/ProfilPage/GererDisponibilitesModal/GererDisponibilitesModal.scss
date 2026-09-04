@@ -1,0 +1,181 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.modale-dispo-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(31, 41, 55, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.modale-dispo-content {
+  position: relative;
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem 1.5rem;
+  min-width: 300px;
+  max-width: 90vw;
+  width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(variables.$nuit, 0.2);
+
+  &__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: variables.$nuit;
+
+    &:hover {
+      color: variables.$rouge;
+    }
+  }
+}
+
+.container-gererDispo {
+  &__h3 {
+    color: variables.$nuit;
+    font-size: 20px;
+    font-family: "Manrope", sans-serif;
+    margin: 0 0 1.1rem;
+  }
+
+  &__empty {
+    margin: 0 0 1rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 12px;
+    background: #f8f9fa;
+
+    span {
+      font-family: "Inter", sans-serif;
+      font-size: 0.85rem;
+      color: variables.$nuit;
+
+      strong {
+        font-weight: 700;
+        margin-right: 0.3rem;
+      }
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(198, 40, 40, 0.1);
+      color: variables.$rouge2;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(198, 40, 40, 0.18);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: wait;
+      }
+    }
+  }
+
+  &__form {
+    padding-top: 1rem;
+    border-top: 1px solid #f1f2f4;
+  }
+
+  &__formTitle {
+    margin: 0 0 0.6rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    select,
+    input {
+      flex: 1;
+      min-width: 90px;
+      border: 1px solid rgba(variables.$nuit, 0.16);
+      border-radius: 14px;
+      padding: 0.6rem 0.7rem;
+      font-family: "Inter", sans-serif;
+      font-size: 0.85rem;
+      color: variables.$nuit;
+      background: rgba(255, 255, 255, 0.9);
+      outline: none;
+      box-sizing: border-box;
+
+      &:focus {
+        border-color: variables.$rouge;
+        box-shadow: 0 0 0 3px rgba(variables.$rouge, 0.14);
+      }
+    }
+  }
+
+  &__error {
+    margin: 0.6rem 0 0;
+    color: variables.$rouge;
+    font-size: 0.85rem;
+  }
+
+  &__submit {
+    display: block;
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.7rem;
+    border: none;
+    border-radius: 30px;
+    color: white;
+    font-family: "Inter", sans-serif;
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+    @include mixins.gradient;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+  }
+}

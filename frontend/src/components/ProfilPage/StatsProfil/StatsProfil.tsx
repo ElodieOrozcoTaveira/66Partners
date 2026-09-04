@@ -101,7 +101,7 @@ export default function StatsProfil({ userId }: StatsProfilProps) {
           <UserPlus size={18} strokeWidth={2.2} />
         </span>
         <p className="stat-value">{loading ? "…" : partnersAccumulated ?? "—"}</p>
-        <h4>Partenaires</h4>
+        <h4>Rencontres</h4>
       </section>
       <section className="container-statprofil__card">
         <span

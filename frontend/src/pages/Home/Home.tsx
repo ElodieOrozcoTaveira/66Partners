@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Compass } from "lucide-react";
+import {
+  Compass,
+  ChevronRight,
+  Users,
+  Calendar,
+  MapPin,
+  ShieldCheck,
+} from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import ModaleContent from "../../components/ModaleConnexion/ModaleContent/ModaleContent";
@@ -29,37 +36,85 @@ export default function Home() {
     }
   }
 
+  const heroFeatures = [
+    {
+      id: 1,
+      icon: Users,
+      titre: "Trouve",
+      description: "des sportifs près de toi",
+    },
+    {
+      id: 2,
+      icon: Calendar,
+      titre: "Rejoins",
+      description: "des activités facilement",
+    },
+    {
+      id: 3,
+      icon: MapPin,
+      titre: "Partage",
+      description: "tes passions sportives",
+    },
+    {
+      id: 4,
+      icon: ShieldCheck,
+      titre: "Évolue",
+      description: "en toute sécurité",
+    },
+  ];
+
   return (
     <>
-      <div className="container-home">
-        <section className="container-home__leftside">
-          <h3 className="container-home__h3">La plateforme qui connecte</h3>
-          <h4 className="container-home__h4">
-            les sportifs des Pyrénées-Orientales
-          </h4>
-          <h1 className="container-home__h1">
-            Ton sport.
-            <br />
-            Ton partenaire.
-            <br />
-            <span className="container-home__span">Ton 66.</span>
-          </h1>
-          <p className="container-home__p">
-            Découvre, partage et vis des expériences sportives uniques près de
-            chez toi.
-          </p>
+      <section className="home-hero">
+        <div className="home-hero__photo-wrap">
+          <span className="home-hero__flag" aria-hidden="true" />
 
-          <div className="container-home__cta">
+          <div className="home-hero__intro">
+            <h1 className="home-hero__titre">
+              Ton sport.
+              <br />
+              Ton partenaire.
+              <br />
+              <span className="home-hero__titre-accent">Ton 66.</span>
+            </h1>
+            <p className="home-hero__soustitre">
+              La plateforme des sportifs des Pyrénées-Orientales.
+            </p>
+          </div>
+        </div>
+
+        <div className="home-hero__card">
+          <ul className="home-hero__features">
+            {heroFeatures.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <li key={feature.id} className="home-hero__feature">
+                  <Icon size={22} className="home-hero__feature-icon" />
+                  <span className="home-hero__feature-titre">
+                    {feature.titre}
+                  </span>
+                  <span className="home-hero__feature-desc">
+                    {feature.description}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="home-hero__actions">
             <NavLink
               to="/explorer"
-              className="container-home__btn container-home__btn--primary"
+              className="home-hero__btn"
               onClick={handleExplorerClick}
             >
-              <Compass size={16} /> Découvrir les activités
+              <Compass size={18} /> Découvrir les activités
+            </NavLink>
+            <NavLink to="/fonctionnement" className="home-hero__more">
+              En savoir plus <ChevronRight size={14} />
             </NavLink>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
       <ModaleContent
         isOpen={activeModal === "login"}

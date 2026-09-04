@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { CalendarDays } from "lucide-react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
@@ -88,9 +89,19 @@ export default function ProchainesActivites() {
       {isLoading ? (
         <p className="container-prochaine__empty">Chargement...</p>
       ) : !next ? (
-        <p className="container-prochaine__empty">
-          Tu n'as pas d'activité à venir pour le moment.
-        </p>
+        <div className="container-prochaine__empty">
+          <span className="container-prochaine__emptyIcon">
+            <CalendarDays size={20} strokeWidth={2.2} />
+          </span>
+          <p>
+            Tu n'as pas d'activité à venir pour le moment.
+            <br />
+            Découvre des activités autour de toi ou crée la tienne !
+          </p>
+          <NavLink to="/mesactivités/nouvelle" className="container-prochaine__emptyCta">
+            Créer une activité
+          </NavLink>
+        </div>
       ) : (
         <NavLink to={`/activities/${next.id}`} className="prochaine-card">
           {(() => {

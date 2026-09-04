@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type SyntheticEvent } from "react";
 import { Calendar, Heart, Users } from "lucide-react";
 import api from "../../lib/axios";
 import { useAuth } from "../../contexts/AuthContext";
-import { getSportVisual } from "../../lib/sportVisuals";
+import { getSportShadow, getSportVisual } from "../../lib/sportVisuals";
 import { getSportPhoto } from "../../lib/sportPhotos";
 import ModaleContent from "../../components/ModaleConnexion/ModaleContent/ModaleContent";
 import ModaleRegisterContent from "../../components/ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
@@ -141,9 +141,13 @@ export default function Sports() {
         ) : (
           <ul className="container-sports__list">
             {filteredSports.map((sport) => {
-              const { icon: Icon } = getSportVisual(sport.name);
+              const { icon: Icon, color } = getSportVisual(sport.name);
               return (
-                <li key={sport.id} className="sport-card">
+                <li
+                  key={sport.id}
+                  className="sport-card"
+                  style={{ boxShadow: `0 4px 14px ${getSportShadow(color)}` }}
+                >
                   <div className="sport-card__thumb">
                     <img
                       src={getSportPhoto(sport.name)}
@@ -151,8 +155,11 @@ export default function Sports() {
                       className="sport-card__photo"
                       onError={handlePhotoError}
                     />
-                    <span className="sport-card__badge">
-                      <Icon size={16} />
+                    <span
+                      className="sport-card__badge"
+                      style={{ backgroundColor: color }}
+                    >
+                      <Icon color="#FFFFFF" size={16} />
                     </span>
                   </div>
 

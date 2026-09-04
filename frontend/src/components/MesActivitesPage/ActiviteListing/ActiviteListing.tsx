@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { Check } from "lucide-react";
+import { ACTIVITY_NOTIFICATION_TYPES, useNotifications } from "../../../contexts/NotificationsContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import {
   formatDayMonth,
@@ -42,15 +43,33 @@ function ActiviteCard({
 }) {
   const { icon: Icon, color } = getSportVisual(activity.sportName);
   const startDate = new Date(activity.startDate);
+  const { notifications } = useNotifications();
+  const unreadCount = notifications.filter(
+    (notif) =>
+      ACTIVITY_NOTIFICATION_TYPES.has(notif.type) &&
+      notif.activityId === activity.id &&
+      !notif.estLu,
+  ).length;
 
   return (
     <NavLink to={`/activities/${activity.id}`} className="activite-card">
       <span className="activite-card__badge" style={{ backgroundColor: color }}>
         <Icon color={getIconColor(color)} size={20} />
+        {unreadCount > 0 && (
+          <span className="activite-card__unread-badge">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
       </span>
 
       <div className="activite-card__body">
-        <h3 className="activite-card__title">{activity.title}</h3>
+        <h3
+          className={`activite-card__title${
+            unreadCount > 0 ? " activite-card__title--unread" : ""
+          }`}
+        >
+          {activity.title}
+        </h3>
         <p className="activite-card__meta">
           {isPast
             ? `${formatWeekdayShort(startDate)} ${formatDayMonth(startDate)}`

@@ -27,8 +27,9 @@ export interface UserProfile {
   email: string;
   pseudo: string;
   city: string | null;
-  bio: string | null;
-  dispo: string | null;
+  headline: string | null;
+  lookingFor: string | null;
+  openTo: string | null;
   avatar: string | null;
   coverPhoto: string | null;
   createdAt: Date;
@@ -44,8 +45,9 @@ export interface PublicUserProfile {
   id: string;
   pseudo: string;
   city: string | null;
-  bio: string | null;
-  dispo: string | null;
+  headline: string | null;
+  lookingFor: string | null;
+  openTo: string | null;
   avatar: string | null;
   coverPhoto: string | null;
   createdAt: Date;
@@ -55,8 +57,9 @@ export interface PublicUserProfile {
 export interface UserUpdateInput {
   pseudo?: string;
   city?: string | null;
-  bio?: string | null;
-  dispo?: string | null;
+  headline?: string | null;
+  lookingFor?: string | null;
+  openTo?: string | null;
   avatar?: string | null;
   coverPhoto?: string | null;
 }
@@ -79,8 +82,9 @@ function toProfile(user: typeof users.$inferSelect): UserProfile {
     email: user.email,
     pseudo: user.pseudo,
     city: user.city,
-    bio: user.bio,
-    dispo: user.dispo,
+    headline: user.headline,
+    lookingFor: user.lookingFor,
+    openTo: user.openTo,
     avatar: user.avatar,
     coverPhoto: user.coverPhoto,
     createdAt: user.createdAt,
@@ -93,8 +97,9 @@ function toPublicProfile(user: typeof users.$inferSelect): PublicUserProfile {
     id: user.id,
     pseudo: user.pseudo,
     city: user.city,
-    bio: user.bio,
-    dispo: user.dispo,
+    headline: user.headline,
+    lookingFor: user.lookingFor,
+    openTo: user.openTo,
     avatar: user.avatar,
     coverPhoto: user.coverPhoto,
     createdAt: user.createdAt,

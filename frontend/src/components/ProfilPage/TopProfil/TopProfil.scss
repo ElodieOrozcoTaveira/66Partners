@@ -7,42 +7,17 @@
     align-items: center;
     text-align: center;
     gap: 0.6rem;
-    margin-top: 3.75rem;
+    // Le chevauchement de l'avatar est déjà compensé par la margin-top de
+    // .hero-profile__editRow (toujours rendue, cf. HeroProfile.tsx) : il ne
+    // reste qu'à espacer visuellement du bouton "Modifier le profil".
+    margin-top: 0.6rem;
 
     @media (min-width: variables.$tablet) {
-        margin-top: 4.5rem;
+        margin-top: 0.85rem;
     }
 
     @media (min-width: variables.$desktop) {
-        margin-top: 5.25rem;
-    }
-
-    &__actions{
-        display: flex;
-        justify-content: flex-end;
-        width: 100%;
-    }
-
-    &__edit{
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.4rem 0.85rem;
-        border: 1px solid rgba(31, 41, 55, 0.15);
-        border-radius: 999px;
-        background: white;
-        color: variables.$nuit;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.8rem;
-        font-weight: 600;
-        white-space: nowrap;
-        cursor: pointer;
-        transition: border-color 0.15s ease, color 0.15s ease;
-
-        &:hover{
-            border-color: variables.$rouge2;
-            color: variables.$rouge2;
-        }
+        margin-top: 1rem;
     }
 
     &__info{

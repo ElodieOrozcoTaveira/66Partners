@@ -15,20 +15,26 @@ const NAV_ITEMS_RIGHT = [
 ];
 
 export default function BottomNavBar() {
-  const { unreadMessagesCount } = useNotifications();
+  const { unreadMessagesCount, unreadActivitiesCount } = useNotifications();
+
+  const badgeCountByPath: Record<string, number> = {
+    "/messages": unreadMessagesCount,
+    "/mesactivités": unreadActivitiesCount,
+  };
 
   function renderItem({
     to,
     icon: Icon,
     label,
   }: (typeof NAV_ITEMS_LEFT)[number]) {
+    const badgeCount = badgeCountByPath[to] ?? 0;
     return (
       <NavLink key={to} to={to} className="container-bottomNavbar__link">
         <span className="container-bottomNavbar__icon-wrap">
           <Icon size={20} strokeWidth={2} />
-          {to === "/messages" && unreadMessagesCount > 0 && (
+          {badgeCount > 0 && (
             <span className="container-bottomNavbar__badge">
-              {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+              {badgeCount > 9 ? "9+" : badgeCount}
             </span>
           )}
         </span>

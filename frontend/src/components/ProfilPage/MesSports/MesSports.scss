@@ -4,11 +4,19 @@
 .container-mesSports {
   padding-bottom: 0.25rem;
 
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 0 0 0.45rem;
+  }
+
   &__h2 {
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    margin: 0 0 0.45rem;
+    margin: 0;
     font-family: "Inter", sans-serif;
     font-size: 0.7rem;
     font-weight: 700;
@@ -19,6 +27,22 @@
     svg {
       flex-shrink: 0;
       color: variables.$rouge2;
+    }
+  }
+
+  &__manage {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    flex-shrink: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: variables.$rouge2;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
     }
   }
 
@@ -50,52 +74,55 @@
     &::-webkit-scrollbar {
       display: none;
     }
+
+    // Le body de la page laisse assez de largeur à partir du laptop pour
+    // que la liste des sports s'étale plutôt que défile : plus besoin du
+    // scroll horizontal pensé pour mobile.
+    @media (min-width: variables.$laptop) {
+      flex-wrap: wrap;
+      overflow-x: visible;
+      gap: 1rem;
+    }
   }
 }
 
 .mesSports-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
-  gap: 0.3rem;
-  width: 56px;
+  gap: 0.4rem;
+  width: 80px;
+  padding: 0.75rem 0.5rem 0.6rem;
+  border-radius: 14px;
+  overflow: hidden;
+  box-sizing: border-box;
 
-  &__badgeWrap {
-    position: relative;
+  @media (min-width: variables.$laptop) {
+    width: 104px;
+    padding: 1rem 0.6rem 0.8rem;
   }
 
   &__link {
     display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: 0.4rem;
     text-decoration: none;
-    transition: transform 0.15s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-    }
   }
 
   &__badge {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(31, 41, 55, 0.1);
-
-    svg {
-      stroke: url(#sport-icon-gradient);
-    }
   }
 
   &__remove {
     position: absolute;
-    top: -2px;
-    right: -2px;
+    top: 6px;
+    right: 6px;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,12 +145,41 @@
   &__name {
     max-width: 100%;
     font-family: "Inter", sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
+    font-size: 0.72rem;
+    font-weight: 700;
     color: variables.$nuit;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+  }
+
+  &__bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+  }
+}
+
+.mesSports-item--add {
+  justify-content: center;
+  border: 1.5px dashed rgba(198, 40, 40, 0.35);
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+
+  .mesSports-item__badge {
+    color: variables.$rouge2;
+  }
+
+  .mesSports-item__name {
+    color: variables.$rouge2;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  &:hover {
+    background: rgba(198, 40, 40, 0.06);
   }
 }

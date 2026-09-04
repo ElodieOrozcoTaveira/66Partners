@@ -132,6 +132,21 @@ export class ParticipationService {
       );
     }
 
+    const [requester] = await db
+      .select({ pseudo: users.pseudo })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    NotificationService.create({
+      usersId: activity.creatorId,
+      type: "PARTICIPATION_REQUESTED",
+      contenu: `${requester?.pseudo ?? "Quelqu'un"} veut rejoindre "${activity.title}"`,
+      activityId: activity.id,
+    }).catch((err) =>
+      console.error("Erreur création notification (demande de participation):", err),
+    );
+
     return newParticipation;
   }
 

@@ -37,6 +37,27 @@ export function formatDayMonth(date: Date): string {
   return `${date.getDate()} ${monthFormatter.format(date)}`;
 }
 
+const dayMonthYearFormatter = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+/** Ex. "22 août 2026" */
+export function formatDayMonthYear(date: Date): string {
+  return dayMonthYearFormatter.format(date);
+}
+
+const monthYearFormatter = new Intl.DateTimeFormat("fr-FR", {
+  month: "long",
+  year: "numeric",
+});
+
+/** Ex. "Juin 2025" */
+export function formatMonthYear(date: Date): string {
+  return capitalize(monthYearFormatter.format(date));
+}
+
 /** Ex. "Aujourd'hui", "Demain", "Dans 4 jours" */
 export function formatRelativeDay(date: Date): string {
   const startOfDay = (value: Date) =>

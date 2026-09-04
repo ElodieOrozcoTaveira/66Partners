@@ -12,10 +12,12 @@ export type User = {
   pseudo: string;
   email: string;
   city: string | null;
-  bio: string | null;
+  headline: string | null;
+  lookingFor: string | null;
+  openTo: string | null;
   avatar: string | null;
   coverPhoto: string | null;
-  dispo: string | null;
+  createdAt: string;
 };
 
 type AuthContextType = {

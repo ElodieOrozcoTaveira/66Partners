@@ -1,23 +1,57 @@
-.container-aproposProfile__quote {
+@use "../../../styles/variables/variables.scss";
+
+.container-aproposProfile {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 0.9rem 0.95rem;
+  border-radius: 16px;
+  background: rgba(198, 40, 40, 0.04);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  box-sizing: border-box;
+}
+
+.container-aproposProfile__col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.55rem;
+  min-width: 0;
+  flex: 1;
+
+  &--meta {
+    flex: 0 1 auto;
+    max-width: 40%;
+  }
+}
+
+.container-aproposProfile__line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
   margin: 0;
-  text-align: center;
   font-family: "Inter", sans-serif;
-  font-style: italic;
-  font-size: 0.88rem;
-  line-height: 1.45;
-  color: #475569;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: variables.$nuit;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+    color: variables.$rouge2;
+  }
 }
 
 .container-aproposProfile__empty {
   margin: 0;
-  text-align: center;
   font-family: "Inter", sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-style: italic;
   color: #94a3b8;
+}
+
+.container-aproposProfile__divider {
+  flex-shrink: 0;
+  width: 1px;
+  background: rgba(31, 41, 55, 0.1);
 }

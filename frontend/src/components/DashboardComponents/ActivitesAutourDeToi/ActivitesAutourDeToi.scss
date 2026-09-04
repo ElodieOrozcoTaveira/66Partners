@@ -1,12 +1,35 @@
 @use "../../../styles/variables/variables.scss";
 
 .container-autourdetoi {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.7rem;
+  }
+
   &__h2 {
-    margin: 0 0 0.7rem;
+    margin: 0;
     font-family: "Manrope", sans-serif;
     font-size: 1rem;
     font-weight: 700;
     color: variables.$nuit;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: variables.$rouge2;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   &__empty {
@@ -21,27 +44,68 @@
   }
 
   &__list {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 1rem;
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
 
     .activity-card {
-      flex: 0 0 200px;
       position: relative;
+    }
+
+    // Cartes plus étroites en grille 2 colonnes qu'en scroll horizontal :
+    // une photo à 160px (valeur du fichier partagé, pensée pour une carte
+    // large) paraîtrait démesurément carrée ici.
+    .activity-card__photo-wrap {
+      height: 110px;
+    }
+
+    .activity-card__title {
+      font-size: 0.9rem;
+    }
+
+    .activity-card__body {
+      padding: 0.7rem;
+      gap: 0.3rem;
+    }
+
+    // Le libellé sport hérite du dégradé de marque dans le fichier partagé
+    // (ActivitésProche.scss) ; ici la couleur est passée en inline style
+    // (par sport), donc plus de white-space:nowrap forcé côté texte pour
+    // laisser respirer les libellés meta sur deux lignes si besoin.
+    .activity-card__meta {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      white-space: normal;
+
+      svg {
+        flex-shrink: 0;
+        color: #94a3b8;
+      }
     }
   }
 }
 
-.autourdetoi-mine-badge {
+.autourdetoi-sport-badge {
   position: absolute;
   top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.autourdetoi-mine-badge {
+  position: absolute;
+  // Sous le badge sport (top-gauche) pour ne pas chevaucher, et sous la
+  // date (top-droite, cf. .activity-card__date dans le scss partagé).
+  top: calc(0.5rem + 34px);
   left: 0.5rem;
   z-index: 1;
   padding: 0.25rem 0.6rem;

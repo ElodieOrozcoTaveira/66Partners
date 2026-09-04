@@ -4,6 +4,12 @@ import { X } from "lucide-react";
 import { isAxiosError } from "axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import api from "../../../lib/axios";
+import {
+  getPushSupportState,
+  subscribeToPush,
+  unsubscribeFromPush,
+  type PushSupportState,
+} from "../../../lib/webPush";
 import "./ModaleEditProfil.scss";
 
 interface ModaleEditProfilProps {
@@ -18,10 +24,32 @@ export default function ModaleEditProfil({
   const { user, refreshUser } = useAuth();
   const [pseudo, setPseudo] = useState("");
   const [city, setCity] = useState("");
-  const [bio, setBio] = useState("");
-  const [dispo, setDispo] = useState("");
+  const [headline, setHeadline] = useState("");
+  const [lookingFor, setLookingFor] = useState("");
+  const [openTo, setOpenTo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pushState, setPushState] = useState<PushSupportState | "checking">("checking");
+  const [isPushBusy, setIsPushBusy] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    getPushSupportState().then(setPushState);
+  }, [isOpen]);
+
+  async function handleTogglePush() {
+    setIsPushBusy(true);
+    try {
+      if (pushState === "subscribed") {
+        await unsubscribeFromPush();
+      } else {
+        await subscribeToPush();
+      }
+      setPushState(await getPushSupportState());
+    } finally {
+      setIsPushBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) return;
@@ -48,8 +76,9 @@ export default function ModaleEditProfil({
 
     setPseudo(user?.pseudo ?? "");
     setCity(user?.city ?? "");
-    setBio(user?.bio ?? "");
-    setDispo(user?.dispo ?? "");
+    setHeadline(user?.headline ?? "");
+    setLookingFor(user?.lookingFor ?? "");
+    setOpenTo(user?.openTo ?? "");
   }, [isOpen, user]);
 
   if (!isOpen) return null;
@@ -68,8 +97,9 @@ export default function ModaleEditProfil({
       await api.patch("/api/users/me", {
         pseudo: pseudo.trim(),
         city: city.trim() || null,
-        bio: bio.trim() || null,
-        dispo: dispo.trim() || null,
+        headline: headline.trim() || null,
+        lookingFor: lookingFor.trim() || null,
+        openTo: openTo.trim() || null,
       });
       await refreshUser();
       onClose();
@@ -141,32 +171,50 @@ export default function ModaleEditProfil({
 
             <label
               className="container-modaleEditProfil__label"
-              htmlFor="edit-bio"
+              htmlFor="edit-headline"
             >
-              À propos de moi
+              Ta présentation
             </label>
-            <textarea
-              id="edit-bio"
-              value={bio}
-              onChange={(event) => setBio(event.target.value)}
-              className="container-modaleEditProfil__textarea"
-              placeholder="Parle un peu de toi, de ton niveau et de ce que tu cherches"
-              rows={3}
+            <input
+              id="edit-headline"
+              type="text"
+              value={headline}
+              onChange={(event) => setHeadline(event.target.value)}
+              className="container-modaleEditProfil__input"
+              placeholder="Ex. Passionné de sport et de nouvelles rencontres."
+              maxLength={200}
             />
 
             <label
               className="container-modaleEditProfil__label"
-              htmlFor="edit-dispo"
+              htmlFor="edit-lookingFor"
             >
-              Disponibilités
+              Ce que tu recherches
             </label>
-            <textarea
-              id="edit-dispo"
-              value={dispo}
-              onChange={(event) => setDispo(event.target.value)}
-              className="container-modaleEditProfil__textarea"
-              placeholder="Ex. Le week-end et en semaine après 18h"
-              rows={3}
+            <input
+              id="edit-lookingFor"
+              type="text"
+              value={lookingFor}
+              onChange={(event) => setLookingFor(event.target.value)}
+              className="container-modaleEditProfil__input"
+              placeholder="Ex. Recherche des partenaires motivés et respectueux."
+              maxLength={200}
+            />
+
+            <label
+              className="container-modaleEditProfil__label"
+              htmlFor="edit-openTo"
+            >
+              Ton ouverture d'esprit
+            </label>
+            <input
+              id="edit-openTo"
+              type="text"
+              value={openTo}
+              onChange={(event) => setOpenTo(event.target.value)}
+              className="container-modaleEditProfil__input"
+              placeholder="Ex. Ouvert à de nouveaux sports et défis."
+              maxLength={200}
             />
 
             {error && (
@@ -181,6 +229,34 @@ export default function ModaleEditProfil({
               {isSubmitting ? "Enregistrement..." : "Enregistrer"}
             </button>
           </form>
+
+          {pushState !== "checking" && pushState !== "unsupported" && (
+            <div className="container-modaleEditProfil__push">
+              <div className="container-modaleEditProfil__pushText">
+                <span className="container-modaleEditProfil__label">
+                  Notifications push
+                </span>
+                <p className="container-modaleEditProfil__pushHint">
+                  {pushState === "denied"
+                    ? "Bloquées dans les réglages de ton navigateur : réactive-les depuis les paramètres du site pour les recevoir."
+                    : "Reçois une alerte sur ton téléphone même quand tu n'es pas sur le site."}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={pushState === "subscribed"}
+                className={
+                  "container-modaleEditProfil__pushToggle" +
+                  (pushState === "subscribed" ? " container-modaleEditProfil__pushToggle--on" : "")
+                }
+                onClick={handleTogglePush}
+                disabled={isPushBusy || pushState === "denied"}
+              >
+                <span className="container-modaleEditProfil__pushToggleKnob" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>,

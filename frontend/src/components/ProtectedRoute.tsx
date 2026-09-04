@@ -12,7 +12,9 @@ export default function ProtectedRoute() {
       </div>
     );
   }
-  if (!user) return <Navigate to="/login" replace />;
+  // Plus de page /login dédiée : la connexion se fait via la modale
+  // (Header/burger), donc on renvoie simplement vers l'accueil.
+  if (!user) return <Navigate to="/" replace />;
 
   return <Outlet />;
 }

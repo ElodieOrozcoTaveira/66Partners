@@ -10,6 +10,15 @@
   padding-bottom: 60px;
   background-color: #ffffff;
 
+  // En mobile, la page devient une coquille de hauteur fixe : la photo de
+  // couverture/profil (HeroProfile) reste en place et seul le corps
+  // (profil-page__body) défile, entre elle et la bottom navbar fixe.
+  @media (max-width: (variables.$tablet - 1px)) {
+    height: 100dvh;
+    height: 100svh;
+    overflow: hidden;
+  }
+
   // Le Header réapparaît à partir de la tablette (masqué seulement en
   // mobile, cf. Layout.tsx) : il faut donc à nouveau le dégager.
   @media (min-width: variables.$tablet) {
@@ -42,6 +51,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
   @media (min-width: variables.$tablet) {
     max-width: 620px;
@@ -50,12 +63,28 @@
   }
 
   @media (min-width: variables.$laptop) {
-    max-width: 640px;
-    padding: 3rem 2rem 0;
-    gap: 1.5rem;
+    max-width: 1040px;
+    padding: 3.5rem 2.5rem 0;
+    gap: 2.25rem;
   }
 
   @media (min-width: variables.$desktop) {
-    max-width: 680px;
+    max-width: 1180px;
+  }
+}
+
+// La carte À propos est volontairement plus étroite que le reste des
+// sections en mobile/tablette (rejointe par les stats juste en dessous, en
+// pleine largeur) : ça aère la mise en page sous le pseudo/lieu au lieu
+// d'un bloc côte à côte. À partir du laptop, le corps est assez large pour
+// que cette même largeur réduite se lise comme un bloc perdu au milieu
+// d'un vide plutôt qu'une respiration : elle reprend alors la pleine
+// largeur, comme les autres sections.
+.profil-page__body > .container-aproposProfile {
+  align-self: center;
+  width: 75%;
+
+  @media (min-width: variables.$laptop) {
+    width: 100%;
   }
 }

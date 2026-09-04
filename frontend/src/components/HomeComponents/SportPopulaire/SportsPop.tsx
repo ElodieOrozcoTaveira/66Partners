@@ -70,7 +70,7 @@ export default function SportsPop() {
 
         <div className="container-sportpop__list" ref={listRef}>
           {sports.map((sport) => {
-            const { icon: Icon } = getSportVisual(sport.name);
+            const { icon: Icon, color } = getSportVisual(sport.name);
 
             return (
               <NavLink key={sport.id} to="/sports" className="sportpop-item">
@@ -81,8 +81,11 @@ export default function SportsPop() {
                     className="sportpop-item__photo"
                     onError={handlePhotoError}
                   />
-                  <span className="sportpop-item__badge">
-                    <Icon size={14} />
+                  <span
+                    className="sportpop-item__badge"
+                    style={{ backgroundColor: color }}
+                  >
+                    <Icon size={14} color="#FFFFFF" />
                   </span>
                 </div>
                 <span className="sportpop-item__name">{sport.name}</span>

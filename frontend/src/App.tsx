@@ -3,9 +3,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationsProvider } from "./contexts/NotificationsContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminAccessGate from "./components/AdminAccessGate";
 import Home from "./pages/Home/Home";
-import Login from "./pages/Login/Login";
-import Register from "./pages/Register/Register";
 import Sports from "./pages/Sports/Sports";
 import Contact from "./pages/Contact/Contact";
 import NotFound from "./pages/NotFound/NotFound";
@@ -25,6 +24,9 @@ import CreerActivite from "./pages/CreerActivite/CreerActivite";
 import DetailActivite from "./pages/DetailActivite/DetailActivite";
 import MotDePasseOublie from "./pages/MotDePasseOublie/MotDePasseOublie";
 import ReinitialiserMotDePasse from "./pages/ReinitialiserMotDePasse/ReinitialiserMotDePasse";
+import AdminLogin from "./pages/AdminLogin/AdminLogin";
+import AdminStats from "./pages/AdminStats/AdminStats";
+import AdminSettings from "./pages/AdminSettings/AdminSettings";
 
 
 export default function App() {
@@ -36,8 +38,6 @@ export default function App() {
           <Route element={<Layout />}>
             {/* Routes publiques */}
             <Route path="/" element={<Home/>} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
             <Route path="/sports" element={<Sports />} />
             <Route path="/pourquoi66" element={<Pourquoi />} />
             <Route path="/contact" element={<Contact />} />
@@ -68,6 +68,15 @@ export default function App() {
             
 
             <Route path="*" element={<NotFound />} />
+          </Route>
+
+          {/* Interface admin : layout autonome, sans Header/Footer du site public.
+              Accès protégé par mot de passe admin (indépendant du compte
+              utilisateur) le temps qu'une vraie auth admin existe côté backend. */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route element={<AdminAccessGate />}>
+            <Route path="/admin/stats" element={<AdminStats />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
         </Routes>
         </NotificationsProvider>

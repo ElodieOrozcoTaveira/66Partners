@@ -5,6 +5,7 @@ import BottomNavBar from "./BottomNavBar/BottomNavBar";
 import GoogleAnalytics from "./Analytics/Analytics";
 import "./Layout.scss";
 import CookieBanner from "./Cookie/Cookie";
+import InstallPwaPrompt from "./InstallPwaPrompt/InstallPwaPrompt";
 
 export default function Layout() {
   const location = useLocation();
@@ -36,6 +37,7 @@ export default function Layout() {
       </main>
       {showBottomNav && <BottomNavBar />}
       <Footer hideOnMobile={isAppRoute} />
+      <InstallPwaPrompt hasBottomNav={showBottomNav} />
     </div>
   );
 }

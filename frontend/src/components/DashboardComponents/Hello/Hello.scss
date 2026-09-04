@@ -5,10 +5,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.5rem;
   width: 100vw;
+  flex-shrink: 0;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
@@ -17,22 +15,22 @@
   &__cover {
     position: relative;
     width: 100%;
-    height: 220px;
+    height: 180px;
     @include mixins.background;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 
     @media (min-width: variables.$tablet) {
-      height: 280px;
+      height: 230px;
       background-position: center 38%;
     }
 
     @media (min-width: variables.$laptop) {
-      height: 300px;
+      height: 250px;
       background-position: center 42%;
     }
 
     @media (min-width: variables.$desktop) {
-      height: 340px;
+      height: 280px;
       background-position: center 45%;
     }
 
@@ -44,42 +42,83 @@
     }
   }
 
-  &__menu {
-    position: absolute;
-    z-index: 2;
-    top: 0.75rem;
-    right: 0.75rem;
+  &__row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1.5rem;
 
-    .navbar-burger {
-      background-color: transparent;
-      color: #ffffff;
+    @media (min-width: variables.$tablet) {
+      padding: 0 2rem;
+    }
+  }
+
+  &__avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+    width: 130px;
+    height: 130px;
+    // Chevauche le bas de la couverture (comme HeroProfile), sans entraîner
+    // le reste de la colonne (le texte) avec elle : seul cet élément remonte.
+    margin-top: -55px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    background: #f3f3f3;
+
+    @media (min-width: variables.$tablet) {
+      width: 150px;
+      height: 150px;
+      margin-top: -64px;
+    }
+
+    @media (min-width: variables.$laptop) {
+      width: 160px;
+      height: 160px;
+      margin-top: -68px;
+    }
+
+    @media (min-width: variables.$desktop) {
+      width: 180px;
+      height: 180px;
+      margin-top: -75px;
     }
   }
 
   &__avatar {
-    position: absolute;
-    left: 50%;
-    bottom: -42px;
-    transform: translateX(-50%);
-    z-index: 1;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    background: #f3f3f3;
-    border: 3px solid #ffffff;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    border-radius: 50%;
+  }
 
-    @media (min-width: variables.$tablet) {
-      width: 140px;
-      height: 140px;
-      bottom: -48px;
+  &__avatarEdit {
+    position: absolute;
+    z-index: 1;
+    right: -2px;
+    bottom: -2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    background: variables.$rouge2;
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.15s ease;
+
+    &:hover {
+      transform: scale(1.06);
     }
 
-    @media (min-width: variables.$desktop) {
-      width: 160px;
-      height: 160px;
-      bottom: -56px;
+    &:disabled {
+      opacity: 0.7;
+      cursor: wait;
     }
   }
 
@@ -87,24 +126,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.2rem;
+    text-align: center;
+    gap: 0.15rem;
     min-width: 0;
-    margin-top: 3.25rem;
-    padding: 0 1.5rem;
-
-    @media (min-width: variables.$tablet) {
-      margin-top: 3.75rem;
-    }
-
-    @media (min-width: variables.$desktop) {
-      margin-top: 4.25rem;
-    }
   }
 
   &__h1 {
     margin: 0;
     font-family: "Manrope", sans-serif;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 800;
     color: variables.$nuit;
   }
@@ -112,14 +142,14 @@
   &__p {
     margin: 0;
     font-family: "Inter", sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: #64748b;
   }
 
   &__bell-wrap {
     position: absolute;
     top: 0.75rem;
-    left: 0.75rem;
+    right: 0.75rem;
     z-index: 2;
     flex-shrink: 0;
   }
@@ -133,8 +163,8 @@
     height: 38px;
     border: none;
     border-radius: 50%;
-    background: #f4a61d;
-    color: #ffffff;
+    background: #ffffff;
+    color: variables.$nuit;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     cursor: pointer;
     transition: transform 0.15s ease;
@@ -184,7 +214,7 @@
 .notifications-panel {
   position: absolute;
   top: calc(100% + 0.6rem);
-  left: 0;
+  right: 0;
   width: 320px;
   max-width: calc(100vw - 3rem);
   max-height: 420px;

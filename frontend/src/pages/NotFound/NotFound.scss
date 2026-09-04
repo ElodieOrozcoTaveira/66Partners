@@ -1,0 +1,143 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.notfound-page {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: calc(var(--header-height) + 1.5rem) 1.5rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @include mixins.background;
+}
+
+.notfound-page__card {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background-color: #fff7eb;
+  filter: sepia(0.2) brightness(1) contrast(1);
+  border-radius: 1rem;
+  border-bottom-right-radius: 35px;
+  padding: 2.25rem 2rem 2rem;
+  box-shadow: 0 12px 40px rgba(variables.$nuit, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.notfound-page__logo {
+  width: 130px;
+  height: auto;
+  margin-bottom: 1.25rem;
+}
+
+.notfound-page__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  color: white;
+  margin-bottom: 0.75rem;
+  @include mixins.gradient;
+}
+
+.notfound-page__code {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: variables.$nuit;
+}
+
+.notfound-page__title {
+  margin: 0.35rem 0 0.5rem;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: variables.$nuit;
+}
+
+.notfound-page__text {
+  margin: 0 0 1.75rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(variables.$nuit, 0.75);
+}
+
+.notfound-page__actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.notfound-page__primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 30px;
+  color: white;
+  font-family: "Inter", sans-serif;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  @include mixins.gradient;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(variables.$rouge, 0.4);
+  }
+}
+
+.notfound-page__secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(variables.$nuit, 0.16);
+  border-radius: 30px;
+  background: #ffffff;
+  color: variables.$nuit;
+  font-family: "Inter", sans-serif;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    border-color: variables.$rouge2;
+    color: variables.$rouge2;
+  }
+}
+
+@media (min-width: variables.$tablet) {
+  .notfound-page__card {
+    padding: 2.75rem 2.5rem 2.5rem;
+  }
+
+  .notfound-page__code {
+    font-size: 4.25rem;
+  }
+
+  .notfound-page__actions {
+    flex-direction: row;
+
+    .notfound-page__primary,
+    .notfound-page__secondary {
+      flex: 1;
+    }
+  }
+}

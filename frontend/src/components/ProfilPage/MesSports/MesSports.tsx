@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Heart, X } from "lucide-react";
+import { ChevronRight, Heart, Plus, X } from "lucide-react";
 import api from "../../../lib/axios";
 import { getSportVisual } from "../../../lib/sportVisuals";
 import "./MesSports.scss";
@@ -83,50 +83,66 @@ export default function MesSports({ userId, isOwnProfile = true }: MesSportsProp
 
     return (
         <div className="container-mesSports">
-            <h2 className="container-mesSports__h2">
-                <Heart size={13} strokeWidth={2.4} />
-                Mes sports
-            </h2>
+            <div className="container-mesSports__header">
+                <h2 className="container-mesSports__h2">
+                    <Heart size={13} strokeWidth={2.4} />
+                    Mes sports
+                </h2>
+                {isOwnProfile && (
+                    <NavLink to="/sports" className="container-mesSports__manage">
+                        Gérer mes sports
+                        <ChevronRight size={14} strokeWidth={2.4} />
+                    </NavLink>
+                )}
+            </div>
             {isLoading ? (
                 <p className="container-mesSports__empty">Chargement...</p>
-            ) : favoriteSports.length === 0 ? (
-                <p className="container-mesSports__empty">
-                    {isOwnProfile
-                        ? "Tu n'as pas encore ajouté de sport en favori."
-                        : "Aucun sport favori pour le moment."}
-                </p>
+            ) : favoriteSports.length === 0 && !isOwnProfile ? (
+                <p className="container-mesSports__empty">Aucun sport favori pour le moment.</p>
             ) : (
                 <div className="container-mesSports__list">
                     {favoriteSports.map((sport) => {
-                        const { icon: Icon } = getSportVisual(sport.name);
+                        const { icon: Icon, color } = getSportVisual(sport.name);
                         return (
-                            <div key={sport.id} className="mesSports-item">
-                                <div className="mesSports-item__badgeWrap">
-                                    <NavLink
-                                        to="/sports"
-                                        className="mesSports-item__link"
-                                        title={sport.name}
-                                        aria-label={sport.name}
+                            <div
+                                key={sport.id}
+                                className="mesSports-item"
+                                style={{ background: `${color}1F` }}
+                            >
+                                <NavLink
+                                    to="/sports"
+                                    className="mesSports-item__link"
+                                    title={sport.name}
+                                    aria-label={sport.name}
+                                >
+                                    <span className="mesSports-item__badge">
+                                        <Icon size={20} color={color} strokeWidth={2.2} />
+                                    </span>
+                                    <span className="mesSports-item__name">{sport.name}</span>
+                                </NavLink>
+                                {isOwnProfile && (
+                                    <button
+                                        type="button"
+                                        className="mesSports-item__remove"
+                                        onClick={() => handleRemove(sport.id)}
+                                        aria-label={`Retirer ${sport.name} des favoris`}
                                     >
-                                        <span className="mesSports-item__badge">
-                                            <Icon size={16} />
-                                        </span>
-                                    </NavLink>
-                                    {isOwnProfile && (
-                                        <button
-                                            type="button"
-                                            className="mesSports-item__remove"
-                                            onClick={() => handleRemove(sport.id)}
-                                            aria-label={`Retirer ${sport.name} des favoris`}
-                                        >
-                                            <X size={9} />
-                                        </button>
-                                    )}
-                                </div>
-                                <span className="mesSports-item__name">{sport.name}</span>
+                                        <X size={9} />
+                                    </button>
+                                )}
+                                <span className="mesSports-item__bar" style={{ background: color }} />
                             </div>
                         );
                     })}
+
+                    {isOwnProfile && (
+                        <NavLink to="/sports" className="mesSports-item mesSports-item--add">
+                            <span className="mesSports-item__badge">
+                                <Plus size={18} strokeWidth={2.4} />
+                            </span>
+                            <span className="mesSports-item__name">Ajouter un sport</span>
+                        </NavLink>
+                    )}
                 </div>
             )}
         </div>

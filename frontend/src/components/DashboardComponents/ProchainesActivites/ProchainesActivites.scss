@@ -29,15 +29,56 @@
   }
 
   &__empty {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin: 0;
     padding: 1rem;
     border-radius: 20px;
     background: white;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
     border: 1px solid rgba(31, 41, 55, 0.06);
+
+    p {
+      flex: 1;
+      min-width: 160px;
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: #64748b;
+    }
+  }
+
+  &__emptyIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(198, 40, 40, 0.1);
+    color: variables.$rouge2;
+  }
+
+  &__emptyCta {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    border: 1.5px solid variables.$rouge2;
+    border-radius: 999px;
     font-family: "Inter", sans-serif;
-    font-size: 0.82rem;
-    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: variables.$rouge2;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: rgba(198, 40, 40, 0.06);
+    }
   }
 }
 

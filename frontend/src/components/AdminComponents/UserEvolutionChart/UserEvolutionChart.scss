@@ -1,0 +1,127 @@
+@use "../../../styles/variables/variables.scss";
+
+.admin-evolution-chart {
+  padding: 1.1rem 1rem 0.9rem;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+}
+
+.admin-evolution-chart--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+}
+
+.admin-evolution-chart__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  h3 {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: variables.$nuit;
+  }
+}
+
+.admin-evolution-chart__change {
+  flex-shrink: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  &.is-up {
+    color: #006300;
+  }
+
+  &.is-down {
+    color: #b91c1c;
+  }
+}
+
+.admin-evolution-chart__subtitle {
+  margin: 0.1rem 0 0.4rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.admin-evolution-chart__plot {
+  position: relative;
+  width: 100%;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: 160px;
+    touch-action: pan-y;
+  }
+}
+
+.admin-evolution-chart__baseline {
+  stroke: #e1e0d9;
+  stroke-width: 1;
+}
+
+.admin-evolution-chart__line {
+  stroke: variables.$rouge2;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.admin-evolution-chart__crosshair {
+  stroke: #c3c2b7;
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.admin-evolution-chart__dot {
+  fill: variables.$rouge2;
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.admin-evolution-chart__tooltip {
+  position: absolute;
+  transform: translate(-50%, -125%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 8px;
+  background: variables.$nuit;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+
+  strong {
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  span {
+    font-size: 0.62rem;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+}
+
+.admin-evolution-chart__axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.2rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #94a3b8;
+}

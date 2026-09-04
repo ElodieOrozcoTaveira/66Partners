@@ -8,24 +8,28 @@
   justify-content: center;
   gap: 0.75rem;
   width: 100%;
+  flex-shrink: 0;
   min-height: 200px;
   @include mixins.background;
+  // La photo de couverture est dynamique (photo perso de chaque utilisateur,
+  // cf. coverSrc dans HeroProfile.tsx) : contrairement au mixin ci-dessus
+  // (pensé pour le visuel de marque fixe canigou2.webp), on ne peut pas
+  // supposer où se trouve le sujet dans l'image, donc on recentre plutôt
+  // que de garder un cadrage taillé pour une photo précise.
+  background-position: center;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   position: relative;
 
   @media (min-width: variables.$tablet) {
     min-height: 260px;
-    background-position: center 38%;
   }
 
   @media (min-width: variables.$laptop) {
     min-height: 280px;
-    background-position: center 42%;
   }
 
   @media (min-width: variables.$desktop) {
     min-height: 320px;
-    background-position: center 45%;
   }
 
   &::before {
@@ -115,6 +119,51 @@
   &:disabled {
     opacity: 0.7;
     cursor: wait;
+  }
+}
+
+// Normalement en flux (pas absolute) : positionné juste sous l'avatar, qui
+// chevauche le bas de la couverture (cf. margin-bottom négatif ci-dessus) —
+// le décalage ici doit donc au moins compenser ce chevauchement pour ne pas
+// se retrouver superposé à la photo de profil.
+.hero-profile__editRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 56px;
+  padding: 0 1.5rem;
+
+  @media (min-width: variables.$tablet) {
+    margin-top: 66px;
+  }
+
+  @media (min-width: variables.$desktop) {
+    margin-top: 76px;
+  }
+}
+
+.hero-profile__editProfile {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(31, 41, 55, 0.12);
+  border-radius: 999px;
+  background: #ffffff;
+  color: variables.$nuit;
+  font-family: "Inter", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.15s ease;
+
+  svg {
+    color: variables.$rouge2;
+  }
+
+  &:hover {
+    background: #f4f4f5;
   }
 }
 

@@ -5,6 +5,7 @@ import Hamburger from "../BurgerComponent/Hamburger/Hamburger";
 import Connexion from "../BurgerComponent/Connexion/Connexion";
 import { useHideOnScroll } from "../../hooks/useHideOnScroll";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNotifications } from "../../contexts/NotificationsContext";
 
 const PUBLIC_NAV_LINKS = [
   { to: "/", label: "Accueil" },
@@ -34,6 +35,7 @@ interface HeaderProps {
 
 export default function Header({ hideOnMobile = false }: HeaderProps) {
   const { user } = useAuth();
+  const { unreadActivitiesCount } = useNotifications();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null,
   );
@@ -49,7 +51,7 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
       <section className="container-header__leftside">
         <NavLink to={"/"}>
           <img
-            src="/logo3.png"
+            src="/logo3.webp"
             alt="logo 66partners"
             className="left-side__img"
             width={153}
@@ -63,6 +65,11 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
         {navLinks.map((link) => (
           <NavLink key={link.to} to={link.to}>
             {link.label}
+            {link.to === "/mesactivités" && unreadActivitiesCount > 0 && (
+              <span className="container-header__navBadge">
+                {unreadActivitiesCount > 9 ? "9+" : unreadActivitiesCount}
+              </span>
+            )}
           </NavLink>
         ))}
         <Connexion

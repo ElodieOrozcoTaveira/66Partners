@@ -36,6 +36,12 @@ export default function MesActivités() {
   const [joined, setJoined] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Chaque carte affiche désormais son propre badge de non-lus (cf.
+  // ActiviteListing) et l'acquittement se fait à l'ouverture de l'activité
+  // concernée (cf. DetailActivite) : on ne marque plus tout comme lu en
+  // arrivant sur cet onglet, pour laisser le temps de voir quelle activité
+  // a une notification.
+
   useEffect(() => {
     if (!user) return;
     let mounted = true;

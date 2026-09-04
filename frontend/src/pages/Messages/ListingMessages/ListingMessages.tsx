@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import api from "../../../lib/axios";
+import { useNotifications } from "../../../contexts/NotificationsContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { formatMonth, formatTime } from "../../../lib/dateFormat";
 import "./ListingMessages.scss";
@@ -49,6 +50,7 @@ function formatRelativeDay(dateInput: string): string {
 export default function ListingMessages({ search }: ListingMessagesProps) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { notifications } = useNotifications();
 
   useEffect(() => {
     let mounted = true;
@@ -90,6 +92,12 @@ export default function ListingMessages({ search }: ListingMessagesProps) {
         <div className="container-listingmessages__list">
           {filtered.map((conversation) => {
             const { icon: Icon, color } = getSportVisual(conversation.sportName);
+            const unreadCount = notifications.filter(
+              (notif) =>
+                notif.type === "NEW_MESSAGE" &&
+                notif.activityId === conversation.activityId &&
+                !notif.estLu,
+            ).length;
 
             return (
               <NavLink
@@ -111,7 +119,11 @@ export default function ListingMessages({ search }: ListingMessagesProps) {
                     {conversation.participantsCount} participants
                   </p>
                   {conversation.lastMessage ? (
-                    <p className="listingmessages-item__preview">
+                    <p
+                      className={`listingmessages-item__preview${
+                        unreadCount > 0 ? " listingmessages-item__preview--unread" : ""
+                      }`}
+                    >
                       {conversation.lastMessage.contenu}
                     </p>
                   ) : (
@@ -120,11 +132,18 @@ export default function ListingMessages({ search }: ListingMessagesProps) {
                     </p>
                   )}
                 </div>
-                {conversation.lastMessage && (
-                  <span className="listingmessages-item__time">
-                    {formatRelativeDay(conversation.lastMessage.createdAt)}
-                  </span>
-                )}
+                <div className="listingmessages-item__side">
+                  {conversation.lastMessage && (
+                    <span className="listingmessages-item__time">
+                      {formatRelativeDay(conversation.lastMessage.createdAt)}
+                    </span>
+                  )}
+                  {unreadCount > 0 && (
+                    <span className="listingmessages-item__unread-badge">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </div>
               </NavLink>
             );
           })}

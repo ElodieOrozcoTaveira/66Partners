@@ -11,7 +11,7 @@ import { useAuth } from "./AuthContext";
 
 export interface AppNotification {
   id: string;
-  type: "PARTICIPATION_ACCEPTED" | "NEW_MESSAGE" | string;
+  type: "PARTICIPATION_ACCEPTED" | "PARTICIPATION_REQUESTED" | "NEW_MESSAGE" | string;
   contenu: string | null;
   estLu: boolean | null;
   activityId: string | null;
@@ -28,10 +28,18 @@ type NotificationsContextType = {
   notifications: AppNotification[];
   unreadCount: number;
   unreadMessagesCount: number;
+  unreadActivitiesCount: number;
   refresh: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  markManyAsRead: (ids: string[]) => Promise<void>;
 };
+
+// Notifications qui concernent une demande de participation (reçue ou
+// acceptée) : c'est ce qui alimente le badge sur l'onglet "Activités"
+// (cf. BottomNavBar / Header), séparément des messages. Exporté pour que la
+// page Mes activités puisse marquer les siennes comme lues à la visite.
+export const ACTIVITY_NOTIFICATION_TYPES = new Set(["PARTICIPATION_REQUESTED", "PARTICIPATION_ACCEPTED"]);
 
 const NotificationsContext = createContext<NotificationsContextType | null>(null);
 
@@ -98,13 +106,43 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Marque un lot de notifications comme lues (ex. celles de type "activité"
+  // en arrivant sur l'onglet Mes activités), sans toucher aux autres.
+  async function markManyAsRead(ids: string[]) {
+    if (ids.length === 0) return;
+    const idSet = new Set(ids);
+    setNotifications((prev) =>
+      prev.map((notif) => (idSet.has(notif.id) ? { ...notif, estLu: true } : notif)),
+    );
+    setUnreadCount((prev) => Math.max(0, prev - ids.length));
+    try {
+      await Promise.all(ids.map((id) => api.patch(`/api/notifications/${id}/read`)));
+    } catch (err) {
+      console.error("NotificationsContext: failed to mark notifications as read", err);
+      refresh();
+    }
+  }
+
   const unreadMessagesCount = notifications.filter(
     (notif) => notif.type === "NEW_MESSAGE" && !notif.estLu,
   ).length;
 
+  const unreadActivitiesCount = notifications.filter(
+    (notif) => ACTIVITY_NOTIFICATION_TYPES.has(notif.type) && !notif.estLu,
+  ).length;
+
   return (
     <NotificationsContext.Provider
-      value={{ notifications, unreadCount, unreadMessagesCount, refresh, markAsRead, markAllAsRead }}
+      value={{
+        notifications,
+        unreadCount,
+        unreadMessagesCount,
+        unreadActivitiesCount,
+        refresh,
+        markAsRead,
+        markAllAsRead,
+        markManyAsRead,
+      }}
     >
       {children}
     </NotificationsContext.Provider>

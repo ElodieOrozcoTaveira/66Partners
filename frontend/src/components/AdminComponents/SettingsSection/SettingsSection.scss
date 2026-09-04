@@ -1,0 +1,82 @@
+@use "../../../styles/variables/variables.scss";
+
+.admin-settings-section {
+  h2 {
+    margin: 0 0 0.6rem;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+.admin-settings-section__card {
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  overflow: hidden;
+}
+
+.admin-settings-section__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-bottom: 1px solid #f1f2f4;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover,
+  &:active {
+    background: #f8f9fa;
+  }
+}
+
+.admin-settings-section__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(198, 40, 40, 0.08);
+  color: variables.$rouge2;
+}
+
+.admin-settings-section__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.admin-settings-section__label {
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: variables.$nuit;
+}
+
+.admin-settings-section__description {
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-settings-section__chevron {
+  flex-shrink: 0;
+  color: #cbd5e1;
+}

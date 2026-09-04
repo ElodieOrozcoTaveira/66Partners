@@ -19,7 +19,7 @@ export default function Footer({ hideOnMobile = false }: FooterProps) {
                 ref={ref}
                 className={`container-footer reveal-on-scroll${visible ? ' is-visible' : ''}${hideOnMobile ? ' container-footer--laptop-only' : ''}`}
             >
-                <img src="/logo3.png" alt="logo de l'application"
+                <img src="/logo3.webp" alt="logo de l'application"
                 height={100}
                 width={120} className="container-footer__img" />
                 <div className="container-footer__underline"></div>
@@ -34,6 +34,10 @@ export default function Footer({ hideOnMobile = false }: FooterProps) {
                     <span className="container-footer__docsep">·</span>
                     <NavLink to="/confidentialite" className="container-footer__doclink">
                         Politique de confidentialité
+                    </NavLink>
+                    <span className="container-footer__docsep">·</span>
+                    <NavLink to="/admin" className="container-footer__doclink">
+                        Administrateur
                     </NavLink>
                 </div>
 

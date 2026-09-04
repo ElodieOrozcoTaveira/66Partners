@@ -69,9 +69,15 @@ export default function UserProfil() {
       <HeroProfile user={profileUser} isOwnProfile={false} />
       <div className="profil-page__body">
         <TopProfile user={profileUser} isOwnProfile={false} />
+        <AproposProfile
+          headline={profileUser.headline}
+          lookingFor={profileUser.lookingFor}
+          openTo={profileUser.openTo}
+          createdAt={profileUser.createdAt}
+          isOwnProfile={false}
+        />
         <StatsProfil userId={profileUser.id} />
-        <AproposProfile bio={profileUser.bio} isOwnProfile={false} />
-        <Dispo dispo={profileUser.dispo} isOwnProfile={false} />
+        <Dispo userId={profileUser.id} isOwnProfile={false} />
         <MesSports userId={profileUser.id} isOwnProfile={false} />
       </div>
     </div>

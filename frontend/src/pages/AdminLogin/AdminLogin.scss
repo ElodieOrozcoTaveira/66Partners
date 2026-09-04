@@ -1,0 +1,150 @@
+@use "../../styles/variables/variables.scss";
+
+.admin-login-page {
+  min-height: 100dvh;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+}
+
+.admin-login-page__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 360px;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+}
+
+.admin-login-page__logo {
+  height: 42px;
+  width: auto;
+  margin-bottom: 0.75rem;
+}
+
+.admin-login-page__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 0.75rem;
+  border-radius: 50%;
+  background: rgba(198, 40, 40, 0.1);
+  color: variables.$rouge2;
+}
+
+.admin-login-page__card h1 {
+  margin: 0 0 0.35rem;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: variables.$nuit;
+}
+
+.admin-login-page__card p {
+  margin: 0 0 1.4rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.admin-login-page__card form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-login-page__field {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 0.5rem 0 1rem;
+  border-radius: 14px;
+  background: #f8f9fa;
+  border: 1px solid #e6e6e6;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem 0;
+    border: none;
+    background: none;
+    outline: none;
+    font-family: "Inter", sans-serif;
+    font-size: 0.9rem;
+    color: variables.$nuit;
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+  }
+}
+
+.admin-login-page__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: #94a3b8;
+  cursor: pointer;
+
+  &:hover {
+    color: variables.$nuit;
+  }
+}
+
+.admin-login-page__error {
+  margin: 0;
+  text-align: left;
+  font-family: "Inter", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.admin-login-page__submit {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 14px;
+  background: variables.$rouge2;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
+
+  &:hover {
+    background: #b02323;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+}

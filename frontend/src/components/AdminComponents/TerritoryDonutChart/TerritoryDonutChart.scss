@@ -1,0 +1,143 @@
+@use "../../../styles/variables/variables.scss";
+
+.admin-donut-chart {
+  padding: 1.1rem 1rem 1.2rem;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+
+  h3 {
+    margin: 0 0 0.9rem;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: variables.$nuit;
+  }
+}
+
+.admin-donut-chart--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.admin-donut-chart__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+
+  @media (min-width: variables.$mobile) {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.admin-donut-chart__ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: fit-content;
+}
+
+.admin-donut-chart__segment {
+  transition: stroke-width 0.15s ease;
+  cursor: pointer;
+}
+
+.admin-donut-chart__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+
+  strong {
+    font-family: "Manrope", sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: variables.$nuit;
+    line-height: 1;
+  }
+
+  span {
+    margin-top: 0.15rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+}
+
+.admin-donut-chart__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.15rem 0.3rem;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+    cursor: pointer;
+
+    &.is-active {
+      background: #f8f9fa;
+    }
+  }
+}
+
+.admin-donut-chart__swatch {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.admin-donut-chart__legend-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: variables.$nuit;
+}
+
+.admin-donut-chart__legend-value {
+  flex-shrink: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.admin-donut-chart__see-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.55rem;
+  border: none;
+  border-top: 1px solid #f1f2f4;
+  background: none;
+  font-family: "Inter", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: variables.$rouge2;
+  cursor: pointer;
+}

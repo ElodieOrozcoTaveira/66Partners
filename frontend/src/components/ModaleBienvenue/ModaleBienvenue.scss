@@ -85,8 +85,7 @@
     color: variables.$nuit;
   }
 
-  &__input,
-  &__textarea {
+  &__input {
     width: 100%;
     border: 1px solid rgba(variables.$nuit, 0.16);
     border-radius: 14px;
@@ -101,11 +100,6 @@
       border-color: variables.$rouge;
       box-shadow: 0 0 0 3px rgba(variables.$rouge, 0.14);
     }
-  }
-
-  &__textarea {
-    resize: vertical;
-    min-height: 100px;
   }
 
   &__error {

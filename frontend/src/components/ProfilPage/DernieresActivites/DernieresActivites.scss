@@ -8,15 +8,26 @@
     margin-bottom: 0.6rem;
 
     h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
       margin: 0;
       font-family: "Manrope", sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
       color: variables.$nuit;
+
+      svg {
+        flex-shrink: 0;
+        color: variables.$rouge2;
+      }
     }
   }
 
   &__link {
+    flex-shrink: 0;
     font-family: "Inter", sans-serif;
     font-size: 0.8rem;
     font-weight: 700;
@@ -42,80 +53,126 @@
 
   &__list {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: none;
 
-    @media (min-width: variables.$laptop) {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
+    &::-webkit-scrollbar {
+      display: none;
     }
   }
 }
 
-.dernieresActivites-item {
+.dernieresActivites-card {
   display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.7rem 0.85rem;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 150px;
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
   border: 1px solid rgba(31, 41, 55, 0.06);
   text-decoration: none;
+  overflow: hidden;
+
+  &__photo-wrap {
+    position: relative;
+    width: 100%;
+    height: 96px;
+  }
+
+  &__photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
   &__badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   }
 
   &__body {
-    flex: 1;
-    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    padding: 0.6rem 0.65rem 0.7rem;
 
     h3 {
       margin: 0;
       font-family: "Manrope", sans-serif;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 700;
       color: variables.$nuit;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      max-width: 100%;
     }
 
     p {
-      margin: 0.1rem 0 0;
+      margin: 0;
       font-family: "Inter", sans-serif;
-      font-size: 0.75rem;
+      font-size: 0.68rem;
       color: #64748b;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      line-height: 1.3;
     }
   }
 
-  &__tag {
-    flex-shrink: 0;
-    padding: 0.3rem 0.6rem;
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.2rem 0.5rem;
     border-radius: 999px;
     font-family: "Inter", sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 700;
 
-    &--organized {
-      background: rgba(198, 40, 40, 0.1);
-      color: variables.$rouge2;
-    }
-
-    &--joined {
+    &--done {
       background: rgba(34, 197, 94, 0.15);
       color: #15803d;
     }
+
+    &--confirmed {
+      background: rgba(59, 130, 246, 0.12);
+      color: #1d4ed8;
+    }
+
+    &--pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: #b45309;
+    }
+  }
+}
+
+@media (min-width: variables.$laptop) {
+  // Le body de la page laisse assez de largeur à partir du laptop pour
+  // afficher plusieurs cartes par ligne plutôt qu'une bande qui défile.
+  .container-dernieresActivites__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1.1rem;
+    overflow-x: visible;
+  }
+
+  .dernieresActivites-card {
+    width: auto;
+  }
+
+  .dernieresActivites-card__photo-wrap {
+    height: 120px;
   }
 }

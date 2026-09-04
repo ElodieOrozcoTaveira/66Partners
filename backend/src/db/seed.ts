@@ -29,6 +29,7 @@ const sportNames = [
   "Pickleball",
   "Paddle",
   "Marche",
+  "Roller",
 ];
 
 // Coordonnées approximatives de villes du 66, pour des données géo réalistes
@@ -75,7 +76,9 @@ async function seed() {
       password: faker.internet.password({ length: 20 }), // à remplacer par un hash Argon2 réel si testé via l'auth
       pseudo: faker.internet.username(),
       city: ville.city,
-      bio: faker.lorem.sentence(),
+      headline: faker.lorem.sentence(),
+      lookingFor: faker.lorem.sentence(),
+      openTo: faker.lorem.sentence(),
       avatar: faker.image.avatar(),
     };
   });

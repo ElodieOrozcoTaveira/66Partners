@@ -5,6 +5,15 @@ import {
 export const sportLevelEnum = pgEnum("sport_level", ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"]);
 export const participationStatusEnum = pgEnum("participation_status", ["PENDING", "ACCEPTED", "REFUSED"]);
 export const activitiesStatusEnum = pgEnum("activities_status", ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]);
+export const weekdayEnum = pgEnum("weekday", [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+]);
 
 
 
@@ -14,8 +23,12 @@ export const users = pgTable("users", {
   password: varchar("password", { length: 255 }).notNull(),
   pseudo: varchar("pseudo", { length: 100 }).notNull(),
   city: varchar("city", { length: 100 }),
-  bio: text("bio"),
-  dispo: text("dispo"),
+  // Les 3 lignes de la carte "à propos" du profil (icônes fixes côté
+  // frontend) — remplacent l'ancien champ bio (paragraphe libre), qui ne
+  // mappait pas proprement sur ce format à 3 lignes structurées.
+  headline: varchar("headline", { length: 200 }),
+  lookingFor: varchar("looking_for", { length: 200 }),
+  openTo: varchar("open_to", { length: 200 }),
   avatar: varchar("avatar", { length: 255 }),
   coverPhoto: varchar("cover_photo", { length: 255 }),
   resetPasswordTokenHash: varchar("reset_password_token_hash", { length: 64 }),
@@ -23,6 +36,20 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// Créneaux de disponibilité récurrents affichés sur le profil ("Lundi
+// 18h-20h", ...). startTime/endTime en "HH:mm" (comparaison lexicale valide
+// pour un format zero-paddé) : pas besoin du type `time` de Postgres ici.
+export const availabilities = pgTable("availabilities", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  weekday: weekdayEnum("weekday").notNull(),
+  startTime: varchar("start_time", { length: 5 }).notNull(),
+  endTime: varchar("end_time", { length: 5 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index("availabilities_user_id_idx").on(t.userId),
+}));
 
 // Une déclinaison territoriale de la plateforme Partners (66Partners,
 // 34Partners, ...). isActive sert uniquement à déterminer le(s) territoire(s)
@@ -141,6 +168,21 @@ export const notifications = pgTable("notifications", {
     createdAt: timestamp("created_at").defaultNow().notNull(),
     usersId: uuid("users_id").notNull().references(()=>users.id, { onDelete: "cascade" }),
 })
+
+// Un abonnement navigateur/PWA aux notifications push (Web Push standard,
+// cf. push.services.ts). Un même utilisateur peut avoir plusieurs
+// abonnements (plusieurs appareils/navigateurs) : l'endpoint identifie de
+// façon unique un couple navigateur+appareil, donné par le navigateur lui-même.
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index("push_subscriptions_user_id_idx").on(t.userId),
+}));
 
 export const opinion = pgTable("opinion", {
     id: uuid("id").defaultRandom().primaryKey(),

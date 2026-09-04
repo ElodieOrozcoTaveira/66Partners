@@ -54,6 +54,10 @@ export function PolitiqueConfidentialite()  {
           <li>Adresse IP</li>
           <li>Données de connexion et de navigation</li>
           <li>Cookies techniques nécessaires au fonctionnement</li>
+          <li>
+            Abonnement aux notifications push (si activé) : identifiant technique du navigateur
+            et clés de chiffrement, cf. section 9
+          </li>
         </ul>
       </section>
 
@@ -77,6 +81,7 @@ export function PolitiqueConfidentialite()  {
               ['Messages', "Communication entre participants d'une activité", 'Exécution du contrat'],
               ['Avis et notations', 'Score de fiabilité des utilisateurs', 'Intérêt légitime'],
               ['Adresse IP', 'Sécurité et prévention des abus', 'Intérêt légitime'],
+              ['Abonnement notifications push', "Alerter d'un nouveau message ou d'une activité même hors du site", 'Consentement'],
             ].map(([donnee, finalite, base]) => (
               <tr key={donnee} className="legal-tr">
                 <td className="legal-td">{donnee}</td>
@@ -106,6 +111,7 @@ export function PolitiqueConfidentialite()  {
               ['Avis et notations', "Durée de vie du compte de l'auteur"],
               ['Données de connexion', '12 mois'],
               ['Données de navigation', '13 mois maximum'],
+              ['Abonnement notifications push', 'Jusqu\'à désactivation par l\'utilisateur, suppression du compte, ou révocation par le navigateur'],
             ].map(([donnee, duree]) => (
               <tr key={donnee} className="legal-tr">
                 <td className="legal-td">{donnee}</td>
@@ -180,7 +186,35 @@ export function PolitiqueConfidentialite()  {
       <hr className="legal-divider" />
 
       <section className="legal-section">
-        <h2 className="legal-subtitle">9. Modifications</h2>
+        <h2 className="legal-subtitle">9. Notifications push</h2>
+        <p className="legal-text">
+          Si vous l'acceptez explicitement (bouton « Activer » sur votre tableau de bord, ou
+          bascule dans « Modifier mon profil »), 66Partners peut vous envoyer des notifications
+          sur votre téléphone ou votre ordinateur pour vous prévenir d'un nouveau message ou
+          d'une activité confirmée, même lorsque vous n'êtes pas sur le site.
+        </p>
+        <ul className="legal-list">
+          <li>
+            <span className="legal-label">Données stockées :</span> un identifiant technique
+            propre à votre navigateur/appareil et des clés de chiffrement (norme Web Push),
+            associés à votre compte — jamais votre position ni le contenu de vos messages
+          </li>
+          <li>
+            <span className="legal-label">Consentement :</span> rien n'est activé par défaut ni
+            demandé automatiquement ; l'autorisation du navigateur n'est sollicitée qu'après un
+            clic explicite de votre part
+          </li>
+          <li>
+            <span className="legal-label">Retrait :</span> désactivable à tout moment depuis
+            « Modifier mon profil », ou depuis les réglages de notifications de votre navigateur
+          </li>
+        </ul>
+      </section>
+
+      <hr className="legal-divider" />
+
+      <section className="legal-section">
+        <h2 className="legal-subtitle">10. Modifications</h2>
         <p className="legal-text">
           Cette politique de confidentialité peut être mise à jour. En cas de modification
           substantielle, vous serez informé par email ou via une notification sur la plateforme.
@@ -189,7 +223,7 @@ export function PolitiqueConfidentialite()  {
 
       <hr className="legal-divider" />
 
-      <p className="legal-update">Dernière mise à jour : juillet 2026</p>
+      <p className="legal-update">Dernière mise à jour : septembre 2026</p>
     </div>
   );
 };

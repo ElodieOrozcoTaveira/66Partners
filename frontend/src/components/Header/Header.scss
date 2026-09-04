@@ -133,6 +133,24 @@
       }
     }
 
+    .container-header__navBadge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 16px;
+      height: 16px;
+      margin-left: 0.3rem;
+      padding: 0 4px;
+      border-radius: 999px;
+      background: variables.$rouge2;
+      color: #ffffff;
+      font-family: "Inter", sans-serif;
+      font-size: 0.62rem;
+      font-weight: 800;
+      line-height: 1;
+      vertical-align: 2px;
+    }
+
     .container-connexion {
       display: flex;
       flex-direction: row;

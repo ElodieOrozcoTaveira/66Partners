@@ -28,7 +28,6 @@ export interface UserRegistration {
   email: string;
   password: string;
   city?: string;
-  bio?: string;
   avatar?: string;
 }
 
@@ -37,7 +36,9 @@ export interface UserData {
   email: string;
   pseudo: string;
   city: string | null;
-  bio: string | null;
+  headline: string | null;
+  lookingFor: string | null;
+  openTo: string | null;
   avatar: string | null;
   createdAt: Date;
 }
@@ -72,7 +73,7 @@ export class AuthService {
    * Inscription d'un nouvel utilisateur
    */
   static async registerUser(userData: UserRegistration): Promise<UserData> {
-    const { pseudo, email, password, city, bio, avatar } = userData;
+    const { pseudo, email, password, city, avatar } = userData;
 
     // 1. Validation de l'email unique
     const [existingUser] = await db
@@ -111,7 +112,6 @@ export class AuthService {
           email: email.toLowerCase(),
           password: hashedPassword,
           city,
-          bio,
           avatar,
         })
         .returning();
@@ -150,7 +150,9 @@ export class AuthService {
       email: newUser.email,
       pseudo: newUser.pseudo,
       city: newUser.city,
-      bio: newUser.bio,
+      headline: newUser.headline,
+      lookingFor: newUser.lookingFor,
+      openTo: newUser.openTo,
       avatar: newUser.avatar,
       createdAt: newUser.createdAt,
     };
@@ -196,7 +198,9 @@ export class AuthService {
       email: user.email,
       pseudo: user.pseudo,
       city: user.city,
-      bio: user.bio,
+      headline: user.headline,
+      lookingFor: user.lookingFor,
+      openTo: user.openTo,
       avatar: user.avatar,
       createdAt: user.createdAt,
     };
@@ -221,7 +225,9 @@ export class AuthService {
       email: user.email,
       pseudo: user.pseudo,
       city: user.city,
-      bio: user.bio,
+      headline: user.headline,
+      lookingFor: user.lookingFor,
+      openTo: user.openTo,
       avatar: user.avatar,
       createdAt: user.createdAt,
     };

@@ -11,6 +11,13 @@
     gap:1rem;
     margin-bottom: 3rem;
 
+    @media (min-width: variables.$laptop) {
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+        gap: 0;
+    }
+
     &::before {
         content: '';
         position: absolute;
@@ -38,6 +45,15 @@
         padding: 1.5rem;
         text-align: center;
         border-bottom: 1.5px solid rgb(204, 200, 200);
+
+        @media (min-width: variables.$laptop) {
+            border-bottom: none;
+            border-right: 1.5px solid rgb(204, 200, 200);
+
+            &:last-child {
+                border-right: none;
+            }
+        }
     }
     &__icon{
         display: block;

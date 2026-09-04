@@ -1,0 +1,64 @@
+@use "../../../styles/variables/variables.scss";
+
+.push-prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  background: rgba(244, 180, 0, 0.1);
+  border: 1px solid rgba(244, 180, 0, 0.3);
+}
+
+.push-prompt__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f4b400;
+  color: #ffffff;
+}
+
+.push-prompt__text {
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: variables.$nuit;
+}
+
+.push-prompt__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.push-prompt__btn {
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: #64748b;
+  font-family: "Inter", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &--primary {
+    background: variables.$rouge2;
+    color: #ffffff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}

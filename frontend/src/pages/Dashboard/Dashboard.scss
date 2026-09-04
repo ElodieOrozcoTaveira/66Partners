@@ -6,6 +6,17 @@
   overflow-x: hidden;
   background-color: #ffffff;
   padding-bottom: 84px;
+  display: flex;
+  flex-direction: column;
+
+  // En mobile, la page devient une coquille de hauteur fixe : le bandeau
+  // Hello (photo de couverture + photo de profil) reste en place et seul
+  // le corps (dashboard-page__body) défile, entre lui et la bottom navbar fixe.
+  @media (max-width: (variables.$tablet - 1px)) {
+    height: 100dvh;
+    height: 100svh;
+    overflow: hidden;
+  }
 
   // Le Header réapparaît à partir de la tablette (masqué seulement en
   // mobile, cf. Layout.tsx) : il faut donc à nouveau le dégager.
@@ -22,21 +33,25 @@
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 1.5rem 1.5rem 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
   @media (min-width: variables.$tablet) {
     max-width: 680px;
-    padding: 0 2rem;
+    padding: 1.6rem 2rem 0;
     gap: 1.6rem;
   }
 
   @media (min-width: variables.$laptop) {
     max-width: 760px;
-    padding: 0 2rem;
+    padding: 1.75rem 2rem 0;
     gap: 1.75rem;
   }
 

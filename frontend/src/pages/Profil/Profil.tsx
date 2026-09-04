@@ -16,10 +16,15 @@ export default function Profil() {
       <HeroProfile user={user} />
       <div className="profil-page__body">
         <TopProfile user={user} />
-        <AproposProfile bio={user?.bio ?? null} />
+        <AproposProfile
+          headline={user?.headline ?? null}
+          lookingFor={user?.lookingFor ?? null}
+          openTo={user?.openTo ?? null}
+          createdAt={user?.createdAt ?? null}
+        />
         <StatsProfil userId={user?.id ?? null} />
         <MesSports userId={user?.id ?? null} />
-        <Dispo dispo={user?.dispo ?? null} />
+        <Dispo userId={user?.id ?? null} />
         <DernieresActivites userId={user?.id ?? null} />
       </div>
     </div>

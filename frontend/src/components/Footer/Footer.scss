@@ -10,6 +10,7 @@
 }
 
 .container-footer {
+  margin-top: 3.5rem;
   position: relative;
   bottom: 0;
   right: 0;
@@ -29,7 +30,7 @@
   @media (min-width: variables.$desktop) {
     padding: 1rem 2rem 1.25rem;
   }
-&::after {
+  &::after {
     content: "";
     position: absolute;
     top: 0;
@@ -40,7 +41,7 @@
   }
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     z-index: 0;
@@ -57,82 +58,81 @@
     z-index: 1;
   }
 
-    &__h2{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        color: whitesmoke;
-        text-align: center;
-        font-size: 16px;
-    }
-    &__span{
-        color: variables.$jaune;
-    }
-    &__img{
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 1.5rem;
+  &__h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: whitesmoke;
+    text-align: center;
+    font-size: 16px;
+  }
+  &__span {
+    color: variables.$jaune;
+  }
+  &__img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 1.5rem;
 
-        @media (min-width: variables.$laptop) {
-            width: 90px;
-            height: 75px;
-            margin-top: 0.75rem;
-        }
+    @media (min-width: variables.$laptop) {
+      width: 90px;
+      height: 75px;
+      margin-top: 0.75rem;
     }
-    &__underline{
-        width: 3.5rem;
-        height: 2px;
-        border-radius: 2px;
-        margin: 0.75rem auto 0;
-        @include mixins.gradient;
+  }
+  &__underline {
+    width: 3.5rem;
+    height: 2px;
+    border-radius: 2px;
+    margin: 0.75rem auto 0;
+    @include mixins.gradient;
 
-        @media (min-width: variables.$laptop) {
-            margin-top: 0.5rem;
-        }
+    @media (min-width: variables.$laptop) {
+      margin-top: 0.5rem;
     }
-    &__h2bis{
-        font-size: 12px;
-        text-align: center;
-        
-        color: whitesmoke;
-        font-weight: 200;
-        font-family: 'Inter';
+  }
+  &__h2bis {
+    font-size: 12px;
+    text-align: center;
+
+    color: whitesmoke;
+    font-weight: 200;
+    font-family: "Inter";
+  }
+  &__lieux {
+    color: whitesmoke;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  &__docs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+
+    @media (min-width: variables.$laptop) {
+      margin-top: 0.75rem;
     }
-    &__lieux{
-        color: whitesmoke;
-        font-size: 12px;
-        text-align: center;
+  }
+
+  &__doclink {
+    color: rgba(245, 245, 245, 0.75);
+    font-size: 11px;
+    text-decoration: none;
+
+    &:hover {
+      color: whitesmoke;
+      text-decoration: underline;
     }
+  }
 
-    &__docs{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 1.25rem;
-
-        @media (min-width: variables.$laptop) {
-            margin-top: 0.75rem;
-        }
-    }
-
-    &__doclink{
-        color: rgba(245, 245, 245, 0.75);
-        font-size: 11px;
-        text-decoration: none;
-
-        &:hover{
-            color: whitesmoke;
-            text-decoration: underline;
-        }
-    }
-
-    &__docsep{
-        color: rgba(245, 245, 245, 0.4);
-        font-size: 11px;
-    }
-
+  &__docsep {
+    color: rgba(245, 245, 245, 0.4);
+    font-size: 11px;
+  }
 }

@@ -1,0 +1,83 @@
+@use "../../../styles/variables/variables.scss";
+
+.container-dashboardstats {
+  display: grid;
+  // minmax(0, 1fr) : un enfant de grid a un min-width auto par défaut, donc
+  // un libellé comme « Activités organisées » pousse sinon la piste au-delà
+  // de sa part de 1fr et déborde silencieusement de la carte sur mobile.
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.container-dashboardstats__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.6rem 0.3rem;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  box-sizing: border-box;
+}
+
+.container-dashboardstats__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.container-dashboardstats__value {
+  margin: 0.15rem 0 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: variables.$nuit;
+}
+
+.container-dashboardstats__card h4 {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: variables.$nuit;
+}
+
+.container-dashboardstats__sub {
+  font-family: "Inter", sans-serif;
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+@media (min-width: variables.$tablet) {
+  .container-dashboardstats__card {
+    padding: 0.85rem 0.5rem;
+  }
+
+  .container-dashboardstats__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .container-dashboardstats__value {
+    font-size: 1.4rem;
+  }
+
+  .container-dashboardstats__card h4 {
+    font-size: 0.72rem;
+  }
+
+  .container-dashboardstats__sub {
+    font-size: 0.65rem;
+  }
+}
