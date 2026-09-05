@@ -85,10 +85,19 @@ export class ActivityController {
 
   /**
    * GET /api/activities/:id
-   * Récupération d'une activité par son ID
+   * Récupération d'une activité par son ID (réservé aux membres de son territoire)
    */
-  static async getById(req: Request, res: Response): Promise<void> {
+  static async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
       const { id } = req.params;
 
       if (typeof id !== "string" || !id) {
@@ -100,7 +109,7 @@ export class ActivityController {
         return;
       }
 
-      const activity = await ActivityService.getActivityById(id);
+      const activity = await ActivityService.getActivityDetailForUser(id, req.userId);
 
       if (!activity) {
         res.status(404).json({

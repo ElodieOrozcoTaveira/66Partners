@@ -5,6 +5,8 @@ import {
   resetAll,
   createUser,
   createSport,
+  createTerritory,
+  attachUserToTerritory,
   closeTestDb,
 } from "../helpers/db.js";
 
@@ -95,6 +97,36 @@ describe("POST /api/activities/:id/join", () => {
       `/api/activities/${activityId}/join`
     );
     expect(res.status).toBe(401);
+  });
+
+  it("refuse (403) si le demandeur n'est pas membre du territoire de l'activité", async () => {
+    const territory34 = await createTerritory({ code: "34" });
+    const { userId: creator34Id, token: creator34Token } = await createUser({
+      email: "creator34join@test.com",
+    });
+    await attachUserToTerritory(creator34Id, territory34.id);
+
+    const sportId2 = await createSport("Rugby");
+    const activity34Res = await request(app)
+      .post("/api/activities")
+      .set("Authorization", `Bearer ${creator34Token}`)
+      .send({
+        title: "Activité 34",
+        city: "Montpellier",
+        startDate: futureDate(),
+        levelRequired: "BEGINNER",
+        maxParticipants: 3,
+        sportId: sportId2,
+        territoryId: territory34.id,
+      });
+    const activity34Id = activity34Res.body.activity.id as string;
+
+    const res = await request(app)
+      .post(`/api/activities/${activity34Id}/join`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("NOT_TERRITORY_MEMBER");
   });
 });
 

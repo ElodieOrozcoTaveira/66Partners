@@ -24,7 +24,12 @@ GET /activities/:id/participations
 const router = Router();
 
 router.get("/", validate({ query: activityFiltersSchema }), ActivityController.list);
-router.get("/:id", validate({ params: activityIdParamSchema }), ActivityController.getById);
+router.get(
+  "/:id",
+  requireAuth,
+  validate({ params: activityIdParamSchema }),
+  ActivityController.getById
+);
 router.post(
   "/",
   requireAuth,

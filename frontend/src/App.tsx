@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationsProvider } from "./contexts/NotificationsContext";
+import { TerritoryProvider } from "./contexts/TerritoryContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminAccessGate from "./components/AdminAccessGate";
@@ -33,6 +34,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <TerritoryProvider>
         <NotificationsProvider>
         <Routes>
           <Route element={<Layout />}>
@@ -80,6 +82,7 @@ export default function App() {
           </Route>
         </Routes>
         </NotificationsProvider>
+        </TerritoryProvider>
       </AuthProvider>
     </BrowserRouter>
   );

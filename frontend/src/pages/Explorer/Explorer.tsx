@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Clock, MapPin, Users } from "lucide-react";
 import api from "../../lib/axios";
+import { useTerritory } from "../../contexts/TerritoryContext";
 import Recherche from "../../components/SportsComponents/Recherche/Recheche";
 import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
 import { getSportPhoto } from "../../lib/sportPhotos";
@@ -53,6 +54,7 @@ const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
 });
 
 export default function Explorer() {
+  const { activeTerritory } = useTerritory();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSportId, setSelectedSportId] = useState<string | null>(null);
@@ -61,8 +63,11 @@ export default function Explorer() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setIsLoading(true);
     Promise.all([
-      api.get<ActivitiesResponse>("/api/activities"),
+      api.get<ActivitiesResponse>("/api/activities", {
+        params: activeTerritory ? { territory: activeTerritory.code } : undefined,
+      }),
       api.get<SportsResponse>("/api/sports"),
     ])
       .then(([activitiesRes, sportsRes]) => {
@@ -71,7 +76,7 @@ export default function Explorer() {
       })
       .catch(() => setError("Impossible de charger les activités."))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [activeTerritory]);
 
   const practicedSportIds = useMemo(
     () => new Set(activities.map((activity) => activity.sportId)),

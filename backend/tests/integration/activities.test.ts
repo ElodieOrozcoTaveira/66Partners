@@ -5,6 +5,8 @@ import {
   resetAll,
   createUser,
   createSport,
+  createTerritory,
+  attachUserToTerritory,
   closeTestDb,
 } from "../helpers/db.js";
 
@@ -165,21 +167,69 @@ describe("GET /api/activities/:id", () => {
       .send(validActivity());
     const activityId = createRes.body.activity.id as string;
 
-    const res = await request(app).get(`/api/activities/${activityId}`);
+    const res = await request(app)
+      .get(`/api/activities/${activityId}`)
+      .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body.activity.id).toBe(activityId);
   });
 
   it("renvoie 404 pour un ID inexistant", async () => {
-    const res = await request(app).get(`/api/activities/${randomUUID()}`);
+    const res = await request(app)
+      .get(`/api/activities/${randomUUID()}`)
+      .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(404);
     expect(res.body.code).toBe("ACTIVITY_NOT_FOUND");
   });
 
   it("renvoie 400 pour un UUID invalide", async () => {
-    const res = await request(app).get("/api/activities/not-a-uuid");
+    const res = await request(app)
+      .get("/api/activities/not-a-uuid")
+      .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
+  });
+
+  it("refuse sans authentification", async () => {
+    const createRes = await request(app)
+      .post("/api/activities")
+      .set("Authorization", `Bearer ${token}`)
+      .send(validActivity());
+    const activityId = createRes.body.activity.id as string;
+
+    const res = await request(app).get(`/api/activities/${activityId}`);
+    expect(res.status).toBe(401);
+  });
+
+  it("renvoie 404 (jamais 403) pour un utilisateur qui n'est pas membre du territoire de l'activité", async () => {
+    // Le créateur est rattaché au territoire "34" en plus du 66 par défaut,
+    // et y crée explicitement son activité. L'outsider ne rejoint jamais
+    // "34" — il ne reste membre que du 66, comme tout compte fraîchement créé.
+    const { userId: creatorId, token: creator34Token } = await createUser({
+      email: "creator34@test.com",
+    });
+    const territory34 = await createTerritory({ code: "34" });
+    await attachUserToTerritory(creatorId, territory34.id);
+
+    const createRes = await request(app)
+      .post("/api/activities")
+      .set("Authorization", `Bearer ${creator34Token}`)
+      .send(validActivity({ territoryId: territory34.id }));
+    const activityId = createRes.body.activity.id as string;
+    expect(createRes.body.activity.territoryId).toBe(territory34.id);
+
+    const { token: outsiderToken } = await createUser({ email: "outsider34@test.com" });
+
+    const outsiderRes = await request(app)
+      .get(`/api/activities/${activityId}`)
+      .set("Authorization", `Bearer ${outsiderToken}`);
+    expect(outsiderRes.status).toBe(404);
+    expect(outsiderRes.body.code).toBe("ACTIVITY_NOT_FOUND");
+
+    const ownerRes = await request(app)
+      .get(`/api/activities/${activityId}`)
+      .set("Authorization", `Bearer ${creator34Token}`);
+    expect(ownerRes.status).toBe(200);
   });
 });
 

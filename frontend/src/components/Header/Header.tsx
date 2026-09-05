@@ -6,6 +6,7 @@ import Connexion from "../BurgerComponent/Connexion/Connexion";
 import { useHideOnScroll } from "../../hooks/useHideOnScroll";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotifications } from "../../contexts/NotificationsContext";
+import { useTerritory } from "../../contexts/TerritoryContext";
 
 const PUBLIC_NAV_LINKS = [
   { to: "/", label: "Accueil" },
@@ -36,6 +37,7 @@ interface HeaderProps {
 export default function Header({ hideOnMobile = false }: HeaderProps) {
   const { user } = useAuth();
   const { unreadActivitiesCount } = useNotifications();
+  const { territories, activeTerritory, setActiveTerritory } = useTerritory();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null,
   );
@@ -72,6 +74,23 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
             )}
           </NavLink>
         ))}
+        {/* Invisible tant qu'un utilisateur n'appartient qu'à un seul
+            territoire (le cas de tous les comptes en V1) — n'apparaît que
+            pour les comptes multi-territoires. */}
+        {territories.length > 1 && (
+          <select
+            className="container-header__territorySelect"
+            aria-label="Territoire actif"
+            value={activeTerritory?.code ?? ""}
+            onChange={(e) => setActiveTerritory(e.target.value)}
+          >
+            {territories.map((territory) => (
+              <option key={territory.id} value={territory.code}>
+                {territory.brandName}
+              </option>
+            ))}
+          </select>
+        )}
         <Connexion
           activeModal={activeModal}
           onOpenLogin={() => setActiveModal("login")}

@@ -184,6 +184,29 @@ export class ActivityService {
   }
 
   /**
+   * Récupération du détail d'une activité pour un utilisateur authentifié,
+   * avec vérification de l'appartenance au territoire de l'activité. Renvoie
+   * null aussi bien si l'activité n'existe pas que si l'utilisateur n'est pas
+   * membre de son territoire (jamais 403) : on évite ainsi de confirmer
+   * l'existence d'une activité à un utilisateur qui n'y a pas accès.
+   */
+  static async getActivityDetailForUser(
+    activityId: string,
+    requesterId: string
+  ): Promise<ActivityWithDetails | null> {
+    const activity = await ActivityService.getActivityById(activityId);
+    if (!activity) return null;
+
+    const isMember = await TerritoryService.isUserMemberOf(
+      requesterId,
+      activity.territoryId
+    );
+    if (!isMember) return null;
+
+    return activity;
+  }
+
+  /**
    * Liste des activités, avec filtres optionnels. Inclut le nom du sport et
    * le nombre réel de participants acceptés (calculé à la volée).
    */

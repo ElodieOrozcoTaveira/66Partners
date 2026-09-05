@@ -82,6 +82,18 @@
 }
 
 @media (min-width: variables.$tablet) {
+  .container-header__territorySelect {
+    font-family: "Inter";
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: variables.$nuit;
+    border: 1px solid variables.$nuit;
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    background: white;
+    cursor: pointer;
+  }
+
   .container-header__nav {
     display: flex;
     align-items: center;

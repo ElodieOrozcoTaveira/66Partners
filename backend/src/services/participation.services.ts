@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { activities, conversations, participations, users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
 import { NotificationService } from "./notification.services.js";
+import { TerritoryService } from "./territory.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -84,6 +85,15 @@ export class ParticipationService {
       throw new ParticipationError(
         "Vous ne pouvez pas rejoindre votre propre activité",
         "CANNOT_JOIN_OWN_ACTIVITY",
+        403
+      );
+    }
+
+    const isMember = await TerritoryService.isUserMemberOf(userId, activity.territoryId);
+    if (!isMember) {
+      throw new ParticipationError(
+        "Vous n'êtes pas membre du territoire de cette activité",
+        "NOT_TERRITORY_MEMBER",
         403
       );
     }

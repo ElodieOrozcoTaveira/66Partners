@@ -70,6 +70,37 @@ export class TerritoryService {
     return Boolean(membership);
   }
 
+  /**
+   * Tous les territoires auxquels l'utilisateur appartient (pour le
+   * sélecteur de territoire actif côté frontend).
+   */
+  static async listForUser(userId: string): Promise<Territory[]> {
+    const rows = await db
+      .select({ territory: territories })
+      .from(userTerritories)
+      .innerJoin(territories, eq(territories.id, userTerritories.territoryId))
+      .where(eq(userTerritories.userId, userId));
+
+    return rows.map((row) => row.territory);
+  }
+
+  /**
+   * Rattache l'utilisateur à un territoire supplémentaire (idempotent, ne
+   * modifie jamais isDefault et ne rattache jamais aux autres territoires).
+   */
+  static async joinTerritory(userId: string, code: string): Promise<Territory> {
+    const territory = await TerritoryService.getByCode(code);
+
+    await db
+      .insert(userTerritories)
+      .values({ userId, territoryId: territory.id, isDefault: false })
+      .onConflictDoNothing({
+        target: [userTerritories.userId, userTerritories.territoryId],
+      });
+
+    return territory;
+  }
+
   static async getDefaultTerritoryForUser(userId: string): Promise<Territory | null> {
     const [row] = await db
       .select({ territory: territories })

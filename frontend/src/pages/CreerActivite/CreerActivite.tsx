@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "../../lib/axios";
+import { useTerritory } from "../../contexts/TerritoryContext";
 import type { ActivityLevel } from "../../lib/activityLabels";
 import EtapeInfos from "./etapes/EtapeInfos";
 import EtapeLieuDate from "./etapes/EtapeLieuDate";
@@ -53,6 +54,7 @@ const TOTAL_STEPS = STEP_META.length;
 
 export default function CreerActivite() {
   const navigate = useNavigate();
+  const { activeTerritory } = useTerritory();
   const [step, setStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
   const [form, setForm] = useState<CreerActiviteForm>(INITIAL_FORM);
@@ -113,6 +115,11 @@ export default function CreerActivite() {
         startDate: startDate.toISOString(),
         levelRequired: form.levelRequired,
         maxParticipants: form.maxParticipants,
+        // Absent si aucun territoire actif n'est encore chargé : le backend
+        // retombe alors sur le territoire par défaut du créateur (comportement
+        // 66 actuel inchangé). L'appartenance est de toute façon toujours
+        // revérifiée côté serveur, jamais fait confiance au frontend.
+        territoryId: activeTerritory?.id,
       });
       setIsSuccess(true);
     } catch (error) {
