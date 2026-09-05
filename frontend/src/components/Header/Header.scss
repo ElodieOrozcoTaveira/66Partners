@@ -48,11 +48,74 @@
 
   &__rightside {
     padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
   }
 
   &__nav {
     display: none;
   }
+}
+
+// Identité + territoire actif — visible dès le mobile (cf. audit PWA Étape 6),
+// pas seulement dans la nav desktop.
+.container-header__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 34vw;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(variables.$nuit, 0.06);
+}
+
+.container-header__identity-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 96px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: variables.$nuit;
+}
+
+.container-header__identity-sep {
+  font-size: 0.7rem;
+  color: rgba(variables.$nuit, 0.35);
+}
+
+.container-header__identity-code {
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: variables.$rouge2;
+}
+
+.container-header__territorySelectWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.container-header__territorySelect {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: variables.$rouge2;
+  cursor: pointer;
+}
+
+.container-header__territoryChevron {
+  color: variables.$rouge2;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 .container-header__leftside img {
@@ -82,18 +145,6 @@
 }
 
 @media (min-width: variables.$tablet) {
-  .container-header__territorySelect {
-    font-family: "Inter";
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: variables.$nuit;
-    border: 1px solid variables.$nuit;
-    border-radius: 6px;
-    padding: 0.3rem 0.5rem;
-    background: white;
-    cursor: pointer;
-  }
-
   .container-header__nav {
     display: flex;
     align-items: center;

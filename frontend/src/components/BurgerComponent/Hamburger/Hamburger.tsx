@@ -68,6 +68,18 @@ export default function Hamburger() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
 
+  // Empêche le scroll de la page derrière le panneau (même convention que
+  // les modales de connexion/inscription) : sans ça, le fond défile encore
+  // au doigt sous le panneau sur mobile, ce qui casse la sensation d'app.
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
+
   return (
     <>
       <nav className="navbar" ref={navRef}>

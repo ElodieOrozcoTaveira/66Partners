@@ -37,7 +37,9 @@
   justify-content: flex-start;
   width: 72vw;
   height: 100vh;
+  height: 100dvh;
   padding: 1rem 1rem 0.75rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   overflow-y: auto;
   background-color: #fffbf7 ;
   z-index: 1000;

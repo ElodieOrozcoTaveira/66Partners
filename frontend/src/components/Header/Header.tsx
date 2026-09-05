@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import {  NavLink, useLocation } from "react-router-dom";
 import "../Header/Header.scss";
 import Hamburger from "../BurgerComponent/Hamburger/Hamburger";
@@ -74,23 +75,6 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
             )}
           </NavLink>
         ))}
-        {/* Invisible tant qu'un utilisateur n'appartient qu'à un seul
-            territoire (le cas de tous les comptes en V1) — n'apparaît que
-            pour les comptes multi-territoires. */}
-        {territories.length > 1 && (
-          <select
-            className="container-header__territorySelect"
-            aria-label="Territoire actif"
-            value={activeTerritory?.code ?? ""}
-            onChange={(e) => setActiveTerritory(e.target.value)}
-          >
-            {territories.map((territory) => (
-              <option key={territory.id} value={territory.code}>
-                {territory.brandName}
-              </option>
-            ))}
-          </select>
-        )}
         <Connexion
           activeModal={activeModal}
           onOpenLogin={() => setActiveModal("login")}
@@ -99,6 +83,42 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
         />
       </nav>
       <section className="container-header__rightside">
+        {/* Identité + territoire actif, visible dès le mobile (cf. audit PWA
+            Étape 6). Le code seul devient un vrai sélecteur uniquement pour
+            les comptes multi-territoires : inutile d'en afficher un pour les
+            comptes 66 uniquement, qui restent la majorité en V1. */}
+        {user && activeTerritory && (
+          <div className="container-header__identity">
+            <span className="container-header__identity-name">{user.pseudo}</span>
+            <span className="container-header__identity-sep">·</span>
+            {territories.length > 1 ? (
+              <span className="container-header__territorySelectWrap">
+                <select
+                  className="container-header__territorySelect"
+                  aria-label="Territoire actif"
+                  value={activeTerritory.code}
+                  onChange={(e) => setActiveTerritory(e.target.value)}
+                >
+                  {territories.map((territory) => (
+                    <option key={territory.id} value={territory.code}>
+                      {territory.code} — {territory.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={12}
+                  strokeWidth={2.5}
+                  className="container-header__territoryChevron"
+                  aria-hidden="true"
+                />
+              </span>
+            ) : (
+              <span className="container-header__identity-code">
+                {activeTerritory.code}
+              </span>
+            )}
+          </div>
+        )}
         <Hamburger />
       </section>
     </header>

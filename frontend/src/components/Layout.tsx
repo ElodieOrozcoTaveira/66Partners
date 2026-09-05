@@ -24,6 +24,10 @@ export default function Layout() {
   const isMessagesThread = /^\/messages\/[^/]+$/.test(pathname);
   const isCreateActivity = pathname.startsWith("/mesactivités/nouvelle");
   const showBottomNav = isAppRoute && !isMessagesThread && !isCreateActivity;
+  // Sur ces deux écrans, un élément fixe reste ancré en bas de la fenêtre
+  // (compositeur de messages, CTA "Publier") : le bandeau d'installation ne
+  // doit jamais s'empiler par-dessus (cf. audit PWA — P0).
+  const hideInstallPrompt = isMessagesThread || isCreateActivity;
 
   return (
     <div className="app-shell">
@@ -37,7 +41,7 @@ export default function Layout() {
       </main>
       {showBottomNav && <BottomNavBar />}
       <Footer hideOnMobile={isAppRoute} />
-      <InstallPwaPrompt hasBottomNav={showBottomNav} />
+      {!hideInstallPrompt && <InstallPwaPrompt hasBottomNav={showBottomNav} />}
     </div>
   );
 }
