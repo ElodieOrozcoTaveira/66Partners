@@ -1,6 +1,7 @@
 import {
-  pgTable, uuid, varchar, text, timestamp, integer, smallint, boolean, pgEnum, unique, primaryKey, doublePrecision, index,
+  pgTable, uuid, varchar, text, timestamp, integer, smallint, boolean, pgEnum, unique, primaryKey, doublePrecision, index, uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const sportLevelEnum = pgEnum("sport_level", ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"]);
 export const participationStatusEnum = pgEnum("participation_status", ["PENDING", "ACCEPTED", "REFUSED"]);
@@ -83,6 +84,15 @@ export const userTerritories = pgTable("user_territories", {
   isDefault: boolean("is_default").notNull().default(false),
 }, (t) => ({
   pk: primaryKey({ columns: [t.userId, t.territoryId] }),
+  // Garde-fou d'intégrité : au plus UN territoire par défaut par utilisateur.
+  // TerritoryService.attachUserToActiveTerritories() ne pose déjà qu'un seul
+  // isDefault=true (le premier territoire actif) — cet index partiel rend
+  // cette invariante impossible à violer même par un futur bug ou un accès
+  // direct à la base, sans jamais limiter le nombre de territoires par
+  // utilisateur (multi-appartenance toujours possible).
+  oneDefaultPerUser: uniqueIndex("user_territories_one_default_per_user")
+    .on(t.userId)
+    .where(sql`${t.isDefault} = true`),
 }));
 
 export const sports = pgTable("sports", {
@@ -140,6 +150,11 @@ export const participations = pgTable("participations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => ({
   uniqueUserActivity: unique().on(t.userId, t.activityId),
+  // La contrainte unique ci-dessus (user_id, activity_id) ne couvre pas les
+  // recherches par activity_id seul (ex. liste des participants d'une
+  // activité) — colonne pourtant filtrée directement à de nombreux endroits
+  // (participation.services.ts, conversation.services.ts, activity.services.ts).
+  activityIdx: index("participations_activity_id_idx").on(t.activityId),
 }));
 
 export const conversations = pgTable("conversations", {
@@ -154,7 +169,14 @@ export const messages = pgTable("messages", {
     createdAt: timestamp("created_at").defaultNow().notNull(),
     usersId: uuid("users_id").notNull().references(()=>users.id, { onDelete: "cascade" }),
     conversationsId: uuid("conversations_id").notNull().references(()=>conversations.id, { onDelete: "cascade" }),
-})
+}, (t) => ({
+  // conversationsId : filtré directement à chaque chargement de messages
+  // (getMessages, listMine). usersId : jamais filtré directement aujourd'hui,
+  // mais indexé pour la suppression en cascade d'un compte (ON DELETE CASCADE
+  // sans index = balayage complet de la table à chaque suppression d'utilisateur).
+  conversationsIdx: index("messages_conversations_id_idx").on(t.conversationsId),
+  usersIdx: index("messages_users_id_idx").on(t.usersId),
+}))
 
 export const activityPhotos = pgTable("activity_photos", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -162,7 +184,11 @@ export const activityPhotos = pgTable("activity_photos", {
   uploaderId: uuid("uploader_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   url: varchar("url", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => ({
+  // Filtré directement à chaque affichage des photos d'une activité
+  // (listPhotos, ActivityService.getActivityById).
+  activityIdx: index("activity_photos_activity_id_idx").on(t.activityId),
+}));
 
 export const notifications = pgTable("notifications", {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -172,7 +198,11 @@ export const notifications = pgTable("notifications", {
     activityId: uuid("activity_id").references(() => activities.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     usersId: uuid("users_id").notNull().references(()=>users.id, { onDelete: "cascade" }),
-})
+}, (t) => ({
+  // usersId : filtré directement à chaque liste/comptage de notifications
+  // et à chaque marquage lu (notification.services.ts, 4 occurrences).
+  usersIdx: index("notifications_users_id_idx").on(t.usersId),
+}))
 
 // Un abonnement navigateur/PWA aux notifications push (Web Push standard,
 // cf. push.services.ts). Un même utilisateur peut avoir plusieurs
