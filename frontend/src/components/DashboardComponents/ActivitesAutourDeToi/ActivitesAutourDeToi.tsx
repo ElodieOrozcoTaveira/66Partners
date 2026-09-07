@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { MapPin, Users } from "lucide-react";
+import { CalendarX, MapPin, Users } from "lucide-react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
@@ -91,9 +91,20 @@ export default function ActivitesAutourDeToi() {
       {isLoading ? (
         <p className="container-autourdetoi__empty">Chargement...</p>
       ) : recent.length === 0 ? (
-        <p className="container-autourdetoi__empty">
-          Aucune activité récente pour le moment.
-        </p>
+        <div className="container-activitesproche__empty">
+          <span className="container-activitesproche__empty-icon">
+            <CalendarX size={26} />
+          </span>
+          <h3 className="container-activitesproche__empty-title">
+            Pas encore d'activité autour de toi
+          </h3>
+          <p className="container-activitesproche__empty-text">
+            Sois le premier à en créer une et lance le mouvement près de chez toi !
+          </p>
+          <NavLink to="/mesactivités/nouvelle" className="container-activitesproche__cta">
+            Créer une activité
+          </NavLink>
+        </div>
       ) : (
         <div className="container-autourdetoi__list">
           {recent.map((activity) => {
