@@ -18,6 +18,7 @@ export default function PushNotificationsPrompt() {
   const [state, setState] = useState<PushSupportState | "checking">("checking");
   const [isBusy, setIsBusy] = useState(false);
   const [isDismissed, setIsDismissed] = useState(isDismissedForNow);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getPushSupportState().then(setState);
@@ -30,15 +31,24 @@ export default function PushNotificationsPrompt() {
 
   async function handleActivate() {
     setIsBusy(true);
+    setError(null);
     try {
       await subscribeToPush();
+      setState(await getPushSupportState());
+    } catch (err) {
+      // Jamais d'échec silencieux : sans ça, le bandeau reste affiché avec
+      // un bouton "Activer" qui semble ne rien faire.
+      console.error("Erreur lors de l'activation des notifications push:", err);
+      setError("Impossible d'activer les notifications pour le moment. Réessaie plus tard.");
       setState(await getPushSupportState());
     } finally {
       setIsBusy(false);
     }
   }
 
-  const canOffer = state === "available";
+  // "error" reste affiché (contrairement aux autres états non éligibles) —
+  // sinon le message d'échec disparaîtrait avec le bandeau lui-même.
+  const canOffer = state === "available" || state === "error";
   if (!canOffer || isDismissed) return null;
 
   return (
@@ -47,15 +57,17 @@ export default function PushNotificationsPrompt() {
         <Bell size={18} strokeWidth={2.2} />
       </span>
       <p className="push-prompt__text">
-        Active les notifications pour être prévenu même quand tu n'es pas sur le site (nouveau
-        message, activité confirmée...).
+        {state === "error"
+          ? "Les notifications ne sont pas disponibles pour le moment sur cet appareil/navigateur."
+          : "Active les notifications pour être prévenu même quand tu n'es pas sur le site (nouveau message, activité confirmée...)."}
       </p>
+      {error && <p className="push-prompt__error">{error}</p>}
       <div className="push-prompt__actions">
         <button
           type="button"
           className="push-prompt__btn push-prompt__btn--primary"
           onClick={handleActivate}
-          disabled={isBusy}
+          disabled={isBusy || state === "error"}
         >
           Activer
         </button>

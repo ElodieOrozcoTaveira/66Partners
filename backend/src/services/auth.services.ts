@@ -7,6 +7,9 @@ import { users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
 import { sendWelcomeEmail, sendResetPasswordEmail } from "./mail.services.js";
 import { TerritoryService } from "./territory.services.js";
+import { SocialAccountService, type SocialProvider } from "./socialAccount.services.js";
+import type { GoogleProfile } from "./google.services.js";
+import type { FacebookProfile } from "./facebook.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -49,6 +52,42 @@ const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 heure
 
 function isPasswordStrong(password: string): boolean {
   return password.length >= PASSWORD_MIN_LENGTH;
+}
+
+function derivePseudoFromGoogleProfile(profile: GoogleProfile): string {
+  const base = profile.givenName || profile.name || profile.email.split("@")[0] || "Sportif";
+  return base.slice(0, 100);
+}
+
+function derivePseudoFromFacebookProfile(profile: FacebookProfile): string {
+  const base = profile.firstName || profile.name || profile.email.split("@")[0] || "Sportif";
+  return base.slice(0, 100);
+}
+
+// État métier renvoyé par POST /api/auth/{google,facebook} — jamais de
+// création ni de fusion à ce stade, uniquement un constat sur l'état du
+// compte :
+// - LOGGED_IN : ce compte social est déjà lié à un utilisateur 66Partners.
+// - NEW_ACCOUNT : ni le compte social ni l'email ne sont connus — le
+//   frontend doit faire accepter les CGU avant d'appeler .../complete.
+// - EMAIL_ALREADY_REGISTERED : un compte 66Partners existe déjà avec cet
+//   email mais sans ce provider lié — jamais de fusion automatique, le
+//   frontend doit faire passer l'utilisateur par un login mot de passe
+//   classique avant d'appeler .../link.
+export type SocialLoginStatus =
+  | { status: "LOGGED_IN"; user: UserData }
+  | { status: "NEW_ACCOUNT"; email: string }
+  | { status: "EMAIL_ALREADY_REGISTERED"; email: string };
+
+// Conservé pour compatibilité de nommage avec le code existant (Google a été
+// implémenté avant que Facebook ne généralise ce type).
+export type GoogleLoginStatus = SocialLoginStatus;
+
+interface SocialIdentity {
+  providerUserId: string;
+  email: string;
+  pseudo: string;
+  avatar?: string | undefined;
 }
 
 // Le token brut part par email ; seul son hash est conservé en base
@@ -184,7 +223,17 @@ export class AuthService {
       );
     }
 
-    // 2. Vérification du mot de passe
+    // 2. Vérification du mot de passe — un compte créé uniquement via Google
+    // n'a pas de mot de passe (password null) : traité comme des identifiants
+    // invalides, jamais comme une erreur serveur.
+    if (!user.password) {
+      throw new AuthError(
+        "Email ou mot de passe incorrect",
+        "INVALID_CREDENTIALS",
+        401
+      );
+    }
+
     const isPasswordValid = await argon2.verify(user.password, password);
 
     if (!isPasswordValid) {
@@ -356,5 +405,219 @@ export class AuthService {
         updatedAt: new Date(),
       })
       .where(eq(users.id, user.id));
+  }
+
+  /**
+   * Constate l'état d'un compte pour un fournisseur social donné — ne crée
+   * et ne fusionne jamais rien. Partagé par Google et Facebook : la logique
+   * est strictement identique une fois `providerUserId`/`email` vérifiés
+   * cryptographiquement par le service du provider concerné.
+   */
+  private static async loginWithSocialAccount(
+    provider: SocialProvider,
+    providerUserId: string,
+    email: string
+  ): Promise<SocialLoginStatus> {
+    const linkedUserId = await SocialAccountService.findUserIdByProvider(
+      provider,
+      providerUserId
+    );
+
+    if (linkedUserId) {
+      const user = await AuthService.getUserById(linkedUserId);
+      if (!user) {
+        // Ligne social_accounts orpheline (ne devrait pas arriver, la FK est
+        // en cascade) — on retombe sur un état sûr plutôt que de planter.
+        throw new AuthError("Utilisateur introuvable", "USER_NOT_FOUND", 404);
+      }
+      return { status: "LOGGED_IN", user };
+    }
+
+    const emailTaken = await AuthService.checkEmailExists(email);
+    if (emailTaken) {
+      return { status: "EMAIL_ALREADY_REGISTERED", email };
+    }
+
+    return { status: "NEW_ACCOUNT", email };
+  }
+
+  /**
+   * Seule voie de création d'un compte via un fournisseur social.
+   * `termsAccepted` est déjà revalidé à `true` par Zod avant d'arriver ici
+   * (même garde-fou que registerUser) : jamais de termsAcceptedAt simplement
+   * parce qu'un provider externe a authentifié la personne.
+   */
+  private static async completeSocialSignup(
+    provider: SocialProvider,
+    identity: SocialIdentity
+  ): Promise<UserData> {
+    // Idempotence : un double-clic/double-soumission sur le même token
+    // ne doit pas tenter de recréer le compte une seconde fois.
+    const alreadyLinkedUserId = await SocialAccountService.findUserIdByProvider(
+      provider,
+      identity.providerUserId
+    );
+    if (alreadyLinkedUserId) {
+      const existing = await AuthService.getUserById(alreadyLinkedUserId);
+      if (existing) return existing;
+    }
+
+    const emailTaken = await AuthService.checkEmailExists(identity.email);
+    if (emailTaken) {
+      // Quelqu'un a créé/lié ce compte entre le premier constat et
+      // celui-ci : jamais de fusion silencieuse, même ici.
+      throw new AuthError(
+        "Un compte existe déjà avec cette adresse email. Connecte-toi puis associe ce compte depuis ton profil.",
+        "EMAIL_ALREADY_REGISTERED",
+        409
+      );
+    }
+
+    let newUser: typeof users.$inferSelect | undefined;
+    try {
+      [newUser] = await db
+        .insert(users)
+        .values({
+          pseudo: identity.pseudo,
+          email: identity.email,
+          password: null,
+          avatar: identity.avatar,
+          termsAcceptedAt: new Date(),
+        })
+        .returning();
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new AuthError(
+          "Un compte existe déjà avec cette adresse email.",
+          "EMAIL_ALREADY_REGISTERED",
+          409
+        );
+      }
+      throw error;
+    }
+
+    if (!newUser) {
+      throw new AuthError(
+        "Erreur lors de la création de l'utilisateur",
+        "USER_CREATION_FAILED",
+        500
+      );
+    }
+
+    // Même rattachement territorial que l'inscription classique (§ registerUser).
+    await TerritoryService.attachUserToActiveTerritories(newUser.id);
+
+    await SocialAccountService.link({
+      userId: newUser.id,
+      provider,
+      providerUserId: identity.providerUserId,
+      email: identity.email,
+    });
+
+    sendWelcomeEmail(newUser).catch((err) =>
+      console.error("Erreur envoi email de bienvenue:", err),
+    );
+
+    return {
+      id: newUser.id,
+      email: newUser.email,
+      pseudo: newUser.pseudo,
+      city: newUser.city,
+      headline: newUser.headline,
+      lookingFor: newUser.lookingFor,
+      openTo: newUser.openTo,
+      avatar: newUser.avatar,
+      createdAt: newUser.createdAt,
+    };
+  }
+
+  /**
+   * Associe un fournisseur social à un compte 66Partners déjà authentifié
+   * par mot de passe (requireAuth, req.userId). C'est la seule voie
+   * d'association : jamais de fusion automatique par email seul.
+   */
+  private static async linkSocialAccount(
+    userId: string,
+    provider: SocialProvider,
+    providerUserId: string,
+    email: string
+  ): Promise<void> {
+    const linkedUserId = await SocialAccountService.findUserIdByProvider(
+      provider,
+      providerUserId
+    );
+
+    if (linkedUserId && linkedUserId !== userId) {
+      throw new AuthError(
+        `Ce compte ${provider === "google" ? "Google" : "Facebook"} est déjà associé à un autre compte 66Partners.`,
+        `${provider.toUpperCase()}_ACCOUNT_ALREADY_LINKED`,
+        409
+      );
+    }
+
+    // Idempotent : déjà lié à ce même utilisateur, rien à faire.
+    if (linkedUserId === userId) return;
+
+    const user = await AuthService.getUserById(userId);
+    if (!user) {
+      throw new AuthError("Utilisateur introuvable", "USER_NOT_FOUND", 404);
+    }
+
+    await SocialAccountService.link({ userId, provider, providerUserId, email });
+  }
+
+  // ─── Google ────────────────────────────────────────────────────────────
+
+  /**
+   * POST /api/auth/google — `profile` a déjà été vérifié cryptographiquement
+   * par verifyGoogleCredential() avant d'arriver ici.
+   */
+  static async loginWithGoogle(profile: GoogleProfile): Promise<GoogleLoginStatus> {
+    return AuthService.loginWithSocialAccount("google", profile.sub, profile.email);
+  }
+
+  static async completeGoogleSignup(
+    profile: GoogleProfile,
+    // Type volontairement restreint au littéral `true` : impossible d'appeler
+    // cette méthode sans avoir déjà une acceptation explicite des CGU.
+    _termsAccepted: true
+  ): Promise<UserData> {
+    return AuthService.completeSocialSignup("google", {
+      providerUserId: profile.sub,
+      email: profile.email,
+      pseudo: derivePseudoFromGoogleProfile(profile),
+      avatar: profile.picture,
+    });
+  }
+
+  static async linkGoogleAccount(userId: string, profile: GoogleProfile): Promise<void> {
+    return AuthService.linkSocialAccount(userId, "google", profile.sub, profile.email);
+  }
+
+  // ─── Facebook ──────────────────────────────────────────────────────────
+
+  /**
+   * POST /api/auth/facebook — `profile` a déjà été vérifié par
+   * verifyFacebookAccessToken() (Graph API /debug_token + /me) avant
+   * d'arriver ici.
+   */
+  static async loginWithFacebook(profile: FacebookProfile): Promise<SocialLoginStatus> {
+    return AuthService.loginWithSocialAccount("facebook", profile.id, profile.email);
+  }
+
+  static async completeFacebookSignup(
+    profile: FacebookProfile,
+    _termsAccepted: true
+  ): Promise<UserData> {
+    return AuthService.completeSocialSignup("facebook", {
+      providerUserId: profile.id,
+      email: profile.email,
+      pseudo: derivePseudoFromFacebookProfile(profile),
+      avatar: profile.picture,
+    });
+  }
+
+  static async linkFacebookAccount(userId: string, profile: FacebookProfile): Promise<void> {
+    return AuthService.linkSocialAccount(userId, "facebook", profile.id, profile.email);
   }
 }

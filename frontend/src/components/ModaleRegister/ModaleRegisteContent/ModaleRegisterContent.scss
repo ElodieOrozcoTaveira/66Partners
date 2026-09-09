@@ -144,6 +144,19 @@
     margin: 0.5rem 0 0;
   }
 
+  // Message informatif (ex. "un compte existe déjà avec Google") : même
+  // gabarit que __error, ton neutre pour ne pas laisser penser à une erreur.
+  &__info {
+    font-family: "Inter";
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: variables.$nuit2;
+    background-color: rgba(variables.$nuit2, 0.06);
+    border-radius: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    margin: 0 0 1rem;
+  }
+
   &__submit {
     margin-top: 0.9rem;
     padding: 0.65rem;

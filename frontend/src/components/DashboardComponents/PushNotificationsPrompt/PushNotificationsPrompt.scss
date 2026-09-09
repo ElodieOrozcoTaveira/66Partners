@@ -33,6 +33,14 @@
   color: variables.$nuit;
 }
 
+.push-prompt__error {
+  width: 100%;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  color: variables.$rouge2;
+}
+
 .push-prompt__actions {
   display: flex;
   align-items: center;

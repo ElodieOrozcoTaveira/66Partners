@@ -21,7 +21,11 @@ export const weekdayEnum = pgEnum("weekday", [
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  password: varchar("password", { length: 255 }).notNull(),
+  // Nullable : un compte créé via un fournisseur d'identité social (Google,
+  // cf. social_accounts) n'a pas de mot de passe 66Partners tant qu'il n'en
+  // définit pas un lui-même. AuthService.authenticateUser() traite un
+  // password null comme des identifiants invalides, jamais comme un crash.
+  password: varchar("password", { length: 255 }),
   pseudo: varchar("pseudo", { length: 100 }).notNull(),
   city: varchar("city", { length: 100 }),
   // Les 3 lignes de la carte "à propos" du profil (icônes fixes côté
@@ -217,6 +221,31 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => ({
   userIdx: index("push_subscriptions_user_id_idx").on(t.userId),
+}));
+
+// Fournisseurs d'identité externes rattachés à un compte 66Partners (Google
+// pour l'instant, potentiellement Facebook plus tard — table dédiée plutôt
+// que de surcharger `users`, pour permettre plusieurs fournisseurs par
+// utilisateur sans jamais faire du social la seule voie d'authentification).
+// provider_user_id = claim "sub" du token du fournisseur (jamais l'email
+// seul : Google recommande "sub" comme identifiant stable et unique).
+export const socialAccounts = pgTable("social_accounts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  provider: varchar("provider", { length: 32 }).notNull(),
+  providerUserId: varchar("provider_user_id", { length: 255 }).notNull(),
+  // Email tel que renvoyé par le fournisseur au moment de la liaison — pour
+  // affichage/traçabilité uniquement, jamais utilisé comme identifiant de
+  // connexion (c'est provider_user_id qui identifie le compte social).
+  email: varchar("email", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index("social_accounts_user_id_idx").on(t.userId),
+  providerAccountUnique: unique("social_accounts_provider_provider_user_id_unique").on(
+    t.provider,
+    t.providerUserId,
+  ),
 }));
 
 export const opinion = pgTable("opinion", {

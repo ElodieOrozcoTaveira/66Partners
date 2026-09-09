@@ -6,6 +6,8 @@ import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
+import { useFacebookAuth } from "../../../hooks/useFacebookAuth";
 import "./ModaleContent.scss";
 
 interface ModaleContentProps {
@@ -31,6 +33,21 @@ export default function ModaleContent({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [termsAcceptedGoogle, setTermsAcceptedGoogle] = useState(false);
+  const [termsAcceptedFacebook, setTermsAcceptedFacebook] = useState(false);
+
+  function handleSocialAuthSuccess() {
+    onClose();
+    navigate("/dashboard");
+  }
+
+  const googleAuth = useGoogleAuth({ onSuccess: handleSocialAuthSuccess });
+  const {
+    triggerLogin: triggerGoogleLogin,
+    isUnavailable: isGoogleUnavailable,
+    error: googleButtonError,
+  } = useGoogleButton(googleAuth.handleCredential);
+  const facebookAuth = useFacebookAuth({ onSuccess: handleSocialAuthSuccess });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -54,8 +71,25 @@ export default function ModaleContent({
       setPassword("");
       setError(null);
       setIsSubmitting(false);
+      setTermsAcceptedGoogle(false);
+      setTermsAcceptedFacebook(false);
+      googleAuth.reset();
+      facebookAuth.reset();
     }
+    // googleAuth/facebookAuth sont recréés à chaque render (hooks locaux) :
+    // seul isOpen doit déclencher cette remise à zéro.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
+  // Un compte 66Partners existe déjà avec l'email Google/Facebook : préremplit
+  // le formulaire mot de passe classique, déjà affiché juste en dessous.
+  useEffect(() => {
+    if (googleAuth.state.step === "linkPending") {
+      setEmail(googleAuth.state.email);
+    } else if (facebookAuth.state.step === "linkPending") {
+      setEmail(facebookAuth.state.email);
+    }
+  }, [googleAuth.state, facebookAuth.state]);
 
   if (!isOpen) return null;
 
@@ -71,6 +105,11 @@ export default function ModaleContent({
       console.debug("ModaleContent: login response", res.data);
       const ok = await login(res.data.token);
       if (ok) {
+        if (googleAuth.state.step === "linkPending") {
+          await googleAuth.linkAfterPasswordLogin();
+        } else if (facebookAuth.state.step === "linkPending") {
+          await facebookAuth.linkAfterPasswordLogin();
+        }
         onClose();
         navigate("/dashboard");
       } else {
@@ -79,8 +118,12 @@ export default function ModaleContent({
     } catch {
       setError("Email ou mot de passe incorrect.");
       // Si échec de connexion (mot de passe erroné ou compte inexistant),
-      // basculer vers la modale d'inscription au lieu de la page.
-      onSwitchToRegister();
+      // basculer vers la modale d'inscription au lieu de la page — sauf si
+      // on est justement en train d'associer Google/Facebook à un compte
+      // qui, lui, existe déjà : rester ici pour laisser réessayer le mot de passe.
+      if (googleAuth.state.step !== "linkPending" && facebookAuth.state.step !== "linkPending") {
+        onSwitchToRegister();
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -102,100 +145,231 @@ export default function ModaleContent({
         >
           <X size={20} />
         </button>
-        <div className="container-modaleConnexion">
-          <h3 className="container-modaleConnexion__h3">Se connecter</h3>
-          <h4 className="container-modaleConnexion__h4">
-            Bienvenue chez 66Partners <HandMetal size={12} color="#F4B400" />
-          </h4>
+        {googleAuth.state.step === "newAccount" ? (
+          <div className="container-modaleConnexion">
+            <h3 className="container-modaleConnexion__h3">Finalise ton inscription</h3>
+            <h4 className="container-modaleConnexion__h4">
+              Connecté·e avec {googleAuth.state.email} <HandMetal size={12} color="#F4B400" />
+            </h4>
 
-          <section className="container-modaleConnexion__section">
-            <form
-              id="login-form"
-              className="container-modaleConnexion__form"
-              onSubmit={handleSubmit}
-            >
-              <label
-                htmlFor="email"
-                className="container-modaleConnexion__label"
-              >
-                Adresse e-mail
+            <section className="container-modaleConnexion__section">
+              <label htmlFor="google-terms" className="container-modaleConnexion__checkboxLabel">
+                <input
+                  id="google-terms"
+                  type="checkbox"
+                  checked={termsAcceptedGoogle}
+                  onChange={(event) => setTermsAcceptedGoogle(event.target.checked)}
+                  className="container-modaleConnexion__checkbox"
+                />
+                J'ai lu et j'accepte les{" "}
+                <NavLink to="/mentionslegales" onClick={onClose}>
+                  Mentions Légales
+                </NavLink>{" "}
+                et la{" "}
+                <NavLink to="/confidentialite" onClick={onClose}>
+                  Politique de confidentialité
+                </NavLink>{" "}
+                de 66Partners.
               </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="container-modaleConnexion__input"
-              />
 
-              <label
-                htmlFor="password"
-                className="container-modaleConnexion__label"
-              >
-                Mot de passe
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="container-modaleConnexion__input"
-              />
-
-              <NavLink
-                to="/mot-de-passe-oublie"
-                onClick={onClose}
-                className="container-modaleConnexion__forgot"
-              >
-                Mot de passe oublié ?
-              </NavLink>
-
-              {error && (
-                <p className="container-modaleConnexion__error">{error}</p>
+              {googleAuth.error && (
+                <p className="container-modaleConnexion__error">{googleAuth.error}</p>
               )}
 
               <button
-                type="submit"
+                type="button"
                 className="container-modaleConnexion__submit"
-                disabled={isSubmitting}
+                disabled={googleAuth.isSubmitting}
+                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle)}
               >
-                {isSubmitting ? "Connexion..." : "Se connecter"}
+                {googleAuth.isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
-            </form>
+              <p className="container-modaleConnexion__register">
+                <button
+                  type="button"
+                  className="container-modaleConnexion__switch"
+                  onClick={() => googleAuth.reset()}
+                >
+                  Annuler
+                </button>
+              </p>
+            </section>
+          </div>
+        ) : facebookAuth.state.step === "newAccount" ? (
+          <div className="container-modaleConnexion">
+            <h3 className="container-modaleConnexion__h3">Finalise ton inscription</h3>
+            <h4 className="container-modaleConnexion__h4">
+              Connecté·e avec {facebookAuth.state.email} <HandMetal size={12} color="#F4B400" />
+            </h4>
 
-            <div className="container-modaleConnexion__divider">
-              <span>ou continuer avec</span>
-            </div>
+            <section className="container-modaleConnexion__section">
+              <label htmlFor="facebook-terms" className="container-modaleConnexion__checkboxLabel">
+                <input
+                  id="facebook-terms"
+                  type="checkbox"
+                  checked={termsAcceptedFacebook}
+                  onChange={(event) => setTermsAcceptedFacebook(event.target.checked)}
+                  className="container-modaleConnexion__checkbox"
+                />
+                J'ai lu et j'accepte les{" "}
+                <NavLink to="/mentionslegales" onClick={onClose}>
+                  Mentions Légales
+                </NavLink>{" "}
+                et la{" "}
+                <NavLink to="/confidentialite" onClick={onClose}>
+                  Politique de confidentialité
+                </NavLink>{" "}
+                de 66Partners.
+              </label>
 
-            <div className="container-modaleConnexion__social">
+              {facebookAuth.error && (
+                <p className="container-modaleConnexion__error">{facebookAuth.error}</p>
+              )}
+
               <button
                 type="button"
-                className="container-modaleConnexion__socialBtn"
+                className="container-modaleConnexion__submit"
+                disabled={facebookAuth.isSubmitting}
+                onClick={() => facebookAuth.completeSignup(termsAcceptedFacebook)}
               >
-                <FcGoogle size={18} /> Google
+                {facebookAuth.isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
-              <button
-                type="button"
-                className="container-modaleConnexion__socialBtn"
-              >
-                <FaFacebook size={18} color="#1877F2" /> Facebook
-              </button>
-            </div>
+              <p className="container-modaleConnexion__register">
+                <button
+                  type="button"
+                  className="container-modaleConnexion__switch"
+                  onClick={() => facebookAuth.reset()}
+                >
+                  Annuler
+                </button>
+              </p>
+            </section>
+          </div>
+        ) : (
+          <div className="container-modaleConnexion">
+            <h3 className="container-modaleConnexion__h3">Se connecter</h3>
+            <h4 className="container-modaleConnexion__h4">
+              Bienvenue chez 66Partners <HandMetal size={12} color="#F4B400" />
+            </h4>
 
-            <p className="container-modaleConnexion__register">
-              Pas encore de compte ?{" "}
-              <button
-                type="button"
-                className="container-modaleConnexion__switch"
-                onClick={onSwitchToRegister}
+            <section className="container-modaleConnexion__section">
+              {googleAuth.state.step === "linkPending" && (
+                <p className="container-modaleConnexion__info">
+                  Un compte existe déjà avec {googleAuth.state.email}. Connecte-toi avec ton mot
+                  de passe pour associer Google.
+                </p>
+              )}
+              {facebookAuth.state.step === "linkPending" && (
+                <p className="container-modaleConnexion__info">
+                  Un compte existe déjà avec {facebookAuth.state.email}. Connecte-toi avec ton mot
+                  de passe pour associer Facebook.
+                </p>
+              )}
+
+              <form
+                id="login-form"
+                className="container-modaleConnexion__form"
+                onSubmit={handleSubmit}
               >
-                S'inscrire
-              </button>
-            </p>
-          </section>
-        </div>
+                <label
+                  htmlFor="email"
+                  className="container-modaleConnexion__label"
+                >
+                  Adresse e-mail
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="container-modaleConnexion__input"
+                />
+
+                <label
+                  htmlFor="password"
+                  className="container-modaleConnexion__label"
+                >
+                  Mot de passe
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="container-modaleConnexion__input"
+                />
+
+                <NavLink
+                  to="/mot-de-passe-oublie"
+                  onClick={onClose}
+                  className="container-modaleConnexion__forgot"
+                >
+                  Mot de passe oublié ?
+                </NavLink>
+
+                {error && (
+                  <p className="container-modaleConnexion__error">{error}</p>
+                )}
+
+                <button
+                  type="submit"
+                  className="container-modaleConnexion__submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Connexion..." : "Se connecter"}
+                </button>
+              </form>
+
+              <div className="container-modaleConnexion__divider">
+                <span>ou continuer avec</span>
+              </div>
+
+              <div className="container-modaleConnexion__social">
+                <button
+                  type="button"
+                  className="container-modaleConnexion__socialBtn"
+                  onClick={() => triggerGoogleLogin()}
+                  disabled={googleAuth.isSubmitting || isGoogleUnavailable}
+                >
+                  <FcGoogle size={18} />
+                  {googleAuth.isSubmitting ? "Connexion..." : "Continuer avec Google"}
+                </button>
+                <button
+                  type="button"
+                  className="container-modaleConnexion__socialBtn"
+                  onClick={() => facebookAuth.handleLogin()}
+                  disabled={facebookAuth.isSubmitting}
+                >
+                  <FaFacebook size={18} color="#1877F2" />
+                  {facebookAuth.isSubmitting ? "Connexion..." : "Facebook"}
+                </button>
+              </div>
+
+              {googleButtonError && (
+                <p className="container-modaleConnexion__error">{googleButtonError}</p>
+              )}
+              {googleAuth.error && googleAuth.state.step === "idle" && (
+                <p className="container-modaleConnexion__error">{googleAuth.error}</p>
+              )}
+              {facebookAuth.error && facebookAuth.state.step === "idle" && (
+                <p className="container-modaleConnexion__error">{facebookAuth.error}</p>
+              )}
+
+              <p className="container-modaleConnexion__register">
+                Pas encore de compte ?{" "}
+                <button
+                  type="button"
+                  className="container-modaleConnexion__switch"
+                  onClick={onSwitchToRegister}
+                >
+                  S'inscrire
+                </button>
+              </p>
+            </section>
+          </div>
+        )}
       </div>
     </div>,
     document.body,

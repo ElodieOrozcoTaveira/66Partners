@@ -69,3 +69,67 @@ export const resetPasswordSchema = z.object({
 });
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+/**
+ * POST /auth/google
+ */
+export const googleAuthSchema = z.object({
+  credential: z.string().min(1, "Jeton Google requis"),
+});
+
+export type GoogleAuthInput = z.infer<typeof googleAuthSchema>;
+
+/**
+ * POST /auth/google/complete
+ */
+export const googleCompleteSchema = z.object({
+  credential: z.string().min(1, "Jeton Google requis"),
+  // Même exigence que registerSchema : une valeur absente ou à `false` fait
+  // échouer la validation (400), jamais de préréglage possible.
+  termsAccepted: z.literal(
+    true,
+    "Tu dois accepter les Mentions Légales et la Politique de confidentialité pour créer un compte."
+  ),
+});
+
+export type GoogleCompleteInput = z.infer<typeof googleCompleteSchema>;
+
+/**
+ * POST /auth/google/link
+ */
+export const googleLinkSchema = z.object({
+  credential: z.string().min(1, "Jeton Google requis"),
+});
+
+export type GoogleLinkInput = z.infer<typeof googleLinkSchema>;
+
+/**
+ * POST /auth/facebook
+ */
+export const facebookAuthSchema = z.object({
+  accessToken: z.string().min(1, "Jeton Facebook requis"),
+});
+
+export type FacebookAuthInput = z.infer<typeof facebookAuthSchema>;
+
+/**
+ * POST /auth/facebook/complete
+ */
+export const facebookCompleteSchema = z.object({
+  accessToken: z.string().min(1, "Jeton Facebook requis"),
+  termsAccepted: z.literal(
+    true,
+    "Tu dois accepter les Mentions Légales et la Politique de confidentialité pour créer un compte."
+  ),
+});
+
+export type FacebookCompleteInput = z.infer<typeof facebookCompleteSchema>;
+
+/**
+ * POST /auth/facebook/link
+ */
+export const facebookLinkSchema = z.object({
+  accessToken: z.string().min(1, "Jeton Facebook requis"),
+});
+
+export type FacebookLinkInput = z.infer<typeof facebookLinkSchema>;

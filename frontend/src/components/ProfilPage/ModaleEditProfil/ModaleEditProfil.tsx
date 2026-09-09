@@ -31,6 +31,7 @@ export default function ModaleEditProfil({
   const [error, setError] = useState<string | null>(null);
   const [pushState, setPushState] = useState<PushSupportState | "checking">("checking");
   const [isPushBusy, setIsPushBusy] = useState(false);
+  const [pushError, setPushError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -39,12 +40,19 @@ export default function ModaleEditProfil({
 
   async function handleTogglePush() {
     setIsPushBusy(true);
+    setPushError(null);
     try {
       if (pushState === "subscribed") {
         await unsubscribeFromPush();
       } else {
         await subscribeToPush();
       }
+      setPushState(await getPushSupportState());
+    } catch (err) {
+      // Ne jamais laisser le toggle retomber silencieusement à "off" sans
+      // explication — l'utilisateur doit savoir que l'activation a échoué.
+      console.error("Erreur lors de l'activation des notifications push:", err);
+      setPushError("Impossible d'activer les notifications pour le moment. Réessaie plus tard.");
       setPushState(await getPushSupportState());
     } finally {
       setIsPushBusy(false);
@@ -71,6 +79,7 @@ export default function ModaleEditProfil({
     if (!isOpen) {
       setError(null);
       setIsSubmitting(false);
+      setPushError(null);
       return;
     }
 
@@ -239,8 +248,13 @@ export default function ModaleEditProfil({
                 <p className="container-modaleEditProfil__pushHint">
                   {pushState === "denied"
                     ? "Bloquées dans les réglages de ton navigateur : réactive-les depuis les paramètres du site pour les recevoir."
-                    : "Reçois une alerte sur ton téléphone même quand tu n'es pas sur le site."}
+                    : pushState === "error"
+                      ? "Indisponibles pour le moment sur cet appareil/navigateur."
+                      : "Reçois une alerte sur ton téléphone même quand tu n'es pas sur le site."}
                 </p>
+                {pushError && (
+                  <p className="container-modaleEditProfil__error">{pushError}</p>
+                )}
               </div>
               <button
                 type="button"
@@ -251,7 +265,7 @@ export default function ModaleEditProfil({
                   (pushState === "subscribed" ? " container-modaleEditProfil__pushToggle--on" : "")
                 }
                 onClick={handleTogglePush}
-                disabled={isPushBusy || pushState === "denied"}
+                disabled={isPushBusy || pushState === "denied" || pushState === "error"}
               >
                 <span className="container-modaleEditProfil__pushToggleKnob" />
               </button>

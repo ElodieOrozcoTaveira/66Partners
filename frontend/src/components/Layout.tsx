@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
@@ -28,6 +29,25 @@ export default function Layout() {
   // (compositeur de messages, CTA "Publier") : le bandeau d'installation ne
   // doit jamais s'empiler par-dessus (cf. audit PWA — P0).
   const hideInstallPrompt = isMessagesThread || isCreateActivity;
+
+  // Le navigateur restaure lui-même sa position de scroll sur back/forward
+  // (history.scrollRestoration = "auto" par défaut) : désactivé une seule
+  // fois pour laisser l'effet ci-dessous décider seul, de façon cohérente
+  // sur toute navigation (retour inclus).
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+  }, []);
+
+  // Solution centralisée (routing/layout) plutôt que page par page : chaque
+  // changement de route (pathname — pas la query string ni le hash) remonte
+  // en haut du document. N'affecte que le scroll de la fenêtre, jamais le
+  // scroll interne des modales ou conteneurs à défilement propre (ex. fil de
+  // messages), qui ne passent jamais par window.scrollTo.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <div className="app-shell">

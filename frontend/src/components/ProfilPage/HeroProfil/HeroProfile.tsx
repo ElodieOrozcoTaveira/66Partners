@@ -48,8 +48,13 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
   );
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const avatarSrc = user?.avatar || "/montagne.webp";
+  const avatarSrc = user?.avatar || "/avatardefault.webp";
   const coverSrc = user?.coverPhoto || "/couverture.webp";
+  // Le cadrage "center" reste la seule option sûre pour une photo perso (on
+  // ne sait pas où se trouve le sujet) : le recadrage spécifique laptop/desktop
+  // (pic du Canigou + mer, sans le logo) ne s'applique qu'à la couverture par
+  // défaut, dont la composition est connue.
+  const hasDefaultCover = !user?.coverPhoto;
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>, target: CropTarget) {
     const file = event.target.files?.[0];
@@ -90,7 +95,7 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
   return (
     <>
     <section
-      className="hero-profile"
+      className={`hero-profile${hasDefaultCover ? " hero-profile--defaultCover" : ""}`}
       style={coverSrc ? { backgroundImage: `url(${coverSrc})` } : undefined}
     >
       <div className="hero-profile__menu">

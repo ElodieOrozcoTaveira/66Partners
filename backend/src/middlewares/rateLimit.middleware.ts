@@ -94,3 +94,20 @@ export const resetPasswordLimiter = createAuthRateLimiter({
   limit: 20,
   message: "Trop de tentatives. Réessaie dans quelques minutes.",
 });
+
+// Pas de keyGenerator email : le credential Google est un jeton opaque, pas
+// un email en clair dans le corps de la requête — limite par IP seule,
+// comme resetPasswordLimiter.
+export const googleAuthLimiter = createAuthRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  message: "Trop de tentatives de connexion avec Google. Réessaie dans quelques minutes.",
+});
+
+// Même logique que googleAuthLimiter (limite par IP seule, le token Facebook
+// n'est pas un email en clair dans le corps de la requête).
+export const facebookAuthLimiter = createAuthRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  message: "Trop de tentatives de connexion avec Facebook. Réessaie dans quelques minutes.",
+});

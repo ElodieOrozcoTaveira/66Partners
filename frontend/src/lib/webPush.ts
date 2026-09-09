@@ -11,10 +11,39 @@ export type PushSupportState =
   | "unsupported" // navigateur sans Push API (ex. Safari hors PWA installée)
   | "denied" // l'utilisateur a explicitement refusé la permission navigateur
   | "subscribed" // permission accordée + abonnement actif sur cet appareil
-  | "available"; // permission pas encore demandée, ou accordée mais pas (ou plus) abonné
+  | "available" // permission pas encore demandée, ou accordée mais pas (ou plus) abonné
+  | "error"; // API supportée mais activation impossible (service worker, réseau...) — jamais un blocage silencieux
 
 export function isPushSupported(): boolean {
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+}
+
+// navigator.serviceWorker.ready ne se résout JAMAIS si le service worker n'a
+// pas pu s'enregistrer (mauvais MIME type en dev, échec d'installation...) —
+// sans ce timeout, tout appelant reste bloqué indéfiniment ("busy" qui ne
+// retombe jamais), sans le moindre message d'erreur pour l'utilisateur.
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
+function readyServiceWorker(): Promise<ServiceWorkerRegistration> {
+  return withTimeout(
+    navigator.serviceWorker.ready,
+    8000,
+    "Le service worker n'a pas répondu à temps.",
+  );
 }
 
 export async function getPushSupportState(): Promise<PushSupportState> {
@@ -22,9 +51,14 @@ export async function getPushSupportState(): Promise<PushSupportState> {
   if (Notification.permission === "denied") return "denied";
 
   if (Notification.permission === "granted") {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    return subscription ? "subscribed" : "available";
+    try {
+      const registration = await readyServiceWorker();
+      const subscription = await registration.pushManager.getSubscription();
+      return subscription ? "subscribed" : "available";
+    } catch (err) {
+      console.error("getPushSupportState: service worker indisponible", err);
+      return "error";
+    }
   }
 
   return "available";
@@ -52,7 +86,7 @@ export async function subscribeToPush(): Promise<boolean> {
     "/api/push/vapid-public-key",
   );
 
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await readyServiceWorker();
   let subscription = await registration.pushManager.getSubscription();
   if (!subscription) {
     subscription = await registration.pushManager.subscribe({
@@ -73,7 +107,7 @@ export async function subscribeToPush(): Promise<boolean> {
 export async function unsubscribeFromPush(): Promise<void> {
   if (!isPushSupported()) return;
 
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await readyServiceWorker();
   const subscription = await registration.pushManager.getSubscription();
   if (!subscription) return;
 

@@ -322,7 +322,7 @@ export default function DetailActivite() {
                         className="request-row__identity"
                       >
                         <img
-                          src={request.userAvatar || "/montagne.webp"}
+                          src={request.userAvatar || "/avatardefault.webp"}
                           alt={request.userPseudo}
                           className="request-row__avatar"
                         />

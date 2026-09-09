@@ -146,7 +146,7 @@ export default function PrivateMessage() {
                 {!isMine && (
                   <NavLink to={`/profile/${message.usersId}`}>
                     <img
-                      src={message.authorAvatar || "/montagne.webp"}
+                      src={message.authorAvatar || "/avatardefault.webp"}
                       alt={message.authorPseudo}
                       className="message-row__avatar"
                     />

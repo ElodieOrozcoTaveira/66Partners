@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { isAxiosError } from "axios";
 import api from "../../lib/axios";
 import "./Contact.scss";
 import { Send } from "lucide-react";
@@ -19,17 +20,32 @@ export default function Contact() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
     "idle",
   );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setStatus("sending");
+    setErrorMessage(null);
     try {
       await api.post<ContactResponse>("/api/contact", { name, email, message });
       setStatus("sent");
       setName("");
       setEmail("");
       setMessage("");
-    } catch {
+    } catch (err) {
+      // Diagnostic minimal, indispensable pour distinguer un vrai échec
+      // serveur d'une simple coupure réseau/timeout (cf. audit mobile) —
+      // l'ancien catch silencieux ne laissait aucune trace exploitable.
+      console.error("Erreur envoi formulaire de contact:", err);
+      if (isAxiosError(err) && !err.response) {
+        // Pas de réponse du serveur : timeout ou requête jamais partie
+        // (réseau mobile instable, tunnel coupé...), pas une erreur métier.
+        setErrorMessage(
+          "Connexion impossible. Vérifiez votre réseau et réessayez.",
+        );
+      } else {
+        setErrorMessage(null);
+      }
       setStatus("error");
     }
   }
@@ -95,8 +111,8 @@ export default function Contact() {
           )}
           {status === "error" && (
             <p className="container-contact__error">
-              Une erreur est survenue, réessayez ou écrivez-nous directement à
-              contact@66partners.fr.
+              {errorMessage ??
+                "Une erreur est survenue, réessayez ou écrivez-nous directement à contact@66partners.fr."}
             </p>
           )}
 
