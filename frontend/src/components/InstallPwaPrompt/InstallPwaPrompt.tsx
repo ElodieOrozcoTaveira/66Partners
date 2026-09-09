@@ -38,9 +38,24 @@ export default function InstallPwaPrompt({ hasBottomNav = false }: InstallPwaPro
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIos, setIsIos] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [cookieAnswered, setCookieAnswered] = useState(hasCookieChoice);
+
+  // La bannière cookies peut être répondue APRÈS le montage de ce composant
+  // (cas typique d'un nouveau compte : premier chargement du site, bannière
+  // acceptée, puis inscription dans la foulée) — sans ce listener, l'effet
+  // ci-dessous ne s'exécuterait qu'une fois, avant la réponse, et resterait
+  // bloqué "invisible" pour le reste de la session (cf. Cookie.tsx).
+  useEffect(() => {
+    if (cookieAnswered) return;
+    function handleCookieChanged() {
+      setCookieAnswered(true);
+    }
+    window.addEventListener("cookie-consent-changed", handleCookieChanged);
+    return () => window.removeEventListener("cookie-consent-changed", handleCookieChanged);
+  }, [cookieAnswered]);
 
   useEffect(() => {
-    if (isStandalone() || isDismissedForNow() || !hasCookieChoice()) return;
+    if (isStandalone() || isDismissedForNow() || !cookieAnswered) return;
 
     const ua = window.navigator.userAgent;
     const iosDevice = /iphone|ipad|ipod/i.test(ua) && !("MSStream" in window);
@@ -55,7 +70,7 @@ export default function InstallPwaPrompt({ hasBottomNav = false }: InstallPwaPro
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-  }, []);
+  }, [cookieAnswered]);
 
   function dismiss() {
     setIsVisible(false);

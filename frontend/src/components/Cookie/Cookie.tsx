@@ -17,6 +17,11 @@ export default function CookieBanner() {
         'analytics_storage': 'granted'
       });
     }
+    // InstallPwaPrompt attend ce choix avant de s'afficher (RGPD : pas de
+    // bandeau superposé) — sans cet évènement, un compte qui répond à la
+    // bannière puis s'inscrit dans la foulée ne verrait jamais la
+    // proposition d'installation (son check au montage a déjà eu lieu).
+    window.dispatchEvent(new Event('cookie-consent-changed'));
   };
 
   const handleDecline = () => {
@@ -26,6 +31,7 @@ export default function CookieBanner() {
         'analytics_storage': 'denied'
       });
     }
+    window.dispatchEvent(new Event('cookie-consent-changed'));
   };
 
   return (

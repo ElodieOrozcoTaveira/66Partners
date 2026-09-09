@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { isAxiosError } from "axios";
 import api from "../lib/axios";
 import { useAuth } from "../contexts/AuthContext";
@@ -75,51 +75,84 @@ export function useFacebookAuth({ onSuccess }: UseFacebookAuthOptions) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const appId = import.meta.env.VITE_FACEBOOK_APP_ID as string | undefined;
+
+  // Précharge le SDK dès que ce hook est monté (donc bien avant un clic
+  // éventuel) — indispensable en PWA/standalone : FB.login() ouvre une
+  // popup via window.open(), que les navigateurs (et les WebView PWA de
+  // façon bien plus stricte que les onglets classiques) n'autorisent que si
+  // elle est déclenchée de façon strictement synchrone depuis le geste
+  // utilisateur. Un `await loadFacebookSdk(...)` avant FB.login() casse
+  // cette synchronicité — c'était la cause du blocage silencieux en PWA.
+  useEffect(() => {
+    if (!appId) return;
+    loadFacebookSdk(appId).catch((err) => {
+      console.error("Préchargement du SDK Facebook impossible:", err);
+    });
+  }, [appId]);
+
   const handleLogin = useCallback(async () => {
-    const appId = import.meta.env.VITE_FACEBOOK_APP_ID as string | undefined;
     if (!appId) {
       setError("Connexion Facebook indisponible pour le moment.");
       return;
     }
 
     setError(null);
-    setIsSubmitting(true);
-    try {
-      await loadFacebookSdk(appId);
 
-      const fbResponse = await new Promise<{ accessToken: string }>((resolve, reject) => {
-        window.FB!.login(
-          (response) => {
-            if (response.authResponse) resolve(response.authResponse);
-            else reject(new Error("Connexion Facebook annulée."));
-          },
-          { scope: "public_profile,email" }
-        );
-      });
-
-      const res = await api.post<SocialAuthApiResponse>("/api/auth/facebook", {
-        accessToken: fbResponse.accessToken,
-      });
-
-      if (res.data.status === "LOGGED_IN" && res.data.token) {
-        const ok = await login(res.data.token);
-        if (ok) {
-          setState({ step: "idle" });
-          onSuccess();
-        } else {
-          setError("Impossible de récupérer le profil. Réessaie plus tard.");
-        }
-      } else if (res.data.status === "NEW_ACCOUNT") {
-        setState({ step: "newAccount", accessToken: fbResponse.accessToken, email: res.data.email ?? "" });
-      } else if (res.data.status === "EMAIL_ALREADY_REGISTERED") {
-        setState({ step: "linkPending", accessToken: fbResponse.accessToken, email: res.data.email ?? "" });
+    // Cas normal (SDK déjà préchargé) : FB.login() est appelé de façon
+    // strictement synchrone dans ce handler de clic, aucun `await` avant —
+    // condition nécessaire pour que la popup OAuth ne soit jamais bloquée,
+    // y compris en PWA/standalone.
+    if (window.FB) {
+      setIsSubmitting(true);
+      try {
+        const fbResponse = await new Promise<{ accessToken: string }>((resolve, reject) => {
+          window.FB!.login(
+            (response) => {
+              if (response.authResponse) resolve(response.authResponse);
+              else reject(new Error("Connexion Facebook annulée."));
+            },
+            { scope: "public_profile,email" }
+          );
+        });
+        await handleFacebookResponse(fbResponse.accessToken);
+      } catch (err) {
+        setError(extractErrorMessage(err, "Connexion avec Facebook impossible. Réessaie plus tard."));
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (err) {
-      setError(extractErrorMessage(err, "Connexion avec Facebook impossible. Réessaie plus tard."));
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
-  }, [login, onSuccess]);
+
+    // SDK pas encore prêt (préchargement toujours en cours, réseau lent...) :
+    // on ne peut pas garantir une popup non bloquée pour CE clic — on le dit
+    // clairement plutôt que de tenter un FB.login() différé qui échouerait
+    // silencieusement en PWA.
+    setError("Connexion Facebook en cours de préparation, réessaie dans un instant.");
+    loadFacebookSdk(appId).catch((err) => {
+      console.error("Préchargement du SDK Facebook impossible:", err);
+    });
+  }, [appId, login, onSuccess]);
+
+  async function handleFacebookResponse(accessToken: string) {
+    const res = await api.post<SocialAuthApiResponse>("/api/auth/facebook", {
+      accessToken,
+    });
+
+    if (res.data.status === "LOGGED_IN" && res.data.token) {
+      const ok = await login(res.data.token);
+      if (ok) {
+        setState({ step: "idle" });
+        onSuccess();
+      } else {
+        setError("Impossible de récupérer le profil. Réessaie plus tard.");
+      }
+    } else if (res.data.status === "NEW_ACCOUNT") {
+      setState({ step: "newAccount", accessToken, email: res.data.email ?? "" });
+    } else if (res.data.status === "EMAIL_ALREADY_REGISTERED") {
+      setState({ step: "linkPending", accessToken, email: res.data.email ?? "" });
+    }
+  }
 
   const completeSignup = useCallback(
     async (termsAccepted: boolean) => {
