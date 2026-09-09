@@ -66,6 +66,11 @@ services:
       - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
       - VAPID_SUBJECT=${VAPID_SUBJECT}
+    volumes:
+      # Persistance des fichiers uploadés (avatars, couvertures) — sans ce
+      # volume nommé, le contenu de /app/backend/uploads ne survit à aucun
+      # rebuild/force-recreate du conteneur (cf. incident du 9 sept.).
+      - uploads_staging_data:/app/backend/uploads
     command: sh -c "node dist/src/db/migrate.js && node dist/src/server.js"
     depends_on:
       postgres-staging:
@@ -108,3 +113,4 @@ networks:
 volumes:
   db_staging_data:
   redis_staging_data:
+  uploads_staging_data:
