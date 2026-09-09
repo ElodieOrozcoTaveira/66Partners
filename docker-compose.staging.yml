@@ -1,0 +1,110 @@
+services:
+
+  # ── PostgreSQL dédié au staging — conteneur, volume et réseau séparés de
+  #    dev/test/prod. Aucun port publié : uniquement accessible depuis les
+  #    autres services de staging_internal, par le nom "postgres-staging".
+  postgres-staging:
+    image: postgis/postgis:17-3.5-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - db_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - staging_internal
+
+  # ── Redis dédié au staging — non utilisé par le code applicatif à ce jour
+  #    (cf. audit : aucune référence à REDIS_URL dans backend/src), provisionné
+  #    par symétrie avec docker-compose.prod.yml ("cache / sessions futures").
+  #    Aucun port publié.
+  redis-staging:
+    image: redis:8-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_staging_data:/data
+    networks:
+      - staging_internal
+
+  # ── API — même Dockerfile que la prod (build TypeScript compilé, jamais
+  #    tsx/hot-reload), base/secrets/CORS propres au staging. Les migrations
+  #    Drizzle s'appliquent au démarrage (idempotentes, sans drizzle-kit —
+  #    devDependency absente de cette image prod-pruned — via le script compilé
+  #    dist/src/db/migrate.js, identique au mécanisme runtime déjà utilisé par
+  #    scripts/migrate-test.ts en dev). Le seed de référence (sports +
+  #    territoire 66, jamais de démo) N'EST PAS automatique : à lancer une
+  #    seule fois explicitement, cf. rapport § méthode de seed.
+  api-staging:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.prod
+    restart: unless-stopped
+    # Pas de "env_file:" ici : les variables sont résolues via ${VAR} dans
+    # "environment:" ci-dessous, à partir du fichier passé en --env-file sur
+    # la ligne de commande (jamais le .env de dev, auto-chargé sinon — cf.
+    # rapport § commandes exactes, c'est le piège n°1 de ce fichier).
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres-staging:5432/${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
+      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
+      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
+      - CORS_ORIGIN=https://staging.66partners.fr
+      - FRONTEND_URL=https://staging.66partners.fr
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
+      - VAPID_SUBJECT=${VAPID_SUBJECT}
+    command: sh -c "node dist/src/db/migrate.js && node dist/src/server.js"
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+    networks:
+      - staging_internal
+    # Pas de "ports:" : jamais exposée directement sur Internet, uniquement
+    # atteignable depuis frontend-staging (reverse proxy) via le réseau Docker.
+
+  # ── Frontend — build statique Vite + nginx (staging.conf : domaines et
+  #    certificat staging, jamais nginx/default.conf ni les certificats prod).
+  #    Seul service publié sur l'hôte : point d'entrée public unique.
+  frontend-staging:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.prod
+      args:
+        VITE_API_URL: https://api-staging.66partners.fr
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        VITE_FACEBOOK_APP_ID: ${FACEBOOK_APP_ID}
+        NGINX_CONF: nginx/staging.conf
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Certificat staging dédié (couvre staging.66partners.fr ET
+      # api-staging.66partners.fr par SAN — cf. rapport § HTTPS). Ne jamais
+      # pointer ce chemin vers le certificat de prod.
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - api-staging
+    networks:
+      - staging_internal
+
+networks:
+  staging_internal:
+    driver: bridge
+
+volumes:
+  db_staging_data:
+  redis_staging_data:
