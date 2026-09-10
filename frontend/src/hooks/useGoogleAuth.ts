@@ -30,74 +30,70 @@ function loadGoogleScript(): Promise<void> {
 }
 
 /**
- * Charge Google Identity Services et expose un déclencheur pour un bouton
- * "Continuer avec Google" personnalisé (même style que le bouton Facebook,
- * cf. demande explicite — le widget officiel de Google est rendu dans un
- * iframe et ne peut être ni restylé ni déclenché par un clic JS externe).
+ * Charge Google Identity Services et affiche le bouton officiel Google dans
+ * l'élément référencé par le ref renvoyé. Ne simule jamais un faux bouton —
+ * c'est le widget rendu par Google lui-même (popup gérée par Google, pas de
+ * redirection depuis 66Partners).
  *
- * `prompt()` affiche l'UI Google (One Tap / sélection de compte) et déclenche
- * le même `callback` que celui configuré par `initialize()` — c'est
- * toujours le vrai flux d'identification Google, jamais une redirection
- * gérée par 66Partners, et le backend (vérification de l'ID token) reste
- * strictement inchangé.
+ * Widget officiel plutôt qu'un bouton personnalisé + prompt()/One Tap :
+ * One Tap dépend des cookies tiers (ou de FedCM, non supporté par Safari)
+ * pour savoir si une session Google est active — indisponible sur Safari
+ * (iPhone comme Mac, PWA ou onglet classique, ITP bloque les cookies tiers
+ * depuis Safari 13.1). Le bouton officiel déclenche un vrai flux OAuth popup
+ * où l'utilisateur s'authentifie directement chez Google, sans dépendre de
+ * cette lecture de session — compatible Safari. Backend inchangé : même
+ * credential (ID token), même callback, même vérification.
+ *
+ * Ref-callback plutôt qu'un `useRef` + effet à dépendances vides : la modale
+ * (ModaleContent) reste montée en permanence et bascule juste entre `null`
+ * et son contenu selon `isOpen`, donc le <span> porteur du bouton est
+ * démonté/remonté à chaque ouverture — un effet à dépendances vides ne se
+ * ré-exécuterait qu'une fois, potentiellement avant que le <span> n'existe
+ * (bouton alors silencieusement jamais rendu). Le ref-callback, lui, est
+ * rappelé par React à chaque montage du nœud, donc à chaque ouverture.
  */
 export function useGoogleButton(onCredential: (credential: string) => void) {
   const [isUnavailable, setIsUnavailable] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  // Ref plutôt que dépendance : évite de recharger/réinitialiser Google
-  // Identity Services à chaque re-render du composant appelant.
+  // Ref plutôt que dépendance : évite de recharger/réinitialiser le bouton
+  // Google à chaque re-render du composant appelant.
   const onCredentialRef = useRef(onCredential);
   onCredentialRef.current = onCredential;
   const initializedRef = useRef(false);
 
-  const ensureInitialized = useCallback(async (): Promise<boolean> => {
+  const buttonRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return; // le <span> vient d'être démonté (modale fermée) : rien à faire
+
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
     if (!clientId) {
       setIsUnavailable(true);
-      return false;
+      return;
     }
 
-    try {
-      await loadGoogleScript();
-    } catch (err) {
-      console.error("Google Identity Services indisponible:", err);
-      setIsUnavailable(true);
-      return false;
-    }
-
-    if (!window.google) {
-      setIsUnavailable(true);
-      return false;
-    }
-
-    if (!initializedRef.current) {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: (response) => onCredentialRef.current(response.credential),
+    loadGoogleScript()
+      .then(() => {
+        if (!window.google) return;
+        if (!initializedRef.current) {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (response) => onCredentialRef.current(response.credential),
+          });
+          initializedRef.current = true;
+        }
+        window.google.accounts.id.renderButton(node, {
+          theme: "outline",
+          size: "large",
+          shape: "pill",
+          text: "continue_with",
+          width: 240,
+        });
+      })
+      .catch((err) => {
+        console.error("Google Identity Services indisponible:", err);
+        setIsUnavailable(true);
       });
-      initializedRef.current = true;
-    }
-
-    return true;
   }, []);
 
-  const triggerLogin = useCallback(async () => {
-    setError(null);
-    const ready = await ensureInitialized();
-    if (!ready || !window.google) return;
-
-    window.google.accounts.id.prompt((notification) => {
-      // Prompt non affiché (popups/cookies tiers bloqués, session déjà
-      // vue récemment...) : jamais d'échec silencieux sur un clic explicite.
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        setError(
-          "Connexion Google indisponible pour le moment. Vérifie que les cookies tiers ne sont pas bloqués, ou réessaie plus tard.",
-        );
-      }
-    });
-  }, [ensureInitialized]);
-
-  return { triggerLogin, isUnavailable, error };
+  return { buttonRef, isUnavailable };
 }
 
 interface GoogleAuthApiResponse {

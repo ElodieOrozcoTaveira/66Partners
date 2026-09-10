@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { HandMetal, X } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
@@ -42,11 +41,7 @@ export default function ModaleContent({
   }
 
   const googleAuth = useGoogleAuth({ onSuccess: handleSocialAuthSuccess });
-  const {
-    triggerLogin: triggerGoogleLogin,
-    isUnavailable: isGoogleUnavailable,
-    error: googleButtonError,
-  } = useGoogleButton(googleAuth.handleCredential);
+  const { buttonRef: googleButtonRef } = useGoogleButton(googleAuth.handleCredential);
   const facebookAuth = useFacebookAuth({ onSuccess: handleSocialAuthSuccess });
 
   useEffect(() => {
@@ -327,15 +322,7 @@ export default function ModaleContent({
               </div>
 
               <div className="container-modaleConnexion__social">
-                <button
-                  type="button"
-                  className="container-modaleConnexion__socialBtn"
-                  onClick={() => triggerGoogleLogin()}
-                  disabled={googleAuth.isSubmitting || isGoogleUnavailable}
-                >
-                  <FcGoogle size={18} />
-                  {googleAuth.isSubmitting ? "Connexion..." : "Continuer avec Google"}
-                </button>
+                <span className="container-modaleConnexion__googleSlot" ref={googleButtonRef} />
                 <button
                   type="button"
                   className="container-modaleConnexion__socialBtn"
@@ -347,9 +334,6 @@ export default function ModaleContent({
                 </button>
               </div>
 
-              {googleButtonError && (
-                <p className="container-modaleConnexion__error">{googleButtonError}</p>
-              )}
               {googleAuth.error && googleAuth.state.step === "idle" && (
                 <p className="container-modaleConnexion__error">{googleAuth.error}</p>
               )}

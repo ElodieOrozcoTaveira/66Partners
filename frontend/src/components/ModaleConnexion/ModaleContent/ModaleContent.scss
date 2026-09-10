@@ -203,6 +203,13 @@
     gap: 0.6rem;
   }
 
+  // Bouton Google officiel (rendu par Google Identity Services, largeur
+  // fixe) : centré plutôt qu'étiré comme __socialBtn, qui lui reste 100%.
+  &__googleSlot {
+    display: flex;
+    justify-content: center;
+  }
+
   &__socialBtn {
     display: flex;
     align-items: center;

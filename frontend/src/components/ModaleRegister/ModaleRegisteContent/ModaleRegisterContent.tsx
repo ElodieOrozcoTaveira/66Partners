@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { NavLink } from "react-router-dom";
 import { Check, X } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
 import { isAxiosError } from "axios";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -47,11 +46,7 @@ export default function ModaleRegisterContent({
   }
 
   const googleAuth = useGoogleAuth({ onSuccess: handleSocialAuthSuccess });
-  const {
-    triggerLogin: triggerGoogleLogin,
-    isUnavailable: isGoogleUnavailable,
-    error: googleButtonError,
-  } = useGoogleButton(googleAuth.handleCredential);
+  const { buttonRef: googleButtonRef } = useGoogleButton(googleAuth.handleCredential);
   const facebookAuth = useFacebookAuth({ onSuccess: handleSocialAuthSuccess });
 
   const passwordsMismatch =
@@ -446,15 +441,7 @@ export default function ModaleRegisterContent({
               </div>
 
               <div className="container-modaleRegister__social">
-                <button
-                  type="button"
-                  className="container-modaleRegister__socialBtn"
-                  onClick={() => triggerGoogleLogin()}
-                  disabled={googleAuth.isSubmitting || isGoogleUnavailable}
-                >
-                  <FcGoogle size={18} />
-                  {googleAuth.isSubmitting ? "Connexion..." : "Continuer avec Google"}
-                </button>
+                <span className="container-modaleRegister__googleSlot" ref={googleButtonRef} />
                 <button
                   type="button"
                   className="container-modaleRegister__socialBtn"
@@ -466,9 +453,6 @@ export default function ModaleRegisterContent({
                 </button>
               </div>
 
-              {googleButtonError && (
-                <p className="container-modaleRegister__error">{googleButtonError}</p>
-              )}
               {googleAuth.error && (
                 <p className="container-modaleRegister__error">{googleAuth.error}</p>
               )}
