@@ -312,20 +312,43 @@ export class ParticipationService {
   }
 
   /**
-   * Liste des demandes de participation d'une activité (réservé au créateur).
+   * Liste des demandes de participation d'une activité.
+   * - Le créateur voit toutes les demandes (en attente, acceptées, refusées),
+   *   nécessaire pour la modération (accepter/refuser).
+   * - Un participant accepté voit uniquement les participants déjà acceptés
+   *   (avec qui il va pratiquer), jamais les demandes en attente/refusées
+   *   d'autres personnes.
+   * - Toute autre personne (non authentifiée ou non liée à l'activité) est
+   *   bloquée ici, côté serveur — ne pas se reposer uniquement sur le
+   *   masquage frontend.
    */
   static async listForActivity(
     activityId: string,
     requesterId: string
   ): Promise<ParticipationWithUser[]> {
     const activity = await getActivityOrThrow(activityId);
+    const isCreator = activity.creatorId === requesterId;
 
-    if (activity.creatorId !== requesterId) {
-      throw new ParticipationError(
-        "Seul le créateur de l'activité peut voir les demandes de participation",
-        "FORBIDDEN",
-        403
-      );
+    if (!isCreator) {
+      const [ownParticipation] = await db
+        .select()
+        .from(participations)
+        .where(
+          and(
+            eq(participations.activityId, activityId),
+            eq(participations.userId, requesterId),
+            eq(participations.status, "ACCEPTED")
+          )
+        )
+        .limit(1);
+
+      if (!ownParticipation) {
+        throw new ParticipationError(
+          "Seuls le créateur et les participants de l'activité peuvent voir cette liste",
+          "FORBIDDEN",
+          403
+        );
+      }
     }
 
     return db
@@ -340,7 +363,14 @@ export class ParticipationService {
       })
       .from(participations)
       .innerJoin(users, eq(users.id, participations.userId))
-      .where(eq(participations.activityId, activityId))
+      .where(
+        isCreator
+          ? eq(participations.activityId, activityId)
+          : and(
+              eq(participations.activityId, activityId),
+              eq(participations.status, "ACCEPTED")
+            )
+      )
       .orderBy(desc(participations.createdAt));
   }
 }

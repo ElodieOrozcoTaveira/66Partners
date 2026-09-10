@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { CheckCircle2, Eye, EyeOff, KeyRound, ShieldAlert } from "lucide-react";
+import { CheckCircle2, KeyRound, ShieldAlert } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "../../lib/axios";
+import PasswordInput from "../../components/PasswordInput/PasswordInput";
 import "./ReinitialiserMotDePasse.scss";
 
 export default function ReinitialiserMotDePasse() {
@@ -12,7 +13,6 @@ export default function ReinitialiserMotDePasse() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDone, setIsDone] = useState(false);
@@ -99,35 +99,21 @@ export default function ReinitialiserMotDePasse() {
               <label htmlFor="new-password" className="reset-mdp__label">
                 Nouveau mot de passe
               </label>
-              <div className="reset-mdp__input-wrap">
-                <input
-                  id="new-password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  autoFocus
-                  minLength={8}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="reset-mdp__input"
-                />
-                <button
-                  type="button"
-                  className="reset-mdp__toggle"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={
-                    showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"
-                  }
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
+              <PasswordInput
+                id="new-password"
+                required
+                autoFocus
+                minLength={8}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="reset-mdp__input"
+              />
 
               <label htmlFor="confirm-password" className="reset-mdp__label">
                 Confirmer le mot de passe
               </label>
-              <input
+              <PasswordInput
                 id="confirm-password"
-                type={showPassword ? "text" : "password"}
                 required
                 minLength={8}
                 value={confirmPassword}

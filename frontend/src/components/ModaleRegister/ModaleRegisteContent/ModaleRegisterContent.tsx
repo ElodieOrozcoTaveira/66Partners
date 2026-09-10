@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { Check, X } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
 import { isAxiosError } from "axios";
+import PasswordInput from "../../PasswordInput/PasswordInput";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
@@ -22,6 +23,11 @@ interface RegisterResponse {
   message: string;
   token: string;
 }
+
+// Droits Facebook Login pas encore validés par Meta : bouton masqué en
+// attendant, sans retirer le flux (useFacebookAuth) pour le réactiver d'un
+// coup une fois l'app validée.
+const FACEBOOK_LOGIN_ENABLED = false;
 
 export default function ModaleRegisterContent({
   isOpen,
@@ -355,9 +361,8 @@ export default function ModaleRegisterContent({
                 >
                   Mot de passe
                 </label>
-                <input
+                <PasswordInput
                   id="password"
-                  type="password"
                   required
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
@@ -370,9 +375,8 @@ export default function ModaleRegisterContent({
                 >
                   Confirmation du mot de passe
                 </label>
-                <input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   required
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
@@ -442,21 +446,23 @@ export default function ModaleRegisterContent({
 
               <div className="container-modaleRegister__social">
                 <span className="container-modaleRegister__googleSlot" ref={googleButtonRef} />
-                <button
-                  type="button"
-                  className="container-modaleRegister__socialBtn"
-                  onClick={() => facebookAuth.handleLogin()}
-                  disabled={facebookAuth.isSubmitting}
-                >
-                  <FaFacebook size={18} color="#1877F2" />
-                  {facebookAuth.isSubmitting ? "Connexion..." : "Facebook"}
-                </button>
+                {FACEBOOK_LOGIN_ENABLED && (
+                  <button
+                    type="button"
+                    className="container-modaleRegister__socialBtn"
+                    onClick={() => facebookAuth.handleLogin()}
+                    disabled={facebookAuth.isSubmitting}
+                  >
+                    <FaFacebook size={18} color="#1877F2" />
+                    {facebookAuth.isSubmitting ? "Connexion..." : "Facebook"}
+                  </button>
+                )}
               </div>
 
               {googleAuth.error && (
                 <p className="container-modaleRegister__error">{googleAuth.error}</p>
               )}
-              {facebookAuth.error && (
+              {FACEBOOK_LOGIN_ENABLED && facebookAuth.error && (
                 <p className="container-modaleRegister__error">{facebookAuth.error}</p>
               )}
             </section>

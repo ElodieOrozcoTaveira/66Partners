@@ -102,32 +102,6 @@
   }
 }
 
-.reset-mdp__input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-
-  .reset-mdp__input {
-    padding-right: 2.4rem;
-  }
-}
-
-.reset-mdp__toggle {
-  position: absolute;
-  right: 0.7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  color: rgba(variables.$nuit, 0.5);
-
-  &:hover {
-    color: variables.$nuit;
-  }
-}
 
 .reset-mdp__error {
   margin: 0.4rem 0 0;

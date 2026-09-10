@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { Clock, MapPin, Users } from "lucide-react";
+import { NavLink, useSearchParams } from "react-router-dom";
+import { CalendarPlus, Clock, MapPin, Users } from "lucide-react";
 import api from "../../lib/axios";
 import { useTerritory } from "../../contexts/TerritoryContext";
 import Recherche from "../../components/SportsComponents/Recherche/Recheche";
@@ -55,9 +55,10 @@ const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
 
 export default function Explorer() {
   const { activeTerritory } = useTerritory();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
-  const [selectedSportId, setSelectedSportId] = useState<string | null>(null);
+  const selectedSportId = searchParams.get("sport");
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +121,13 @@ export default function Explorer() {
           <button
             type="button"
             className={`filter-chip${selectedSportId === null ? " filter-chip--active" : ""}`}
-            onClick={() => setSelectedSportId(null)}
+            onClick={() =>
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                next.delete("sport");
+                return next;
+              })
+            }
           >
             Tous
           </button>
@@ -133,7 +140,13 @@ export default function Explorer() {
                 type="button"
                 className={`filter-chip${isActive ? " filter-chip--active" : ""}`}
                 style={isActive ? { backgroundColor: color, borderColor: color } : undefined}
-                onClick={() => setSelectedSportId(sport.id)}
+                onClick={() =>
+                  setSearchParams((prev) => {
+                    const next = new URLSearchParams(prev);
+                    next.set("sport", sport.id);
+                    return next;
+                  })
+                }
               >
                 <Icon size={14} color={isActive ? getIconColor(color) : color} />
                 {sport.name}
@@ -144,11 +157,30 @@ export default function Explorer() {
       )}
 
       {filteredActivities.length === 0 ? (
-        <p className="explorer-state">
-          {search.trim() || selectedSportId
-            ? "Aucune activité ne correspond à ta recherche."
-            : "Aucune activité pour le moment."}
-        </p>
+        search.trim() || selectedSportId ? (
+          <p className="explorer-state">
+            Aucune activité ne correspond à ta recherche.
+          </p>
+        ) : (
+          <div className="container-explorer__empty">
+            <span className="container-explorer__empty-icon">
+              <CalendarPlus size={26} />
+            </span>
+            <h2 className="container-explorer__empty-title">
+              Pas encore d'activité
+            </h2>
+            <p className="container-explorer__empty-text">
+              Sois le premier à proposer une sortie, une séance ou une activité
+              près de chez toi !
+            </p>
+            <NavLink
+              to="/mesactivités/nouvelle"
+              className="container-explorer__empty-cta"
+            >
+              Créer une activité
+            </NavLink>
+          </div>
+        )
       ) : (
         <div className="container-explorer__grid">
           {filteredActivities.map((activity) => {

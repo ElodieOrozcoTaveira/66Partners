@@ -43,6 +43,23 @@
     font-family: 'Inter';
     min-height: 200px;
     min-width: 150px;
+    transition: transform 0.15s ease;
+
+    &:active {
+        transform: scale(0.98);
+    }
+
+    // `display: contents` fait disparaître le lien de la mise en page : ses
+    // enfants (thumb/name/stats) redeviennent directement les items flex/grid
+    // de .sport-card, donc tous les breakpoints ci-dessous s'appliquent sans
+    // duplication. Le bouton favori reste un frère du lien (pas imbriqué
+    // dedans) pour éviter un <button> dans un <a>.
+    &__link {
+        display: contents;
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
     &__thumb {
         position: relative;

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { HandMetal, X } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
+import PasswordInput from "../../PasswordInput/PasswordInput";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
@@ -20,6 +21,11 @@ interface LoginResponse {
   message: string;
   token: string;
 }
+
+// Droits Facebook Login pas encore validés par Meta : bouton masqué en
+// attendant, sans retirer le flux (useFacebookAuth) pour le réactiver d'un
+// coup une fois l'app validée.
+const FACEBOOK_LOGIN_ENABLED = false;
 
 export default function ModaleContent({
   isOpen,
@@ -254,7 +260,7 @@ export default function ModaleContent({
                   de passe pour associer Google.
                 </p>
               )}
-              {facebookAuth.state.step === "linkPending" && (
+              {FACEBOOK_LOGIN_ENABLED && facebookAuth.state.step === "linkPending" && (
                 <p className="container-modaleConnexion__info">
                   Un compte existe déjà avec {facebookAuth.state.email}. Connecte-toi avec ton mot
                   de passe pour associer Facebook.
@@ -287,9 +293,8 @@ export default function ModaleContent({
                 >
                   Mot de passe
                 </label>
-                <input
+                <PasswordInput
                   id="password"
-                  type="password"
                   required
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
@@ -323,21 +328,23 @@ export default function ModaleContent({
 
               <div className="container-modaleConnexion__social">
                 <span className="container-modaleConnexion__googleSlot" ref={googleButtonRef} />
-                <button
-                  type="button"
-                  className="container-modaleConnexion__socialBtn"
-                  onClick={() => facebookAuth.handleLogin()}
-                  disabled={facebookAuth.isSubmitting}
-                >
-                  <FaFacebook size={18} color="#1877F2" />
-                  {facebookAuth.isSubmitting ? "Connexion..." : "Facebook"}
-                </button>
+                {FACEBOOK_LOGIN_ENABLED && (
+                  <button
+                    type="button"
+                    className="container-modaleConnexion__socialBtn"
+                    onClick={() => facebookAuth.handleLogin()}
+                    disabled={facebookAuth.isSubmitting}
+                  >
+                    <FaFacebook size={18} color="#1877F2" />
+                    {facebookAuth.isSubmitting ? "Connexion..." : "Facebook"}
+                  </button>
+                )}
               </div>
 
               {googleAuth.error && googleAuth.state.step === "idle" && (
                 <p className="container-modaleConnexion__error">{googleAuth.error}</p>
               )}
-              {facebookAuth.error && facebookAuth.state.step === "idle" && (
+              {FACEBOOK_LOGIN_ENABLED && facebookAuth.error && facebookAuth.state.step === "idle" && (
                 <p className="container-modaleConnexion__error">{facebookAuth.error}</p>
               )}
 

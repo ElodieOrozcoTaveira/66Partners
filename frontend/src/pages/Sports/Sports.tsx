@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type SyntheticEvent } from "react";
+import { NavLink } from "react-router-dom";
 import { Calendar, Heart, Users } from "lucide-react";
 import api from "../../lib/axios";
 import { useAuth } from "../../contexts/AuthContext";
@@ -148,35 +149,42 @@ export default function Sports() {
                   className="sport-card"
                   style={{ boxShadow: `0 4px 14px ${getSportShadow(color)}` }}
                 >
-                  <div className="sport-card__thumb">
-                    <img
-                      src={getSportPhoto(sport.name)}
-                      alt={sport.name}
-                      className="sport-card__photo"
-                      onError={handlePhotoError}
-                    />
-                    <span
-                      className="sport-card__badge"
-                      style={{ backgroundColor: color }}
-                    >
-                      <Icon color="#FFFFFF" size={16} />
-                    </span>
-                  </div>
+                  <NavLink
+                    to={`/explorer?sport=${sport.id}`}
+                    className="sport-card__link"
+                    aria-label={`Voir les activités ${sport.name}`}
+                  >
+                    <div className="sport-card__thumb">
+                      <img
+                        src={getSportPhoto(sport.name)}
+                        alt={sport.name}
+                        className="sport-card__photo"
+                        loading="lazy"
+                        onError={handlePhotoError}
+                      />
+                      <span
+                        className="sport-card__badge"
+                        style={{ backgroundColor: color }}
+                      >
+                        <Icon color="#FFFFFF" size={16} />
+                      </span>
+                    </div>
 
-                  <h3 className="sport-card__name">{sport.name}</h3>
+                    <h3 className="sport-card__name">{sport.name}</h3>
 
-                  <div className="sport-card__stats">
-                    <span className="sport-card__stat">
-                      <Calendar size={13} />
-                      {sport.activitiesCount} sortie
-                      {sport.activitiesCount === 1 ? "" : "s"}
-                    </span>
-                    <span className="sport-card__stat">
-                      <Users size={13} />
-                      {sport.participantsCount} participant
-                      {sport.participantsCount === 1 ? "" : "s"}
-                    </span>
-                  </div>
+                    <div className="sport-card__stats">
+                      <span className="sport-card__stat">
+                        <Calendar size={13} />
+                        {sport.activitiesCount} sortie
+                        {sport.activitiesCount === 1 ? "" : "s"}
+                      </span>
+                      <span className="sport-card__stat">
+                        <Users size={13} />
+                        {sport.participantsCount} participant
+                        {sport.participantsCount === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                  </NavLink>
 
                   <button
                     type="button"

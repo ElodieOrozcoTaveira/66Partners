@@ -70,6 +70,7 @@ export default function DetailActivite() {
   const [myParticipation, setMyParticipation] = useState<MyParticipation | null>(null);
   const [isJoining, setIsJoining] = useState(false);
   const [requests, setRequests] = useState<ParticipationRequest[]>([]);
+  const [participants, setParticipants] = useState<ParticipationRequest[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -148,6 +149,28 @@ export default function DetailActivite() {
         .catch(() => setMyParticipation(null));
     }
   }, [activity, id, user]);
+
+  // Un participant accepté peut voir la liste des autres participants (avec
+  // qui il va pratiquer) — jamais les demandes en attente/refusées d'autrui ;
+  // le backend applique la même restriction côté serveur (voir
+  // ParticipationService.listForActivity).
+  useEffect(() => {
+    if (!activity || !id || !user || isCreator) {
+      setParticipants([]);
+      return;
+    }
+    if (myParticipation?.status !== "ACCEPTED") {
+      setParticipants([]);
+      return;
+    }
+
+    api
+      .get<{ participations: ParticipationRequest[] }>(
+        `/api/activities/${id}/participations`,
+      )
+      .then((res) => setParticipants(res.data.participations))
+      .catch(() => setParticipants([]));
+  }, [activity, id, user, isCreator, myParticipation]);
 
   async function handleJoin() {
     if (!id) return;
@@ -402,6 +425,35 @@ export default function DetailActivite() {
               <span className="join-badge join-badge--refused">Demande refusée</span>
             )}
           </div>
+        )}
+
+        {!isCreator && myParticipation?.status === "ACCEPTED" && (
+          <section className="detailactivite-page__requests">
+            <h2>Participants</h2>
+            {participants.length === 0 ? (
+              <p className="detailactivite-page__requests-empty">
+                Chargement des participants...
+              </p>
+            ) : (
+              <div className="detailactivite-page__requests-list">
+                {participants.map((participant) => (
+                  <div key={participant.id} className="request-row">
+                    <NavLink
+                      to={`/profile/${participant.userId}`}
+                      className="request-row__identity"
+                    >
+                      <img
+                        src={participant.userAvatar || "/avatardefault.webp"}
+                        alt={participant.userPseudo}
+                        className="request-row__avatar"
+                      />
+                      <span className="request-row__name">{participant.userPseudo}</span>
+                    </NavLink>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         )}
 
         {activity.description && (

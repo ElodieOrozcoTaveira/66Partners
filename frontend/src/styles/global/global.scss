@@ -14,6 +14,23 @@
   :root {
     --header-height: 78px;
   }
+
+  // iOS Safari zoome automatiquement la page au focus de tout champ dont la
+  // taille de police calculée est < 16px (comportement natif du navigateur,
+  // pas de notre code) — plusieurs champs de l'app (composeur de messages,
+  // modales de connexion/inscription...) sont en dessous. Règle unique,
+  // globale, plutôt que de corriger chaque composant un par un : le
+  // `!important` est nécessaire ici pour l'emporter sur les classes
+  // spécifiques existantes (`.xxx__input { font-size: ... }`), seul moyen
+  // sans dupliquer cette correction dans chaque fichier. N'affecte que le
+  // texte des champs de saisie en dessous de la largeur tablette ; ni le
+  // zoom manuel de l'utilisateur (jamais désactivé, cf. viewport meta), ni
+  // le design desktop, ne sont concernés.
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
 html {
