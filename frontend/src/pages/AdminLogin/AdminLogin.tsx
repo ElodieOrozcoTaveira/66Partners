@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { loginAdmin, type AdminLoginResult } from "../../lib/adminAccess";
 import "./AdminLogin.scss";
@@ -80,6 +80,10 @@ export default function AdminLogin() {
             {submitting ? "Vérification…" : "Accéder"}
           </button>
         </form>
+
+        <Link to="/admin/mot-de-passe-oublie" className="admin-login-page__link">
+          Mot de passe oublié ?
+        </Link>
       </div>
     </div>
   );

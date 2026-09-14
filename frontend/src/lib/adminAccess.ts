@@ -34,3 +34,36 @@ export async function loginAdmin(password: string): Promise<AdminLoginResult> {
 export function revokeAdminAccess(): void {
   sessionStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
 }
+
+// Un seul admin : pas d'email à saisir, le lien part toujours vers l'adresse
+// fixe configurée côté serveur (ADMIN_RECOVERY_EMAIL).
+export async function requestAdminPasswordReset(): Promise<{ success: boolean }> {
+  try {
+    await axios.post(`${import.meta.env.VITE_API_URL || ""}/api/admin/auth/forgot-password`);
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
+
+export type AdminResetPasswordResult =
+  | { success: true }
+  | { success: false; message: string };
+
+export async function resetAdminPassword(
+  token: string,
+  password: string,
+): Promise<AdminResetPasswordResult> {
+  try {
+    await axios.post(`${import.meta.env.VITE_API_URL || ""}/api/admin/auth/reset-password`, {
+      token,
+      password,
+    });
+    return { success: true };
+  } catch (error) {
+    if (axios.isAxiosError<{ message?: string }>(error) && error.response?.data?.message) {
+      return { success: false, message: error.response.data.message };
+    }
+    return { success: false, message: "Impossible de réinitialiser le mot de passe pour le moment." };
+  }
+}

@@ -36,6 +36,65 @@ export class AdminController {
   }
 
   /**
+   * POST /api/admin/auth/forgot-password
+   */
+  static async forgotPassword(_req: Request, res: Response): Promise<void> {
+    try {
+      await AdminAuthService.requestPasswordReset();
+
+      res.status(200).json({
+        success: true,
+        message: "Un email de réinitialisation vient d'être envoyé.",
+      });
+    } catch (error) {
+      if (error instanceof AdminAuthError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de la demande de réinitialisation admin:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la demande de réinitialisation",
+      });
+    }
+  }
+
+  /**
+   * POST /api/admin/auth/reset-password
+   */
+  static async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { token, password } = req.body as { token: string; password: string };
+      await AdminAuthService.resetPassword(token, password);
+
+      res.status(200).json({
+        success: true,
+        message: "Le mot de passe administrateur a été mis à jour avec succès.",
+      });
+    } catch (error) {
+      if (error instanceof AdminAuthError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de la réinitialisation du mot de passe admin:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la réinitialisation du mot de passe",
+      });
+    }
+  }
+
+  /**
    * GET /api/admin/stats/overview
    */
   static async statsOverview(req: Request, res: Response): Promise<void> {

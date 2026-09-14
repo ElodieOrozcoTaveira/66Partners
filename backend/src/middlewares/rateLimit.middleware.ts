@@ -111,3 +111,17 @@ export const facebookAuthLimiter = createAuthRateLimiter({
   limit: 20,
   message: "Trop de tentatives de connexion avec Facebook. Réessaie dans quelques minutes.",
 });
+
+// Même logique que googleAuthLimiter : pas d'email dans le corps de la
+// requête admin (mot de passe partagé, pas de compte), limite par IP seule.
+export const adminForgotPasswordLimiter = createAuthRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  message: "Trop de demandes de réinitialisation. Réessaie dans quelques instants.",
+});
+
+export const adminResetPasswordLimiter = createAuthRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  message: "Trop de tentatives. Réessaie dans quelques minutes.",
+});

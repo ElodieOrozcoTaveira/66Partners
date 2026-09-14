@@ -282,3 +282,17 @@ export const opinion = pgTable("opinion", {
 
 })
 
+// Table singleton (une seule ligne, id=1) : le mot de passe admin reste un
+// secret partagé unique (pas de compte/email, cf. admin.services.ts), mais
+// stocké ici plutôt que dans ADMIN_PASSWORD_HASH pour pouvoir être modifié à
+// l'exécution via le flux "mot de passe oublié". Tant qu'aucune ligne
+// n'existe, AdminAuthService retombe sur la variable d'env (compatibilité
+// des déploiements existants).
+export const adminCredentials = pgTable("admin_credentials", {
+  id: integer("id").primaryKey().default(1),
+  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  resetTokenHash: varchar("reset_token_hash", { length: 64 }),
+  resetTokenExpiresAt: timestamp("reset_token_expires_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+

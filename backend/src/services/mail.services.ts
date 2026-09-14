@@ -36,6 +36,19 @@ export async function sendResetPasswordEmail(
   });
 }
 
+export async function sendAdminResetPasswordEmail(resetUrl: string): Promise<void> {
+  const to = process.env.ADMIN_RECOVERY_EMAIL;
+  if (!to) return;
+
+  await transporter.sendMail({
+    from: `"66Partners" <${process.env.SMTP_USER}>`,
+    replyTo: "contact@66partners.fr",
+    to,
+    subject: "Réinitialise le mot de passe administrateur 66Partners",
+    html: resetPasswordEmailTemplate("Administrateur", resetUrl),
+  });
+}
+
 export async function sendContactEmail(contact: { name: string; email: string; message: string }) {
   await transporter.sendMail({
     from: `"66Partners" <${process.env.SMTP_USER}>`,

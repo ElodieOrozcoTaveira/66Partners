@@ -1,9 +1,11 @@
 import "dotenv/config";
+import crypto from "crypto";
 import argon2 from "argon2";
-import { and, desc, eq, gte, lt, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import {
   activities,
+  adminCredentials,
   messages,
   notifications,
   participations,
@@ -12,8 +14,19 @@ import {
   users,
 } from "../db/schema.js";
 import { signAdminToken } from "../utils/adminJwt.js";
+import { sendAdminResetPasswordEmail } from "./mail.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 heure
+
+// Le token brut part par email ; seul son hash est conservé en base (comme
+// pour un mot de passe : une fuite de la base ne permet pas de le rejouer).
+// Même principe que hashResetToken dans auth.services.ts, dupliqué ici car
+// trop petit pour justifier un partage cross-service.
+function hashResetToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
 
 /**
  * SERVICE ADMIN
@@ -91,6 +104,19 @@ async function countRows(query: Promise<{ count: unknown }[]>): Promise<number> 
 }
 
 export class AdminAuthService {
+  // Retombe sur ADMIN_PASSWORD_HASH tant qu'aucun reset n'a encore créé la
+  // ligne en base — préserve les déploiements existants qui n'ont que la
+  // variable d'env.
+  static async getPasswordHash(): Promise<string | undefined> {
+    const [row] = await db
+      .select({ passwordHash: adminCredentials.passwordHash })
+      .from(adminCredentials)
+      .where(eq(adminCredentials.id, 1))
+      .limit(1);
+
+    return row?.passwordHash ?? process.env.ADMIN_PASSWORD_HASH;
+  }
+
   static async login(password: string, clientKey: string): Promise<string> {
     const attempt = loginAttempts.get(clientKey);
     const now = Date.now();
@@ -103,7 +129,7 @@ export class AdminAuthService {
       );
     }
 
-    const passwordHash = process.env.ADMIN_PASSWORD_HASH;
+    const passwordHash = await AdminAuthService.getPasswordHash();
     const isValid = passwordHash ? await argon2.verify(passwordHash, password) : false;
 
     if (!isValid) {
@@ -114,6 +140,102 @@ export class AdminAuthService {
 
     loginAttempts.delete(clientKey);
     return signAdminToken();
+  }
+
+  /**
+   * Demande de réinitialisation du mot de passe admin. Contrairement au
+   * flux utilisateur, aucun email n'est fourni par l'appelant : le lien
+   * part toujours vers ADMIN_RECOVERY_EMAIL (adresse fixe côté serveur),
+   * donc aucun risque d'énumération à gérer ici.
+   */
+  static async requestPasswordReset(): Promise<void> {
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = hashResetToken(rawToken);
+    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+
+    const [existing] = await db
+      .select({ passwordHash: adminCredentials.passwordHash })
+      .from(adminCredentials)
+      .where(eq(adminCredentials.id, 1))
+      .limit(1);
+
+    // Bootstrap : si la ligne n'existe pas encore, on l'initialise avec le
+    // hash actuellement actif (l'env var) pour ne pas le perdre au premier
+    // reset.
+    const currentHash = existing?.passwordHash ?? process.env.ADMIN_PASSWORD_HASH;
+    if (!currentHash) {
+      throw new AdminAuthError(
+        "Aucun mot de passe admin configuré",
+        "NO_PASSWORD_CONFIGURED",
+        500
+      );
+    }
+
+    await db
+      .insert(adminCredentials)
+      .values({
+        id: 1,
+        passwordHash: currentHash,
+        resetTokenHash: tokenHash,
+        resetTokenExpiresAt: expiresAt,
+      })
+      .onConflictDoUpdate({
+        target: adminCredentials.id,
+        set: { resetTokenHash: tokenHash, resetTokenExpiresAt: expiresAt },
+      });
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetUrl = `${frontendUrl}/admin/reinitialiser-mot-de-passe?token=${rawToken}`;
+
+    sendAdminResetPasswordEmail(resetUrl).catch((err) =>
+      console.error("Erreur envoi email de réinitialisation admin:", err)
+    );
+  }
+
+  /**
+   * Finalise une réinitialisation à partir du token reçu par email.
+   */
+  static async resetPassword(token: string, newPassword: string): Promise<void> {
+    if (newPassword.length < 8) {
+      throw new AdminAuthError(
+        "Le mot de passe doit contenir au moins 8 caractères",
+        "WEAK_PASSWORD",
+        400
+      );
+    }
+
+    const tokenHash = hashResetToken(token);
+
+    const [row] = await db
+      .select({ id: adminCredentials.id })
+      .from(adminCredentials)
+      .where(
+        and(
+          eq(adminCredentials.resetTokenHash, tokenHash),
+          gt(adminCredentials.resetTokenExpiresAt, new Date())
+        )
+      )
+      .limit(1);
+
+    if (!row) {
+      throw new AdminAuthError(
+        "Ce lien de réinitialisation est invalide ou a expiré",
+        "INVALID_OR_EXPIRED_TOKEN",
+        400
+      );
+    }
+
+    const hashedPassword = await argon2.hash(newPassword);
+
+    await db
+      .update(adminCredentials)
+      .set({
+        passwordHash: hashedPassword,
+        resetTokenHash: null,
+        resetTokenExpiresAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(adminCredentials.id, row.id));
   }
 }
 

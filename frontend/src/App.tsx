@@ -26,6 +26,8 @@ import DetailActivite from "./pages/DetailActivite/DetailActivite";
 import MotDePasseOublie from "./pages/MotDePasseOublie/MotDePasseOublie";
 import ReinitialiserMotDePasse from "./pages/ReinitialiserMotDePasse/ReinitialiserMotDePasse";
 import AdminLogin from "./pages/AdminLogin/AdminLogin";
+import AdminMotDePasseOublie from "./pages/AdminMotDePasseOublie/AdminMotDePasseOublie";
+import AdminReinitialiserMotDePasse from "./pages/AdminReinitialiserMotDePasse/AdminReinitialiserMotDePasse";
 import AdminStats from "./pages/AdminStats/AdminStats";
 import AdminSettings from "./pages/AdminSettings/AdminSettings";
 
@@ -76,6 +78,8 @@ export default function App() {
               Accès protégé par mot de passe admin (indépendant du compte
               utilisateur) le temps qu'une vraie auth admin existe côté backend. */}
           <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/mot-de-passe-oublie" element={<AdminMotDePasseOublie />} />
+          <Route path="/admin/reinitialiser-mot-de-passe" element={<AdminReinitialiserMotDePasse />} />
           <Route element={<AdminAccessGate />}>
             <Route path="/admin/stats" element={<AdminStats />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
