@@ -26,7 +26,7 @@ export default function FollowUs({ onDark = false }: FollowUsProps) {
 
             <div className="container-followUs__reseaux">
                 <a
-                    href="https://www.instagram.com/66partners/"
+                    href="https://www.instagram.com/66par.tners/"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Suivez-nous sur Instagram"
