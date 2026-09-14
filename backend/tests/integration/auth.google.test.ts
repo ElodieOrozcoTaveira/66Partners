@@ -319,6 +319,111 @@ describe("JWT et non-duplication", () => {
   });
 });
 
+describe("Avatar Google", () => {
+  it("13. remplace le suffixe de taille Google (=s96-c) par une résolution plus grande à l'inscription", async () => {
+    const email = `avatar-signup-${randomUUID()}@example.com`;
+    const sub = `sub-${randomUUID()}`;
+    mockGoogleSuccess(
+      googlePayload({
+        sub,
+        email,
+        picture: "https://lh3.googleusercontent.com/a/ACg8ocExample=s96-c",
+      }),
+    );
+
+    const res = await request(app)
+      .post("/api/auth/google/complete")
+      .send({ credential: "tok", termsAccepted: true });
+
+    expect(res.status).toBe(201);
+    expect(res.body.user.avatar).toBe("https://lh3.googleusercontent.com/a/ACg8ocExample=s400-c");
+  });
+
+  it("14. n'invente rien si l'URL Google ne correspond pas au format de suffixe de taille connu", async () => {
+    const email = `avatar-unknown-format-${randomUUID()}@example.com`;
+    const sub = `sub-${randomUUID()}`;
+    mockGoogleSuccess(
+      googlePayload({ sub, email, picture: "https://example.com/some/other/photo.jpg" }),
+    );
+
+    const res = await request(app)
+      .post("/api/auth/google/complete")
+      .send({ credential: "tok", termsAccepted: true });
+
+    expect(res.status).toBe(201);
+    expect(res.body.user.avatar).toBe("https://example.com/some/other/photo.jpg");
+  });
+
+  it("15. fallback : aucune photo fournie par Google, avatar reste null, pas de crash", async () => {
+    const email = `avatar-fallback-${randomUUID()}@example.com`;
+    const sub = `sub-${randomUUID()}`;
+    mockGoogleSuccess(googlePayload({ sub, email }));
+
+    const res = await request(app)
+      .post("/api/auth/google/complete")
+      .send({ credential: "tok", termsAccepted: true });
+
+    expect(res.status).toBe(201);
+    expect(res.body.user.avatar).toBeNull();
+  });
+
+  it("16. une connexion suivante remplace un ancien avatar Google basse résolution par la version haute résolution", async () => {
+    const email = `avatar-refresh-${randomUUID()}@example.com`;
+    const { userId } = await createUser({ email });
+    const sub = `sub-${randomUUID()}`;
+    await testDb
+      .insert(socialAccounts)
+      .values({ userId, provider: "google", providerUserId: sub, email });
+    await testDb
+      .update(users)
+      .set({ avatar: "https://lh3.googleusercontent.com/a/ACg8ocExample=s96-c" })
+      .where(eq(users.id, userId));
+
+    mockGoogleSuccess(
+      googlePayload({
+        sub,
+        email,
+        picture: "https://lh3.googleusercontent.com/a/ACg8ocExample=s96-c",
+      }),
+    );
+    await request(app).post("/api/auth/google").send({ credential: "tok" });
+
+    // Le rafraîchissement est fire-and-forget (ne bloque pas la réponse de
+    // connexion) : on attend juste qu'il ait eu le temps de s'exécuter.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const [updated] = await testDb.select().from(users).where(eq(users.id, userId));
+    expect(updated?.avatar).toBe("https://lh3.googleusercontent.com/a/ACg8ocExample=s400-c");
+  });
+
+  it("17. ne remplace jamais un avatar personnalisé (non Google) déjà choisi par l'utilisateur", async () => {
+    const email = `avatar-custom-${randomUUID()}@example.com`;
+    const { userId } = await createUser({ email });
+    const sub = `sub-${randomUUID()}`;
+    await testDb
+      .insert(socialAccounts)
+      .values({ userId, provider: "google", providerUserId: sub, email });
+    await testDb
+      .update(users)
+      .set({ avatar: "/uploads/avatars/mon-avatar-perso.webp" })
+      .where(eq(users.id, userId));
+
+    mockGoogleSuccess(
+      googlePayload({
+        sub,
+        email,
+        picture: "https://lh3.googleusercontent.com/a/ACg8ocExample=s96-c",
+      }),
+    );
+    await request(app).post("/api/auth/google").send({ credential: "tok" });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const [updated] = await testDb.select().from(users).where(eq(users.id, userId));
+    expect(updated?.avatar).toBe("/uploads/avatars/mon-avatar-perso.webp");
+  });
+});
+
 describe("Non-régression — login classique", () => {
   it("12. le login email/mot de passe fonctionne toujours normalement", async () => {
     const email = `regression-${randomUUID()}@example.com`;

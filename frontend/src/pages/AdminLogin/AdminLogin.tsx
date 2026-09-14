@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { loginAdmin, type AdminLoginResult } from "../../lib/adminAccess";
 import "./AdminLogin.scss";
 
@@ -42,6 +42,9 @@ export default function AdminLogin() {
   return (
     <div className="admin-login-page">
       <div className="admin-login-page__card">
+        <NavLink to="/" className="admin-login-page__back" aria-label="Retour à l'accueil">
+          <ArrowLeft size={18} strokeWidth={2.2} />
+        </NavLink>
         <img src="/logo3.webp" alt="logo 66partners" className="admin-login-page__logo" />
         <span className="admin-login-page__icon">
           <ShieldCheck size={22} strokeWidth={2.2} />

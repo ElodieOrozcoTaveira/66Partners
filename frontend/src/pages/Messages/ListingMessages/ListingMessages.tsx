@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { Car } from "lucide-react";
 import api from "../../../lib/axios";
 import { useNotifications } from "../../../contexts/NotificationsContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
@@ -18,6 +19,10 @@ interface ConversationSummary {
   sportName: string;
   participantsCount: number;
   conversationId: string | null;
+  isCarpool: boolean;
+  carpoolWithUserId: string | null;
+  carpoolWithPseudo: string | null;
+  carpoolWithAvatar: string | null;
   lastMessage: LastMessage | null;
   activityStartDate: string;
 }
@@ -101,22 +106,28 @@ export default function ListingMessages({ search }: ListingMessagesProps) {
 
             return (
               <NavLink
-                key={conversation.activityId}
-                to={`/messages/${conversation.activityId}`}
+                key={conversation.conversationId ?? conversation.activityId}
+                to={
+                  conversation.isCarpool
+                    ? `/messages/${conversation.activityId}?carpool=${conversation.carpoolWithUserId}`
+                    : `/messages/${conversation.activityId}`
+                }
                 className="listingmessages-item"
               >
                 <span
                   className="listingmessages-item__badge"
                   style={{ backgroundColor: color, color: getIconColor(color) }}
                 >
-                  <Icon size={20} strokeWidth={2.2} />
+                  {conversation.isCarpool ? <Car size={20} strokeWidth={2.2} /> : <Icon size={20} strokeWidth={2.2} />}
                 </span>
                 <div className="listingmessages-item__body">
                   <h3 className="listingmessages-item__title">
                     {conversation.activityTitle}
                   </h3>
                   <p className="listingmessages-item__meta">
-                    {conversation.participantsCount} participants
+                    {conversation.isCarpool
+                      ? `🚗 Covoiturage avec ${conversation.carpoolWithPseudo ?? "un participant"}`
+                      : `${conversation.participantsCount} participants`}
                   </p>
                   {conversation.lastMessage ? (
                     <p

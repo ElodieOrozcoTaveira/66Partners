@@ -573,7 +573,38 @@ export class AuthService {
    * par verifyGoogleCredential() avant d'arriver ici.
    */
   static async loginWithGoogle(profile: GoogleProfile): Promise<GoogleLoginStatus> {
-    return AuthService.loginWithSocialAccount("google", profile.sub, profile.email);
+    const result = await AuthService.loginWithSocialAccount("google", profile.sub, profile.email);
+
+    if (result.status === "LOGGED_IN") {
+      AuthService.refreshGoogleAvatarIfStale(result.user.id, result.user.avatar, profile.picture).catch(
+        (err) => console.error("Erreur rafraîchissement avatar Google:", err),
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Remplace un avatar Google déjà stocké par une version plus grande
+   * (cf. google.services.ts) dès qu'on en a l'occasion (connexion). Ne
+   * touche jamais un avatar que l'utilisateur a choisi lui-même depuis
+   * (upload personnel, ou tout avatar qui ne vient plus de Google) — évite
+   * d'écraser silencieusement un choix explicite de l'utilisateur.
+   */
+  private static async refreshGoogleAvatarIfStale(
+    userId: string,
+    currentAvatar: string | null,
+    newPictureUrl: string | undefined
+  ): Promise<void> {
+    if (!newPictureUrl || currentAvatar === newPictureUrl) return;
+
+    const isStillGoogleAvatar = !currentAvatar || currentAvatar.includes("googleusercontent.com");
+    if (!isStillGoogleAvatar) return;
+
+    await db
+      .update(users)
+      .set({ avatar: newPictureUrl, updatedAt: new Date() })
+      .where(eq(users.id, userId));
   }
 
   static async completeGoogleSignup(

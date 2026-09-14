@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { activities, conversations, participations, users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
+import { ConversationService } from "./conversation.services.js";
 import { NotificationService } from "./notification.services.js";
 import { TerritoryService } from "./territory.services.js";
 
@@ -251,9 +252,11 @@ export class ParticipationService {
       );
     }
 
+    // Un participant refusé (y compris déjà accepté puis re-refusé) ne doit
+    // plus pouvoir activer/laisser actif le covoiturage pour cette activité.
     const [updatedParticipation] = await db
       .update(participations)
-      .set({ status: "REFUSED" })
+      .set({ status: "REFUSED", carpoolRequested: false })
       .where(eq(participations.id, participationId))
       .returning();
 
@@ -357,6 +360,7 @@ export class ParticipationService {
         userId: participations.userId,
         activityId: participations.activityId,
         status: participations.status,
+        carpoolRequested: participations.carpoolRequested,
         createdAt: participations.createdAt,
         userPseudo: users.pseudo,
         userAvatar: users.avatar,
@@ -372,5 +376,99 @@ export class ParticipationService {
             )
       )
       .orderBy(desc(participations.createdAt));
+  }
+
+  /**
+   * Active "je souhaite covoiturer" pour un participant accepté, si le
+   * créateur propose le covoiturage sur cette activité. Idempotent : une
+   * réactivation réutilise la conversation existante et ne renvoie pas de
+   * nouvelle notification au créateur (cf. section 9 — éviter les doublons).
+   */
+  static async requestCarpool(
+    activityId: string,
+    userId: string
+  ): Promise<{ participation: Participation; conversationId: string }> {
+    const activity = await getActivityOrThrow(activityId);
+
+    if (!activity.carpoolEnabled) {
+      throw new ParticipationError(
+        "Le covoiturage n'est pas proposé pour cette activité",
+        "CARPOOL_NOT_ENABLED",
+        403
+      );
+    }
+
+    const [participation] = await db
+      .select()
+      .from(participations)
+      .where(
+        and(
+          eq(participations.activityId, activityId),
+          eq(participations.userId, userId),
+          eq(participations.status, "ACCEPTED")
+        )
+      )
+      .limit(1);
+
+    if (!participation) {
+      throw new ParticipationError(
+        "Seul un participant accepté peut activer le covoiturage",
+        "NOT_ACCEPTED_PARTICIPANT",
+        403
+      );
+    }
+
+    // Résolution/création du fil privé AVANT la notification : si elle
+    // échoue (covoiturage désactivé entre-temps, etc.), on ne notifie pas
+    // pour rien.
+    const conversation = await ConversationService.getOrCreateCarpoolConversation(
+      activityId,
+      userId,
+      userId
+    );
+
+    if (!participation.carpoolRequested) {
+      await db
+        .update(participations)
+        .set({ carpoolRequested: true })
+        .where(eq(participations.id, participation.id));
+
+      const [requester] = await db
+        .select({ pseudo: users.pseudo })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      NotificationService.create({
+        usersId: activity.creatorId,
+        type: "CARPOOL_REQUESTED",
+        contenu: `${requester?.pseudo ?? "Un participant"} souhaite covoiturer pour "${activity.title}"`,
+        activityId: activity.id,
+        carpoolParticipantId: userId,
+      }).catch((err) =>
+        console.error("Erreur création notification (covoiturage):", err),
+      );
+    }
+
+    return {
+      participation: { ...participation, carpoolRequested: true },
+      conversationId: conversation.id,
+    };
+  }
+
+  /**
+   * Désactive "je souhaite covoiturer". Ne touche jamais à la conversation
+   * ni à son historique (cf. section 5) — se contente de retirer le statut.
+   */
+  static async cancelCarpoolRequest(activityId: string, userId: string): Promise<void> {
+    await db
+      .update(participations)
+      .set({ carpoolRequested: false })
+      .where(
+        and(
+          eq(participations.activityId, activityId),
+          eq(participations.userId, userId)
+        )
+      );
   }
 }

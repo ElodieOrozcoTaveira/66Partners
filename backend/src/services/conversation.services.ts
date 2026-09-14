@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import {
   activities,
@@ -10,14 +10,18 @@ import {
 } from "../db/schema.js";
 import { ActivityService } from "./activity.services.js";
 import { NotificationService } from "./notification.services.js";
+import { isUniqueViolation } from "../utils/db-errors.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
 /**
  * SERVICE CONVERSATION
  *
- * Gère les conversations de groupe liées aux activités et leurs messages.
- * Une conversation est créée automatiquement à la première consultation.
+ * Gère les conversations liées aux activités et leurs messages : la
+ * conversation de groupe (participantId NULL, créée à la première
+ * acceptation d'une demande — cf. ParticipationService.acceptParticipation)
+ * et les fils privés "covoiturage" (participantId renseigné, un par couple
+ * activité+participant — cf. getOrCreateCarpoolConversation).
  */
 
 export type Conversation = typeof conversations.$inferSelect;
@@ -34,9 +38,15 @@ export class ConversationError extends Error {
   }
 }
 
+/**
+ * `participantId` : celui de la CONVERSATION visée (`null` = fil de groupe,
+ * sinon fil privé covoiturage réservé à ce participant précis). Ne pas
+ * confondre avec `userId`, l'utilisateur qui demande l'accès.
+ */
 async function assertUserCanAccessConversation(
   userId: string,
-  activityId: string
+  activityId: string,
+  participantId: string | null
 ): Promise<void> {
   const [activity] = await db
     .select()
@@ -49,6 +59,16 @@ async function assertUserCanAccessConversation(
   }
 
   if (activity.creatorId === userId) return;
+
+  // Fil privé covoiturage : réservé au créateur (déjà traité ci-dessus) et à
+  // ce participant précis — jamais aux autres participants de l'activité.
+  if (participantId && participantId !== userId) {
+    throw new ConversationError(
+      "Accès refusé : cette conversation ne vous concerne pas",
+      "FORBIDDEN",
+      403
+    );
+  }
 
   const [participation] = await db
     .select()
@@ -80,12 +100,14 @@ export class ConversationService {
     activityId: string,
     userId: string
   ): Promise<Conversation> {
-    await assertUserCanAccessConversation(userId, activityId);
+    await assertUserCanAccessConversation(userId, activityId, null);
 
+    // participantId IS NULL : cible bien le fil de groupe, jamais un fil
+    // privé covoiturage de la même activité (cf. index uniques partiels).
     const [existing] = await db
       .select()
       .from(conversations)
-      .where(eq(conversations.activityId, activityId))
+      .where(and(eq(conversations.activityId, activityId), isNull(conversations.participantId)))
       .limit(1);
 
     if (existing) return existing;
@@ -104,6 +126,152 @@ export class ConversationService {
     }
 
     return created;
+  }
+
+  /**
+   * Résout (et crée si besoin) le fil privé "covoiturage" entre le créateur
+   * de l'activité et `participantUserId`. Réservé au participant concerné
+   * lui-même (le créateur n'initie jamais ce fil, cf. getCarpoolConversation
+   * pour sa consultation). Vérifie le covoiturage activé et le statut
+   * accepté avant toute création ; idempotent — réutilise le fil existant,
+   * jamais de doublon (garanti par l'index unique partiel sur
+   * conversations(activity_id, participant_id)).
+   */
+  static async getOrCreateCarpoolConversation(
+    activityId: string,
+    participantUserId: string,
+    requesterId: string
+  ): Promise<Conversation> {
+    if (requesterId !== participantUserId) {
+      throw new ConversationError(
+        "Cette conversation ne peut être activée que par le participant concerné",
+        "FORBIDDEN",
+        403
+      );
+    }
+
+    const findExisting = () =>
+      db
+        .select()
+        .from(conversations)
+        .where(
+          and(
+            eq(conversations.activityId, activityId),
+            eq(conversations.participantId, participantUserId)
+          )
+        )
+        .limit(1)
+        .then((rows) => rows[0]);
+
+    const existing = await findExisting();
+    if (existing) return existing;
+
+    const activity = await ActivityService.getActivityById(activityId);
+    if (!activity) {
+      throw new ConversationError("Activité non trouvée", "ACTIVITY_NOT_FOUND", 404);
+    }
+    if (!activity.carpoolEnabled) {
+      throw new ConversationError(
+        "Le covoiturage n'est pas proposé pour cette activité",
+        "CARPOOL_NOT_ENABLED",
+        403
+      );
+    }
+
+    const [participation] = await db
+      .select()
+      .from(participations)
+      .where(
+        and(
+          eq(participations.activityId, activityId),
+          eq(participations.userId, participantUserId),
+          eq(participations.status, "ACCEPTED")
+        )
+      )
+      .limit(1);
+
+    if (!participation) {
+      throw new ConversationError(
+        "Seul un participant accepté peut activer le covoiturage",
+        "NOT_ACCEPTED_PARTICIPANT",
+        403
+      );
+    }
+
+    let created: Conversation | undefined;
+    try {
+      [created] = await db
+        .insert(conversations)
+        .values({ activityId, participantId: participantUserId })
+        .returning();
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        const race = await findExisting();
+        if (race) return race;
+      }
+      throw error;
+    }
+
+    if (!created) {
+      throw new ConversationError(
+        "Erreur lors de la création de la conversation",
+        "CONVERSATION_CREATION_FAILED",
+        500
+      );
+    }
+
+    return created;
+  }
+
+  /**
+   * Récupère (sans jamais créer) le fil privé covoiturage entre le créateur
+   * et `participantUserId`. Réservé au créateur de l'activité ou à ce
+   * participant précis — le créateur ne peut jamais démarrer ce fil
+   * lui-même, seulement le consulter une fois que le participant l'a activé.
+   */
+  static async getCarpoolConversation(
+    activityId: string,
+    participantUserId: string,
+    requesterId: string
+  ): Promise<Conversation> {
+    const [activity] = await db
+      .select()
+      .from(activities)
+      .where(eq(activities.id, activityId))
+      .limit(1);
+
+    if (!activity) {
+      throw new ConversationError("Activité non trouvée", "ACTIVITY_NOT_FOUND", 404);
+    }
+
+    if (requesterId !== activity.creatorId && requesterId !== participantUserId) {
+      throw new ConversationError(
+        "Accès refusé : cette conversation ne vous concerne pas",
+        "FORBIDDEN",
+        403
+      );
+    }
+
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(
+        and(
+          eq(conversations.activityId, activityId),
+          eq(conversations.participantId, participantUserId)
+        )
+      )
+      .limit(1);
+
+    if (!conversation) {
+      throw new ConversationError(
+        "Conversation non trouvée",
+        "CONVERSATION_NOT_FOUND",
+        404
+      );
+    }
+
+    return conversation;
   }
 
   /**
@@ -130,7 +298,7 @@ export class ConversationService {
       );
     }
 
-    await assertUserCanAccessConversation(userId, conversation.activityId);
+    await assertUserCanAccessConversation(userId, conversation.activityId, conversation.participantId);
 
     return db
       .select({
@@ -164,24 +332,36 @@ export class ConversationService {
         and(eq(participations.userId, userId), eq(participations.status, "ACCEPTED"))
       );
     const joinedIds = new Set(joinedRows.map((row) => row.activityId));
+    const createdIds = new Set(
+      myActivities.filter((activity) => activity.creatorId === userId).map((activity) => activity.id)
+    );
 
     const mine = myActivities.filter(
-      (activity) => activity.creatorId === userId || joinedIds.has(activity.id)
+      (activity) => createdIds.has(activity.id) || joinedIds.has(activity.id)
     );
 
     if (mine.length === 0) return [];
 
     const activityIds = mine.map((activity) => activity.id);
-    const myConversations = await db
+    const activityById = new Map(mine.map((activity) => [activity.id, activity]));
+
+    const allConversations = await db
       .select()
       .from(conversations)
       .where(inArray(conversations.activityId, activityIds));
 
-    const conversationByActivity = new Map(
-      myConversations.map((conversation) => [conversation.activityId, conversation])
+    // Un fil de groupe est visible dès qu'on est créateur/participant accepté
+    // de l'activité (déjà garanti par `mine`) ; un fil privé covoiturage
+    // n'est visible que par les deux personnes concernées (le participant,
+    // ou le créateur de l'activité).
+    const visibleConversations = allConversations.filter(
+      (conversation) =>
+        conversation.participantId === null ||
+        conversation.participantId === userId ||
+        createdIds.has(conversation.activityId)
     );
 
-    const conversationIds = myConversations.map((conversation) => conversation.id);
+    const conversationIds = visibleConversations.map((conversation) => conversation.id);
     const lastMessageByConversation = new Map<string, Message>();
 
     if (conversationIds.length > 0) {
@@ -198,18 +378,45 @@ export class ConversationService {
       }
     }
 
-    const summaries = mine.map((activity) => {
-      const conversation = conversationByActivity.get(activity.id) ?? null;
+    const groupConversationByActivity = new Map(
+      visibleConversations
+        .filter((conversation) => conversation.participantId === null)
+        .map((conversation) => [conversation.activityId, conversation])
+    );
+    const carpoolConversations = visibleConversations.filter(
+      (conversation) => conversation.participantId !== null
+    );
+
+    // Pseudo/avatar publics de l'autre partie de chaque fil covoiturage —
+    // jamais l'email ni une autre donnée privée (cf. toPublicProfile).
+    const carpoolParticipantIds = Array.from(
+      new Set(carpoolConversations.map((conversation) => conversation.participantId as string))
+    );
+    const carpoolUsers =
+      carpoolParticipantIds.length > 0
+        ? await db
+            .select({ id: users.id, pseudo: users.pseudo, avatar: users.avatar })
+            .from(users)
+            .where(inArray(users.id, carpoolParticipantIds))
+        : [];
+    const carpoolUserById = new Map(carpoolUsers.map((user) => [user.id, user]));
+
+    const groupSummaries: ConversationSummary[] = mine.map((activity) => {
+      const conversation = groupConversationByActivity.get(activity.id) ?? null;
       const lastMessage = conversation
         ? lastMessageByConversation.get(conversation.id) ?? null
         : null;
 
       return {
+        conversationId: conversation?.id ?? null,
         activityId: activity.id,
         activityTitle: activity.title,
         sportName: activity.sportName,
         participantsCount: activity.participantsCount,
-        conversationId: conversation?.id ?? null,
+        isCarpool: false,
+        carpoolWithUserId: null,
+        carpoolWithPseudo: null,
+        carpoolWithAvatar: null,
         lastMessage: lastMessage
           ? {
               contenu: lastMessage.contenu,
@@ -220,6 +427,34 @@ export class ConversationService {
         activityStartDate: activity.startDate,
       };
     });
+
+    const carpoolSummaries: ConversationSummary[] = carpoolConversations.map((conversation) => {
+      const activity = activityById.get(conversation.activityId)!;
+      const lastMessage = lastMessageByConversation.get(conversation.id) ?? null;
+      const carpoolWith = carpoolUserById.get(conversation.participantId as string);
+
+      return {
+        conversationId: conversation.id,
+        activityId: activity.id,
+        activityTitle: activity.title,
+        sportName: activity.sportName,
+        participantsCount: activity.participantsCount,
+        isCarpool: true,
+        carpoolWithUserId: conversation.participantId as string,
+        carpoolWithPseudo: carpoolWith?.pseudo ?? null,
+        carpoolWithAvatar: carpoolWith?.avatar ?? null,
+        lastMessage: lastMessage
+          ? {
+              contenu: lastMessage.contenu,
+              createdAt: lastMessage.createdAt,
+              authorId: lastMessage.usersId,
+            }
+          : null,
+        activityStartDate: activity.startDate,
+      };
+    });
+
+    const summaries = [...groupSummaries, ...carpoolSummaries];
 
     summaries.sort((a, b) => {
       const dateA = a.lastMessage?.createdAt ?? a.activityStartDate;
@@ -253,7 +488,7 @@ export class ConversationService {
       );
     }
 
-    await assertUserCanAccessConversation(userId, conversation.activityId);
+    await assertUserCanAccessConversation(userId, conversation.activityId, conversation.participantId);
 
     const [created] = await db
       .insert(messages)
@@ -268,11 +503,57 @@ export class ConversationService {
       );
     }
 
-    ConversationService.notifyNewMessage(conversation.activityId, userId).catch((err) =>
+    // Un fil privé covoiturage ne notifie que l'autre partie du duo (pas
+    // tous les participants de l'activité, contrairement au fil de groupe).
+    const notifyPromise = conversation.participantId
+      ? ConversationService.notifyNewCarpoolMessage(
+          conversation.activityId,
+          conversation.participantId,
+          userId,
+        )
+      : ConversationService.notifyNewMessage(conversation.activityId, userId);
+
+    notifyPromise.catch((err) =>
       console.error("Erreur création notification (nouveau message):", err),
     );
 
     return created;
+  }
+
+  /**
+   * Notifie l'autre partie d'un fil privé covoiturage (le créateur si
+   * l'expéditeur est le participant, ou inversement) qu'un nouveau message a
+   * été envoyé.
+   */
+  private static async notifyNewCarpoolMessage(
+    activityId: string,
+    participantId: string,
+    senderId: string,
+  ): Promise<void> {
+    const [activity] = await db
+      .select({ title: activities.title, creatorId: activities.creatorId })
+      .from(activities)
+      .where(eq(activities.id, activityId))
+      .limit(1);
+
+    if (!activity) return;
+
+    const recipientId = senderId === activity.creatorId ? participantId : activity.creatorId;
+    if (recipientId === senderId) return;
+
+    const [sender] = await db
+      .select({ pseudo: users.pseudo })
+      .from(users)
+      .where(eq(users.id, senderId))
+      .limit(1);
+
+    await NotificationService.create({
+      usersId: recipientId,
+      type: "NEW_MESSAGE",
+      contenu: `${sender?.pseudo ?? "Quelqu'un"} a envoyé un message (covoiturage) pour "${activity.title}"`,
+      activityId,
+      carpoolParticipantId: participantId,
+    });
   }
 
   /**
@@ -331,6 +612,12 @@ export interface ConversationSummary {
   sportName: string;
   participantsCount: number;
   conversationId: string | null;
+  /** true = fil privé covoiturage ; false = conversation de groupe de l'activité. */
+  isCarpool: boolean;
+  /** Identité publique de l'autre partie d'un fil covoiturage (jamais pour un fil de groupe). */
+  carpoolWithUserId: string | null;
+  carpoolWithPseudo: string | null;
+  carpoolWithAvatar: string | null;
   lastMessage: { contenu: string | null; createdAt: Date; authorId: string } | null;
   activityStartDate: Date;
 }

@@ -19,7 +19,11 @@ let activityId: string;
 const futureDate = () =>
   new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-async function createActivity(token: string, sportId: string): Promise<string> {
+async function createActivity(
+  token: string,
+  sportId: string,
+  carpoolEnabled = false
+): Promise<string> {
   const res = await request(app)
     .post("/api/activities")
     .set("Authorization", `Bearer ${token}`)
@@ -30,6 +34,7 @@ async function createActivity(token: string, sportId: string): Promise<string> {
       levelRequired: "BEGINNER",
       maxParticipants: 3,
       sportId,
+      carpoolEnabled,
     });
   return res.body.activity.id as string;
 }
@@ -311,5 +316,206 @@ describe("Limite de participants (ACTIVITY_FULL)", () => {
 
     expect(res.status).toBe(409);
     expect(res.body.code).toBe("ACTIVITY_FULL");
+  });
+});
+
+describe("Covoiturage", () => {
+  let carpoolActivityId: string;
+  let joinerParticipationId: string;
+
+  beforeEach(async () => {
+    const sportId = await createSport("Cyclisme");
+    carpoolActivityId = await createActivity(creatorToken, sportId, true);
+
+    const joinRes = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/join`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+    joinerParticipationId = joinRes.body.participation.id as string;
+
+    await request(app)
+      .put(`/api/participations/${joinerParticipationId}/accept`)
+      .set("Authorization", `Bearer ${creatorToken}`);
+  });
+
+  it("le créateur peut activer le covoiturage à la création de l'activité", async () => {
+    const res = await request(app)
+      .get(`/api/activities/${carpoolActivityId}`)
+      .set("Authorization", `Bearer ${creatorToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.activity.carpoolEnabled).toBe(true);
+  });
+
+  it("un participant accepté peut activer je souhaite covoiturer", async () => {
+    const res = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.participation.carpoolRequested).toBe(true);
+    expect(res.body.conversationId).toBeTruthy();
+  });
+
+  it("refuse l'activation par un utilisateur non inscrit à l'activité", async () => {
+    const { token: strangerToken } = await createUser({ email: "stranger@test.com" });
+
+    const res = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${strangerToken}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("NOT_ACCEPTED_PARTICIPANT");
+  });
+
+  it("refuse l'activation par un participant refusé", async () => {
+    const { token: refusedToken } = await createUser({ email: "refused@test.com" });
+    const joinRes = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/join`)
+      .set("Authorization", `Bearer ${refusedToken}`);
+    const refusedParticipationId = joinRes.body.participation.id as string;
+
+    await request(app)
+      .put(`/api/participations/${refusedParticipationId}/refuse`)
+      .set("Authorization", `Bearer ${creatorToken}`);
+
+    const res = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${refusedToken}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("NOT_ACCEPTED_PARTICIPANT");
+  });
+
+  it("refuse l'activation si le créateur n'a pas activé le covoiturage", async () => {
+    const sportId = await createSport("Roller");
+    const noCarpoolActivityId = await createActivity(creatorToken, sportId, false);
+
+    const joinRes = await request(app)
+      .post(`/api/activities/${noCarpoolActivityId}/join`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+    await request(app)
+      .put(`/api/participations/${joinRes.body.participation.id}/accept`)
+      .set("Authorization", `Bearer ${creatorToken}`);
+
+    const res = await request(app)
+      .post(`/api/activities/${noCarpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("CARPOOL_NOT_ENABLED");
+  });
+
+  it("l'activation crée une seule conversation, réutilisée en cas de réactivation", async () => {
+    const first = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+    const second = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    expect(second.body.conversationId).toBe(first.body.conversationId);
+  });
+
+  it("la désactivation conserve la conversation, la réactivation la réutilise", async () => {
+    const activateRes = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+    const conversationId = activateRes.body.conversationId as string;
+
+    const deactivateRes = await request(app)
+      .delete(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+    expect(deactivateRes.status).toBe(200);
+
+    // La conversation reste accessible (créateur) même désactivée.
+    const stillAccessible = await request(app)
+      .get(`/api/activities/${carpoolActivityId}/conversation`)
+      .query({ carpool: joinerId })
+      .set("Authorization", `Bearer ${creatorToken}`);
+    expect(stillAccessible.status).toBe(200);
+    expect(stillAccessible.body.conversation.id).toBe(conversationId);
+
+    const reactivateRes = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+    expect(reactivateRes.body.conversationId).toBe(conversationId);
+  });
+
+  it("un utilisateur tiers ne peut pas accéder au fil covoiturage d'un autre participant", async () => {
+    await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+
+    const { token: otherToken } = await createUser({ email: "other-participant@test.com" });
+    const joinRes = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/join`)
+      .set("Authorization", `Bearer ${otherToken}`);
+    await request(app)
+      .put(`/api/participations/${joinRes.body.participation.id}/accept`)
+      .set("Authorization", `Bearer ${creatorToken}`);
+
+    const res = await request(app)
+      .get(`/api/activities/${carpoolActivityId}/conversation`)
+      .query({ carpool: joinerId })
+      .set("Authorization", `Bearer ${otherToken}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("FORBIDDEN");
+  });
+
+  it("le créateur et le participant peuvent échanger des messages dans le fil privé, inaccessibles à un tiers", async () => {
+    const activateRes = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+    const conversationId = activateRes.body.conversationId as string;
+
+    const sendByParticipant = await request(app)
+      .post(`/api/conversations/${conversationId}/messages`)
+      .set("Authorization", `Bearer ${joinerToken}`)
+      .send({ contenu: "On se retrouve où pour le covoiturage ?" });
+    expect(sendByParticipant.status).toBe(201);
+
+    const sendByCreator = await request(app)
+      .post(`/api/conversations/${conversationId}/messages`)
+      .set("Authorization", `Bearer ${creatorToken}`)
+      .send({ contenu: "Devant la mairie à 9h !" });
+    expect(sendByCreator.status).toBe(201);
+
+    const { token: otherToken } = await createUser({ email: "third-wheel@test.com" });
+    const joinRes = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/join`)
+      .set("Authorization", `Bearer ${otherToken}`);
+    await request(app)
+      .put(`/api/participations/${joinRes.body.participation.id}/accept`)
+      .set("Authorization", `Bearer ${creatorToken}`);
+
+    const readByOther = await request(app)
+      .get(`/api/conversations/${conversationId}/messages`)
+      .set("Authorization", `Bearer ${otherToken}`);
+    expect(readByOther.status).toBe(403);
+
+    const sendByOther = await request(app)
+      .post(`/api/conversations/${conversationId}/messages`)
+      .set("Authorization", `Bearer ${otherToken}`)
+      .send({ contenu: "Je peux venir aussi ?" });
+    expect(sendByOther.status).toBe(403);
+  });
+
+  it("n'expose aucune donnée privée (email, GPS) dans les réponses covoiturage", async () => {
+    const res = await request(app)
+      .post(`/api/activities/${carpoolActivityId}/carpool`)
+      .set("Authorization", `Bearer ${joinerToken}`);
+
+    const serialized = JSON.stringify(res.body);
+    expect(serialized).not.toContain("joiner@test.com");
+    expect(res.body.participation).not.toHaveProperty("email");
+
+    const mineRes = await request(app)
+      .get("/api/conversations/mine")
+      .set("Authorization", `Bearer ${creatorToken}`);
+    const mineSerialized = JSON.stringify(mineRes.body);
+    expect(mineSerialized).not.toContain("joiner@test.com");
   });
 });

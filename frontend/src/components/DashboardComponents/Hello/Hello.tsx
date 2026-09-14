@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Camera, CheckCheck, MessageCircle, UserCheck2, UserPlus } from "lucide-react";
+import { Bell, Camera, Car, CheckCheck, MessageCircle, UserCheck2, UserPlus } from "lucide-react";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useNotifications, type AppNotification } from "../../../contexts/NotificationsContext";
 import api from "../../../lib/axios";
@@ -18,6 +18,7 @@ function notificationIcon(type: AppNotification["type"]) {
   if (type === "PARTICIPATION_ACCEPTED") return UserCheck2;
   if (type === "PARTICIPATION_REQUESTED") return UserPlus;
   if (type === "NEW_MESSAGE") return MessageCircle;
+  if (type === "CARPOOL_REQUESTED") return Car;
   return Bell;
 }
 

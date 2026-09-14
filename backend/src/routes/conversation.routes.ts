@@ -3,6 +3,7 @@ import { ConversationController } from "../controllers/conversation.controller.j
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validation.middleware.js";
 import {
+  activityConversationQuerySchema,
   activityIdParamSchema,
   conversationIdParamSchema,
   messagesQuerySchema,
@@ -23,7 +24,7 @@ const conversationRouter = Router();
 activityConversationRouter.get(
   "/:activityId/conversation",
   requireAuth,
-  validate({ params: activityIdParamSchema }),
+  validate({ params: activityIdParamSchema, query: activityConversationQuerySchema }),
   ConversationController.getOrCreate
 );
 

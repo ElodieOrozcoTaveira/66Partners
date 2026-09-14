@@ -15,6 +15,24 @@ import { SocialAuthError } from "./socialAuthError.js";
 
 const client = new OAuth2Client();
 
+// Le claim `picture` d'un ID token Google pointe presque toujours vers une
+// miniature basse résolution (`=s96-c`, taille par défaut de Google) — c'est
+// la cause du flou observé dans l'app, pas une limite de la photo source.
+// Google sert la MÊME image (même hébergeur googleusercontent.com, aucune
+// requête réseau ni source externe supplémentaire) à une résolution plus
+// grande sur simple changement de ce suffixe de taille dans l'URL.
+const GOOGLE_AVATAR_SIZE = 400;
+
+function upgradeGooglePictureResolution(pictureUrl: string | undefined): string | undefined {
+  if (!pictureUrl) return pictureUrl;
+  // Ne remplace que le suffixe de taille Google connu (`=s<n>` ou `=s<n>-c`)
+  // en fin d'URL ; si l'URL ne correspond pas à ce format (autre hébergeur,
+  // format inattendu), elle est renvoyée telle quelle plutôt que devinée.
+  return pictureUrl.replace(/=s\d+(-c)?$/, (_match, crop: string | undefined) =>
+    `=s${GOOGLE_AVATAR_SIZE}${crop ?? ""}`
+  );
+}
+
 export interface GoogleProfile {
   sub: string;
   email: string;
@@ -78,6 +96,6 @@ export async function verifyGoogleCredential(credential: string): Promise<Google
     givenName: payload.given_name,
     familyName: payload.family_name,
     name: payload.name,
-    picture: payload.picture,
+    picture: upgradeGooglePictureResolution(payload.picture),
   };
 }

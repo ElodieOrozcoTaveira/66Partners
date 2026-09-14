@@ -140,6 +140,11 @@ export const activities = pgTable("activities", {
   // d'origine du créateur). Backfillé pour les données existantes
   // (cf. seed-territories.ts) avant ce passage en NOT NULL.
   territoryId: uuid("territory_id").notNull().references(() => territories.id),
+  // Choix du créateur, à la création ou en modification : permet aux
+  // participants acceptés de se signaler comme intéressés par du
+  // covoiturage (cf. participations.carpoolRequested). Désactiver ce champ
+  // n'efface jamais l'historique des conversations déjà créées.
+  carpoolEnabled: boolean("carpool_enabled").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => ({
@@ -151,6 +156,11 @@ export const participations = pgTable("participations", {
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   activityId: uuid("activity_id").notNull().references(() => activities.id, { onDelete: "cascade" }),
   status: participationStatusEnum("status").notNull().default("PENDING"),
+  // "Je souhaite covoiturer" — uniquement significatif quand status=ACCEPTED
+  // et activities.carpoolEnabled=true (revérifié côté serveur à chaque
+  // action, jamais fait confiance tel quel). Remis à false par
+  // ParticipationService lors d'une désinscription/refus.
+  carpoolRequested: boolean("carpool_requested").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => ({
   uniqueUserActivity: unique().on(t.userId, t.activityId),
@@ -163,9 +173,24 @@ export const participations = pgTable("participations", {
 
 export const conversations = pgTable("conversations", {
     id:uuid("id").defaultRandom().primaryKey(),
-    activityId: uuid("activity_id").notNull().unique().references(() => activities.id, { onDelete: "cascade" }),
+    activityId: uuid("activity_id").notNull().references(() => activities.id, { onDelete: "cascade" }),
+    // NULL = conversation de groupe de l'activité (comportement historique,
+    // inchangé — cf. index unique partiel ci-dessous). Non nul = fil privé
+    // "covoiturage" entre le créateur et exactement ce participant.
+    participantId: uuid("participant_id").references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-})
+}, (t) => ({
+  // Remplace l'ancien `.unique()` sur activityId seul : au plus UNE
+  // conversation de groupe (participantId IS NULL) par activité...
+  oneGroupPerActivity: uniqueIndex("conversations_activity_group_unique")
+    .on(t.activityId)
+    .where(sql`${t.participantId} IS NULL`),
+  // ...et au plus UNE conversation covoiturage par couple activité+participant
+  // (garantie anti-doublon au niveau base de données, pas seulement applicative).
+  oneCarpoolPerParticipant: uniqueIndex("conversations_activity_participant_unique")
+    .on(t.activityId, t.participantId)
+    .where(sql`${t.participantId} IS NOT NULL`),
+}))
 
 export const messages = pgTable("messages", {
     id: uuid("id").defaultRandom().primaryKey(),

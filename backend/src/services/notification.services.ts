@@ -9,7 +9,16 @@ const db = drizzle(process.env.DATABASE_URL!);
 // Lien profond ouvert par la notification push, par type (cf. App.tsx).
 function pushUrlFor(input: CreateNotificationInput): string | undefined {
   if (!input.activityId) return undefined;
-  if (input.type === "NEW_MESSAGE") return `/messages/${input.activityId}`;
+  // carpoolParticipantId présent : pointe directement vers le fil privé
+  // covoiturage concerné (identifié par ce participant), pas la messagerie
+  // de groupe de l'activité.
+  if (input.type === "NEW_MESSAGE" || input.type === "CARPOOL_REQUESTED") {
+    return input.carpoolParticipantId
+      ? `/messages/${input.activityId}?carpool=${input.carpoolParticipantId}`
+      : input.type === "NEW_MESSAGE"
+        ? `/messages/${input.activityId}`
+        : `/activities/${input.activityId}`;
+  }
   if (input.type === "PARTICIPATION_ACCEPTED" || input.type === "PARTICIPATION_REQUESTED") {
     return `/activities/${input.activityId}`;
   }
@@ -29,13 +38,17 @@ export type Notification = typeof notifications.$inferSelect;
 export type NotificationType =
   | "PARTICIPATION_ACCEPTED"
   | "PARTICIPATION_REQUESTED"
-  | "NEW_MESSAGE";
+  | "NEW_MESSAGE"
+  | "CARPOOL_REQUESTED";
 
 export interface CreateNotificationInput {
   usersId: string;
   type: NotificationType;
   contenu: string;
   activityId?: string;
+  /** Identité (publique) du participant du fil covoiturage concerné — sert
+   *  uniquement à construire le lien profond de la notification push. */
+  carpoolParticipantId?: string;
 }
 
 // Une notification est considérée non lue si `estLu` est false ou absent (legacy).

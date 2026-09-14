@@ -61,6 +61,22 @@ export default function EtapeDetails({ form, onChange }: EtapeDetailsProps) {
           </button>
         </div>
       </div>
+
+      <div className="etape-field">
+        <label className="carpool-toggle">
+          <input
+            type="checkbox"
+            checked={form.carpoolEnabled}
+            onChange={(event) => onChange({ carpoolEnabled: event.target.checked })}
+          />
+          <span className="carpool-toggle__text">
+            <span className="carpool-toggle__title">🚗 Proposer du covoiturage</span>
+            <span className="carpool-toggle__hint">
+              Permettre aux participants de vous contacter pour organiser un covoiturage.
+            </span>
+          </span>
+        </label>
+      </div>
     </div>
   );
 }

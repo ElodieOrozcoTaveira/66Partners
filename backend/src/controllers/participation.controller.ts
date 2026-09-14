@@ -294,4 +294,72 @@ export class ParticipationController {
       });
     }
   }
+
+  /**
+   * POST /api/activities/:id/carpool
+   * Le participant authentifié active "je souhaite covoiturer"
+   */
+  static async requestCarpool(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
+      const { id } = req.params as { id: string };
+      const { participation, conversationId } = await ParticipationService.requestCarpool(
+        id,
+        req.userId
+      );
+
+      res.status(200).json({ success: true, participation, conversationId });
+    } catch (error) {
+      if (error instanceof ParticipationError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de l'activation du covoiturage:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de l'activation du covoiturage",
+      });
+    }
+  }
+
+  /**
+   * DELETE /api/activities/:id/carpool
+   * Le participant authentifié désactive "je souhaite covoiturer"
+   */
+  static async cancelCarpoolRequest(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentification requise",
+          code: "UNAUTHENTICATED",
+        });
+        return;
+      }
+
+      const { id } = req.params as { id: string };
+      await ParticipationService.cancelCarpoolRequest(id, req.userId);
+
+      res.status(200).json({ success: true, message: "Covoiturage désactivé" });
+    } catch (error) {
+      console.error("Erreur lors de la désactivation du covoiturage:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la désactivation du covoiturage",
+      });
+    }
+  }
 }

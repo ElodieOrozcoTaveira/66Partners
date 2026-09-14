@@ -28,6 +28,7 @@ export interface CreerActiviteForm {
   time: string;
   levelRequired: ActivityLevel;
   maxParticipants: number;
+  carpoolEnabled: boolean;
 }
 
 const INITIAL_FORM: CreerActiviteForm = {
@@ -41,6 +42,7 @@ const INITIAL_FORM: CreerActiviteForm = {
   time: "",
   levelRequired: "INTERMEDIATE",
   maxParticipants: 8,
+  carpoolEnabled: false,
 };
 
 const STEP_META = [
@@ -115,6 +117,7 @@ export default function CreerActivite() {
         startDate: startDate.toISOString(),
         levelRequired: form.levelRequired,
         maxParticipants: form.maxParticipants,
+        carpoolEnabled: form.carpoolEnabled,
         // Absent si aucun territoire actif n'est encore chargé : le backend
         // retombe alors sur le territoire par défaut du créateur (comportement
         // 66 actuel inchangé). L'appartenance est de toute façon toujours

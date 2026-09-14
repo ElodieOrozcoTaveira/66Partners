@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -23,6 +23,10 @@ interface ActivityInfo {
 
 export default function PrivateMessage() {
   const { activityId } = useParams<{ activityId: string }>();
+  const [searchParams] = useSearchParams();
+  // Présent = fil privé covoiturage avec ce participant ; absent = fil de
+  // groupe de l'activité (comportement historique, inchangé).
+  const carpoolParticipantId = searchParams.get("carpool");
   const { user } = useAuth();
   const { notifications, markManyAsRead } = useNotifications();
 
@@ -30,6 +34,7 @@ export default function PrivateMessage() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [draft, setDraft] = useState("");
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -37,14 +42,18 @@ export default function PrivateMessage() {
   useEffect(() => {
     if (!activityId) return;
     let mounted = true;
+    setIsLoading(true);
+    setNotFound(false);
 
     async function load() {
       try {
+        const conversationUrl = carpoolParticipantId
+          ? `/api/activities/${activityId}/conversation?carpool=${carpoolParticipantId}`
+          : `/api/activities/${activityId}/conversation`;
+
         const [activityRes, conversationRes] = await Promise.all([
           api.get<{ activity: ActivityInfo }>(`/api/activities/${activityId}`),
-          api.get<{ conversation: { id: string } }>(
-            `/api/activities/${activityId}/conversation`,
-          ),
+          api.get<{ conversation: { id: string } }>(conversationUrl),
         ]);
         if (!mounted) return;
 
@@ -59,6 +68,7 @@ export default function PrivateMessage() {
         setMessages([...messagesRes.data.messages].reverse());
       } catch (err) {
         console.error("PrivateMessage: failed to load conversation", err);
+        if (mounted) setNotFound(true);
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -69,7 +79,7 @@ export default function PrivateMessage() {
     return () => {
       mounted = false;
     };
-  }, [activityId]);
+  }, [activityId, carpoolParticipantId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -125,12 +135,19 @@ export default function PrivateMessage() {
         >
           <ArrowLeft size={18} strokeWidth={2.2} />
         </NavLink>
-        <h1 className="privatemessage-page__title">{activity?.title ?? "Discussion"}</h1>
+        <h1 className="privatemessage-page__title">
+          {carpoolParticipantId && "🚗 Covoiturage — "}
+          {activity?.title ?? "Discussion"}
+        </h1>
       </header>
 
       <div className="privatemessage-page__body">
         {isLoading ? (
           <p className="privatemessage-page__empty">Chargement...</p>
+        ) : notFound ? (
+          <p className="privatemessage-page__empty">
+            Cette conversation n'est pas (encore) disponible.
+          </p>
         ) : messages.length === 0 ? (
           <p className="privatemessage-page__empty">
             Aucun message pour l'instant. Lance la discussion !

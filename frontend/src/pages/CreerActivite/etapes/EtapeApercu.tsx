@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Signal, Users } from "lucide-react";
+import { Calendar, Car, MapPin, Signal, Users } from "lucide-react";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { LEVEL_LABELS } from "../../../lib/activityLabels";
@@ -21,6 +21,7 @@ export default function EtapeApercu({ form, sportName }: EtapeApercuProps) {
           src={getSportPhoto(sportName)}
           alt={sportName}
           className="apercu-card__photo"
+          loading="lazy"
         />
         <span className="apercu-card__badge" style={{ backgroundColor: color }}>
           <Icon size={18} color={getIconColor(color)} />
@@ -49,6 +50,12 @@ export default function EtapeApercu({ form, sportName }: EtapeApercuProps) {
             <Users size={15} />
             {form.maxParticipants} participants max
           </li>
+          {form.carpoolEnabled && (
+            <li>
+              <Car size={15} />
+              Covoiturage proposé
+            </li>
+          )}
         </ul>
 
         {form.description && <p className="apercu-card__description">{form.description}</p>}

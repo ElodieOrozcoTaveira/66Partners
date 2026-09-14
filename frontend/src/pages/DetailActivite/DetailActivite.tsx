@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { NavLink, useParams } from "react-router-dom";
-import { ArrowLeft, Calendar, Check, MapPin, Plus, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, Calendar, Car, Check, MapPin, Plus, Trash2, Users, X } from "lucide-react";
 import api from "../../lib/axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { ACTIVITY_NOTIFICATION_TYPES, useNotifications } from "../../contexts/NotificationsContext";
@@ -25,6 +25,7 @@ interface ActivityDetail {
   sportId: string;
   sportName: string;
   creatorId: string;
+  carpoolEnabled: boolean;
 }
 
 interface Photo {
@@ -42,12 +43,14 @@ type ParticipationStatus = "PENDING" | "ACCEPTED" | "REFUSED";
 interface MyParticipation {
   id: string;
   status: ParticipationStatus;
+  carpoolRequested: boolean;
 }
 
 interface ParticipationRequest {
   id: string;
   userId: string;
   status: ParticipationStatus;
+  carpoolRequested: boolean;
   userPseudo: string;
   userAvatar: string | null;
 }
@@ -71,6 +74,7 @@ export default function DetailActivite() {
   const [isJoining, setIsJoining] = useState(false);
   const [requests, setRequests] = useState<ParticipationRequest[]>([]);
   const [participants, setParticipants] = useState<ParticipationRequest[]>([]);
+  const [isTogglingCarpool, setIsTogglingCarpool] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -197,6 +201,26 @@ export default function DetailActivite() {
     } catch (err) {
       console.error("DetailActivite: failed to cancel participation", err);
       setMyParticipation(previous);
+    }
+  }
+
+  async function handleToggleCarpool() {
+    if (!id || !myParticipation) return;
+    const wantsCarpool = !myParticipation.carpoolRequested;
+
+    setIsTogglingCarpool(true);
+    try {
+      if (wantsCarpool) {
+        await api.post(`/api/activities/${id}/carpool`);
+      } else {
+        await api.delete(`/api/activities/${id}/carpool`);
+      }
+      setMyParticipation((prev) => (prev ? { ...prev, carpoolRequested: wantsCarpool } : prev));
+    } catch (err) {
+      console.error("DetailActivite: failed to toggle carpool", err);
+      window.alert("Impossible de mettre à jour le covoiturage.");
+    } finally {
+      setIsTogglingCarpool(false);
     }
   }
 
@@ -370,6 +394,15 @@ export default function DetailActivite() {
                             <X size={14} strokeWidth={2.6} />
                           </button>
                         </div>
+                      ) : request.status === "ACCEPTED" && request.carpoolRequested ? (
+                        <NavLink
+                          to={`/messages/${id}?carpool=${request.userId}`}
+                          className="request-row__carpool"
+                          aria-label={`Discuter du covoiturage avec ${request.userPseudo}`}
+                        >
+                          <Car size={13} strokeWidth={2.4} />
+                          Covoiturage
+                        </NavLink>
                       ) : (
                         <span className="request-row__status">Inscrit·e</span>
                       )}
@@ -452,6 +485,38 @@ export default function DetailActivite() {
                   </div>
                 ))}
               </div>
+            )}
+          </section>
+        )}
+
+        {activity.carpoolEnabled && (
+          <section className="detailactivite-page__carpool">
+            <h2>🚗 Covoiturage</h2>
+            <p className="detailactivite-page__carpool-text">Le créateur propose du covoiturage.</p>
+
+            {!isCreator && myParticipation?.status === "ACCEPTED" && (
+              <>
+                <label className="carpool-toggle">
+                  <input
+                    type="checkbox"
+                    checked={myParticipation.carpoolRequested}
+                    onChange={handleToggleCarpool}
+                    disabled={isTogglingCarpool}
+                  />
+                  <span className="carpool-toggle__text">
+                    <span className="carpool-toggle__title">Je souhaite covoiturer</span>
+                  </span>
+                </label>
+
+                {myParticipation.carpoolRequested && (
+                  <NavLink
+                    to={`/messages/${id}?carpool=${user?.id}`}
+                    className="detailactivite-page__carpool-link"
+                  >
+                    Ouvrir la conversation
+                  </NavLink>
+                )}
+              </>
             )}
           </section>
         )}

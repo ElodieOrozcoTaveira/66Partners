@@ -14,7 +14,10 @@ import {
 export class ConversationController {
   /**
    * GET /api/activities/:activityId/conversation
-   * Retourne la conversation d'une activité (créée à la volée si absente).
+   * Retourne la conversation de groupe d'une activité (créée à la volée si
+   * absente), ou — avec ?carpool=<participantId> — le fil privé covoiturage
+   * correspondant (jamais créé ici : uniquement via
+   * POST /api/activities/:id/carpool, réservé au participant concerné).
    */
   static async getOrCreate(
     req: AuthenticatedRequest,
@@ -31,11 +34,11 @@ export class ConversationController {
       }
 
       const { activityId } = req.params as { activityId: string };
+      const { carpool } = req.query as { carpool?: string };
 
-      const conversation = await ConversationService.getOrCreateConversation(
-        activityId,
-        req.userId
-      );
+      const conversation = carpool
+        ? await ConversationService.getCarpoolConversation(activityId, carpool, req.userId)
+        : await ConversationService.getOrCreateConversation(activityId, req.userId);
 
       res.status(200).json({ success: true, conversation });
     } catch (error) {

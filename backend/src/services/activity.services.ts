@@ -45,6 +45,7 @@ export interface ActivityCreateInput {
    *  par défaut du créateur — jamais fait confiance tel quel : l'appartenance
    *  du créateur au territoire est toujours vérifiée côté serveur. */
   territoryId?: string;
+  carpoolEnabled?: boolean;
 }
 
 export interface ActivityUpdateInput {
@@ -58,6 +59,7 @@ export interface ActivityUpdateInput {
   maxParticipants?: number;
   status?: ActivityStatus;
   sportId?: string;
+  carpoolEnabled?: boolean;
 }
 
 export interface ActivityFilters {
@@ -166,6 +168,7 @@ export class ActivityService {
         sportId: activities.sportId,
         creatorId: activities.creatorId,
         territoryId: activities.territoryId,
+        carpoolEnabled: activities.carpoolEnabled,
         createdAt: activities.createdAt,
         updatedAt: activities.updatedAt,
         sportName: sports.name,
@@ -243,6 +246,7 @@ export class ActivityService {
         sportId: activities.sportId,
         creatorId: activities.creatorId,
         territoryId: activities.territoryId,
+        carpoolEnabled: activities.carpoolEnabled,
         createdAt: activities.createdAt,
         updatedAt: activities.updatedAt,
         sportName: sports.name,

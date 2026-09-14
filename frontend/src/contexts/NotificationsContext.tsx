@@ -11,7 +11,12 @@ import { useAuth } from "./AuthContext";
 
 export interface AppNotification {
   id: string;
-  type: "PARTICIPATION_ACCEPTED" | "PARTICIPATION_REQUESTED" | "NEW_MESSAGE" | string;
+  type:
+    | "PARTICIPATION_ACCEPTED"
+    | "PARTICIPATION_REQUESTED"
+    | "NEW_MESSAGE"
+    | "CARPOOL_REQUESTED"
+    | string;
   contenu: string | null;
   estLu: boolean | null;
   activityId: string | null;
@@ -39,7 +44,11 @@ type NotificationsContextType = {
 // acceptée) : c'est ce qui alimente le badge sur l'onglet "Activités"
 // (cf. BottomNavBar / Header), séparément des messages. Exporté pour que la
 // page Mes activités puisse marquer les siennes comme lues à la visite.
-export const ACTIVITY_NOTIFICATION_TYPES = new Set(["PARTICIPATION_REQUESTED", "PARTICIPATION_ACCEPTED"]);
+export const ACTIVITY_NOTIFICATION_TYPES = new Set([
+  "PARTICIPATION_REQUESTED",
+  "PARTICIPATION_ACCEPTED",
+  "CARPOOL_REQUESTED",
+]);
 
 const NotificationsContext = createContext<NotificationsContextType | null>(null);
 

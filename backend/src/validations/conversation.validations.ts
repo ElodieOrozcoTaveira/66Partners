@@ -4,6 +4,11 @@ export const activityIdParamSchema = z.object({
   activityId: z.uuid("Identifiant d'activité invalide"),
 });
 
+// GET /api/activities/:activityId/conversation?carpool=<participantId>
+export const activityConversationQuerySchema = z.object({
+  carpool: z.uuid("Identifiant de participant invalide").optional(),
+});
+
 export const conversationIdParamSchema = z.object({
   id: z.uuid("Identifiant de conversation invalide"),
 });

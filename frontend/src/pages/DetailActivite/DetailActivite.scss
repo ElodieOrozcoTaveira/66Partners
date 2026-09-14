@@ -273,6 +273,21 @@
     color: #15803d;
   }
 
+  &__carpool {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(230, 57, 46, 0.1);
+    color: variables.$rouge;
+    font-family: "Inter", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
   &__actions {
     display: flex;
     gap: 0.4rem;
@@ -407,5 +422,61 @@
     background: rgba(15, 23, 42, 0.65);
     color: #ffffff;
     cursor: pointer;
+  }
+}
+
+.detailactivite-page__carpool {
+  padding: 1rem;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  h2 {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: variables.$nuit;
+  }
+}
+
+.detailactivite-page__carpool-text {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  color: rgba(variables.$nuit, 0.75);
+}
+
+.detailactivite-page__carpool-link {
+  align-self: flex-start;
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: variables.$rouge;
+  text-decoration: none;
+}
+
+.carpool-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: variables.$rouge;
+  }
+
+  &__title {
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: variables.$nuit;
   }
 }

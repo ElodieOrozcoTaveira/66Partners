@@ -28,6 +28,7 @@ export const createActivitySchema = z.object({
     .gt(1, "Le nombre maximum de participants doit être supérieur à 1"),
   sportId: z.uuid("Identifiant de sport invalide"),
   territoryId: z.uuid("Identifiant de territoire invalide").optional(),
+  carpoolEnabled: z.boolean().optional(),
 });
 
 export type CreateActivityInput = z.infer<typeof createActivitySchema>;
@@ -50,6 +51,7 @@ export const updateActivitySchema = z
       .gt(1, "Le nombre maximum de participants doit être supérieur à 1"),
     status: statusSchema,
     sportId: z.uuid("Identifiant de sport invalide"),
+    carpoolEnabled: z.boolean(),
   })
   .partial()
   .refine((data) => Object.keys(data).length > 0, {

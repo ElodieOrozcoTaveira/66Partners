@@ -19,6 +19,8 @@ DELETE /activities/:id
 POST /activities/:id/join
 GET /activities/:id/my-participation
 GET /activities/:id/participations
+POST /activities/:id/carpool
+DELETE /activities/:id/carpool
 */
 
 const router = Router();
@@ -65,6 +67,18 @@ router.get(
   requireAuth,
   validate({ params: activityIdParamSchema }),
   ParticipationController.listForActivity
+);
+router.post(
+  "/:id/carpool",
+  requireAuth,
+  validate({ params: activityIdParamSchema }),
+  ParticipationController.requestCarpool
+);
+router.delete(
+  "/:id/carpool",
+  requireAuth,
+  validate({ params: activityIdParamSchema }),
+  ParticipationController.cancelCarpoolRequest
 );
 
 export default router;
