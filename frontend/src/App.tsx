@@ -29,6 +29,8 @@ import AdminLogin from "./pages/AdminLogin/AdminLogin";
 import AdminMotDePasseOublie from "./pages/AdminMotDePasseOublie/AdminMotDePasseOublie";
 import AdminReinitialiserMotDePasse from "./pages/AdminReinitialiserMotDePasse/AdminReinitialiserMotDePasse";
 import AdminStats from "./pages/AdminStats/AdminStats";
+import AdminUsers from "./pages/AdminUsers/AdminUsers";
+import AdminActivities from "./pages/AdminActivities/AdminActivities";
 import AdminSettings from "./pages/AdminSettings/AdminSettings";
 
 
@@ -82,6 +84,8 @@ export default function App() {
           <Route path="/admin/reinitialiser-mot-de-passe" element={<AdminReinitialiserMotDePasse />} />
           <Route element={<AdminAccessGate />}>
             <Route path="/admin/stats" element={<AdminStats />} />
+            <Route path="/admin/utilisateurs" element={<AdminUsers />} />
+            <Route path="/admin/activites" element={<AdminActivities />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
         </Routes>

@@ -9,6 +9,7 @@ import {
   messages,
   notifications,
   participations,
+  sports,
   territories,
   userTerritories,
   users,
@@ -409,5 +410,65 @@ export class AdminStatsService {
     }
 
     return items;
+  }
+}
+
+export interface AdminUserListItem {
+  id: string;
+  pseudo: string;
+  city: string | null;
+  avatar: string | null;
+  createdAt: string;
+}
+
+export class AdminUsersService {
+  static async list(): Promise<AdminUserListItem[]> {
+    const rows = await db
+      .select({
+        id: users.id,
+        pseudo: users.pseudo,
+        city: users.city,
+        avatar: users.avatar,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt));
+
+    return rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }));
+  }
+}
+
+export interface AdminActivityListItem {
+  id: string;
+  title: string;
+  city: string;
+  startDate: string;
+  creatorPseudo: string;
+  createdAt: string;
+  sportName: string;
+}
+
+export class AdminActivitiesService {
+  static async list(): Promise<AdminActivityListItem[]> {
+    const rows = await db
+      .select({
+        id: activities.id,
+        title: activities.title,
+        city: activities.city,
+        startDate: activities.startDate,
+        creatorPseudo: users.pseudo,
+        createdAt: activities.createdAt,
+        sportName: sports.name,
+      })
+      .from(activities)
+      .innerJoin(users, eq(users.id, activities.creatorId))
+      .innerJoin(sports, eq(sports.id, activities.sportId))
+      .orderBy(desc(activities.createdAt));
+
+    return rows.map((row) => ({
+      ...row,
+      startDate: row.startDate.toISOString(),
+      createdAt: row.createdAt.toISOString(),
+    }));
   }
 }

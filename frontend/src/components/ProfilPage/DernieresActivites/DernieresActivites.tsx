@@ -16,6 +16,8 @@ interface Activity {
   sportName: string;
   participantsCount: number;
   creatorId: string;
+  creatorPseudo: string;
+  creatorAvatar: string | null;
 }
 
 interface ActivitiesResponse {
@@ -130,6 +132,14 @@ export default function DernieresActivites({ userId }: DernieresActivitesProps) 
                     {formatDayMonthYear(startDate)} · {activity.participantsCount} participant
                     {activity.participantsCount > 1 ? "s" : ""}
                   </p>
+                  <span className="dernieresActivites-card__creator">
+                    <img
+                      src={activity.creatorAvatar || "/avatardefault.webp"}
+                      alt={activity.creatorPseudo}
+                      className="dernieresActivites-card__creator-avatar"
+                    />
+                    Organisée par {activity.creatorPseudo}
+                  </span>
                   {status && (
                     <span
                       className={`dernieresActivites-card__status dernieresActivites-card__status--${status.tone}`}

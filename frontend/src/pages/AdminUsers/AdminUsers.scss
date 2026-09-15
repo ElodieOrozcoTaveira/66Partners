@@ -1,0 +1,149 @@
+@use "../../styles/variables/variables.scss";
+
+.admin-users-page {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background-color: #f8f9fa;
+  padding-top: 1.25rem;
+  padding-bottom: 84px;
+
+  @media (min-width: variables.$laptop) {
+    padding-bottom: 2rem;
+  }
+}
+
+.admin-users-page__body {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  @media (min-width: variables.$tablet) {
+    max-width: 720px;
+    padding: 0 2rem;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: variables.$desktop) {
+    max-width: 900px;
+  }
+}
+
+.admin-users-page__header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  h1 {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: variables.$nuit;
+  }
+
+  p {
+    margin: 0.15rem 0 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #64748b;
+  }
+}
+
+.admin-users-page__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  color: variables.$nuit;
+}
+
+.admin-users-page__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-users-page__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.admin-users-page__avatar {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.admin-users-page__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+
+  strong {
+    font-family: "Inter", sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: variables.$nuit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.admin-users-page__city {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.admin-users-page__gap-top {
+  margin-top: 0.35rem;
+}
+
+.admin-users-page__date {
+  flex-shrink: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.admin-users-page__empty {
+  padding: 1.5rem;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  color: #64748b;
+  background: #ffffff;
+  border-radius: 16px;
+}

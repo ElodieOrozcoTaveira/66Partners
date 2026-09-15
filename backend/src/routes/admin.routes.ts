@@ -19,6 +19,8 @@ POST /admin/auth/reset-password
 GET /admin/stats/overview
 GET /admin/stats/user-evolution
 GET /admin/stats/territory-breakdown
+GET /admin/users
+GET /admin/activities
 */
 
 const router = Router();
@@ -50,5 +52,8 @@ router.get(
   validateQuery(statsRangeQuerySchema),
   AdminController.territoryBreakdown
 );
+
+router.get("/users", requireAdminAuth, AdminController.listUsers);
+router.get("/activities", requireAdminAuth, AdminController.listActivities);
 
 export default router;

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   CalendarRange,
@@ -36,6 +37,7 @@ type BlockState<T> =
   | { status: "ready"; data: T };
 
 export default function AdminStats() {
+  const navigate = useNavigate();
   const { unreadCount } = useNotifications();
   const [range, setRange] = useState<TimeRange>("30d");
 
@@ -128,6 +130,7 @@ export default function AdminStats() {
                 value={overviewData?.users.value ?? null}
                 deltaPct={overviewData?.users.deltaPct}
                 loading={overviewLoading}
+                onClick={() => navigate("/admin/utilisateurs")}
               />
               <StatCard
                 icon={CalendarDays}
@@ -136,6 +139,7 @@ export default function AdminStats() {
                 value={overviewData?.activities.value ?? null}
                 deltaPct={overviewData?.activities.deltaPct}
                 loading={overviewLoading}
+                onClick={() => navigate("/admin/activites")}
               />
               <StatCard
                 icon={Users}

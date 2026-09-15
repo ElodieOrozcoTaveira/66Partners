@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { getIconColor } from "../../../lib/sportVisuals";
@@ -12,6 +13,7 @@ interface StatCardProps {
   deltaPct?: number;
   loading?: boolean;
   suffix?: string;
+  onClick?: () => void;
 }
 
 const numberFormatter = new Intl.NumberFormat("fr-FR");
@@ -24,6 +26,7 @@ export default function StatCard({
   deltaPct,
   loading = false,
   suffix,
+  onClick,
 }: StatCardProps) {
   if (loading) {
     return (
@@ -39,7 +42,19 @@ export default function StatCard({
   const isPositive = (deltaPct ?? 0) >= 0;
 
   return (
-    <div className="admin-stat-card">
+    <div
+      className={`admin-stat-card${onClick ? " admin-stat-card--clickable" : ""}`}
+      {...(onClick
+        ? {
+            role: "button",
+            tabIndex: 0,
+            onClick,
+            onKeyDown: (e: KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") onClick();
+            },
+          }
+        : {})}
+    >
       <span
         className="admin-stat-card__icon"
         style={{ backgroundColor: color, color: getIconColor(color) }}

@@ -1,5 +1,12 @@
 import type { Request, Response } from "express";
-import { AdminAuthError, AdminAuthService, AdminStatsService, type TimeRange } from "../services/admin.services.js";
+import {
+  AdminActivitiesService,
+  AdminAuthError,
+  AdminAuthService,
+  AdminStatsService,
+  AdminUsersService,
+  type TimeRange,
+} from "../services/admin.services.js";
 
 /**
  * CONTRÔLEUR ADMIN
@@ -143,6 +150,40 @@ export class AdminController {
       res.status(500).json({
         success: false,
         message: "Erreur interne lors de la récupération de la répartition par territoire",
+      });
+    }
+  }
+
+  /**
+   * GET /api/admin/users
+   */
+  static async listUsers(_req: Request, res: Response): Promise<void> {
+    try {
+      const users = await AdminUsersService.list();
+
+      res.status(200).json({ success: true, users });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des utilisateurs:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération des utilisateurs",
+      });
+    }
+  }
+
+  /**
+   * GET /api/admin/activities
+   */
+  static async listActivities(_req: Request, res: Response): Promise<void> {
+    try {
+      const activities = await AdminActivitiesService.list();
+
+      res.status(200).json({ success: true, activities });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des activités:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération des activités",
       });
     }
   }

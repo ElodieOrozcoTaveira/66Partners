@@ -13,6 +13,24 @@
   min-width: 0;
 }
 
+.admin-stat-card--clickable {
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid variables.$rouge2;
+    outline-offset: 2px;
+  }
+}
+
 .admin-stat-card__gap-top {
   margin-top: 0.35rem;
 }

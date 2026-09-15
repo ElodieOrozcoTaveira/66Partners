@@ -9,6 +9,7 @@ import {
   sportLevelEnum,
   sports,
   territories,
+  users,
 } from "../db/schema.js";
 import { TerritoryService } from "./territory.services.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
@@ -29,6 +30,8 @@ export type Activity = typeof activities.$inferSelect;
 export type ActivityWithDetails = Activity & {
   sportName: string;
   participantsCount: number;
+  creatorPseudo: string;
+  creatorAvatar: string | null;
 };
 
 export interface ActivityCreateInput {
@@ -173,12 +176,15 @@ export class ActivityService {
         updatedAt: activities.updatedAt,
         sportName: sports.name,
         participantsCount: sql<number>`count(distinct case when ${participations.status} = 'ACCEPTED' then ${participations.id} end)`,
+        creatorPseudo: users.pseudo,
+        creatorAvatar: users.avatar,
       })
       .from(activities)
       .innerJoin(sports, eq(sports.id, activities.sportId))
+      .innerJoin(users, eq(users.id, activities.creatorId))
       .leftJoin(participations, eq(participations.activityId, activities.id))
       .where(eq(activities.id, activityId))
-      .groupBy(activities.id, sports.name)
+      .groupBy(activities.id, sports.name, users.pseudo, users.avatar)
       .limit(1);
 
     if (!activity) return null;
@@ -251,13 +257,16 @@ export class ActivityService {
         updatedAt: activities.updatedAt,
         sportName: sports.name,
         participantsCount: sql<number>`count(distinct case when ${participations.status} = 'ACCEPTED' then ${participations.id} end)`,
+        creatorPseudo: users.pseudo,
+        creatorAvatar: users.avatar,
       })
       .from(activities)
       .innerJoin(sports, eq(sports.id, activities.sportId))
       .innerJoin(territories, eq(territories.id, activities.territoryId))
+      .innerJoin(users, eq(users.id, activities.creatorId))
       .leftJoin(participations, eq(participations.activityId, activities.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .groupBy(activities.id, sports.name)
+      .groupBy(activities.id, sports.name, users.pseudo, users.avatar)
       .orderBy(activities.startDate);
 
     return rows.map((row) => ({
