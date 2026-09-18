@@ -32,7 +32,7 @@ export default function ModaleContent({
   onClose,
   onSwitchToRegister,
 }: ModaleContentProps) {
-  const { login } = useAuth();
+  const { login, getLastLoginFailureReason } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -99,11 +99,15 @@ export default function ModaleContent({
     setError(null);
     setIsSubmitting(true);
     try {
+      // Seul un échec de CET appel (401, réseau...) constitue un véritable
+      // échec d'authentification — tout ce qui suit (login()) ne doit jamais
+      // basculer vers l'inscription, cf. rapport § bug inscription→connexion.
       const res = await api.post<LoginResponse>("/api/auth/login", {
         email,
         password,
       });
       console.debug("ModaleContent: login response", res.data);
+
       const ok = await login(res.data.token);
       if (ok) {
         if (googleAuth.state.step === "linkPending") {
@@ -113,6 +117,10 @@ export default function ModaleContent({
         }
         onClose();
         navigate("/dashboard");
+      } else if (getLastLoginFailureReason() === "storage") {
+        setError(
+          "Ton navigateur bloque la mémorisation de la connexion (navigation privée ou extension). Autorise le stockage local pour te connecter.",
+        );
       } else {
         setError("Impossible de récupérer le profil. Réessaie plus tard.");
       }

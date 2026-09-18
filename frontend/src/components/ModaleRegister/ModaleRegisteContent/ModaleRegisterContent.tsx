@@ -34,7 +34,7 @@ export default function ModaleRegisterContent({
   onClose,
   onSwitchToLogin,
 }: ModaleContentProps) {
-  const { login } = useAuth();
+  const { login, getLastLoginFailureReason } = useAuth();
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -134,12 +134,19 @@ export default function ModaleRegisterContent({
         termsAccepted,
       });
       console.debug("ModaleRegister: register response", res.data);
+      // Le compte est déjà créé côté backend à ce stade (201 reçu) : une
+      // erreur ici ne doit jamais être présentée comme un échec de
+      // création de compte, cf. rapport § bug inscription→connexion.
       const ok = await login(res.data.token);
       if (ok) {
         onClose();
         setShowWelcome(true);
+      } else if (getLastLoginFailureReason() === "storage") {
+        setError(
+          "Ton compte a été créé, mais ton navigateur bloque la mémorisation de la connexion (navigation privée ou extension). Connecte-toi manuellement.",
+        );
       } else {
-        setError("Impossible de récupérer le profil après inscription.");
+        setError("Ton compte a été créé, mais impossible de récupérer ton profil. Réessaie de te connecter.");
       }
     } catch (err) {
       const message =
