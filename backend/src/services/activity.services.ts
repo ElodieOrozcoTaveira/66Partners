@@ -30,7 +30,10 @@ export type Activity = typeof activities.$inferSelect;
 export type ActivityWithDetails = Activity & {
   sportName: string;
   participantsCount: number;
-  creatorPseudo: string;
+  // Nullable : le créateur peut avoir supprimé son compte (creatorId passe
+  // alors à null, cf. schema.ts) — l'activité reste visible et fonctionnelle
+  // pour les autres participants, seule l'identité du créateur disparaît.
+  creatorPseudo: string | null;
   creatorAvatar: string | null;
 };
 
@@ -181,7 +184,7 @@ export class ActivityService {
       })
       .from(activities)
       .innerJoin(sports, eq(sports.id, activities.sportId))
-      .innerJoin(users, eq(users.id, activities.creatorId))
+      .leftJoin(users, eq(users.id, activities.creatorId))
       .leftJoin(participations, eq(participations.activityId, activities.id))
       .where(eq(activities.id, activityId))
       .groupBy(activities.id, sports.name, users.pseudo, users.avatar)
@@ -263,7 +266,7 @@ export class ActivityService {
       .from(activities)
       .innerJoin(sports, eq(sports.id, activities.sportId))
       .innerJoin(territories, eq(territories.id, activities.territoryId))
-      .innerJoin(users, eq(users.id, activities.creatorId))
+      .leftJoin(users, eq(users.id, activities.creatorId))
       .leftJoin(participations, eq(participations.activityId, activities.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .groupBy(activities.id, sports.name, users.pseudo, users.avatar)

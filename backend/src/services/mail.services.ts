@@ -2,6 +2,7 @@ import "dotenv/config";
 import nodemailer from "nodemailer";
 import { welcomeEmailTemplate } from "./emailTemplates/welcome.template.js";
 import { resetPasswordEmailTemplate } from "./emailTemplates/resetPassword.template.js";
+import { accountDeletedEmailTemplate } from "./emailTemplates/accountDeleted.template.js";
 
 const transporter = nodemailer.createTransport({
   host: "ssl0.ovh.net",
@@ -46,6 +47,16 @@ export async function sendAdminResetPasswordEmail(resetUrl: string): Promise<voi
     to,
     subject: "Réinitialise le mot de passe administrateur 66Partners",
     html: resetPasswordEmailTemplate("Administrateur", resetUrl),
+  });
+}
+
+export async function sendAccountDeletedEmail(user: { email: string; pseudo: string }) {
+  await transporter.sendMail({
+    from: `"66Partners" <${process.env.SMTP_USER}>`,
+    replyTo: "contact@66partners.fr",
+    to: user.email,
+    subject: "Votre compte 66Partners a été supprimé",
+    html: accountDeletedEmailTemplate(user.pseudo),
   });
 }
 

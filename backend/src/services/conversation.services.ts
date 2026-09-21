@@ -539,7 +539,9 @@ export class ConversationService {
     if (!activity) return;
 
     const recipientId = senderId === activity.creatorId ? participantId : activity.creatorId;
-    if (recipientId === senderId) return;
+    // Le créateur peut avoir supprimé son compte (creatorId -> null) : plus
+    // personne à notifier côté "créateur", le fil reste néanmoins utilisable.
+    if (!recipientId || recipientId === senderId) return;
 
     const [sender] = await db
       .select({ pseudo: users.pseudo })
@@ -582,10 +584,14 @@ export class ConversationService {
         and(eq(participations.activityId, activityId), eq(participations.status, "ACCEPTED"))
       );
 
-    const recipientIds = new Set<string>([
-      activity.creatorId,
-      ...acceptedParticipants.map((row) => row.userId),
-    ]);
+    // Le créateur peut avoir supprimé son compte (creatorId -> null) : il
+    // est simplement exclu des destinataires, les autres participants
+    // continuent de recevoir la notification normalement.
+    const recipientIds = new Set<string>(
+      [activity.creatorId, ...acceptedParticipants.map((row) => row.userId)].filter(
+        (id): id is string => id !== null,
+      ),
+    );
     recipientIds.delete(senderId);
 
     await Promise.all(

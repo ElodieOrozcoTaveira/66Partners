@@ -15,8 +15,9 @@ interface Activity {
   status: string;
   sportName: string;
   participantsCount: number;
-  creatorId: string;
-  creatorPseudo: string;
+  // Nullable : le créateur a pu supprimer son compte, l'activité reste visible.
+  creatorId: string | null;
+  creatorPseudo: string | null;
   creatorAvatar: string | null;
 }
 
@@ -135,10 +136,12 @@ export default function DernieresActivites({ userId }: DernieresActivitesProps) 
                   <span className="dernieresActivites-card__creator">
                     <img
                       src={activity.creatorAvatar || "/avatardefault.webp"}
-                      alt={activity.creatorPseudo}
+                      alt={activity.creatorPseudo ?? "Compte supprimé"}
                       className="dernieresActivites-card__creator-avatar"
                     />
-                    Organisée par {activity.creatorPseudo}
+                    {activity.creatorPseudo
+                      ? `Organisée par ${activity.creatorPseudo}`
+                      : "Organisateur du compte supprimé"}
                   </span>
                   {status && (
                     <span

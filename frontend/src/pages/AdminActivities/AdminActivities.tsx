@@ -90,7 +90,7 @@ export default function AdminActivities() {
                     </span>
                     <span className="admin-activities-page__meta-item">
                       <User size={12} strokeWidth={2.2} />
-                      {activity.creatorPseudo}
+                      {activity.creatorPseudo ?? "Compte supprimé"}
                     </span>
                   </span>
                 </div>

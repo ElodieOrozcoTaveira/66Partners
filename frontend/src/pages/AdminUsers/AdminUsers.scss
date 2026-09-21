@@ -138,6 +138,25 @@
   white-space: nowrap;
 }
 
+.admin-users-page__delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(198, 40, 40, 0.1);
+    color: #c62828;
+  }
+}
+
 .admin-users-page__empty {
   padding: 1.5rem;
   text-align: center;

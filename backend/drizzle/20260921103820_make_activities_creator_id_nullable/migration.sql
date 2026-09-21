@@ -1,0 +1,2 @@
+ALTER TABLE "activities" ALTER COLUMN "creator_id" DROP NOT NULL;--> statement-breakpoint
+ALTER TABLE "activities" DROP CONSTRAINT "activities_creator_id_users_id_fkey", ADD CONSTRAINT "activities_creator_id_users_id_fkey" FOREIGN KEY ("creator_id") REFERENCES "users"("id") ON DELETE SET NULL;

@@ -14,7 +14,7 @@ interface Activity {
   startDate: string;
   status: string;
   sportName: string;
-  creatorId: string;
+  creatorId: string | null;
 }
 
 interface ActivitiesResponse {

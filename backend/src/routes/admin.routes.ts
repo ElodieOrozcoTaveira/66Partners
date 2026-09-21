@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AdminController } from "../controllers/admin.controller.js";
 import { requireAdminAuth } from "../middlewares/adminAuth.middleware.js";
-import { validateBody, validateQuery } from "../middlewares/validation.middleware.js";
+import { validateBody, validateParams, validateQuery } from "../middlewares/validation.middleware.js";
 import {
   adminForgotPasswordLimiter,
   adminResetPasswordLimiter,
@@ -9,6 +9,7 @@ import {
 import {
   adminLoginSchema,
   adminResetPasswordSchema,
+  adminUserIdParamSchema,
   statsRangeQuerySchema,
 } from "../validations/admin.validations.js";
 
@@ -20,6 +21,7 @@ GET /admin/stats/overview
 GET /admin/stats/user-evolution
 GET /admin/stats/territory-breakdown
 GET /admin/users
+DELETE /admin/users/:userId
 GET /admin/activities
 */
 
@@ -54,6 +56,12 @@ router.get(
 );
 
 router.get("/users", requireAdminAuth, AdminController.listUsers);
+router.delete(
+  "/users/:userId",
+  requireAdminAuth,
+  validateParams(adminUserIdParamSchema),
+  AdminController.deleteUser
+);
 router.get("/activities", requireAdminAuth, AdminController.listActivities);
 
 export default router;

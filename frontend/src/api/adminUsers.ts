@@ -17,3 +17,7 @@ export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
   );
   return res.data.users;
 }
+
+export async function deleteAdminUser(userId: string): Promise<void> {
+  await adminApi.delete(`/api/admin/users/${userId}`);
+}

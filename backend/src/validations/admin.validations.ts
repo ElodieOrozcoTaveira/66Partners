@@ -30,3 +30,10 @@ export const statsRangeQuerySchema = z.object({
 });
 
 export type StatsRangeQuery = z.infer<typeof statsRangeQuerySchema>;
+
+/**
+ * DELETE /admin/users/:userId
+ */
+export const adminUserIdParamSchema = z.object({
+  userId: z.uuid("Identifiant utilisateur invalide"),
+});

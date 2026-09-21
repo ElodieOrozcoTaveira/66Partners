@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ArrowLeft, MapPin } from "lucide-react";
-import { fetchAdminUsers, type AdminUserListItem } from "../../api/adminUsers";
+import { ArrowLeft, MapPin, Trash2 } from "lucide-react";
+import { isAxiosError } from "axios";
+import { deleteAdminUser, fetchAdminUsers, type AdminUserListItem } from "../../api/adminUsers";
 import AdminBottomNav from "../../components/AdminComponents/AdminBottomNav/AdminBottomNav";
+import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import Skeleton from "../../components/AdminComponents/Skeleton/Skeleton";
 import "./AdminUsers.scss";
@@ -16,6 +18,9 @@ const dateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: 
 
 export default function AdminUsers() {
   const [state, setState] = useState<ListState>({ status: "loading" });
+  const [deleteTarget, setDeleteTarget] = useState<AdminUserListItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setState({ status: "loading" });
@@ -27,6 +32,25 @@ export default function AdminUsers() {
   useEffect(() => {
     load();
   }, [load]);
+
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAdminUser(deleteTarget.id);
+      setDeleteTarget(null);
+      load();
+    } catch (err) {
+      const message =
+        isAxiosError<{ message?: string }>(err) && err.response?.data?.message
+          ? err.response.data.message
+          : "Impossible de supprimer ce compte pour le moment.";
+      setDeleteError(message);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <div className="admin-users-page">
@@ -80,6 +104,14 @@ export default function AdminUsers() {
                   </span>
                 </div>
                 <span className="admin-users-page__date">{dateFormatter.format(new Date(user.createdAt))}</span>
+                <button
+                  type="button"
+                  className="admin-users-page__delete"
+                  onClick={() => setDeleteTarget(user)}
+                  aria-label={`Supprimer le compte de ${user.pseudo}`}
+                >
+                  <Trash2 size={16} strokeWidth={2.2} />
+                </button>
               </li>
             ))}
             {state.data.length === 0 && (
@@ -89,6 +121,19 @@ export default function AdminUsers() {
         )}
       </div>
       <AdminBottomNav />
+
+      <ConfirmDialog
+        isOpen={deleteTarget !== null}
+        title={`Supprimer le compte de ${deleteTarget?.pseudo ?? ""} ?`}
+        description="Cette action est définitive : le compte et les données personnelles associées seront supprimés. Les activités créées par cet utilisateur resteront visibles pour les autres participants."
+        isSubmitting={isDeleting}
+        errorMessage={deleteError}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setDeleteTarget(null);
+          setDeleteError(null);
+        }}
+      />
     </div>
   );
 }

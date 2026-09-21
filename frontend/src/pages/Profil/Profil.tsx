@@ -1,4 +1,5 @@
 import AproposProfile from "../../components/ProfilPage/A propos/Apropos";
+import CompteDanger from "../../components/ProfilPage/CompteDanger/CompteDanger";
 import Dispo from "../../components/ProfilPage/Dispo/Dispo";
 import DernieresActivites from "../../components/ProfilPage/DernieresActivites/DernieresActivites";
 import HeroProfile from "../../components/ProfilPage/HeroProfil/HeroProfile";
@@ -26,6 +27,7 @@ export default function Profil() {
         <MesSports userId={user?.id ?? null} />
         <Dispo userId={user?.id ?? null} />
         <DernieresActivites userId={user?.id ?? null} />
+        <CompteDanger />
       </div>
     </div>
   );

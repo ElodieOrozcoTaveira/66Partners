@@ -14,7 +14,7 @@ const ORGANIZED_COLOR = "#C62828";
 
 interface Activity {
   id: string;
-  creatorId: string;
+  creatorId: string | null;
   participantsCount: number;
   status: string;
 }

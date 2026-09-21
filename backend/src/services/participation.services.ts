@@ -149,14 +149,18 @@ export class ParticipationService {
       .where(eq(users.id, userId))
       .limit(1);
 
-    NotificationService.create({
-      usersId: activity.creatorId,
-      type: "PARTICIPATION_REQUESTED",
-      contenu: `${requester?.pseudo ?? "Quelqu'un"} veut rejoindre "${activity.title}"`,
-      activityId: activity.id,
-    }).catch((err) =>
-      console.error("Erreur création notification (demande de participation):", err),
-    );
+    // Le créateur peut avoir supprimé son compte (creatorId -> null) :
+    // personne à notifier, l'activité reste fonctionnelle sans notification.
+    if (activity.creatorId) {
+      NotificationService.create({
+        usersId: activity.creatorId,
+        type: "PARTICIPATION_REQUESTED",
+        contenu: `${requester?.pseudo ?? "Quelqu'un"} veut rejoindre "${activity.title}"`,
+        activityId: activity.id,
+      }).catch((err) =>
+        console.error("Erreur création notification (demande de participation):", err),
+      );
+    }
 
     return newParticipation;
   }
@@ -439,15 +443,17 @@ export class ParticipationService {
         .where(eq(users.id, userId))
         .limit(1);
 
-      NotificationService.create({
-        usersId: activity.creatorId,
-        type: "CARPOOL_REQUESTED",
-        contenu: `${requester?.pseudo ?? "Un participant"} souhaite covoiturer pour "${activity.title}"`,
-        activityId: activity.id,
-        carpoolParticipantId: userId,
-      }).catch((err) =>
-        console.error("Erreur création notification (covoiturage):", err),
-      );
+      if (activity.creatorId) {
+        NotificationService.create({
+          usersId: activity.creatorId,
+          type: "CARPOOL_REQUESTED",
+          contenu: `${requester?.pseudo ?? "Un participant"} souhaite covoiturer pour "${activity.title}"`,
+          activityId: activity.id,
+          carpoolParticipantId: userId,
+        }).catch((err) =>
+          console.error("Erreur création notification (covoiturage):", err),
+        );
+      }
     }
 
     return {

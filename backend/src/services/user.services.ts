@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { and, eq, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { activities, activityPhotos, sportLevelEnum, sports, userSports, users } from "../db/schema.js";
+import { sportLevelEnum, sports, userSports, users } from "../db/schema.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -181,40 +181,9 @@ export class UserService {
     return toProfile(updatedUser);
   }
 
-  /**
-   * Suppression d'un utilisateur
-   */
-  static async deleteUser(userId: string): Promise<void> {
-    const [existingUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (!existingUser) {
-      throw new UserError("Utilisateur non trouvé", "USER_NOT_FOUND", 404);
-    }
-
-    // Photos qui vont disparaître en cascade (uploadées par lui, ou
-    // appartenant à une activité qu'il a créée) : à capturer AVANT la
-    // suppression, sans quoi les lignes ne seront plus interrogeables —
-    // cf. chantier RGPD F-04.
-    const relatedPhotos = await db
-      .selectDistinct({ url: activityPhotos.url })
-      .from(activityPhotos)
-      .leftJoin(activities, eq(activities.id, activityPhotos.activityId))
-      .where(
-        or(eq(activityPhotos.uploaderId, userId), eq(activities.creatorId, userId))
-      );
-
-    await db.delete(users).where(eq(users.id, userId));
-
-    await deleteUploadedFileIfUnreferenced(existingUser.avatar);
-    await deleteUploadedFileIfUnreferenced(existingUser.coverPhoto);
-    await Promise.all(
-      relatedPhotos.map((photo) => deleteUploadedFileIfUnreferenced(photo.url))
-    );
-  }
+  // Suppression d'un compte : voir AccountDeletionService.deleteAccount,
+  // point d'entrée unique partagé avec le parcours admin (cf. chantier
+  // suppression de compte — éviter toute divergence entre les deux).
 
   /**
    * Liste des sports pratiqués par un utilisateur, avec leur niveau

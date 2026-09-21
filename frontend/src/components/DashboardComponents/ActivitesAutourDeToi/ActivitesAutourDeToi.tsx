@@ -21,7 +21,7 @@ interface Activity {
   sportName: string;
   participantsCount: number;
   createdAt: string;
-  creatorId: string;
+  creatorId: string | null;
 }
 
 interface ActivitiesResponse {

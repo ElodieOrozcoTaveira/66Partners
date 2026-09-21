@@ -8,7 +8,8 @@ export interface AdminActivityListItem {
   title: string;
   city: string;
   startDate: string;
-  creatorPseudo: string;
+  // Nullable : le créateur a pu supprimer son compte, l'activité reste listée.
+  creatorPseudo: string | null;
   createdAt: string;
   sportName: string;
 }

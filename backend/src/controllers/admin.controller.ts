@@ -7,6 +7,7 @@ import {
   AdminUsersService,
   type TimeRange,
 } from "../services/admin.services.js";
+import { UserError } from "../services/user.services.js";
 
 /**
  * CONTRÔLEUR ADMIN
@@ -184,6 +185,32 @@ export class AdminController {
       res.status(500).json({
         success: false,
         message: "Erreur interne lors de la récupération des activités",
+      });
+    }
+  }
+
+  /**
+   * DELETE /api/admin/users/:userId
+   */
+  static async deleteUser(req: Request, res: Response): Promise<void> {
+    try {
+      await AdminUsersService.delete(req.params.userId as string);
+
+      res.status(200).json({ success: true, message: "Compte supprimé" });
+    } catch (error) {
+      if (error instanceof UserError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      console.error("Erreur lors de la suppression de l'utilisateur:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la suppression de l'utilisateur",
       });
     }
   }

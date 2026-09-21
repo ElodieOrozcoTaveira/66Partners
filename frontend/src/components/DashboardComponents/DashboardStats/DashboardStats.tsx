@@ -8,7 +8,7 @@ interface Activity {
   id: string;
   startDate: string;
   status: string;
-  creatorId: string;
+  creatorId: string | null;
   participantsCount: number;
 }
 

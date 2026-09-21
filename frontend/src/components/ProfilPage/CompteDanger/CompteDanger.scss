@@ -1,0 +1,69 @@
+@use "../../../styles/variables/variables.scss";
+
+.container-compteDanger {
+  padding-bottom: 1.5rem;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 0 0.6rem;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: variables.$nuit;
+  }
+}
+
+.compteDanger-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(198, 40, 40, 0.12);
+
+  &__text {
+    h3 {
+      margin: 0 0 0.3rem;
+      font-family: "Manrope", sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: variables.$nuit;
+    }
+
+    p {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: #64748b;
+    }
+  }
+
+  &__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.65rem 1rem;
+    border-radius: 999px;
+    border: 1px solid variables.$rouge2;
+    background: #ffffff;
+    color: variables.$rouge2;
+    font-family: "Inter", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    align-self: flex-start;
+
+    &:hover {
+      background: variables.$rouge2;
+      color: #ffffff;
+    }
+  }
+}

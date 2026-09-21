@@ -135,7 +135,12 @@ export const activities = pgTable("activities", {
   maxParticipants: integer("max_participants").notNull(),
   status: activitiesStatusEnum("status").notNull().default("PENDING"),
   sportId: uuid("sport_id").notNull().references(() => sports.id),
-  creatorId: uuid("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // Nullable : quand le créateur supprime son compte, l'activité reste
+  // visible et fonctionnelle pour les autres participants (cf. chantier
+  // suppression de compte) — le créateur est détaché (SET NULL), jamais
+  // réassigné à un compte système artificiel, jamais l'activité elle-même
+  // supprimée en cascade.
+  creatorId: uuid("creator_id").references(() => users.id, { onDelete: "set null" }),
   // Territoire dans lequel l'activité se déroule (pas le territoire
   // d'origine du créateur). Backfillé pour les données existantes
   // (cf. seed-territories.ts) avant ce passage en NOT NULL.

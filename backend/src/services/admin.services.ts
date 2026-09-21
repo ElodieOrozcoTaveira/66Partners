@@ -16,6 +16,7 @@ import {
 } from "../db/schema.js";
 import { signAdminToken } from "../utils/adminJwt.js";
 import { sendAdminResetPasswordEmail } from "./mail.services.js";
+import { AccountDeletionService } from "./accountDeletion.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -436,6 +437,13 @@ export class AdminUsersService {
 
     return rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }));
   }
+
+  // Délègue entièrement à AccountDeletionService (même logique que le
+  // parcours utilisateur, cf. chantier suppression de compte) : ce service
+  // ne fait qu'exposer l'action côté admin, jamais sa propre suppression.
+  static async delete(userId: string): Promise<void> {
+    await AccountDeletionService.deleteAccount(userId, "ADMIN");
+  }
 }
 
 export interface AdminActivityListItem {
@@ -443,7 +451,9 @@ export interface AdminActivityListItem {
   title: string;
   city: string;
   startDate: string;
-  creatorPseudo: string;
+  // Nullable : le créateur a pu supprimer son compte depuis (creatorId ->
+  // null), l'activité reste listée.
+  creatorPseudo: string | null;
   createdAt: string;
   sportName: string;
 }
@@ -461,7 +471,7 @@ export class AdminActivitiesService {
         sportName: sports.name,
       })
       .from(activities)
-      .innerJoin(users, eq(users.id, activities.creatorId))
+      .leftJoin(users, eq(users.id, activities.creatorId))
       .innerJoin(sports, eq(sports.id, activities.sportId))
       .orderBy(desc(activities.createdAt));
 

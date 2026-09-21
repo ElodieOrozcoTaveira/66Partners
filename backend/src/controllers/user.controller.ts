@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import type { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { UserService, UserError } from "../services/user.services.js";
+import { AccountDeletionService } from "../services/accountDeletion.services.js";
 
 /**
  * CONTRÔLEUR UTILISATEUR
@@ -242,7 +243,7 @@ export class UserController {
         return;
       }
 
-      await UserService.deleteUser(req.userId);
+      await AccountDeletionService.deleteAccount(req.userId, "USER");
 
       res.status(200).json({
         success: true,

@@ -24,7 +24,9 @@ interface ActivityDetail {
   status: ActivityStatus;
   sportId: string;
   sportName: string;
-  creatorId: string;
+  // Nullable : le créateur a pu supprimer son compte (cf. chantier
+  // suppression de compte) — l'activité reste visible, sans créateur.
+  creatorId: string | null;
   carpoolEnabled: boolean;
 }
 

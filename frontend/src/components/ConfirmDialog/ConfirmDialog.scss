@@ -1,0 +1,145 @@
+@use "../../styles/variables/variables.scss";
+
+.confirm-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(31, 41, 55, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+  padding: 1rem;
+}
+
+.confirm-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem 1.5rem;
+  box-shadow: 0 12px 40px rgba(31, 41, 55, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  &__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: variables.$nuit;
+
+    &:hover {
+      color: variables.$rouge2;
+    }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(198, 40, 40, 0.1);
+    color: variables.$rouge2;
+    margin-bottom: 0.75rem;
+  }
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: variables.$nuit;
+  }
+
+  &__description {
+    margin: 0 0 1.25rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #4b5563;
+  }
+
+  &__label {
+    align-self: flex-start;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    color: variables.$nuit;
+    margin-bottom: 0.4rem;
+
+    strong {
+      color: variables.$rouge2;
+    }
+  }
+
+  &__input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.6rem;
+    border: 1px solid #d1d5db;
+    font-family: "Inter", sans-serif;
+    font-size: 0.9rem;
+    color: variables.$nuit;
+    margin-bottom: 0.5rem;
+
+    &:focus {
+      outline: none;
+      border-color: variables.$rouge2;
+    }
+  }
+
+  &__error {
+    align-self: flex-start;
+    margin: 0 0 0.75rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    color: variables.$rouge2;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 0.75rem;
+  }
+
+  &__cancel,
+  &__confirm {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s ease;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__cancel {
+    background: #f1f5f9;
+    color: variables.$nuit;
+  }
+
+  &__confirm {
+    background: variables.$rouge2;
+    color: #ffffff;
+  }
+}
