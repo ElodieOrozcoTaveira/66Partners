@@ -7,6 +7,7 @@ import {
   AdminUsersService,
   type TimeRange,
 } from "../services/admin.services.js";
+import { TerritoryError } from "../services/territory.services.js";
 import { UserError } from "../services/user.services.js";
 
 /**
@@ -107,11 +108,16 @@ export class AdminController {
    */
   static async statsOverview(req: Request, res: Response): Promise<void> {
     try {
-      const { range } = req.query as unknown as { range: TimeRange };
-      const overview = await AdminStatsService.getOverview(range);
+      const { range, territory } = req.query as unknown as { range: TimeRange; territory?: string };
+      const overview = await AdminStatsService.getOverview(range, territory);
 
       res.status(200).json({ success: true, overview });
     } catch (error) {
+      if (error instanceof TerritoryError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+
       console.error("Erreur lors de la récupération de la vue d'ensemble:", error);
       res.status(500).json({
         success: false,
@@ -125,11 +131,16 @@ export class AdminController {
    */
   static async userEvolution(req: Request, res: Response): Promise<void> {
     try {
-      const { range } = req.query as unknown as { range: TimeRange };
-      const points = await AdminStatsService.getUserEvolution(range);
+      const { range, territory } = req.query as unknown as { range: TimeRange; territory?: string };
+      const points = await AdminStatsService.getUserEvolution(range, territory);
 
       res.status(200).json({ success: true, points });
     } catch (error) {
+      if (error instanceof TerritoryError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+
       console.error("Erreur lors de la récupération de l'évolution des utilisateurs:", error);
       res.status(500).json({
         success: false,
@@ -158,12 +169,17 @@ export class AdminController {
   /**
    * GET /api/admin/users
    */
-  static async listUsers(_req: Request, res: Response): Promise<void> {
+  static async listUsers(req: Request, res: Response): Promise<void> {
     try {
-      const users = await AdminUsersService.list();
+      const users = await AdminUsersService.list(req.query.territory as string | undefined);
 
       res.status(200).json({ success: true, users });
     } catch (error) {
+      if (error instanceof TerritoryError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+
       console.error("Erreur lors de la récupération des utilisateurs:", error);
       res.status(500).json({
         success: false,
@@ -175,12 +191,17 @@ export class AdminController {
   /**
    * GET /api/admin/activities
    */
-  static async listActivities(_req: Request, res: Response): Promise<void> {
+  static async listActivities(req: Request, res: Response): Promise<void> {
     try {
-      const activities = await AdminActivitiesService.list();
+      const activities = await AdminActivitiesService.list(req.query.territory as string | undefined);
 
       res.status(200).json({ success: true, activities });
     } catch (error) {
+      if (error instanceof TerritoryError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+
       console.error("Erreur lors de la récupération des activités:", error);
       res.status(500).json({
         success: false,

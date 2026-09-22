@@ -26,12 +26,15 @@
 
     @media (min-width: variables.$laptop) {
       height: 250px;
-      background-position: center 42%;
+      // Remonte le cadrage pour dégager le pic du Canigou et la mer/drapeau
+      // catalan, sans laisser dépasser le logo 66Partners incrusté en haut
+      // de la photo de couverture par défaut.
+      background-position: center 72%;
     }
 
     @media (min-width: variables.$desktop) {
       height: 280px;
-      background-position: center 45%;
+      background-position: center 76%;
     }
 
     &::after {
@@ -304,7 +307,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: rgba(variables.$rouge2, 0.1);
+    background: variables.alpha(variables.$rouge2, 10%);
     color: variables.$rouge2;
     margin-top: 0.1rem;
   }
@@ -340,7 +343,7 @@
   }
 
   &--unread {
-    background: rgba(variables.$rouge2, 0.04);
+    background: variables.alpha(variables.$rouge2, 4%);
 
     .notification-item__text {
       font-weight: 700;

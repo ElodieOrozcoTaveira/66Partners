@@ -8,12 +8,13 @@ import { useHideOnScroll } from "../../hooks/useHideOnScroll";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotifications } from "../../contexts/NotificationsContext";
 import { useTerritory } from "../../contexts/TerritoryContext";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 const PUBLIC_NAV_LINKS = [
   { to: "/", label: "Accueil" },
   { to: "/sports", label: "Sports" },
   { to: "/fonctionnement", label: "Comment ça marche" },
-  { to: "/pourquoi66", label: "Pourquoi 66Partners?" },
+  { to: "/pourquoi66", label: "Pourquoi {brand}?" },
   { to: "/FAQ", label: "FAQ" },
   { to: "/contact", label: "Contact" },
 ];
@@ -36,16 +37,20 @@ interface HeaderProps {
 }
 
 export default function Header({ hideOnMobile = false }: HeaderProps) {
+  const { brandName, asset } = useBranding();
   const { user } = useAuth();
   const { unreadActivitiesCount } = useNotifications();
-  const { territories, activeTerritory, setActiveTerritory } = useTerritory();
+  const { selectableTerritories, activeTerritory, setActiveTerritory } = useTerritory();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null,
   );
   const location = useLocation();
   const hidden = useHideOnScroll();
   const isProfilePage = location.pathname === "/profile";
-  const navLinks = user ? APP_NAV_LINKS : PUBLIC_NAV_LINKS;
+  const navLinks = (user ? APP_NAV_LINKS : PUBLIC_NAV_LINKS).map((link) => ({
+    ...link,
+    label: link.label.replace("{brand}", brandName),
+  }));
 
   return (
     <header
@@ -54,8 +59,8 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
       <section className="container-header__leftside">
         <NavLink to={"/"}>
           <img
-            src="/logo3.webp"
-            alt="logo 66partners"
+            src={asset("logo")}
+            alt={`logo ${brandName}`}
             className="left-side__img"
             width={153}
             height={100}
@@ -83,40 +88,36 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
         />
       </nav>
       <section className="container-header__rightside">
-        {/* Identité + territoire actif, visible dès le mobile (cf. audit PWA
-            Étape 6). Le code seul devient un vrai sélecteur uniquement pour
-            les comptes multi-territoires : inutile d'en afficher un pour les
-            comptes 66 uniquement, qui restent la majorité en V1. */}
-        {user && activeTerritory && (
+        {/* Territoire actif = contexte d'utilisation (jamais une autre
+            application) : onglet `34` (code département) avec chevron, quel
+            que soit l'utilisateur (dernier territoire choisi, sinon premier
+            territoire actif). Le clic fait défiler les territoires
+            sélectionnables un par un — activé dès maintenant côté front
+            même si la liste des territoires n'est pas encore calée côté
+            back (un seul territoire = le clic ne change rien). */}
+        {activeTerritory && (
           <div className="container-header__identity">
-            <span className="container-header__identity-name">{user.pseudo}</span>
-            <span className="container-header__identity-sep">·</span>
-            {territories.length > 1 ? (
-              <span className="container-header__territorySelectWrap">
-                <select
-                  className="container-header__territorySelect"
-                  aria-label="Territoire actif"
-                  value={activeTerritory.code}
-                  onChange={(e) => setActiveTerritory(e.target.value)}
-                >
-                  {territories.map((territory) => (
-                    <option key={territory.id} value={territory.code}>
-                      {territory.code} — {territory.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  size={12}
-                  strokeWidth={2.5}
-                  className="container-header__territoryChevron"
-                  aria-hidden="true"
-                />
-              </span>
-            ) : (
-              <span className="container-header__identity-code">
-                {activeTerritory.code}
-              </span>
-            )}
+            <button
+              type="button"
+              className="container-header__territoryTab"
+              aria-label={`Territoire actif : ${activeTerritory.name}. Changer de territoire`}
+              onClick={() => {
+                const currentIndex = selectableTerritories.findIndex(
+                  (territory) => territory.code === activeTerritory.code,
+                );
+                const next =
+                  selectableTerritories[(currentIndex + 1) % selectableTerritories.length];
+                setActiveTerritory(next.code);
+              }}
+            >
+              <span className="container-header__territoryLabel">{activeTerritory.code}</span>
+              <ChevronDown
+                size={12}
+                strokeWidth={2.5}
+                className="container-header__territoryChevron"
+                aria-hidden="true"
+              />
+            </button>
           </div>
         )}
         <Hamburger />

@@ -9,6 +9,7 @@ import { getSportPhoto } from "../../lib/sportPhotos";
 import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
 import { formatMonth, formatWeekday } from "../../lib/dateFormat";
 import "./Explorer.scss";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 type ActivityStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
@@ -54,6 +55,7 @@ const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
 });
 
 export default function Explorer() {
+  const { brandName } = useBranding();
   const { activeTerritory } = useTerritory();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -103,7 +105,7 @@ export default function Explorer() {
   return (
     <div className="container-explorer">
       <h1 className="container-explorer__titre">
-        Les activités des 66Partners
+        Les activités des {brandName}
       </h1>
       <p className="container-explorer__soustitre">
         Découvre les sorties sportives proposées par la communauté près de chez

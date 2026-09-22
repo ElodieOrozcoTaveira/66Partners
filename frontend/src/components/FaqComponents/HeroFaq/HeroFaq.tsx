@@ -1,8 +1,10 @@
 import './HeroFaq.scss';
 import { useRevealOnScroll } from "../../../hooks/useRevealOnScroll";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 
 export default function HeroFaq() {
+  const { brandName } = useBranding();
       const left = useRevealOnScroll<HTMLElement>();
     
     return(
@@ -13,7 +15,7 @@ export default function HeroFaq() {
       >
         <h2 className="container-herofaq__h2">FAQ</h2>
         <p className="container-herofaq__p">
-           Retrouve ici les réponses aux questions les plus fréquentes sur 66Partners.
+           Retrouve ici les réponses aux questions les plus fréquentes sur {brandName}.
         </p>
       </section>
     </div>

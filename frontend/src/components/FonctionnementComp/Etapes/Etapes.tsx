@@ -2,8 +2,8 @@ import { MessageCircle, Search, UserPlus, Users } from 'lucide-react';
 import './Etapes.scss';
 
 const PEACH = '#FDECD1';
-const ROUGE = '#E6392E';
-const JAUNE = '#F4A61D';
+const ROUGE = 'var(--brand-primary, #E6392E)';
+const JAUNE = 'var(--brand-accent, #F4A61D)';
 const NUIT = '#1F2937';
 
 export default function Etapes() {

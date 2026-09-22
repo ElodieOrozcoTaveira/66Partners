@@ -199,8 +199,8 @@ describe("POST /api/territories/:code/join", () => {
     expect(res.body.code).toBe("TERRITORY_NOT_FOUND");
   });
 
-  it("rattache l'utilisateur à un nouveau territoire, sans toucher son territoire par défaut", async () => {
-    const territory34 = await createTerritory({ code: "34" });
+  it("rattache l'utilisateur à un nouveau territoire actif, sans toucher son territoire par défaut", async () => {
+    const territory34 = await createTerritory({ code: "34", isActive: true });
 
     const res = await request(app)
       .post("/api/territories/34/join")
@@ -222,8 +222,19 @@ describe("POST /api/territories/:code/join", () => {
     expect(membership?.isDefault).toBe(false);
   });
 
+  it("refuse (403) de rejoindre un territoire inactif", async () => {
+    await createTerritory({ code: "34", isActive: false });
+
+    const res = await request(app)
+      .post("/api/territories/34/join")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("TERRITORY_NOT_ACTIVE");
+  });
+
   it("est idempotent : rejoindre deux fois le même territoire ne duplique rien", async () => {
-    await createTerritory({ code: "34" });
+    await createTerritory({ code: "34", isActive: true });
 
     await request(app)
       .post("/api/territories/34/join")

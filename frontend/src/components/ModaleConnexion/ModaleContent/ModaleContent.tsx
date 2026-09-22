@@ -3,12 +3,14 @@ import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { HandMetal, X } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
+import TerritoryPicker, { useSignupTerritory } from "../../TerritoryPicker/TerritoryPicker";
 import PasswordInput from "../../PasswordInput/PasswordInput";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
 import { useFacebookAuth } from "../../../hooks/useFacebookAuth";
 import "./ModaleContent.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 interface ModaleContentProps {
   isOpen: boolean;
@@ -32,6 +34,7 @@ export default function ModaleContent({
   onClose,
   onSwitchToRegister,
 }: ModaleContentProps) {
+  const { brandName } = useBranding();
   const { login, getLastLoginFailureReason } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -40,6 +43,7 @@ export default function ModaleContent({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [termsAcceptedGoogle, setTermsAcceptedGoogle] = useState(false);
   const [termsAcceptedFacebook, setTermsAcceptedFacebook] = useState(false);
+  const { territoryCode: signupTerritory, setTerritoryCode: setSignupTerritory } = useSignupTerritory();
 
   function handleSocialAuthSuccess() {
     onClose();
@@ -82,7 +86,7 @@ export default function ModaleContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // Un compte 66Partners existe déjà avec l'email Google/Facebook : préremplit
+  // Un compte {brandName} existe déjà avec l'email Google/Facebook : préremplit
   // le formulaire mot de passe classique, déjà affiché juste en dessous.
   useEffect(() => {
     if (googleAuth.state.step === "linkPending") {
@@ -158,10 +162,11 @@ export default function ModaleContent({
           <div className="container-modaleConnexion">
             <h3 className="container-modaleConnexion__h3">Finalise ton inscription</h3>
             <h4 className="container-modaleConnexion__h4">
-              Connecté·e avec {googleAuth.state.email} <HandMetal size={12} color="#F4B400" />
+              Connecté·e avec {googleAuth.state.email} <HandMetal size={12} color="var(--brand-accent-dark, #F4B400)" />
             </h4>
 
             <section className="container-modaleConnexion__section">
+              <TerritoryPicker id="google-territory" value={signupTerritory} onChange={setSignupTerritory} />
               <label htmlFor="google-terms" className="container-modaleConnexion__checkboxLabel">
                 <input
                   id="google-terms"
@@ -178,7 +183,7 @@ export default function ModaleContent({
                 <NavLink to="/confidentialite" onClick={onClose}>
                   Politique de confidentialité
                 </NavLink>{" "}
-                de 66Partners.
+                de {brandName}.
               </label>
 
               {googleAuth.error && (
@@ -189,7 +194,7 @@ export default function ModaleContent({
                 type="button"
                 className="container-modaleConnexion__submit"
                 disabled={googleAuth.isSubmitting}
-                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle)}
+                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle, signupTerritory)}
               >
                 {googleAuth.isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
@@ -208,10 +213,11 @@ export default function ModaleContent({
           <div className="container-modaleConnexion">
             <h3 className="container-modaleConnexion__h3">Finalise ton inscription</h3>
             <h4 className="container-modaleConnexion__h4">
-              Connecté·e avec {facebookAuth.state.email} <HandMetal size={12} color="#F4B400" />
+              Connecté·e avec {facebookAuth.state.email} <HandMetal size={12} color="var(--brand-accent-dark, #F4B400)" />
             </h4>
 
             <section className="container-modaleConnexion__section">
+              <TerritoryPicker id="facebook-territory" value={signupTerritory} onChange={setSignupTerritory} />
               <label htmlFor="facebook-terms" className="container-modaleConnexion__checkboxLabel">
                 <input
                   id="facebook-terms"
@@ -228,7 +234,7 @@ export default function ModaleContent({
                 <NavLink to="/confidentialite" onClick={onClose}>
                   Politique de confidentialité
                 </NavLink>{" "}
-                de 66Partners.
+                de {brandName}.
               </label>
 
               {facebookAuth.error && (
@@ -239,7 +245,7 @@ export default function ModaleContent({
                 type="button"
                 className="container-modaleConnexion__submit"
                 disabled={facebookAuth.isSubmitting}
-                onClick={() => facebookAuth.completeSignup(termsAcceptedFacebook)}
+                onClick={() => facebookAuth.completeSignup(termsAcceptedFacebook, signupTerritory)}
               >
                 {facebookAuth.isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
@@ -258,7 +264,7 @@ export default function ModaleContent({
           <div className="container-modaleConnexion">
             <h3 className="container-modaleConnexion__h3">Se connecter</h3>
             <h4 className="container-modaleConnexion__h4">
-              Bienvenue chez 66Partners <HandMetal size={12} color="#F4B400" />
+              Bienvenue chez {brandName} <HandMetal size={12} color="var(--brand-accent-dark, #F4B400)" />
             </h4>
 
             <section className="container-modaleConnexion__section">

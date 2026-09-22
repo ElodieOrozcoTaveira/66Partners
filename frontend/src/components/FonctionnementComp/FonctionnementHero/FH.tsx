@@ -1,8 +1,10 @@
 import './FH.scss'; 
 import { useRevealOnScroll } from "../../../hooks/useRevealOnScroll";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 
 export default function FH() {
+  const { brandName } = useBranding();
       const left = useRevealOnScroll<HTMLElement>();
     
     return(
@@ -13,7 +15,7 @@ export default function FH() {
       >
         <h2 className="container-fh__h2">Comment ça marche?</h2>
         <p className="container-fh__p">
-           Rejoins la communauté 66Partners et profite d'activités sportives près de chez toi en quelques étapes!
+           Rejoins la communauté {brandName} et profite d'activités sportives près de chez toi en quelques étapes!
         </p>
       </section>
     </div>

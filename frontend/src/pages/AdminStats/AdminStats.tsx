@@ -24,6 +24,8 @@ import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import UserEvolutionChart from "../../components/AdminComponents/UserEvolutionChart/UserEvolutionChart";
 import TerritoryDonutChart from "../../components/AdminComponents/TerritoryDonutChart/TerritoryDonutChart";
 import "./AdminStats.scss";
+import AdminTerritoryFilter, { useAdminTerritoryFilter } from "../../components/AdminComponents/AdminTerritoryFilter/AdminTerritoryFilter";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 const RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
   { value: "7d", label: "7 derniers jours" },
@@ -38,23 +40,31 @@ type BlockState<T> =
 
 export default function AdminStats() {
   const navigate = useNavigate();
+  const { asset, brandName } = useBranding();
   const { unreadCount } = useNotifications();
   const [range, setRange] = useState<TimeRange>("30d");
+  const {
+    territory,
+    territoryValue,
+    setTerritory,
+    territories: adminTerritories,
+    brandName: filterBrandName,
+  } = useAdminTerritoryFilter();
 
   const [overview, setOverview] = useState<BlockState<StatsOverview>>({ status: "loading" });
   const [evolution, setEvolution] = useState<BlockState<UserEvolutionPoint[]>>({ status: "loading" });
   const [territories, setTerritories] = useState<BlockState<TerritoryBreakdownItem[]>>({ status: "loading" });
 
-  const loadOverview = useCallback((r: TimeRange) => {
+  const loadOverview = useCallback((r: TimeRange, t?: string) => {
     setOverview({ status: "loading" });
-    fetchStatsOverview(r)
+    fetchStatsOverview(r, t)
       .then((data) => setOverview({ status: "ready", data }))
       .catch(() => setOverview({ status: "error" }));
   }, []);
 
-  const loadEvolution = useCallback((r: TimeRange) => {
+  const loadEvolution = useCallback((r: TimeRange, t?: string) => {
     setEvolution({ status: "loading" });
-    fetchUserEvolution(r)
+    fetchUserEvolution(r, t)
       .then((data) => setEvolution({ status: "ready", data }))
       .catch(() => setEvolution({ status: "error" }));
   }, []);
@@ -67,10 +77,10 @@ export default function AdminStats() {
   }, []);
 
   useEffect(() => {
-    loadOverview(range);
-    loadEvolution(range);
+    loadOverview(range, territory);
+    loadEvolution(range, territory);
     loadTerritories(range);
-  }, [range, loadOverview, loadEvolution, loadTerritories]);
+  }, [range, territory, loadOverview, loadEvolution, loadTerritories]);
 
   const overviewData = overview.status === "ready" ? overview.data : null;
   const overviewLoading = overview.status === "loading";
@@ -80,7 +90,7 @@ export default function AdminStats() {
       <div className="admin-stats-page__body">
         <header className="admin-stats-page__header">
           <div className="admin-stats-page__brand">
-            <img src="/logo3.webp" alt="logo 66partners" />
+            <img src={asset("logo")} alt={`logo ${brandName}`} />
             <span>Admin</span>
           </div>
           <span className="admin-stats-page__bell">
@@ -96,7 +106,11 @@ export default function AdminStats() {
         <div className="admin-stats-page__greeting">
           <div>
             <h1>Bonjour Admin 👋</h1>
-            <p>Voici un aperçu des statistiques de 66Partners</p>
+            <p>
+              {filterBrandName
+                ? `Voici un aperçu des statistiques de ${filterBrandName}`
+                : "Voici un aperçu des statistiques de tous les territoires"}
+            </p>
           </div>
           <label className="admin-stats-page__range">
             <CalendarRange size={16} strokeWidth={2.2} />
@@ -110,6 +124,8 @@ export default function AdminStats() {
           </label>
         </div>
 
+        <AdminTerritoryFilter value={territoryValue} onChange={setTerritory} territories={adminTerritories} />
+
         <div className="admin-stats-page__gradient-bar" />
 
         <section className="admin-stats-page__section">
@@ -118,7 +134,7 @@ export default function AdminStats() {
             <div className="admin-stats-page__grid-error">
               <ErrorBlock
                 message="Impossible de charger la vue d'ensemble."
-                onRetry={() => loadOverview(range)}
+                onRetry={() => loadOverview(range, territory)}
               />
             </div>
           ) : (
@@ -180,7 +196,7 @@ export default function AdminStats() {
           points={evolution.status === "ready" ? evolution.data : []}
           loading={evolution.status === "loading"}
           error={evolution.status === "error"}
-          onRetry={() => loadEvolution(range)}
+          onRetry={() => loadEvolution(range, territory)}
         />
 
         <TerritoryDonutChart

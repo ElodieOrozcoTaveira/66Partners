@@ -61,7 +61,7 @@ export default function Contact() {
 
       <div className="container-contact">
         <h1 className="container-contact__titre">
-          <Send size={20} color="#C62828" /> Envoyez-nous un message
+          <Send size={20} color="var(--brand-primary-dark, #C62828)" /> Envoyez-nous un message
         </h1>
         <p className="container-contact__soustitre">
           Une question ? Écrivez-nous, on vous répond au plus vite.

@@ -32,6 +32,8 @@ export interface UserRegistration {
   password: string;
   city?: string;
   avatar?: string;
+  /** Territoire principal choisi à l'inscription (absent : premier territoire actif). */
+  territoryCode?: string | undefined;
   termsAccepted: true;
 }
 
@@ -88,6 +90,7 @@ interface SocialIdentity {
   email: string;
   pseudo: string;
   avatar?: string | undefined;
+  territoryCode?: string | undefined;
 }
 
 // Le token brut part par email ; seul son hash est conservé en base
@@ -113,7 +116,11 @@ export class AuthService {
    * Inscription d'un nouvel utilisateur
    */
   static async registerUser(userData: UserRegistration): Promise<UserData> {
-    const { pseudo, email, password, city, avatar } = userData;
+    const { pseudo, email, password, city, avatar, territoryCode } = userData;
+
+    // Territoire principal résolu AVANT toute écriture : un code inconnu ou
+    // inactif échoue proprement, sans compte créé à moitié.
+    const signupTerritory = await TerritoryService.resolveSignupTerritory(territoryCode);
 
     // 1. Validation de l'email unique
     const [existingUser] = await db
@@ -177,13 +184,15 @@ export class AuthService {
       );
     }
 
-    // 5. Rattachement aux territoires actuellement actifs (ex : le 66).
-    // Uniquement à l'inscription — un futur territoire qui devient actif ne
-    // rattache jamais rétroactivement les comptes déjà existants.
-    await TerritoryService.attachUserToActiveTerritories(newUser.id);
+    // 5. Rattachement au SEUL territoire choisi (principal). Jamais aux autres
+    // territoires actifs, jamais rétroactif pour les comptes existants.
+    await TerritoryService.attachUserToTerritory(newUser.id, signupTerritory.id);
 
-    // 6. Email de bienvenue (non bloquant)
-    sendWelcomeEmail(newUser).catch((err) =>
+    // 6. Email de bienvenue (non bloquant), aux couleurs du territoire choisi
+    sendWelcomeEmail(newUser, {
+      brandName: signupTerritory.brandName,
+      territoryName: signupTerritory.name,
+    }).catch((err) =>
       console.error("Erreur envoi email de bienvenue:", err),
     );
 
@@ -356,9 +365,9 @@ export class AuthService {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const resetUrl = `${frontendUrl}/reinitialiser-mot-de-passe?token=${rawToken}`;
 
-    sendResetPasswordEmail(user, resetUrl).catch((err) =>
-      console.error("Erreur envoi email de réinitialisation:", err),
-    );
+    TerritoryService.getBrandForUser(user.id)
+      .then((brand) => sendResetPasswordEmail(user, resetUrl, brand))
+      .catch((err) => console.error("Erreur envoi email de réinitialisation:", err));
   }
 
   /**
@@ -451,6 +460,8 @@ export class AuthService {
     provider: SocialProvider,
     identity: SocialIdentity
   ): Promise<UserData> {
+    const signupTerritory = await TerritoryService.resolveSignupTerritory(identity.territoryCode);
+
     // Idempotence : un double-clic/double-soumission sur le même token
     // ne doit pas tenter de recréer le compte une seconde fois.
     const alreadyLinkedUserId = await SocialAccountService.findUserIdByProvider(
@@ -505,7 +516,7 @@ export class AuthService {
     }
 
     // Même rattachement territorial que l'inscription classique (§ registerUser).
-    await TerritoryService.attachUserToActiveTerritories(newUser.id);
+    await TerritoryService.attachUserToTerritory(newUser.id, signupTerritory.id);
 
     await SocialAccountService.link({
       userId: newUser.id,
@@ -514,9 +525,10 @@ export class AuthService {
       email: identity.email,
     });
 
-    sendWelcomeEmail(newUser).catch((err) =>
-      console.error("Erreur envoi email de bienvenue:", err),
-    );
+    sendWelcomeEmail(newUser, {
+      brandName: signupTerritory.brandName,
+      territoryName: signupTerritory.name,
+    }).catch((err) => console.error("Erreur envoi email de bienvenue:", err));
 
     return {
       id: newUser.id,
@@ -611,9 +623,11 @@ export class AuthService {
     profile: GoogleProfile,
     // Type volontairement restreint au littéral `true` : impossible d'appeler
     // cette méthode sans avoir déjà une acceptation explicite des CGU.
-    _termsAccepted: true
+    _termsAccepted: true,
+    territoryCode?: string
   ): Promise<UserData> {
     return AuthService.completeSocialSignup("google", {
+      territoryCode,
       providerUserId: profile.sub,
       email: profile.email,
       pseudo: derivePseudoFromGoogleProfile(profile),
@@ -638,9 +652,11 @@ export class AuthService {
 
   static async completeFacebookSignup(
     profile: FacebookProfile,
-    _termsAccepted: true
+    _termsAccepted: true,
+    territoryCode?: string
   ): Promise<UserData> {
     return AuthService.completeSocialSignup("facebook", {
+      territoryCode,
       providerUserId: profile.id,
       email: profile.email,
       pseudo: derivePseudoFromFacebookProfile(profile),

@@ -14,9 +14,10 @@ export interface AdminActivityListItem {
   sportName: string;
 }
 
-export async function fetchAdminActivities(): Promise<AdminActivityListItem[]> {
+export async function fetchAdminActivities(territory?: string): Promise<AdminActivityListItem[]> {
   const res = await adminApi.get<{ success: boolean; activities: AdminActivityListItem[] }>(
     "/api/admin/activities",
+    { params: { territory } },
   );
   return res.data.activities;
 }

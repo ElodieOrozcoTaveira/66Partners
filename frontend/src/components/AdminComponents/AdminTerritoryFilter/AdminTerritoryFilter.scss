@@ -1,0 +1,27 @@
+@use "../../../styles/variables/variables.scss";
+
+.admin-territory-filter {
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+
+  &__btn {
+    padding: 0.35rem 0.8rem;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: variables.$nuit;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &--active {
+      background: variables.$rouge2;
+      color: #ffffff;
+    }
+  }
+}

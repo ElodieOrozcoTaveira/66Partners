@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Check, Flame } from "lucide-react";
+import { useTerritory } from "../../../contexts/TerritoryContext";
 import api from "../../../lib/axios";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { formatDayMonthYear } from "../../../lib/dateFormat";
 import "./DernieresActivites.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 interface Activity {
   id: string;
@@ -38,6 +40,9 @@ const STATUS_INFO: Record<string, { label: string; tone: "done" | "confirmed" | 
 };
 
 export default function DernieresActivites({ userId }: DernieresActivitesProps) {
+  const { asset } = useBranding();
+  const { activeTerritory } = useTerritory();
+  const territoryCode = activeTerritory?.code;
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -46,9 +51,11 @@ export default function DernieresActivites({ userId }: DernieresActivitesProps) 
     let mounted = true;
 
     Promise.all([
-      api.get<ActivitiesResponse>("/api/activities"),
       api.get<ActivitiesResponse>("/api/activities", {
-        params: { participantId: userId },
+        params: { territory: territoryCode },
+      }),
+      api.get<ActivitiesResponse>("/api/activities", {
+        params: { participantId: userId, territory: territoryCode },
       }),
     ])
       .then(([allRes, joinedRes]) => {
@@ -77,7 +84,7 @@ export default function DernieresActivites({ userId }: DernieresActivitesProps) 
     return () => {
       mounted = false;
     };
-  }, [userId]);
+  }, [userId, territoryCode]);
 
   if (!userId) return null;
 
@@ -135,7 +142,7 @@ export default function DernieresActivites({ userId }: DernieresActivitesProps) 
                   </p>
                   <span className="dernieresActivites-card__creator">
                     <img
-                      src={activity.creatorAvatar || "/avatardefault.webp"}
+                      src={activity.creatorAvatar || asset("avatarDefault")}
                       alt={activity.creatorPseudo ?? "Compte supprimé"}
                       className="dernieresActivites-card__creator-avatar"
                     />

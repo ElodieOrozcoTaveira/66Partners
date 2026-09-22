@@ -6,10 +6,12 @@ import {
   UsersRound,
 } from "lucide-react";
 import "./PourquoiHome.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
-const ROUGE = "#E6392E";
+const ROUGE = "var(--brand-primary, #E6392E)";
 
 export default function PourquoiHome() {
+  const { brandName, territoryOf } = useBranding();
   const choix = [
     {
       id: 1,
@@ -35,7 +37,7 @@ export default function PourquoiHome() {
       icone: MapPin,
       titre: "Découvre le 66",
       description:
-        "Explore les plus beaux spots sportifs des Pyrénées-Orientales.",
+        `Explore les plus beaux spots sportifs ${territoryOf}.`,
     },
     {
       id: 5,
@@ -48,7 +50,7 @@ export default function PourquoiHome() {
 
   return (
     <div className="container-pourquoiHome">
-      <h2 className="container-pourquoiHome__h2">Pourquoi choisir 66Partners</h2>
+      <h2 className="container-pourquoiHome__h2">Pourquoi choisir {brandName}</h2>
       <p className="container-pourquoiHome__p">
         Tout ce qu'il faut savoir pour pratiquer ton sport, en toute confiance.
       </p>

@@ -78,7 +78,7 @@
 
     &:focus {
       border-color: variables.$rouge;
-      box-shadow: 0 0 0 3px rgba(variables.$rouge, 0.14);
+      box-shadow: 0 0 0 3px variables.alpha(variables.$rouge, 14%);
     }
   }
 

@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Trash2 } from "lucide-react";
 import { isAxiosError } from "axios";
 import { deleteAdminUser, fetchAdminUsers, type AdminUserListItem } from "../../api/adminUsers";
 import AdminBottomNav from "../../components/AdminComponents/AdminBottomNav/AdminBottomNav";
+import AdminTerritoryFilter, { useAdminTerritoryFilter } from "../../components/AdminComponents/AdminTerritoryFilter/AdminTerritoryFilter";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import Skeleton from "../../components/AdminComponents/Skeleton/Skeleton";
@@ -17,6 +18,7 @@ type ListState =
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 
 export default function AdminUsers() {
+  const { territory, territoryValue, setTerritory, territories: adminTerritories } = useAdminTerritoryFilter();
   const [state, setState] = useState<ListState>({ status: "loading" });
   const [deleteTarget, setDeleteTarget] = useState<AdminUserListItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -24,10 +26,10 @@ export default function AdminUsers() {
 
   const load = useCallback(() => {
     setState({ status: "loading" });
-    fetchAdminUsers()
+    fetchAdminUsers(territory)
       .then((data) => setState({ status: "ready", data }))
       .catch(() => setState({ status: "error" }));
-  }, []);
+  }, [territory]);
 
   useEffect(() => {
     load();
@@ -64,10 +66,12 @@ export default function AdminUsers() {
             <p>
               {state.status === "ready"
                 ? `${state.data.length} compte${state.data.length > 1 ? "s" : ""} créé${state.data.length > 1 ? "s" : ""}`
-                : "Tous les comptes créés sur 66Partners"}
+                : "Tous les comptes créés"}
             </p>
           </div>
         </header>
+
+        <AdminTerritoryFilter value={territoryValue} onChange={setTerritory} territories={adminTerritories} />
 
         {state.status === "error" && (
           <ErrorBlock message="Impossible de charger la liste des utilisateurs." onRetry={load} />
@@ -92,7 +96,7 @@ export default function AdminUsers() {
             {state.data.map((user) => (
               <li key={user.id} className="admin-users-page__row">
                 <img
-                  src={user.avatar || "/avatardefault.webp"}
+                  src={user.avatar || "/66partners/avatardefault.webp"}
                   alt={`Photo de profil de ${user.pseudo}`}
                   className="admin-users-page__avatar"
                 />
@@ -102,6 +106,7 @@ export default function AdminUsers() {
                     <MapPin size={12} strokeWidth={2.2} />
                     {user.city ?? "Ville non renseignée"}
                   </span>
+                  <span className="admin-users-page__city">Territoire : {user.territories.length > 0 ? user.territories.join(", ") : "—"}</span>
                 </div>
                 <span className="admin-users-page__date">{dateFormatter.format(new Date(user.createdAt))}</span>
                 <button

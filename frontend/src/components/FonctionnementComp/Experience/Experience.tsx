@@ -1,8 +1,8 @@
 import { Handshake, MapPin, Star, Trophy } from "lucide-react";
 import "./Experience.scss";
 
-const ROUGE = "#E6392E";
-const JAUNE = "#F4A61D";
+const ROUGE = "var(--brand-primary, #E6392E)";
+const JAUNE = "var(--brand-accent, #F4A61D)";
 
 export default function Experience() {
   const exp = [

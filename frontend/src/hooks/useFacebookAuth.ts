@@ -155,7 +155,7 @@ export function useFacebookAuth({ onSuccess }: UseFacebookAuthOptions) {
   }
 
   const completeSignup = useCallback(
-    async (termsAccepted: boolean) => {
+    async (termsAccepted: boolean, territoryCode?: string) => {
       if (state.step !== "newAccount") return;
       if (!termsAccepted) {
         setError(
@@ -169,6 +169,7 @@ export function useFacebookAuth({ onSuccess }: UseFacebookAuthOptions) {
         const res = await api.post<SocialAuthApiResponse>("/api/auth/facebook/complete", {
           accessToken: state.accessToken,
           termsAccepted: true,
+          ...(territoryCode ? { territoryCode } : {}),
         });
         const ok = await login(res.data.token!);
         if (ok) {

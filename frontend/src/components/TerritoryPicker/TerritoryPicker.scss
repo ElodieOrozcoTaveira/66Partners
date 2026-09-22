@@ -1,0 +1,33 @@
+@use "../../styles/variables/variables.scss";
+
+.territory-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  margin-top: 0.9rem;
+
+  &__label {
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: variables.$nuit;
+  }
+
+  &__select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.6rem;
+    border: 1px solid rgba(31, 41, 55, 0.2);
+    background: #ffffff;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    color: variables.$nuit;
+
+    &:focus {
+      outline: none;
+      border-color: variables.$rouge2;
+    }
+  }
+}

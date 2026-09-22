@@ -4,6 +4,7 @@ import { ArrowLeft, CalendarDays, MapPin, User } from "lucide-react";
 import { fetchAdminActivities, type AdminActivityListItem } from "../../api/adminActivities";
 import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
 import AdminBottomNav from "../../components/AdminComponents/AdminBottomNav/AdminBottomNav";
+import AdminTerritoryFilter, { useAdminTerritoryFilter } from "../../components/AdminComponents/AdminTerritoryFilter/AdminTerritoryFilter";
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import Skeleton from "../../components/AdminComponents/Skeleton/Skeleton";
 import "./AdminActivities.scss";
@@ -17,13 +18,14 @@ const dateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: 
 
 export default function AdminActivities() {
   const [state, setState] = useState<ListState>({ status: "loading" });
+  const { territory, territoryValue, setTerritory, territories: adminTerritories } = useAdminTerritoryFilter();
 
   const load = useCallback(() => {
     setState({ status: "loading" });
-    fetchAdminActivities()
+    fetchAdminActivities(territory)
       .then((data) => setState({ status: "ready", data }))
       .catch(() => setState({ status: "error" }));
-  }, []);
+  }, [territory]);
 
   useEffect(() => {
     load();
@@ -41,10 +43,12 @@ export default function AdminActivities() {
             <p>
               {state.status === "ready"
                 ? `${state.data.length} activité${state.data.length > 1 ? "s" : ""} créée${state.data.length > 1 ? "s" : ""}`
-                : "Toutes les activités créées sur 66Partners"}
+                : "Toutes les activités créées"}
             </p>
           </div>
         </header>
+
+        <AdminTerritoryFilter value={territoryValue} onChange={setTerritory} territories={adminTerritories} />
 
         {state.status === "error" && (
           <ErrorBlock message="Impossible de charger la liste des activités." onRetry={load} />

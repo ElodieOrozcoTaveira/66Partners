@@ -4,6 +4,7 @@ import './Footer.scss';
 import FollowUs from '../BurgerComponent/followUs/FollowUs';
 import { useRevealOnScroll } from '../../hooks/useRevealOnScroll';
 import Fleche from '../Fleche/Fleche';
+import { useBranding } from "../../contexts/TerritoryContext";
 
 interface FooterProps {
     /** Masqué en mobile/tablette, visible seulement à partir du laptop */
@@ -11,6 +12,7 @@ interface FooterProps {
 }
 
 export default function Footer({ hideOnMobile = false }: FooterProps) {
+  const { asset, territoryOf, territoryName } = useBranding();
     const { ref, visible } = useRevealOnScroll<HTMLElement>(0.1);
 
     return(
@@ -19,12 +21,12 @@ export default function Footer({ hideOnMobile = false }: FooterProps) {
                 ref={ref}
                 className={`container-footer reveal-on-scroll${visible ? ' is-visible' : ''}${hideOnMobile ? ' container-footer--laptop-only' : ''}`}
             >
-                <img src="/logo3.webp" alt="logo de l'application"
+                <img src={asset("logo")} alt="logo de l'application"
                 height={100}
                 width={120} className="container-footer__img" />
                 <div className="container-footer__underline"></div>
-                <h2 className="container-footer__h2bis">La plateforme qui connecte les sportifs des Pyrénées-Orientales</h2>
-                <div className="container-footer__lieux"><MapPin size={14} color='#F4B400'/>Pyrénées-Orientales, France</div>
+                <h2 className="container-footer__h2bis">La plateforme qui connecte les sportifs {territoryOf}</h2>
+                <div className="container-footer__lieux"><MapPin size={14} color='var(--brand-accent-dark, #F4B400)'/>{territoryName}, France</div>
                 <FollowUs onDark/>
 
                 <div className="container-footer__docs">

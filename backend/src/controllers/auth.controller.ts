@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { AuthService, AuthError } from "../services/auth.services.js";
+import { TerritoryError } from "../services/territory.services.js";
 import { verifyGoogleCredential } from "../services/google.services.js";
 import { verifyFacebookAccessToken } from "../services/facebook.services.js";
 import { SocialAuthError } from "../services/socialAuthError.js";
@@ -28,7 +29,7 @@ export class AuthController {
         token,
       });
     } catch (error) {
-      if (error instanceof AuthError) {
+      if (error instanceof AuthError || error instanceof TerritoryError) {
         res.status(error.statusCode).json({
           success: false,
           message: error.message,
@@ -217,7 +218,7 @@ export class AuthController {
     try {
       const { credential } = req.body;
       const profile = await verifyGoogleCredential(credential);
-      const newUser = await AuthService.completeGoogleSignup(profile, true);
+      const newUser = await AuthService.completeGoogleSignup(profile, true, req.body.territoryCode);
       const token = signToken({ id: newUser.id });
 
       res.status(201).json({
@@ -310,7 +311,7 @@ export class AuthController {
     try {
       const { accessToken } = req.body;
       const profile = await verifyFacebookAccessToken(accessToken);
-      const newUser = await AuthService.completeFacebookSignup(profile, true);
+      const newUser = await AuthService.completeFacebookSignup(profile, true, req.body.territoryCode);
       const token = signToken({ id: newUser.id });
 
       res.status(201).json({
@@ -377,7 +378,7 @@ export class AuthController {
       return;
     }
 
-    if (error instanceof AuthError) {
+    if (error instanceof AuthError || error instanceof TerritoryError) {
       res.status(error.statusCode).json({
         success: false,
         message: error.message,

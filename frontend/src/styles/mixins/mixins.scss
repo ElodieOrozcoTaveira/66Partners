@@ -1,41 +1,39 @@
 
 @use 'sass:meta';
+@use '../variables/variables';
 
-// Remplacez entièrement le mixin gradient par ces deux versions
+// Dégradé de marque : suit le territoire actif via les variables CSS
+// --brand-primary(-dark)/--brand-accent(-dark) (cf. TerritoryContext,
+// theme.json par territoire), jamais de couleur 66 codée en dur. Les valeurs
+// hexadécimales ne sont que le repli si un territoire n'a pas de theme.json.
 @mixin gradient {
   background: linear-gradient(
     135deg,
-    #7d0a18 0%,
-    #9d1222 15%,
-    #b71c1c 25%,
-    #d62828 45%,
-    #e6392e 65%,
-    #f05a28 80%,
-    #f8ff26 100%
+    variables.$rouge2 0%,
+    variables.$rouge 45%,
+    variables.$jaune 80%,
+    variables.$jaune2 100%
   );
   box-shadow:
-    0 12px 40px rgba(230, 57, 46, 0.25),
+    0 12px 40px variables.alpha(variables.$rouge, 25%),
     inset 0 1px 1px rgba(255, 255, 255, 0.25);
 }
 
 @mixin gradient-important {
   background: linear-gradient(
     135deg,
-    #7d0a18 0%,
-    #9d1222 15%,
-    #b71c1c 25%,
-    #d62828 45%,
-    #e6392e 65%,
-    #f05a28 80%,
-    #f8ff26 100%
+    variables.$rouge2 0%,
+    variables.$rouge 45%,
+    variables.$jaune 80%,
+    variables.$jaune2 100%
   ) !important;
   box-shadow:
-    0 12px 40px rgba(230, 57, 46, 0.25),
+    0 12px 40px variables.alpha(variables.$rouge, 25%),
     inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
 }
 
 @mixin background {
-  background-image: url("/canigou2.webp");
+  background-image: var(--brand-emblem-image, url("/66partners/emblem.webp"));
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;

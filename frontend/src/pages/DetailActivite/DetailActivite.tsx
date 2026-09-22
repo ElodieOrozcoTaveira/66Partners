@@ -9,6 +9,7 @@ import { getSportPhoto } from "../../lib/sportPhotos";
 import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
 import { formatMonth, formatTime, formatWeekday } from "../../lib/dateFormat";
 import "./DetailActivite.scss";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 type ActivityStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
@@ -58,6 +59,7 @@ interface ParticipationRequest {
 }
 
 export default function DetailActivite() {
+  const { asset } = useBranding();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { notifications, markManyAsRead } = useNotifications();
@@ -371,7 +373,7 @@ export default function DetailActivite() {
                         className="request-row__identity"
                       >
                         <img
-                          src={request.userAvatar || "/avatardefault.webp"}
+                          src={request.userAvatar || asset("avatarDefault")}
                           alt={request.userPseudo}
                           className="request-row__avatar"
                         />
@@ -478,7 +480,7 @@ export default function DetailActivite() {
                       className="request-row__identity"
                     >
                       <img
-                        src={participant.userAvatar || "/avatardefault.webp"}
+                        src={participant.userAvatar || asset("avatarDefault")}
                         alt={participant.userPseudo}
                         className="request-row__avatar"
                       />

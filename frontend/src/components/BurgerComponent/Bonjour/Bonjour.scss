@@ -15,7 +15,7 @@
   height: 130px;
   box-sizing: border-box;
   border-bottom: 1.5px solid rgb(238, 238, 238);
-  background-image: url("/canigou2.webp");
+  background-image: var(--brand-emblem-image, url("/66partners/emblem.webp"));
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -25,18 +25,31 @@
 
   &--clickable {
     cursor: pointer;
-    @include mixins.gradient;
     filter: none;
     border-bottom: none;
+    position: relative;
+
+    // Le fond emblem.webp (66partners) a des zones très claires (ciel jaune pâle) selon
+    // le cadrage : sans ce voile, le nom/sous-titre en blanc y devient
+    // illisible. Voile posé en ::before pour rester sous le contenu (avatar,
+    // texte, chevron), qui reste en flux normal par-dessus.
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.42);
+      border-bottom-right-radius: 35px;
+      pointer-events: none;
+    }
 
     .container-bonjour__h3 {
       color: #ffffff;
-      text-shadow: none;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     }
 
     .container-bonjour__p {
-      color: rgba(255, 255, 255, 0.9);
-      text-shadow: none;
+      color: rgba(255, 255, 255, 0.92);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     }
   }
 
@@ -55,17 +68,55 @@
     border-radius: 50%;
     object-fit: cover;
     transition: transform 0.2s ease;
+    height: 90px;
+    width: 90px;
+    border: solid 1px white;
 
     &:hover {
       transform: scale(1.03);
     }
   }
+  &__nameRow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
   &__h3 {
     color: orangered;
     text-shadow: 1px 1px 2px white;
 
     font-size: 16px;
     margin-bottom: -0.2rem;
+  }
+
+  &__territoryTab {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0.1rem 0.5rem;
+    margin-bottom: -0.2rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    color: variables.$rouge2;
+    font-family: "Inter", sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+
+    select {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    &--static {
+      background: rgba(255, 255, 255, 0.55);
+    }
   }
   &__p {
     color: whitesmoke;

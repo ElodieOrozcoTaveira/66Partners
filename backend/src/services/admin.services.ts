@@ -17,6 +17,7 @@ import {
 import { signAdminToken } from "../utils/adminJwt.js";
 import { sendAdminResetPasswordEmail } from "./mail.services.js";
 import { AccountDeletionService } from "./accountDeletion.services.js";
+import { TerritoryService } from "./territory.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -189,9 +190,9 @@ export class AdminAuthService {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const resetUrl = `${frontendUrl}/admin/reinitialiser-mot-de-passe?token=${rawToken}`;
 
-    sendAdminResetPasswordEmail(resetUrl).catch((err) =>
-      console.error("Erreur envoi email de réinitialisation admin:", err)
-    );
+    TerritoryService.getDefaultBrand()
+      .then((brand) => sendAdminResetPasswordEmail(resetUrl, brand))
+      .catch((err) => console.error("Erreur envoi email de réinitialisation admin:", err));
   }
 
   /**
@@ -241,12 +242,78 @@ export class AdminAuthService {
   }
 }
 
+// Filtre territoire (optionnel) des statistiques et listes admin : "Tous"
+// = aucun filtre. Les utilisateurs sont rattachés via user_territories,
+// les activités via activities.territoryId ; participations et messages via
+// l'activité concernée ; notifications via leur destinataire.
+async function resolveTerritoryId(code?: string): Promise<string | undefined> {
+  if (!code) return undefined;
+  return (await TerritoryService.getByCode(code)).id;
+}
+
+function userInTerritory(territoryId: string | undefined) {
+  return territoryId
+    ? sql`${users.id} in (select user_id from user_territories where territory_id = ${territoryId})`
+    : undefined;
+}
+
+function activityInTerritory(territoryId: string | undefined) {
+  return territoryId ? eq(activities.territoryId, territoryId) : undefined;
+}
+
+function participationInTerritory(territoryId: string | undefined) {
+  return territoryId
+    ? sql`${participations.activityId} in (select id from activities where territory_id = ${territoryId})`
+    : undefined;
+}
+
+function messageInTerritory(territoryId: string | undefined) {
+  return territoryId
+    ? sql`${messages.conversationsId} in (select c.id from conversations c join activities a on a.id = c.activity_id where a.territory_id = ${territoryId})`
+    : undefined;
+}
+
+function notificationInTerritory(territoryId: string | undefined) {
+  return territoryId
+    ? sql`${notifications.usersId} in (select user_id from user_territories where territory_id = ${territoryId})`
+    : undefined;
+}
+
 export class AdminStatsService {
-  static async getOverview(range: TimeRange): Promise<StatsOverview> {
+  static async getOverview(range: TimeRange, territoryCode?: string): Promise<StatsOverview> {
+    const territoryId = await resolveTerritoryId(territoryCode);
     const days = RANGE_DAYS[range];
     const now = new Date();
     const periodStart = daysAgo(days);
     const previousPeriodStart = daysAgo(days * 2);
+
+    const countUsersUntil = (date: Date) =>
+      countRows(
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(users)
+          .where(and(lte(users.createdAt, date), userInTerritory(territoryId)))
+      );
+
+    const countIn = (
+      table: typeof activities | typeof participations | typeof messages | typeof notifications,
+      extra: ReturnType<typeof sql> | ReturnType<typeof eq> | undefined,
+      from: Date,
+      to: Date,
+      upperInclusive: boolean
+    ) =>
+      countRows(
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(table)
+          .where(
+            and(
+              gte(table.createdAt, from),
+              upperInclusive ? lte(table.createdAt, to) : lt(table.createdAt, to),
+              extra
+            )
+          )
+      );
 
     const [
       totalUsersNow,
@@ -261,62 +328,16 @@ export class AdminStatsService {
       notificationsInPreviousPeriod,
       territoriesActive,
     ] = await Promise.all([
-      countRows(db.select({ count: sql<number>`count(*)` }).from(users).where(lte(users.createdAt, now))),
-      countRows(
-        db.select({ count: sql<number>`count(*)` }).from(users).where(lte(users.createdAt, periodStart))
-      ),
-      countRows(
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(activities)
-          .where(and(gte(activities.createdAt, periodStart), lte(activities.createdAt, now)))
-      ),
-      countRows(
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(activities)
-          .where(and(gte(activities.createdAt, previousPeriodStart), lt(activities.createdAt, periodStart)))
-      ),
-      countRows(
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(participations)
-          .where(and(gte(participations.createdAt, periodStart), lte(participations.createdAt, now)))
-      ),
-      countRows(
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(participations)
-          .where(
-            and(gte(participations.createdAt, previousPeriodStart), lt(participations.createdAt, periodStart))
-          )
-      ),
-      countRows(
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(messages)
-          .where(and(gte(messages.createdAt, periodStart), lte(messages.createdAt, now)))
-      ),
-      countRows(
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(messages)
-          .where(and(gte(messages.createdAt, previousPeriodStart), lt(messages.createdAt, periodStart)))
-      ),
-      countRows(
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(notifications)
-          .where(and(gte(notifications.createdAt, periodStart), lte(notifications.createdAt, now)))
-      ),
-      countRows(
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(notifications)
-          .where(
-            and(gte(notifications.createdAt, previousPeriodStart), lt(notifications.createdAt, periodStart))
-          )
-      ),
+      countUsersUntil(now),
+      countUsersUntil(periodStart),
+      countIn(activities, activityInTerritory(territoryId), periodStart, now, true),
+      countIn(activities, activityInTerritory(territoryId), previousPeriodStart, periodStart, false),
+      countIn(participations, participationInTerritory(territoryId), periodStart, now, true),
+      countIn(participations, participationInTerritory(territoryId), previousPeriodStart, periodStart, false),
+      countIn(messages, messageInTerritory(territoryId), periodStart, now, true),
+      countIn(messages, messageInTerritory(territoryId), previousPeriodStart, periodStart, false),
+      countIn(notifications, notificationInTerritory(territoryId), periodStart, now, true),
+      countIn(notifications, notificationInTerritory(territoryId), previousPeriodStart, periodStart, false),
       countRows(db.select({ count: sql<number>`count(*)` }).from(territories).where(eq(territories.isActive, true))),
     ]);
 
@@ -355,7 +376,8 @@ export class AdminStatsService {
     };
   }
 
-  static async getUserEvolution(range: TimeRange): Promise<UserEvolutionPoint[]> {
+  static async getUserEvolution(range: TimeRange, territoryCode?: string): Promise<UserEvolutionPoint[]> {
+    const territoryId = await resolveTerritoryId(territoryCode);
     const days = RANGE_DAYS[range];
     const sampleCount = 8;
     const sampleDates: Date[] = [];
@@ -366,7 +388,12 @@ export class AdminStatsService {
 
     const counts = await Promise.all(
       sampleDates.map((date) =>
-        countRows(db.select({ count: sql<number>`count(*)` }).from(users).where(lte(users.createdAt, date)))
+        countRows(
+          db
+            .select({ count: sql<number>`count(*)` })
+            .from(users)
+            .where(and(lte(users.createdAt, date), userInTerritory(territoryId)))
+        )
       )
     );
 
@@ -420,10 +447,14 @@ export interface AdminUserListItem {
   city: string | null;
   avatar: string | null;
   createdAt: string;
+  /** Codes des territoires dont l'utilisateur est membre. */
+  territories: string[];
 }
 
 export class AdminUsersService {
-  static async list(): Promise<AdminUserListItem[]> {
+  static async list(territoryCode?: string): Promise<AdminUserListItem[]> {
+    const territoryId = await resolveTerritoryId(territoryCode);
+
     const rows = await db
       .select({
         id: users.id,
@@ -433,9 +464,24 @@ export class AdminUsersService {
         createdAt: users.createdAt,
       })
       .from(users)
+      .where(userInTerritory(territoryId))
       .orderBy(desc(users.createdAt));
 
-    return rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }));
+    const memberships = await db
+      .select({ userId: userTerritories.userId, code: territories.code })
+      .from(userTerritories)
+      .innerJoin(territories, eq(territories.id, userTerritories.territoryId));
+
+    const codesByUser = new Map<string, string[]>();
+    for (const m of memberships) {
+      codesByUser.set(m.userId, [...(codesByUser.get(m.userId) ?? []), m.code]);
+    }
+
+    return rows.map((row) => ({
+      ...row,
+      createdAt: row.createdAt.toISOString(),
+      territories: codesByUser.get(row.id) ?? [],
+    }));
   }
 
   // Délègue entièrement à AccountDeletionService (même logique que le
@@ -459,7 +505,9 @@ export interface AdminActivityListItem {
 }
 
 export class AdminActivitiesService {
-  static async list(): Promise<AdminActivityListItem[]> {
+  static async list(territoryCode?: string): Promise<AdminActivityListItem[]> {
+    const territoryId = await resolveTerritoryId(territoryCode);
+
     const rows = await db
       .select({
         id: activities.id,
@@ -473,6 +521,7 @@ export class AdminActivitiesService {
       .from(activities)
       .leftJoin(users, eq(users.id, activities.creatorId))
       .innerJoin(sports, eq(sports.id, activities.sportId))
+      .where(activityInTerritory(territoryId))
       .orderBy(desc(activities.createdAt));
 
     return rows.map((row) => ({

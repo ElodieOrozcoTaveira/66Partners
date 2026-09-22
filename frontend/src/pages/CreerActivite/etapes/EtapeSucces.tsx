@@ -1,17 +1,19 @@
 import { PartyPopper, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 interface EtapeSuccesProps {
   title: string;
 }
 
 export default function EtapeSucces({ title }: EtapeSuccesProps) {
+  const { brandName } = useBranding();
   const navigate = useNavigate();
 
   async function handleShare() {
     const shareData = {
-      title: "66Partners",
-      text: `Rejoins-moi pour "${title}" sur 66Partners !`,
+      title: brandName,
+      text: `Rejoins-moi pour "${title}" sur ${brandName} !`,
     };
 
     if (navigator.share) {

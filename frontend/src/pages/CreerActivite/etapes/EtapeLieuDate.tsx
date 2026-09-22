@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 import {
-  preloadVilles66,
-  searchVilles66,
+  preloadVilles,
+  searchVilles,
   type VilleSuggestion,
 } from "../../../lib/villesInsee";
+import { useBranding } from "../../../contexts/TerritoryContext";
 import type { CreerActiviteForm } from "../CreerActivite";
 
 interface EtapeLieuDateProps {
@@ -15,20 +16,21 @@ interface EtapeLieuDateProps {
 const today = new Date().toISOString().slice(0, 10);
 
 export default function EtapeLieuDate({ form, onChange }: EtapeLieuDateProps) {
+  const { inseeDepartmentCode, territoryName } = useBranding();
   const [suggestions, setSuggestions] = useState<VilleSuggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // La liste des ~226 communes du 66 est chargée une seule fois en amont,
-    // pour que la recherche soit ensuite instantanée (cf. lib/villesInsee.ts).
-    preloadVilles66();
-  }, []);
+    // La liste des communes du département du territoire actif est chargée
+    // une seule fois en amont (cf. lib/villesInsee.ts).
+    if (inseeDepartmentCode) preloadVilles(inseeDepartmentCode);
+  }, [inseeDepartmentCode]);
 
   useEffect(() => {
     const query = form.city;
-    if (query.trim().length < 2) {
+    if (!inseeDepartmentCode || query.trim().length < 2) {
       setSuggestions([]);
       setIsOpen(false);
       return;
@@ -36,7 +38,7 @@ export default function EtapeLieuDate({ form, onChange }: EtapeLieuDateProps) {
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
-      searchVilles66(query, controller.signal)
+      searchVilles(inseeDepartmentCode, query, controller.signal)
         .then((results) => {
           setSuggestions(results);
           setHighlighted(0);
@@ -52,7 +54,7 @@ export default function EtapeLieuDate({ form, onChange }: EtapeLieuDateProps) {
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.city]);
+  }, [form.city, inseeDepartmentCode]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -99,7 +101,7 @@ export default function EtapeLieuDate({ form, onChange }: EtapeLieuDateProps) {
             id="ville"
             type="text"
             className="etape-input etape-input--with-icon"
-            placeholder="Rechercher une ville des Pyrénées-Orientales..."
+            placeholder={`Rechercher une ville (${territoryName})...`}
             value={form.city}
             autoComplete="off"
             role="combobox"
@@ -132,10 +134,10 @@ export default function EtapeLieuDate({ form, onChange }: EtapeLieuDateProps) {
             </ul>
           )}
           {isOpen && suggestions.length === 0 && form.city.trim().length >= 2 && (
-            <p className="ville-input__empty">Aucune commune trouvée dans le 66.</p>
+            <p className="ville-input__empty">Aucune commune trouvée dans ce territoire.</p>
           )}
         </div>
-        <p className="etape-hint">Recherche des communes du 66 via l'API officielle INSEE.</p>
+        <p className="etape-hint">Recherche des communes du territoire via l'API officielle INSEE.</p>
       </div>
 
       <div className="etape-field">

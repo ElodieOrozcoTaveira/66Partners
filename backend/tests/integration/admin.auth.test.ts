@@ -108,7 +108,7 @@ describe("AdminAuthService.requestPasswordReset — génération et envoi du tok
     await AdminAuthService.requestPasswordReset();
     // sendAdminResetPasswordEmail est appelée en fire-and-forget (non
     // attendue par requestPasswordReset) : on laisse la microtask se vider.
-    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(mockSendAdminResetPasswordEmail).toHaveBeenCalledTimes(1);
     const resetUrl = mockSendAdminResetPasswordEmail.mock.calls[0]![0];
@@ -129,7 +129,7 @@ describe("AdminAuthService.requestPasswordReset — génération et envoi du tok
     mockSendAdminResetPasswordEmail.mockRejectedValueOnce(new Error("SMTP down"));
 
     await expect(AdminAuthService.requestPasswordReset()).resolves.toBeUndefined();
-    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(mockSendAdminResetPasswordEmail).toHaveBeenCalledTimes(1);
 

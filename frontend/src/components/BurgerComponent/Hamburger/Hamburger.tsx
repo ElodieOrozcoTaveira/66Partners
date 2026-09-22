@@ -18,6 +18,7 @@ import FollowUs from "../followUs/FollowUs";
 import Connexion from "../Connexion/Connexion";
 import Bonjour from "../Bonjour/Bonjour";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 interface NavItem {
   to: string;
@@ -29,7 +30,7 @@ const PUBLIC_NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Accueil", icon: Home },
   { to: "/sports", label: "Sports", icon: Bike },
   { to: "/fonctionnement", label: "Comment ça marche", icon: Map },
-  { to: "/pourquoi66", label: "Pourquoi 66Partners?", icon: Star },
+  { to: "/pourquoi66", label: "Pourquoi {brand}?", icon: Star },
   { to: "/FAQ", label: "FAQ", icon: CircleQuestionMark },
   { to: "/contact", label: "Contact", icon: Mail },
 ];
@@ -45,13 +46,17 @@ const APP_NAV_ITEMS: NavItem[] = [
 ];
 
 export default function Hamburger() {
+  const { brandName } = useBranding();
   const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null,
   );
   const navRef = useRef<HTMLElement>(null);
-  const navItems = user ? APP_NAV_ITEMS : PUBLIC_NAV_ITEMS;
+  const navItems = (user ? APP_NAV_ITEMS : PUBLIC_NAV_ITEMS).map((item) => ({
+    ...item,
+    label: item.label.replace("{brand}", brandName),
+  }));
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 

@@ -36,6 +36,7 @@ const { socialAccounts, users, userTerritories, territories } = await import(
 );
 const { eq, and } = await import("drizzle-orm");
 const { verifyToken } = await import("../../src/utils/jwt.js");
+const { AuthService } = await import("../../src/services/auth.services.js");
 
 function googlePayload(overrides: Partial<MockGooglePayload> = {}): MockGooglePayload {
   return {
@@ -123,6 +124,31 @@ describe("POST /api/auth/google", () => {
   });
 });
 
+// La base de test est persistante pour les territoires : la ligne "34" peut
+// avoir été laissée dans un état quelconque par d'autres suites. On la
+// ramène à sa définition canonique (TERRITORY_SEEDS), même duplication que
+// resetTerritory34 dans territorySelection.test.ts.
+async function resetTerritory34(isActive: boolean) {
+  const { TERRITORY_SEEDS } = await import("../../src/db/seed-territories.js");
+  const seed34 = TERRITORY_SEEDS.find((t) => t.code === "34")!;
+  await testDb
+    .insert(territories)
+    .values({ code: "34", name: seed34.name, slug: seed34.slug, brandName: seed34.brandName, isActive })
+    .onConflictDoNothing({ target: territories.code });
+  await testDb
+    .update(territories)
+    .set({
+      name: seed34.name,
+      slug: seed34.slug,
+      brandName: seed34.brandName,
+      inseeDepartmentCode: seed34.inseeDepartmentCode,
+      tagline: seed34.tagline,
+      assetsPath: seed34.assetsPath,
+      isActive,
+    })
+    .where(eq(territories.code, "34"));
+}
+
 describe("POST /api/auth/google/complete", () => {
   it("5. crée le compte, l'associe au territoire 66 et lie le compte Google", async () => {
     const email = `complete-${randomUUID()}@example.com`;
@@ -162,6 +188,54 @@ describe("POST /api/auth/google/complete", () => {
       .from(socialAccounts)
       .where(eq(socialAccounts.userId, userId));
     expect(social).toMatchObject({ provider: "google", providerUserId: sub });
+  });
+
+  describe("choix du territoire (territoryCode)", () => {
+    // Appel direct à AuthService.completeGoogleSignup (pas de requête HTTP) :
+    // googleAuthLimiter (20 req/15 min, PARTAGÉ par /google, /google/complete
+    // et /google/link) est déjà entièrement consommé par le reste de ce
+    // fichier — une requête HTTP de plus ferait échouer un autre test
+    // (429). Le plumbing HTTP → controller → validation du territoryCode
+    // est lui-même trivial (req.body.territoryCode transmis tel quel, cf.
+    // auth.controller.ts) et déjà exercé pour /register dans
+    // territorySelection.test.ts ; ce qui reste à couvrir spécifiquement à
+    // l'inscription Google, c'est que completeGoogleSignup propage bien
+    // territoryCode jusqu'à resolveSignupTerritory — testable sans HTTP.
+    it("rattache UNIQUEMENT au territoire 34 quand il est choisi, même si le 66 est aussi actif", async () => {
+      await resetTerritory34(true);
+      const email = `complete34-${randomUUID()}@example.com`;
+
+      const created = await AuthService.completeGoogleSignup(
+        { sub: `sub-${randomUUID()}`, email, emailVerified: true },
+        true,
+        "34",
+      );
+
+      const rows = await testDb
+        .select({ code: territories.code })
+        .from(userTerritories)
+        .innerJoin(territories, eq(territories.id, userTerritories.territoryId))
+        .where(eq(userTerritories.userId, created.id));
+      expect(rows.map((r) => r.code)).toEqual(["34"]);
+
+      await resetTerritory34(false);
+    });
+
+    it("refuse un territoire inactif sans créer de compte", async () => {
+      await resetTerritory34(false);
+      const email = `completeinactive-${randomUUID()}@example.com`;
+
+      await expect(
+        AuthService.completeGoogleSignup(
+          { sub: `sub-${randomUUID()}`, email, emailVerified: true },
+          true,
+          "34",
+        ),
+      ).rejects.toMatchObject({ code: "TERRITORY_NOT_ACTIVE", statusCode: 400 });
+
+      const rows = await testDb.select().from(users).where(eq(users.email, email));
+      expect(rows).toHaveLength(0);
+    });
   });
 
   it("6bis. refuse la création si l'email a été pris entre-temps (pas de fusion)", async () => {

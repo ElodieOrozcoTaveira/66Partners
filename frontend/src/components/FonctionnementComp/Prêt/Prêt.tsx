@@ -3,15 +3,17 @@ import { UserPlus } from "lucide-react";
 import "./Prêt.scss";
 import ModaleContent from "../../ModaleConnexion/ModaleContent/ModaleContent";
 import ModaleRegisterContent from "../../ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 export default function Prêt() {
+  const { territoryOf } = useBranding();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
 
   return (
     <>
       <div className="container-prêt">
         <h3 className="container-prêt__h3">
-          Rejoins les sportifs des Pyrénées-Orientales
+          Rejoins les sportifs {territoryOf}
         </h3>
         <button
           type="button"

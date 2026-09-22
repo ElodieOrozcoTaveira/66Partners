@@ -16,6 +16,7 @@ jest.unstable_mockModule("nodemailer", () => ({
 
 const { sendAdminResetPasswordEmail } = await import("../../src/services/mail.services.js");
 
+const testBrand = { brandName: "TestPartners", territoryName: "Test" };
 const originalAdminRecoveryEmail = process.env.ADMIN_RECOVERY_EMAIL;
 
 beforeEach(() => {
@@ -31,7 +32,7 @@ describe("sendAdminResetPasswordEmail — adresse de destination fixe (ADMIN_REC
   it("envoie l'email à ADMIN_RECOVERY_EMAIL quand elle est configurée (adresse autorisée)", async () => {
     process.env.ADMIN_RECOVERY_EMAIL = "admin-recovery@example.com";
 
-    await sendAdminResetPasswordEmail("https://example.com/admin/reinitialiser-mot-de-passe?token=abc123");
+    await sendAdminResetPasswordEmail("https://example.com/admin/reinitialiser-mot-de-passe?token=abc123", testBrand);
 
     expect(mockSendMail).toHaveBeenCalledTimes(1);
     const call = mockSendMail.mock.calls[0]![0] as { to: string; subject: string; html: string };
@@ -43,7 +44,7 @@ describe("sendAdminResetPasswordEmail — adresse de destination fixe (ADMIN_REC
     delete process.env.ADMIN_RECOVERY_EMAIL;
 
     await expect(
-      sendAdminResetPasswordEmail("https://example.com/admin/reinitialiser-mot-de-passe?token=abc123")
+      sendAdminResetPasswordEmail("https://example.com/admin/reinitialiser-mot-de-passe?token=abc123", testBrand)
     ).resolves.toBeUndefined();
 
     expect(mockSendMail).not.toHaveBeenCalled();

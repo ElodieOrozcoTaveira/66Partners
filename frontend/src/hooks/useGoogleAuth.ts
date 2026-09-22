@@ -162,7 +162,7 @@ export function useGoogleAuth({ onSuccess }: UseGoogleAuthOptions) {
   );
 
   const completeSignup = useCallback(
-    async (termsAccepted: boolean) => {
+    async (termsAccepted: boolean, territoryCode?: string) => {
       if (state.step !== "newAccount") return;
       if (!termsAccepted) {
         setError(
@@ -176,6 +176,7 @@ export function useGoogleAuth({ onSuccess }: UseGoogleAuthOptions) {
         const res = await api.post<GoogleAuthApiResponse>("/api/auth/google/complete", {
           credential: state.credential,
           termsAccepted: true,
+          ...(territoryCode ? { territoryCode } : {}),
         });
         const ok = await login(res.data.token!);
         if (ok) {

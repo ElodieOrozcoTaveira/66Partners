@@ -1,4 +1,10 @@
-export function resetPasswordEmailTemplate(pseudo: string, resetUrl: string): string {
+import type { TerritoryBrand } from "../territory.services.js";
+
+export function resetPasswordEmailTemplate(
+  pseudo: string,
+  resetUrl: string,
+  brand: TerritoryBrand,
+): string {
   return `
 <!doctype html>
 <html lang="fr">
@@ -21,7 +27,7 @@ export function resetPasswordEmailTemplate(pseudo: string, resetUrl: string): st
                   <v:textbox inset="0,0,0,0">
                 <![endif]-->
                 <span style="font-family: Arial, Helvetica, sans-serif; font-size:20px; font-weight:bold; color:#FFFFFF; letter-spacing:0.5px;">
-                  66Partners
+                  ${brand.brandName}
                 </span>
                 <!--[if mso]>
                   </v:textbox>
@@ -35,7 +41,7 @@ export function resetPasswordEmailTemplate(pseudo: string, resetUrl: string): st
                   Réinitialise ton mot de passe
                 </h1>
                 <p style="margin:0 0 16px; font-family: Arial, Helvetica, sans-serif; font-size:15px; line-height:1.6; color:#1F2937;">
-                  Bonjour ${pseudo}, tu as demandé à réinitialiser le mot de passe de ton compte <strong>66Partners</strong>. Clique sur le bouton ci-dessous pour choisir un nouveau mot de passe.
+                  Bonjour ${pseudo}, tu as demandé à réinitialiser le mot de passe de ton compte <strong>${brand.brandName}</strong>. Clique sur le bouton ci-dessous pour choisir un nouveau mot de passe.
                 </p>
                 <p style="margin:0 0 24px; font-family: Arial, Helvetica, sans-serif; font-size:14px; line-height:1.6; color:#6b7280;">
                   Ce lien est valable 1 heure. Si tu n'es pas à l'origine de cette demande, ignore simplement cet email : ton mot de passe restera inchangé.
@@ -70,7 +76,7 @@ export function resetPasswordEmailTemplate(pseudo: string, resetUrl: string): st
                   <a href="mailto:contact@66partners.fr" style="color:#1F2937;">contact@66partners.fr</a>
                 </p>
                 <p style="margin:8px 0 0; font-family: Arial, Helvetica, sans-serif; font-size:12px; color:#1F2937;">
-                  © ${new Date().getFullYear()} 66Partners — Pyrénées-Orientales
+                  © ${new Date().getFullYear()} ${brand.brandName}${brand.territoryName ? ` — ${brand.territoryName}` : ""}
                 </p>
               </td>
             </tr>

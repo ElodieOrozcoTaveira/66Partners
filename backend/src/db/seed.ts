@@ -1,36 +1,10 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { faker } from "@faker-js/faker";
-import { sports, users, userSports, activities } from "./schema.js";
-import { seedTerritory66 } from "./seed-territories.js";
+import { users, userSports, activities } from "./schema.js";
+import { seedReferenceData } from "./seed-reference.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
-
-const sportNames = [
-  "Football",
-  "Basketball",
-  "Tennis",
-  "Running",
-  "Cyclisme",
-  "Natation",
-  "Musculation",
-  "Yoga",
-  "Escalade",
-  "Badminton",
-  "Volleyball",
-  "Randonnée",
-  "Boxe",
-  "Padel",
-  "Golf",
-  "Pétanque",
-  "Gravel",
-  "VTT",
-  "Squash",
-  "Pickleball",
-  "Paddle",
-  "Marche",
-  "Roller",
-];
 
 // Coordonnées approximatives de villes du 66, pour des données géo réalistes
 const villes66 = [
@@ -54,19 +28,11 @@ const activityStatuses = [
   "COMPLETED",
 ] as const;
 
-type SeedSport = {
-  id: string;
-  name: string;
-};
-
 async function seed() {
-  console.log("Seeding sports...");
-  await db
-    .insert(sports)
-    .values(sportNames.map((name) => ({ name })))
-    .onConflictDoNothing();
-  const allSports: SeedSport[] = await db.select().from(sports);
-  console.log(`${allSports.length} sports en base.`);
+  // Données de référence (sports + territoire 66) : jamais de démo dedans,
+  // cf. seed-reference.ts — c'est aussi le script utilisé seul pour amorcer
+  // une base sans aucune donnée factice (staging).
+  const { sports: allSports, defaultTerritory } = await seedReferenceData();
 
   console.log("Seeding users...");
   const fakeUsers = Array.from({ length: 30 }, () => {
@@ -103,11 +69,6 @@ async function seed() {
   await db.insert(userSports).values(fakeUserSports).onConflictDoNothing();
   console.log(`${fakeUserSports.length} associations user/sport créées.`);
 
-  // Le territoire 66 doit exister avant les activités : territoryId est
-  // NOT NULL et cet insert est un bulk-insert direct (il ne passe pas par
-  // ActivityService, qui lui résout le territoire par défaut du créateur).
-  const territory66 = await seedTerritory66();
-
   console.log("Seeding activities...");
   const fakeActivities = Array.from({ length: 40 }, () => {
     const creator = faker.helpers.arrayElement(insertedUsers);
@@ -130,7 +91,7 @@ async function seed() {
       status: faker.helpers.arrayElement(activityStatuses),
       sportId: sport.id,
       creatorId: creator.id,
-      territoryId: territory66.id,
+      territoryId: defaultTerritory.id,
     };
   });
 
@@ -143,7 +104,7 @@ async function seed() {
   // Les utilisateurs ci-dessus sont insérés en bulk (pas via
   // AuthService.registerUser) : ils n'ont donc pas encore de ligne
   // user_territories. Deuxième appel idempotent pour les rattacher au 66.
-  await seedTerritory66();
+  await seedReferenceData();
 
   console.log("Seed terminé avec succès.");
   process.exit(0);

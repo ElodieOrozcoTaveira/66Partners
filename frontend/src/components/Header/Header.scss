@@ -67,7 +67,7 @@
   max-width: 34vw;
   padding: 0.3rem 0.55rem;
   border-radius: 999px;
-  background: rgba(variables.$nuit, 0.06);
+  background: variables.alpha(variables.$nuit, 6%);
 }
 
 .container-header__identity-name {
@@ -83,7 +83,7 @@
 
 .container-header__identity-sep {
   font-size: 0.7rem;
-  color: rgba(variables.$nuit, 0.35);
+  color: variables.alpha(variables.$nuit, 35%);
 }
 
 .container-header__identity-code {
@@ -93,14 +93,13 @@
   color: variables.$rouge2;
 }
 
-.container-header__territorySelectWrap {
+.container-header__territoryTab {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 0.1rem;
-}
-
-.container-header__territorySelect {
-  appearance: none;
+  min-width: 0;
+  max-width: 40px;
   border: none;
   background: transparent;
   padding: 0;
@@ -110,6 +109,14 @@
   font-weight: 800;
   color: variables.$rouge2;
   cursor: pointer;
+}
+
+.container-header__territoryLabel {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
 }
 
 .container-header__territoryChevron {
@@ -235,12 +242,12 @@
 
       &__links1 {
         border-radius: 999px;
-        box-shadow: 0 8px 20px rgba(variables.$rouge, 0.28);
+        box-shadow: 0 8px 20px variables.alpha(variables.$rouge, 28%);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
 
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 0 10px 24px rgba(variables.$rouge, 0.36);
+          box-shadow: 0 10px 24px variables.alpha(variables.$rouge, 36%);
         }
       }
 

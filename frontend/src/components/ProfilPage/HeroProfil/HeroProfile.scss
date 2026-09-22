@@ -13,7 +13,7 @@
   @include mixins.background;
   // La photo de couverture est dynamique (photo perso de chaque utilisateur,
   // cf. coverSrc dans HeroProfile.tsx) : contrairement au mixin ci-dessus
-  // (pensé pour le visuel de marque fixe canigou2.webp), on ne peut pas
+  // (pensé pour le visuel de marque fixe emblem.webp), on ne peut pas
   // supposer où se trouve le sujet dans l'image, donc on recentre plutôt
   // que de garder un cadrage taillé pour une photo précise.
   background-position: center;
@@ -30,6 +30,19 @@
 
   @media (min-width: variables.$desktop) {
     min-height: 320px;
+  }
+
+  // Recadrage spécifique à la couverture par défaut (composition connue :
+  // logo en haut, pic du Canigou puis mer/drapeau catalan plus bas) — une
+  // photo perso reste centrée (background-position: center, ci-dessus).
+  &--defaultCover {
+    @media (min-width: variables.$laptop) {
+      background-position: center 80%;
+    }
+
+    @media (min-width: variables.$desktop) {
+      background-position: center 65% ;
+    }
   }
 
   &::before {

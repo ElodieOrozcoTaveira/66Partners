@@ -6,6 +6,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { useNotifications } from "../../../contexts/NotificationsContext";
 import { formatTime } from "../../../lib/dateFormat";
 import "./PrivateMessage.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 interface MessageItem {
   id: string;
@@ -22,6 +23,7 @@ interface ActivityInfo {
 }
 
 export default function PrivateMessage() {
+  const { asset } = useBranding();
   const { activityId } = useParams<{ activityId: string }>();
   const [searchParams] = useSearchParams();
   // Présent = fil privé covoiturage avec ce participant ; absent = fil de
@@ -163,7 +165,7 @@ export default function PrivateMessage() {
                 {!isMine && (
                   <NavLink to={`/profile/${message.usersId}`}>
                     <img
-                      src={message.authorAvatar || "/avatardefault.webp"}
+                      src={message.authorAvatar || asset("avatarDefault")}
                       alt={message.authorPseudo}
                       className="message-row__avatar"
                     />

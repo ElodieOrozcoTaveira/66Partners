@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import { Compass, House, MapPinned } from "lucide-react";
 import "./NotFound.scss";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 export default function NotFound() {
+  const { asset, brandName } = useBranding();
   return (
     <div className="notfound-page">
       <div className="notfound-page__card">
-        <img src="/logo3.webp" alt="66Partners" className="notfound-page__logo" />
+        <img src={asset("logo")} alt={brandName} className="notfound-page__logo" />
 
         <span className="notfound-page__icon">
           <Compass size={26} strokeWidth={2.2} />
@@ -16,7 +18,7 @@ export default function NotFound() {
         <h1 className="notfound-page__title">Page introuvable</h1>
         <p className="notfound-page__text">
           Cette page n'existe pas ou a été déplacée. Repars à l'aventure et
-          retrouve ton chemin vers 66Partners.
+          retrouve ton chemin vers {brandName}.
         </p>
 
         <div className="notfound-page__actions">

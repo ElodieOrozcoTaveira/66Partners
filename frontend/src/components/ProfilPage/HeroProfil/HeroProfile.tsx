@@ -6,6 +6,7 @@ import ImageCropModal from "../ImageCropModal/ImageCropModal";
 import ModaleEditProfil from "../ModaleEditProfil/ModaleEditProfil";
 import Hamburger from "../../BurgerComponent/Hamburger/Hamburger";
 import "./HeroProfile.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 interface HeroProfileProps {
   user: Pick<User, "avatar" | "pseudo" | "coverPhoto"> | null;
@@ -38,6 +39,7 @@ const CROP_CONFIG: Record<
 };
 
 export default function HeroProfile({ user, isOwnProfile = true }: HeroProfileProps) {
+  const { asset } = useBranding();
   const { refreshUser } = useAuth();
   const avatarInputRef = useRef<HTMLInputElement>(null);
   // Modification de la photo de couverture désactivée pour l'instant (cf. plus bas).
@@ -48,8 +50,8 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
   );
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const avatarSrc = user?.avatar || "/avatardefault.webp";
-  const coverSrc = user?.coverPhoto || "/couverture.webp";
+  const avatarSrc = user?.avatar || asset("avatarDefault");
+  const coverSrc = user?.coverPhoto || asset("cover");
   // Le cadrage "center" reste la seule option sûre pour une photo perso (on
   // ne sait pas où se trouve le sujet) : le recadrage spécifique laptop/desktop
   // (pic du Canigou + mer, sans le logo) ne s'applique qu'à la couverture par

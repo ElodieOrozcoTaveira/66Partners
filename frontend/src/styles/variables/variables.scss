@@ -7,19 +7,27 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 //Variables couleurs
 
 //V1
-$rouge : #E6392E;
-$jaune : #F4A61D;
+$rouge : var(--brand-primary, #E6392E);
+$jaune : var(--brand-accent, #F4A61D);
 $nuit : #1F2937;
 $bleufonce:#242a36;
 $beige : #FFF7EB;
 $gris : #F5F5F5;
 $burger:#fef8f3;
 //V2
-$rouge2 : #C62828;
-$jaune2 : #F4B400;
+$rouge2 : var(--brand-primary-dark, #C62828);
+$jaune2 : var(--brand-accent-dark, #F4B400);
 $nuit2 : #1E2A38;
 $beige2 : #F7F3EC;
 $gris2 : #E6E6E6;
+
+// Les 4 couleurs de marque sont des variables CSS runtime (posées sur :root
+// par TerritoryContext selon le territoire actif, cf. <assetsPath>/theme.json),
+// avec les valeurs du 66 en repli. `alpha()` remplace rgba() : les fonctions
+// Sass de couleur ne fonctionnent pas sur var(...).
+@function alpha($color, $percent) {
+  @return color-mix(in srgb, #{$color} $percent, transparent);
+}
 
 $header-height: 100px;
 

@@ -1,14 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { CalendarX } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useTerritory } from "../../../contexts/TerritoryContext";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { getSportVisual } from "../../../lib/sportVisuals";
 import { formatMonth, formatTime, formatWeekday } from "../../../lib/dateFormat";
-import ModaleContent from "../../ModaleConnexion/ModaleContent/ModaleContent";
-import ModaleRegisterContent from "../../ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
 import "./ActivitésProche.scss";
+
+// Chargées à la demande : ces modales embarquent react-icons (cf. Home.tsx).
+const ModaleContent = lazy(() => import("../../ModaleConnexion/ModaleContent/ModaleContent"));
+const ModaleRegisterContent = lazy(
+  () => import("../../ModaleRegister/ModaleRegisteContent/ModaleRegisterContent"),
+);
 
 const UPCOMING_COUNT = 4;
 
@@ -30,6 +35,9 @@ interface ActivitiesResponse {
 }
 
 export default function ActivitésProche() {
+  const { activeTerritory } = useTerritory();
+  const territoryCode = activeTerritory?.code;
+  const inseeDepartmentCode = activeTerritory?.inseeDepartmentCode;
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -39,10 +47,10 @@ export default function ActivitésProche() {
 
   useEffect(() => {
     api
-      .get<ActivitiesResponse>("/api/activities")
+      .get<ActivitiesResponse>("/api/activities", { params: { territory: territoryCode } })
       .then((res) => setActivities(res.data.activities))
       .catch(() => setActivities([]));
-  }, []);
+  }, [territoryCode]);
 
   useEffect(() => {
     if (activeModal && user) {
@@ -95,6 +103,13 @@ export default function ActivitésProche() {
           <p className="container-activitesproche__empty-text">
             Sois le premier à en créer une et lance le mouvement près de chez toi !
           </p>
+          <NavLink
+            to="/mesactivités/nouvelle"
+            className="container-activitesproche__cta"
+            onClick={handleExplorerClick}
+          >
+            Créer une activité
+          </NavLink>
         </div>
       ) : (
         <div className="container-activitesproche__list">
@@ -114,6 +129,7 @@ export default function ActivitésProche() {
                   src={getSportPhoto(activity.sportName)}
                   alt={activity.sportName}
                   className="activity-card__photo"
+                  loading="lazy"
                 />
                 <div className="activity-card__date">
                   <span className="activity-card__date-day">
@@ -132,7 +148,7 @@ export default function ActivitésProche() {
 
               <div className="activity-card__body">
                 <h3 className="activity-card__title">{activity.title}</h3>
-                <p className="activity-card__meta">{activity.city} (66)</p>
+                <p className="activity-card__meta">{activity.city}{inseeDepartmentCode ? ` (${inseeDepartmentCode})` : ""}</p>
                 <p className="activity-card__meta">
                   {formatTime(startDate)} ·{" "}
                   {activity.participantsCount}/{activity.maxParticipants}{" "}
@@ -159,16 +175,18 @@ export default function ActivitésProche() {
         Voir toutes les activités
       </NavLink>
 
-      <ModaleContent
-        isOpen={activeModal === "login"}
-        onClose={() => setActiveModal(null)}
-        onSwitchToRegister={() => setActiveModal("register")}
-      />
-      <ModaleRegisterContent
-        isOpen={activeModal === "register"}
-        onClose={() => setActiveModal(null)}
-        onSwitchToLogin={() => setActiveModal("login")}
-      />
+      <Suspense fallback={null}>
+        <ModaleContent
+          isOpen={activeModal === "login"}
+          onClose={() => setActiveModal(null)}
+          onSwitchToRegister={() => setActiveModal("register")}
+        />
+        <ModaleRegisterContent
+          isOpen={activeModal === "register"}
+          onClose={() => setActiveModal(null)}
+          onSwitchToLogin={() => setActiveModal("login")}
+        />
+      </Suspense>
     </div>
   );
 }

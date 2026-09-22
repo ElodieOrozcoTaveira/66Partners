@@ -56,8 +56,8 @@ await migrate(db, { migrationsFolder: "./drizzle" });
 // évalué. Un import statique serait hissé (hoisting ESM) et s'exécuterait
 // avant l'override de DATABASE_URL ci-dessus, connectant le seed à la
 // mauvaise base (celle du conteneur, la base de dev).
-const { seedTerritory66 } = await import("../src/db/seed-territories.js");
-await seedTerritory66();
+const { seedTerritories } = await import("../src/db/seed-territories.js");
+await seedTerritories();
 
-console.log(`Base de test (${dbName}) migrée et territoire 66 vérifié.`);
+console.log(`Base de test (${dbName}) migrée et territoires vérifiés.`);
 process.exit(0);

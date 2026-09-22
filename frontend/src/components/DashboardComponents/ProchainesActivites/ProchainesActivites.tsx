@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
-import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { formatMonth, formatTime, formatWeekday } from "../../../lib/dateFormat";
@@ -17,49 +16,26 @@ interface Activity {
   creatorId: string | null;
 }
 
-interface ActivitiesResponse {
-  success: boolean;
+interface ProchainesActivitesProps {
+  /** Toutes les activités (déjà chargées par Dashboard.tsx). */
   activities: Activity[];
+  /** Activités auxquelles l'utilisateur participe. */
+  myActivities: Activity[];
+  isLoading: boolean;
 }
 
-export default function ProchainesActivites() {
+export default function ProchainesActivites({
+  activities,
+  myActivities,
+  isLoading,
+}: ProchainesActivitesProps) {
   const { user } = useAuth();
-  const [organized, setOrganized] = useState<Activity[]>([]);
-  const [joined, setJoined] = useState<Activity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    let mounted = true;
-    setIsLoading(true);
-
-    Promise.all([
-      api.get<ActivitiesResponse>("/api/activities"),
-      api.get<ActivitiesResponse>("/api/activities", {
-        params: { participantId: user.id },
-      }),
-    ])
-      .then(([allRes, joinedRes]) => {
-        if (!mounted) return;
-        setOrganized(
-          allRes.data.activities.filter((activity) => activity.creatorId === user.id),
-        );
-        setJoined(joinedRes.data.activities);
-      })
-      .catch(() => {
-        if (mounted) {
-          setOrganized([]);
-          setJoined([]);
-        }
-      })
-      .finally(() => {
-        if (mounted) setIsLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [user]);
+  const organized = useMemo(
+    () => (user ? activities.filter((activity) => activity.creatorId === user.id) : []),
+    [activities, user],
+  );
+  const joined = myActivities;
 
   const next = useMemo(() => {
     const now = Date.now();

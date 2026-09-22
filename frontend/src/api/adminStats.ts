@@ -33,18 +33,18 @@ export interface TerritoryBreakdownItem {
   percent: number;
 }
 
-export async function fetchStatsOverview(range: TimeRange): Promise<StatsOverview> {
+export async function fetchStatsOverview(range: TimeRange, territory?: string): Promise<StatsOverview> {
   const res = await adminApi.get<{ success: boolean; overview: StatsOverview }>(
     "/api/admin/stats/overview",
-    { params: { range } },
+    { params: { range, territory } },
   );
   return res.data.overview;
 }
 
-export async function fetchUserEvolution(range: TimeRange): Promise<UserEvolutionPoint[]> {
+export async function fetchUserEvolution(range: TimeRange, territory?: string): Promise<UserEvolutionPoint[]> {
   const res = await adminApi.get<{ success: boolean; points: UserEvolutionPoint[] }>(
     "/api/admin/stats/user-evolution",
-    { params: { range } },
+    { params: { range, territory } },
   );
   return res.data.points;
 }

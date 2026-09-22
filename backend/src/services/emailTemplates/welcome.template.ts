@@ -1,4 +1,6 @@
-export function welcomeEmailTemplate(pseudo: string): string {
+import type { TerritoryBrand } from "../territory.services.js";
+
+export function welcomeEmailTemplate(pseudo: string, brand: TerritoryBrand): string {
   return `
 <!doctype html>
 <html lang="fr">
@@ -21,7 +23,7 @@ export function welcomeEmailTemplate(pseudo: string): string {
                   <v:textbox inset="0,0,0,0">
                 <![endif]-->
                 <span style="font-family: Arial, Helvetica, sans-serif; font-size:20px; font-weight:bold; color:#FFFFFF; letter-spacing:0.5px;">
-                  66Partners
+                  ${brand.brandName}
                 </span>
                 <!--[if mso]>
                   </v:textbox>
@@ -35,7 +37,7 @@ export function welcomeEmailTemplate(pseudo: string): string {
                   Bienvenue ${pseudo} 👋
                 </h1>
                 <p style="margin:0 0 16px; font-family: Arial, Helvetica, sans-serif; font-size:15px; line-height:1.6; color:#1F2937;">
-                  Merci de rejoindre la communauté <strong>66Partners</strong>. Tu peux dès maintenant créer ou rejoindre des activités sportives dans les Pyrénées-Orientales.
+                  Merci de rejoindre la communauté <strong>${brand.brandName}</strong>. Tu peux dès maintenant créer ou rejoindre des activités sportives près de chez toi${brand.territoryName ? ` (${brand.territoryName})` : ""}.
                 </p>
                 <p style="margin:0 0 24px; font-family: Arial, Helvetica, sans-serif; font-size:15px; line-height:1.6; color:#1F2937;">
                   Prêt à trouver ton prochain partenaire de sport ?
@@ -70,7 +72,7 @@ export function welcomeEmailTemplate(pseudo: string): string {
                   <a href="mailto:contact@66partners.fr" style="color:#1F2937;">contact@66partners.fr</a>
                 </p>
                 <p style="margin:8px 0 0; font-family: Arial, Helvetica, sans-serif; font-size:12px; color:#1F2937;">
-                  © ${new Date().getFullYear()} 66Partners — Pyrénées-Orientales
+                  © ${new Date().getFullYear()} ${brand.brandName}${brand.territoryName ? ` — ${brand.territoryName}` : ""}
                 </p>
               </td>
             </tr>

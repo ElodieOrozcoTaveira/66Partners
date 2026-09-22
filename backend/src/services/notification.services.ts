@@ -3,6 +3,7 @@ import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { notifications } from "../db/schema.js";
 import { PushService } from "./push.services.js";
+import { TerritoryService } from "./territory.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -68,11 +69,15 @@ export class NotificationService {
     // jamais un prérequis : un utilisateur non abonné (ou un échec d'envoi)
     // ne doit jamais faire échouer l'action qui a déclenché la notification.
     const url = pushUrlFor(input);
-    PushService.sendToUser(input.usersId, {
-      title: "66Partners",
-      body: input.contenu,
-      ...(url ? { url } : {}),
-    }).catch((error) => console.error("Erreur envoi notification push:", error));
+    TerritoryService.getBrandForUser(input.usersId)
+      .then((brand) =>
+        PushService.sendToUser(input.usersId, {
+          title: brand.brandName,
+          body: input.contenu,
+          ...(url ? { url } : {}),
+        })
+      )
+      .catch((error) => console.error("Erreur envoi notification push:", error));
   }
 
   static async listMine(userId: string, limit = 30): Promise<Notification[]> {

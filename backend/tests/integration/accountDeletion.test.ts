@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import fs from "node:fs";
 
 const mockSendAccountDeletedEmail =
-  jest.fn<(user: { email: string; pseudo: string }) => Promise<void>>().mockResolvedValue(undefined);
+  jest.fn<(user: { email: string; pseudo: string }, brand: unknown) => Promise<void>>().mockResolvedValue(undefined);
 
 // mail.services.ts est mocké AVANT tout import (même transitif) de
 // src/app.js : évite tout appel SMTP réel en test, même pattern que
@@ -107,10 +107,10 @@ describe("DELETE /api/users/me — parcours utilisateur", () => {
     expect(row).toBeUndefined();
 
     expect(mockSendAccountDeletedEmail).toHaveBeenCalledTimes(1);
-    expect(mockSendAccountDeletedEmail).toHaveBeenCalledWith({
-      email: "solo@test.com",
-      pseudo: "Solo",
-    });
+    expect(mockSendAccountDeletedEmail).toHaveBeenCalledWith(
+      { email: "solo@test.com", pseudo: "Solo" },
+      expect.objectContaining({ brandName: expect.any(String) }),
+    );
   });
 
   it("refuse sans authentification", async () => {
@@ -517,10 +517,10 @@ describe("DELETE /api/admin/users/:userId — parcours admin", () => {
     const [row] = await testDb.select().from(users).where(eq(users.id, userId));
     expect(row).toBeUndefined();
 
-    expect(mockSendAccountDeletedEmail).toHaveBeenCalledWith({
-      email: "adminvictim@test.com",
-      pseudo: "Victime",
-    });
+    expect(mockSendAccountDeletedEmail).toHaveBeenCalledWith(
+      { email: "adminvictim@test.com", pseudo: "Victime" },
+      expect.objectContaining({ brandName: expect.any(String) }),
+    );
   });
 
   it("refuse sans authentification admin", async () => {

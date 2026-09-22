@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { activityPhotos, users } from "../db/schema.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
 import { sendAccountDeletedEmail } from "./mail.services.js";
+import { TerritoryService } from "./territory.services.js";
 import { UserError } from "./user.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -58,6 +59,10 @@ export class AccountDeletionService {
       .from(activityPhotos)
       .where(eq(activityPhotos.uploaderId, userId));
 
+    // Marque du territoire de l'utilisateur, à capturer AVANT suppression
+    // (user_territories disparaît en cascade) pour l'email de confirmation.
+    const brand = await TerritoryService.getBrandForUser(userId);
+
     await db.delete(users).where(eq(users.id, userId));
 
     // Best-effort, jamais bloquant : le compte est déjà supprimé en base à
@@ -78,8 +83,9 @@ export class AccountDeletionService {
 
     // Best-effort, jamais bloquant : le compte est déjà supprimé à ce stade,
     // un échec d'envoi ne doit jamais remettre en cause la suppression.
-    sendAccountDeletedEmail({ email: existingUser.email, pseudo: existingUser.pseudo }).catch(
-      (err) => console.error("Erreur envoi email de suppression de compte:", err),
-    );
+    sendAccountDeletedEmail(
+      { email: existingUser.email, pseudo: existingUser.pseudo },
+      brand,
+    ).catch((err) => console.error("Erreur envoi email de suppression de compte:", err));
   }
 }

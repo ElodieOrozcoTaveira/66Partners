@@ -135,6 +135,30 @@ describe("POST /api/auth/facebook", () => {
   });
 });
 
+// Même duplication que resetTerritory34 dans territorySelection.test.ts et
+// auth.google.test.ts : la base de test est persistante pour les
+// territoires, on ramène "34" à sa définition canonique avant usage.
+async function resetTerritory34(isActive: boolean) {
+  const { TERRITORY_SEEDS } = await import("../../src/db/seed-territories.js");
+  const seed34 = TERRITORY_SEEDS.find((t) => t.code === "34")!;
+  await testDb
+    .insert(territories)
+    .values({ code: "34", name: seed34.name, slug: seed34.slug, brandName: seed34.brandName, isActive })
+    .onConflictDoNothing({ target: territories.code });
+  await testDb
+    .update(territories)
+    .set({
+      name: seed34.name,
+      slug: seed34.slug,
+      brandName: seed34.brandName,
+      inseeDepartmentCode: seed34.inseeDepartmentCode,
+      tagline: seed34.tagline,
+      assetsPath: seed34.assetsPath,
+      isActive,
+    })
+    .where(eq(territories.code, "34"));
+}
+
 describe("POST /api/auth/facebook/complete", () => {
   it("5. crée le compte, l'associe au territoire 66 et lie le compte Facebook", async () => {
     const email = `complete-${randomUUID()}@example.com`;
@@ -168,6 +192,51 @@ describe("POST /api/auth/facebook/complete", () => {
       .from(socialAccounts)
       .where(eq(socialAccounts.userId, userId));
     expect(social).toMatchObject({ provider: "facebook", providerUserId: fbId });
+  });
+
+  describe("choix du territoire (territoryCode)", () => {
+    beforeEach(async () => {
+      await resetTerritory34(true);
+    });
+
+    afterAll(async () => {
+      await resetTerritory34(false);
+    });
+
+    it("rattache UNIQUEMENT au territoire 34 quand il est choisi, même si le 66 est aussi actif", async () => {
+      const email = `complete34-${randomUUID()}@example.com`;
+      mockFacebookSuccess(facebookProfile({ email }));
+
+      const res = await request(app)
+        .post("/api/auth/facebook/complete")
+        .send({ accessToken: "tok", termsAccepted: true, territoryCode: "34" });
+
+      expect(res.status).toBe(201);
+      const userId = res.body.user.id as string;
+
+      const rows = await testDb
+        .select({ code: territories.code })
+        .from(userTerritories)
+        .innerJoin(territories, eq(territories.id, userTerritories.territoryId))
+        .where(eq(userTerritories.userId, userId));
+      expect(rows.map((r) => r.code)).toEqual(["34"]);
+    });
+
+    it("refuse un territoire inactif (400) sans créer de compte ni de compte Facebook lié", async () => {
+      await resetTerritory34(false);
+      const email = `completeinactive-${randomUUID()}@example.com`;
+      mockFacebookSuccess(facebookProfile({ email }));
+
+      const res = await request(app)
+        .post("/api/auth/facebook/complete")
+        .send({ accessToken: "tok", termsAccepted: true, territoryCode: "34" });
+
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("TERRITORY_NOT_ACTIVE");
+
+      const rows = await testDb.select().from(users).where(eq(users.email, email));
+      expect(rows).toHaveLength(0);
+    });
   });
 
   it("6bis. refuse la création si l'email a été pris entre-temps (pas de fusion)", async () => {

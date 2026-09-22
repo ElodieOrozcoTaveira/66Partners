@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { Check, X } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
 import { isAxiosError } from "axios";
+import TerritoryPicker, { useSignupTerritory } from "../../TerritoryPicker/TerritoryPicker";
 import PasswordInput from "../../PasswordInput/PasswordInput";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -11,6 +12,7 @@ import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
 import { useFacebookAuth } from "../../../hooks/useFacebookAuth";
 import ModaleBienvenue from "../../ModaleBienvenue/ModaleBienvenue";
 import "./ModaleRegisterContent.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 interface ModaleContentProps {
   isOpen: boolean;
@@ -34,12 +36,14 @@ export default function ModaleRegisterContent({
   onClose,
   onSwitchToLogin,
 }: ModaleContentProps) {
+  const { brandName } = useBranding();
   const { login, getLastLoginFailureReason } = useAuth();
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const { territoryCode: signupTerritory, setTerritoryCode: setSignupTerritory } = useSignupTerritory();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -132,6 +136,7 @@ export default function ModaleRegisterContent({
         email,
         password,
         termsAccepted,
+        ...(signupTerritory ? { territoryCode: signupTerritory } : {}),
       });
       console.debug("ModaleRegister: register response", res.data);
       // Le compte est déjà créé côté backend à ce stade (201 reçu) : une
@@ -183,6 +188,7 @@ export default function ModaleRegisterContent({
             </h4>
 
             <section className="container-modaleRegister__section">
+              <TerritoryPicker id="google-territory-r" value={signupTerritory} onChange={setSignupTerritory} />
               <label htmlFor="google-terms" className="container-modaleRegister__checkboxLabel">
                 <input
                   id="google-terms"
@@ -199,7 +205,7 @@ export default function ModaleRegisterContent({
                 <NavLink to="/confidentialite" onClick={onClose}>
                   Politique de confidentialité
                 </NavLink>{" "}
-                de 66Partners.
+                de {brandName}.
               </label>
 
               {googleAuth.error && (
@@ -210,7 +216,7 @@ export default function ModaleRegisterContent({
                 type="button"
                 className="container-modaleRegister__submit"
                 disabled={googleAuth.isSubmitting}
-                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle)}
+                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle, signupTerritory)}
               >
                 {googleAuth.isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
@@ -231,7 +237,7 @@ export default function ModaleRegisterContent({
 
             <section className="container-modaleRegister__section">
               <p className="container-modaleRegister__info">
-                Un compte 66Partners existe déjà avec {googleAuth.state.email}. Connecte-toi avec
+                Un compte {brandName} existe déjà avec {googleAuth.state.email}. Connecte-toi avec
                 ton mot de passe pour associer Google à ce compte.
               </p>
 
@@ -255,6 +261,7 @@ export default function ModaleRegisterContent({
             </h4>
 
             <section className="container-modaleRegister__section">
+              <TerritoryPicker id="facebook-territory-r" value={signupTerritory} onChange={setSignupTerritory} />
               <label htmlFor="facebook-terms" className="container-modaleRegister__checkboxLabel">
                 <input
                   id="facebook-terms"
@@ -271,7 +278,7 @@ export default function ModaleRegisterContent({
                 <NavLink to="/confidentialite" onClick={onClose}>
                   Politique de confidentialité
                 </NavLink>{" "}
-                de 66Partners.
+                de {brandName}.
               </label>
 
               {facebookAuth.error && (
@@ -282,7 +289,7 @@ export default function ModaleRegisterContent({
                 type="button"
                 className="container-modaleRegister__submit"
                 disabled={facebookAuth.isSubmitting}
-                onClick={() => facebookAuth.completeSignup(termsAcceptedFacebook)}
+                onClick={() => facebookAuth.completeSignup(termsAcceptedFacebook, signupTerritory)}
               >
                 {facebookAuth.isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
@@ -303,7 +310,7 @@ export default function ModaleRegisterContent({
 
             <section className="container-modaleRegister__section">
               <p className="container-modaleRegister__info">
-                Un compte 66Partners existe déjà avec {facebookAuth.state.email}. Connecte-toi
+                Un compte {brandName} existe déjà avec {facebookAuth.state.email}. Connecte-toi
                 avec ton mot de passe pour associer Facebook à ce compte.
               </p>
 
@@ -323,7 +330,7 @@ export default function ModaleRegisterContent({
           <div className="container-modaleRegister">
             <h3 className="container-modaleRegister__h3">Créer un compte</h3>
             <h4 className="container-modaleRegister__h4">
-              Rejoignez la communauté 66Partners et vivez l'aventure avec nous !
+              Rejoignez la communauté {brandName} et vivez l'aventure avec nous !
             </h4>
 
             <section className="container-modaleRegister__section">
@@ -400,6 +407,8 @@ export default function ModaleRegisterContent({
                   </p>
                 )}
 
+                <TerritoryPicker id="register-territory" value={signupTerritory} onChange={setSignupTerritory} />
+
                 <label
                   htmlFor="termsAccepted"
                   className="container-modaleRegister__checkboxLabel"
@@ -420,7 +429,7 @@ export default function ModaleRegisterContent({
                   <NavLink to="/confidentialite" onClick={onClose}>
                     Politique de confidentialité
                   </NavLink>{" "}
-                  de 66Partners.
+                  de {brandName}.
                 </label>
 
                 {error && (

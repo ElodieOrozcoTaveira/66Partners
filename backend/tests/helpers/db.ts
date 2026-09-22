@@ -34,6 +34,7 @@ let userCounter = 0;
 export async function createUser(overrides: {
   email?: string;
   pseudo?: string;
+  territoryCode?: string;
 } = {}): Promise<{ userId: string; token: string }> {
   userCounter++;
   const [user] = await testDb
@@ -47,9 +48,10 @@ export async function createUser(overrides: {
 
   if (!user) throw new Error("createUser: insert failed");
 
-  // Reproduit le comportement de AuthService.registerUser : tout compte est
-  // rattaché aux territoires actifs (le 66 en V1) dès sa création.
-  await TerritoryService.attachUserToActiveTerritories(user.id);
+  // Reproduit AuthService.registerUser sans choix explicite : rattaché à son
+  // territoire principal (par défaut, le premier territoire actif).
+  const signupTerritory = await TerritoryService.resolveSignupTerritory(overrides.territoryCode);
+  await TerritoryService.attachUserToTerritory(user.id, signupTerritory.id);
 
   const token = signToken({ id: user.id });
   return { userId: user.id, token };
@@ -93,6 +95,15 @@ export async function createTerritory(overrides: {
       isActive: overrides.isActive ?? false,
     })
     .onConflictDoNothing({ target: territories.code });
+
+  // Le territoire peut déjà exister (seed des territoires, non tronqué entre
+  // les tests) : un `isActive` explicite doit toujours s'appliquer.
+  if (overrides.isActive !== undefined) {
+    await testDb
+      .update(territories)
+      .set({ isActive: overrides.isActive })
+      .where(eq(territories.code, code));
+  }
 
   const [territory] = await testDb
     .select({ id: territories.id, code: territories.code })

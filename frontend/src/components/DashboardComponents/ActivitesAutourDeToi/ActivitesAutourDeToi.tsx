@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { CalendarX, MapPin, Users } from "lucide-react";
-import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useBranding } from "../../../contexts/TerritoryContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { formatMonth, formatWeekday } from "../../../lib/dateFormat";
@@ -24,46 +24,26 @@ interface Activity {
   creatorId: string | null;
 }
 
-interface ActivitiesResponse {
-  success: boolean;
+interface ActivitesAutourDeToiProps {
+  /** Toutes les activités (déjà chargées par Dashboard.tsx). */
   activities: Activity[];
+  /** Activités auxquelles l'utilisateur participe. */
+  myActivities: Activity[];
+  isLoading: boolean;
 }
 
-export default function ActivitesAutourDeToi() {
+export default function ActivitesAutourDeToi({
+  activities,
+  myActivities,
+  isLoading,
+}: ActivitesAutourDeToiProps) {
   const { user } = useAuth();
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(true);
+  const { inseeDepartmentCode } = useBranding();
 
-  useEffect(() => {
-    let mounted = true;
-
-    Promise.all([
-      api.get<ActivitiesResponse>("/api/activities"),
-      user
-        ? api.get<ActivitiesResponse>("/api/activities", {
-            params: { participantId: user.id },
-          })
-        : Promise.resolve(null),
-    ])
-      .then(([allRes, joinedRes]) => {
-        if (!mounted) return;
-        setActivities(allRes.data.activities);
-        setJoinedIds(
-          new Set((joinedRes?.data.activities ?? []).map((activity) => activity.id)),
-        );
-      })
-      .catch(() => {
-        if (mounted) setActivities([]);
-      })
-      .finally(() => {
-        if (mounted) setIsLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [user]);
+  const joinedIds = useMemo(
+    () => new Set(myActivities.map((activity) => activity.id)),
+    [myActivities],
+  );
 
   const recent = useMemo(() => {
     const isMine = (activity: Activity) =>
@@ -124,6 +104,7 @@ export default function ActivitesAutourDeToi() {
                     src={getSportPhoto(activity.sportName)}
                     alt={activity.sportName}
                     className="activity-card__photo"
+                    loading="lazy"
                   />
                   <span
                     className="autourdetoi-sport-badge"
@@ -153,7 +134,7 @@ export default function ActivitesAutourDeToi() {
                   <h3 className="activity-card__title">{activity.title}</h3>
                   <p className="activity-card__meta">
                     <MapPin size={12} strokeWidth={2.2} />
-                    {activity.city} (66)
+                    {activity.city}{inseeDepartmentCode ? ` (${inseeDepartmentCode})` : ""}
                   </p>
                   <p className="activity-card__meta">
                     <Users size={12} strokeWidth={2.2} />

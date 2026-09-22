@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { UserPlus, Users, Award } from "lucide-react";
+import { useTerritory } from "../../../contexts/TerritoryContext";
 import api from "../../../lib/axios";
 import { getIconColor } from "../../../lib/sportVisuals";
 import "./StatsProfil.scss";
@@ -8,9 +9,9 @@ interface StatsProfilProps {
   userId: string | null;
 }
 
-const JOINED_COLOR = "#C62828";
-const PARTNERS_COLOR = "#F4B400";
-const ORGANIZED_COLOR = "#C62828";
+const JOINED_COLOR = "var(--brand-primary-dark, #C62828)";
+const PARTNERS_COLOR = "var(--brand-accent-dark, #F4B400)";
+const ORGANIZED_COLOR = "var(--brand-primary-dark, #C62828)";
 
 interface Activity {
   id: string;
@@ -24,6 +25,8 @@ interface ActivitiesResponse {
 }
 
 export default function StatsProfil({ userId }: StatsProfilProps) {
+  const { activeTerritory } = useTerritory();
+  const territoryCode = activeTerritory?.code;
   const [loading, setLoading] = useState(false);
   const [joinedCount, setJoinedCount] = useState<number | null>(null);
   const [partnersAccumulated, setPartnersAccumulated] = useState<number | null>(
@@ -40,9 +43,11 @@ export default function StatsProfil({ userId }: StatsProfilProps) {
     async function fetchStats() {
       try {
         const [allRes, joinedRes] = await Promise.all([
-          api.get<ActivitiesResponse>("/api/activities"),
           api.get<ActivitiesResponse>("/api/activities", {
-            params: { participantId: userId },
+        params: { territory: territoryCode },
+      }),
+          api.get<ActivitiesResponse>("/api/activities", {
+            params: { participantId: userId, territory: territoryCode },
           }),
         ]);
         if (!mounted) return;
@@ -74,7 +79,7 @@ export default function StatsProfil({ userId }: StatsProfilProps) {
     return () => {
       mounted = false;
     };
-  }, [userId]);
+  }, [userId, territoryCode]);
 
   if (!userId) return null;
 

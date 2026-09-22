@@ -8,11 +8,12 @@ import ActiviteListing, {
   type ActiviteListItem,
 } from "../../components/MesActivitesPage/ActiviteListing/ActiviteListing";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTerritory } from "../../contexts/TerritoryContext";
 import api from "../../lib/axios";
 import "./MesActivités.scss";
 
 interface Activity extends ActiviteListItem {
-  creatorId: string;
+  creatorId: string | null;
 }
 
 interface ActivitiesResponse {
@@ -28,6 +29,8 @@ const EMPTY_MESSAGES: Record<ActiviteTab, string> = {
 };
 
 export default function MesActivités() {
+  const { activeTerritory } = useTerritory();
+  const territoryCode = activeTerritory?.code;
   const { user } = useAuth();
   const location = useLocation();
   const initialTab = (location.state as { tab?: ActiviteTab } | null)?.tab ?? "TOUTES";
@@ -48,9 +51,11 @@ export default function MesActivités() {
     setIsLoading(true);
 
     Promise.all([
-      api.get<ActivitiesResponse>("/api/activities"),
       api.get<ActivitiesResponse>("/api/activities", {
-        params: { participantId: user.id },
+        params: { territory: territoryCode },
+      }),
+      api.get<ActivitiesResponse>("/api/activities", {
+        params: { participantId: user.id, territory: territoryCode },
       }),
     ])
       .then(([allRes, joinedRes]) => {
@@ -77,7 +82,7 @@ export default function MesActivités() {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [user, territoryCode]);
 
   const all = useMemo(() => {
     const byId = new Map<string, Activity>();

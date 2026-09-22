@@ -3,14 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useTerritory } from "../../../contexts/TerritoryContext";
 import "./Bonjour.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 type BonjourProps = {
   onNavigate?: () => void;
 };
 
 export default function Bonjour({ onNavigate }: BonjourProps) {
+  const { asset } = useBranding();
   const { user } = useAuth();
-  const { territories, activeTerritory, setActiveTerritory } = useTerritory();
+  const { selectableTerritories, activeTerritory, setActiveTerritory } = useTerritory();
   const navigate = useNavigate();
 
   // Le chiffre du territoire ne doit jamais déclencher la navigation vers le
@@ -42,7 +44,7 @@ export default function Bonjour({ onNavigate }: BonjourProps) {
       >
         <section className="container-bonjour__leftside">
           <img
-            src={user?.avatar || "/avatardefault.webp"}
+            src={user?.avatar || asset("avatarDefault")}
             alt={
               user ? `Photo de profil de ${user.pseudo}` : "logo de montagne"
             }
@@ -56,11 +58,8 @@ export default function Bonjour({ onNavigate }: BonjourProps) {
             <h3 className="container-bonjour__h3">
               {user ? user.pseudo : "Bonjour !👋"}
             </h3>
-            {/* Invisible tant qu'un utilisateur n'appartient qu'à un seul
-                territoire (le cas de tous les comptes en V1) — même règle
-                que le sélecteur du Header, jamais de badge statique pour un
-                compte mono-territoire. */}
-            {user && activeTerritory && territories.length > 1 && (
+            {/* Territoire actif (contexte d'utilisation), même sélecteur que le Header. */}
+            {user && activeTerritory && (
               <span
                 className="container-bonjour__territoryTab"
                 onClick={stopBubble}
@@ -72,7 +71,7 @@ export default function Bonjour({ onNavigate }: BonjourProps) {
                   onChange={(e) => setActiveTerritory(e.target.value)}
                   onClick={stopBubble}
                 >
-                  {territories.map((territory) => (
+                  {selectableTerritories.map((territory) => (
                     <option key={territory.id} value={territory.code}>
                       {territory.code}
                     </option>

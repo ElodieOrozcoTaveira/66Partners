@@ -15,6 +15,8 @@ export const registerSchema = z.object({
     .max(128),
   city: z.string().trim().min(1).max(100).transform(sanitizeText).optional(),
   avatar: z.url("URL d'avatar invalide").max(255).optional(),
+  // Territoire principal choisi à l'inscription (absent : premier territoire actif).
+  territoryCode: z.string().trim().min(1).max(10).optional(),
   // Acceptation explicite requise côté serveur : une valeur absente ou à
   // `false` fait échouer la validation (400), pas de préréglage possible —
   // cf. P1 audit RGPD.
@@ -84,6 +86,7 @@ export type GoogleAuthInput = z.infer<typeof googleAuthSchema>;
  */
 export const googleCompleteSchema = z.object({
   credential: z.string().min(1, "Jeton Google requis"),
+  territoryCode: z.string().trim().min(1).max(10).optional(),
   // Même exigence que registerSchema : une valeur absente ou à `false` fait
   // échouer la validation (400), jamais de préréglage possible.
   termsAccepted: z.literal(
@@ -117,6 +120,7 @@ export type FacebookAuthInput = z.infer<typeof facebookAuthSchema>;
  */
 export const facebookCompleteSchema = z.object({
   accessToken: z.string().min(1, "Jeton Facebook requis"),
+  territoryCode: z.string().trim().min(1).max(10).optional(),
   termsAccepted: z.literal(
     true,
     "Tu dois accepter les Mentions Légales et la Politique de confidentialité pour créer un compte."

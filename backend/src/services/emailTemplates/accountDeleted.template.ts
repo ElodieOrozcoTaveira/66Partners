@@ -1,4 +1,6 @@
-export function accountDeletedEmailTemplate(pseudo: string): string {
+import type { TerritoryBrand } from "../territory.services.js";
+
+export function accountDeletedEmailTemplate(pseudo: string, brand: TerritoryBrand): string {
   return `
 <!doctype html>
 <html lang="fr">
@@ -21,7 +23,7 @@ export function accountDeletedEmailTemplate(pseudo: string): string {
                   <v:textbox inset="0,0,0,0">
                 <![endif]-->
                 <span style="font-family: Arial, Helvetica, sans-serif; font-size:20px; font-weight:bold; color:#FFFFFF; letter-spacing:0.5px;">
-                  66Partners
+                  ${brand.brandName}
                 </span>
                 <!--[if mso]>
                   </v:textbox>
@@ -38,7 +40,7 @@ export function accountDeletedEmailTemplate(pseudo: string): string {
                   Bonjour ${pseudo},
                 </p>
                 <p style="margin:0 0 24px; font-family: Arial, Helvetica, sans-serif; font-size:15px; line-height:1.6; color:#1F2937;">
-                  Nous confirmons que ton compte 66Partners et les données personnelles associées ont bien été supprimés. Si tu n'es pas à l'origine de cette demande, contacte-nous dès que possible.
+                  Nous confirmons que ton compte ${brand.brandName} et les données personnelles associées ont bien été supprimés. Si tu n'es pas à l'origine de cette demande, contacte-nous dès que possible.
                 </p>
               </td>
             </tr>
@@ -49,7 +51,7 @@ export function accountDeletedEmailTemplate(pseudo: string): string {
                   <a href="mailto:contact@66partners.fr" style="color:#1F2937;">contact@66partners.fr</a>
                 </p>
                 <p style="margin:8px 0 0; font-family: Arial, Helvetica, sans-serif; font-size:12px; color:#1F2937;">
-                  © ${new Date().getFullYear()} 66Partners — Pyrénées-Orientales
+                  © ${new Date().getFullYear()} ${brand.brandName}${brand.territoryName ? ` — ${brand.territoryName}` : ""}
                 </p>
               </td>
             </tr>

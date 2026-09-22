@@ -2,18 +2,20 @@ import { Mountain } from 'lucide-react';
 import { SiInstagram } from 'react-icons/si';
 import { FaFacebook } from 'react-icons/fa';
 import './FollowUs.scss';
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 type FollowUsProps = {
     onDark?: boolean;
 };
 
 export default function FollowUs({ onDark = false }: FollowUsProps) {
-    const accentColor = onDark ? '#F4B400' : '#C62828';
+  const { taglineLead, taglineAccent, brandName, territoryOf } = useBranding();
+    const accentColor = onDark ? 'var(--brand-accent-dark, #F4B400)' : 'var(--brand-primary-dark, #C62828)';
 
     return (
         <div className={`container-followUs${onDark ? ' container-followUs--onDark' : ''}`}>
             <p className="container-followUs__tagline">
-                Ton sport. Ton partenaire. <span>Ton 66.</span>
+                {taglineLead} <span>{taglineAccent}</span>
             </p>
 
             <div className="container-followUs__divider">
@@ -46,7 +48,7 @@ export default function FollowUs({ onDark = false }: FollowUsProps) {
             </div>
 
             <p className="container-followUs__desc">
-                66Partners – L'application qui connecte les sportifs des Pyrénées-Orientales.
+                {brandName} – L'application qui connecte les sportifs {territoryOf}.
             </p>
 
         </div>

@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { loginAdmin, type AdminLoginResult } from "../../lib/adminAccess";
 import "./AdminLogin.scss";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 const ERROR_MESSAGES: Record<Exclude<AdminLoginResult, { success: true }>["reason"], string> = {
   invalid: "Mot de passe incorrect.",
@@ -11,6 +12,7 @@ const ERROR_MESSAGES: Record<Exclude<AdminLoginResult, { success: true }>["reaso
 };
 
 export default function AdminLogin() {
+  const { asset, brandName } = useBranding();
   const navigate = useNavigate();
   const location = useLocation();
   const [password, setPassword] = useState("");
@@ -45,7 +47,7 @@ export default function AdminLogin() {
         <NavLink to="/" className="admin-login-page__back" aria-label="Retour à l'accueil">
           <ArrowLeft size={18} strokeWidth={2.2} />
         </NavLink>
-        <img src="/logo3.webp" alt="logo 66partners" className="admin-login-page__logo" />
+        <img src={asset("logo")} alt={`logo ${brandName}`} className="admin-login-page__logo" />
         <span className="admin-login-page__icon">
           <ShieldCheck size={22} strokeWidth={2.2} />
         </span>

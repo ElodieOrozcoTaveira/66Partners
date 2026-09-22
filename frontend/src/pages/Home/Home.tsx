@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import {
   Compass,
   ChevronRight,
@@ -9,15 +9,26 @@ import {
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import ModaleContent from "../../components/ModaleConnexion/ModaleContent/ModaleContent";
-import ModaleRegisterContent from "../../components/ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
 import "./Home.scss";
+
+// Chargées à la demande : ces modales embarquent react-icons (FaFacebook,
+// FcGoogle — aucun équivalent lucide-react disponible), sinon présentes dans
+// le bundle initial via la Home (seule page conservée hors code-splitting —
+// cf. audit performance P1).
+const ModaleContent = lazy(
+  () => import("../../components/ModaleConnexion/ModaleContent/ModaleContent"),
+);
+const ModaleRegisterContent = lazy(
+  () => import("../../components/ModaleRegister/ModaleRegisteContent/ModaleRegisterContent"),
+);
 import Principe from "../../components/HomeComponents/Principe/Principe";
 import SportsPop from "../../components/HomeComponents/SportPopulaire/SportsPop";
 import ActivitésProche from "../../components/HomeComponents/ActivitésProche/AcitivtésProche";
 import PourquoiHome from "../../components/HomeComponents/Pourquoi/PourquoiHome";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 export default function Home() {
+  const { taglineLead, taglineAccent, territoryOf } = useBranding();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
@@ -71,14 +82,12 @@ export default function Home() {
 
           <div className="home-hero__intro">
             <h1 className="home-hero__titre">
-              Ton sport.
+              {taglineLead}
               <br />
-              Ton partenaire.
-              <br />
-              <span className="home-hero__titre-accent">Ton 66.</span>
+              <span className="home-hero__titre-accent">{taglineAccent}</span>
             </h1>
             <p className="home-hero__soustitre">
-              La plateforme des sportifs des Pyrénées-Orientales.
+              La plateforme des sportifs {territoryOf}.
             </p>
           </div>
         </div>
@@ -116,16 +125,18 @@ export default function Home() {
         </div>
       </section>
 
-      <ModaleContent
-        isOpen={activeModal === "login"}
-        onClose={() => setActiveModal(null)}
-        onSwitchToRegister={() => setActiveModal("register")}
-      />
-      <ModaleRegisterContent
-        isOpen={activeModal === "register"}
-        onClose={() => setActiveModal(null)}
-        onSwitchToLogin={() => setActiveModal("login")}
-      />
+      <Suspense fallback={null}>
+        <ModaleContent
+          isOpen={activeModal === "login"}
+          onClose={() => setActiveModal(null)}
+          onSwitchToRegister={() => setActiveModal("register")}
+        />
+        <ModaleRegisterContent
+          isOpen={activeModal === "register"}
+          onClose={() => setActiveModal(null)}
+          onSwitchToLogin={() => setActiveModal("login")}
+        />
+      </Suspense>
       <Principe/>
       <SportsPop/>
       <ActivitésProche/>

@@ -1,16 +1,17 @@
 /**
  * Recherche de communes via l'API Découpage administratif (data.gouv/INSEE),
- * restreinte au département 66 (Pyrénées-Orientales) — cœur du territoire 66Partners.
+ * restreinte au département INSEE du territoire actif (champ inseeDepartmentCode
+ * du territoire, jamais codé en dur).
  * Doc : https://geo.api.gouv.fr/decoupage-administratif/communes
  *
- * Le département ne compte qu'environ 226 communes : plutôt que d'interroger
+
+ * Un département compte quelques centaines de communes : plutôt que d'interroger
  * l'API à chaque frappe (latence réseau variable, parfois plusieurs secondes,
  * et recherche "nom=" peu tolérante aux abréviations comme "St-Cyprien"), on
  * récupère la liste complète une seule fois puis on filtre côté client.
  */
 
 const GEO_API_URL = "https://geo.api.gouv.fr/communes";
-const DEPARTEMENT_66 = "66";
 
 export interface VilleSuggestion {
   nom: string;
@@ -29,8 +30,8 @@ interface IndexedVille extends VilleSuggestion {
   normalized: string;
 }
 
-let cache: IndexedVille[] | null = null;
-let pendingFetch: Promise<IndexedVille[]> | null = null;
+const cache = new Map<string, IndexedVille[]>();
+const pendingFetches = new Map<string, Promise<IndexedVille[]>>();
 
 // Enlève les accents, uniformise la casse/les séparateurs, et développe les
 // abréviations "St"/"Ste" en "Saint"/"Sainte" (les noms INSEE sont toujours
@@ -46,16 +47,18 @@ function normalize(value: string): string {
     .replace(/\bst\b/g, "saint");
 }
 
-function loadVilles66(): Promise<IndexedVille[]> {
-  if (cache) return Promise.resolve(cache);
-  if (pendingFetch) return pendingFetch;
+function loadVilles(departmentCode: string): Promise<IndexedVille[]> {
+  const cached = cache.get(departmentCode);
+  if (cached) return Promise.resolve(cached);
+  const pending = pendingFetches.get(departmentCode);
+  if (pending) return pending;
 
   const url = new URL(GEO_API_URL);
-  url.searchParams.set("codeDepartement", DEPARTEMENT_66);
+  url.searchParams.set("codeDepartement", departmentCode);
   url.searchParams.set("fields", "nom,centre,codesPostaux");
   url.searchParams.set("limit", "500");
 
-  pendingFetch = fetch(url.toString())
+  const request = fetch(url.toString())
     .then((response) => {
       if (!response.ok) throw new Error("Liste des communes indisponible");
       return response.json() as Promise<GeoApiCommune[]>;
@@ -70,32 +73,34 @@ function loadVilles66(): Promise<IndexedVille[]> {
           latitude: commune.centre!.coordinates[1],
           normalized: normalize(commune.nom),
         }));
-      cache = indexed;
+      cache.set(departmentCode, indexed);
       return indexed;
     })
     .finally(() => {
-      pendingFetch = null;
+      pendingFetches.delete(departmentCode);
     });
 
-  return pendingFetch;
+  pendingFetches.set(departmentCode, request);
+  return request;
 }
 
 // À appeler tôt (ex. au montage du formulaire) pour que la liste soit déjà
 // en cache au moment où l'utilisateur tape ses deux premiers caractères.
-export function preloadVilles66(): void {
-  loadVilles66().catch(() => {
+export function preloadVilles(departmentCode: string): void {
+  loadVilles(departmentCode).catch(() => {
     /* le préchargement échoue silencieusement, la recherche réessaiera au besoin */
   });
 }
 
-export async function searchVilles66(
+export async function searchVilles(
+  departmentCode: string,
   query: string,
   signal?: AbortSignal,
 ): Promise<VilleSuggestion[]> {
   const trimmed = query.trim();
   if (trimmed.length < 2) return [];
 
-  const villes = await loadVilles66();
+  const villes = await loadVilles(departmentCode);
   if (signal?.aborted) return [];
 
   const needle = normalize(trimmed);

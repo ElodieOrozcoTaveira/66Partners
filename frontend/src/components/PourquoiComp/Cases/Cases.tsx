@@ -4,8 +4,8 @@ import "./Cases.scss";
 import ModaleContent from "../../ModaleConnexion/ModaleContent/ModaleContent";
 import ModaleRegisterContent from "../../ModaleRegister/ModaleRegisteContent/ModaleRegisterContent";
 
-const JAUNE = "#F4A61D";
-const ROUGE = "#E6392E";
+const JAUNE = "var(--brand-accent, #F4A61D)";
+const ROUGE = "var(--brand-primary, #E6392E)";
 const JAUNE_CLAIR = "#FDECD1";
 const ROUGE_CLAIR = "#FBE0DD";
 

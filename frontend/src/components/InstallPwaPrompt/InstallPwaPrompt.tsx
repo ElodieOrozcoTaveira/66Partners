@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Download, Share, X } from "lucide-react";
 import "./InstallPwaPrompt.scss";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 const DISMISS_KEY = "66partners-pwa-install-dismissed-until";
 const DISMISS_DAYS = 14;
@@ -35,6 +36,7 @@ interface InstallPwaPromptProps {
 }
 
 export default function InstallPwaPrompt({ hasBottomNav = false }: InstallPwaPromptProps) {
+  const { brandName } = useBranding();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIos, setIsIos] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -106,7 +108,7 @@ export default function InstallPwaPrompt({ hasBottomNav = false }: InstallPwaPro
       {isIos ? (
         <>
           <p className="install-pwa-prompt__text">
-            Installe 66Partners sur ton écran d'accueil pour un accès plus rapide et recevoir
+            Installe {brandName} sur ton écran d'accueil pour un accès plus rapide et recevoir
             les notifications : appuie sur <Share size={14} className="install-pwa-prompt__icon" />{" "}
             puis « Sur l'écran d'accueil ».
           </p>
@@ -114,7 +116,7 @@ export default function InstallPwaPrompt({ hasBottomNav = false }: InstallPwaPro
       ) : (
         <>
           <p className="install-pwa-prompt__text">
-            Installe 66Partners sur ton téléphone pour un accès plus rapide et recevoir les
+            Installe {brandName} sur ton téléphone pour un accès plus rapide et recevoir les
             notifications même en dehors du site.
           </p>
           <button type="button" className="install-pwa-prompt__btn" onClick={handleInstallClick}>

@@ -7,6 +7,7 @@ import api from "../../../lib/axios";
 import { formatRelativeTime } from "../../../lib/dateFormat";
 import ImageCropModal from "../../ProfilPage/ImageCropModal/ImageCropModal";
 import "./Hello.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 interface HelloProps {
   pseudo: string;
@@ -23,6 +24,7 @@ function notificationIcon(type: AppNotification["type"]) {
 }
 
 export default function Hello({ pseudo, avatar, coverPhoto }: HelloProps) {
+  const { asset } = useBranding();
   const { refreshUser } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
@@ -94,7 +96,7 @@ export default function Hello({ pseudo, avatar, coverPhoto }: HelloProps) {
     <div className="container-hello">
       <div
         className="container-hello__cover"
-        style={{ backgroundImage: `url(${coverPhoto || "/couverture.webp"})` }}
+        style={{ backgroundImage: `url(${coverPhoto || asset("cover")})` }}
       >
         <div className="container-hello__bell-wrap" ref={panelRef}>
           <button
@@ -171,7 +173,7 @@ export default function Hello({ pseudo, avatar, coverPhoto }: HelloProps) {
       <div className="container-hello__row">
         <div className="container-hello__avatar-wrap">
           <img
-            src={avatar || "/avatardefault.webp"}
+            src={avatar || asset("avatarDefault")}
             alt={`Photo de profil de ${pseudo}`}
             className="container-hello__avatar"
           />

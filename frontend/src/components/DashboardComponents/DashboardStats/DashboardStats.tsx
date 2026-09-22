@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, Flame, Trophy, Users } from "lucide-react";
-import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import "./DashboardStats.scss";
 
@@ -12,9 +11,12 @@ interface Activity {
   participantsCount: number;
 }
 
-interface ActivitiesResponse {
-  success: boolean;
+interface DashboardStatsProps {
+  /** Toutes les activités (déjà chargées par Dashboard.tsx). */
   activities: Activity[];
+  /** Activités auxquelles l'utilisateur participe. */
+  myActivities: Activity[];
+  isLoading: boolean;
 }
 
 function isSameMonth(date: Date, reference: Date): boolean {
@@ -27,73 +29,49 @@ function dayKey(date: Date): string {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
-export default function DashboardStats() {
+export default function DashboardStats({
+  activities,
+  myActivities,
+  isLoading: loading,
+}: DashboardStatsProps) {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
   const [joinedThisMonth, setJoinedThisMonth] = useState(0);
   const [rencontresThisMonth, setRencontresThisMonth] = useState(0);
   const [organizedThisMonth, setOrganizedThisMonth] = useState(0);
   const [activeDaysThisWeek, setActiveDaysThisWeek] = useState(0);
 
   useEffect(() => {
-    if (!user) return;
-    let mounted = true;
-    setLoading(true);
+    if (!user || loading) return;
 
-    Promise.all([
-      api.get<ActivitiesResponse>("/api/activities"),
-      api.get<ActivitiesResponse>("/api/activities", {
-        params: { participantId: user.id },
-      }),
-    ])
-      .then(([allRes, joinedRes]) => {
-        if (!mounted) return;
+    const now = new Date();
+    const joined = myActivities.filter((a) => a.status !== "CANCELLED");
+    const organized = activities.filter(
+      (a) => a.creatorId === user.id && a.status !== "CANCELLED",
+    );
 
-        const now = new Date();
-        const allActivities = allRes.data.activities;
-        const joined = joinedRes.data.activities.filter((a) => a.status !== "CANCELLED");
-        const organized = allActivities.filter(
-          (a) => a.creatorId === user.id && a.status !== "CANCELLED",
-        );
+    const organizedThisMonthList = organized.filter((a) =>
+      isSameMonth(new Date(a.startDate), now),
+    );
 
-        const organizedThisMonthList = organized.filter((a) =>
-          isSameMonth(new Date(a.startDate), now),
-        );
+    setJoinedThisMonth(
+      joined.filter((a) => isSameMonth(new Date(a.startDate), now)).length,
+    );
+    setOrganizedThisMonth(organizedThisMonthList.length);
+    setRencontresThisMonth(
+      organizedThisMonthList.reduce((sum, a) => sum + (Number(a.participantsCount) || 0), 0),
+    );
 
-        setJoinedThisMonth(
-          joined.filter((a) => isSameMonth(new Date(a.startDate), now)).length,
-        );
-        setOrganizedThisMonth(organizedThisMonthList.length);
-        setRencontresThisMonth(
-          organizedThisMonthList.reduce((sum, a) => sum + (Number(a.participantsCount) || 0), 0),
-        );
+    const weekAgo = new Date(now);
+    weekAgo.setDate(weekAgo.getDate() - 6);
+    weekAgo.setHours(0, 0, 0, 0);
 
-        const weekAgo = new Date(now);
-        weekAgo.setDate(weekAgo.getDate() - 6);
-        weekAgo.setHours(0, 0, 0, 0);
-
-        const activeDays = new Set<string>();
-        [...joined, ...organized].forEach((a) => {
-          const date = new Date(a.startDate);
-          if (date >= weekAgo && date <= now) activeDays.add(dayKey(date));
-        });
-        setActiveDaysThisWeek(activeDays.size);
-      })
-      .catch(() => {
-        if (!mounted) return;
-        setJoinedThisMonth(0);
-        setRencontresThisMonth(0);
-        setOrganizedThisMonth(0);
-        setActiveDaysThisWeek(0);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [user]);
+    const activeDays = new Set<string>();
+    [...joined, ...organized].forEach((a) => {
+      const date = new Date(a.startDate);
+      if (date >= weekAgo && date <= now) activeDays.add(dayKey(date));
+    });
+    setActiveDaysThisWeek(activeDays.size);
+  }, [user, activities, myActivities, loading]);
 
   if (!user) return null;
 
@@ -102,7 +80,7 @@ export default function DashboardStats() {
       <div className="container-dashboardstats__card">
         <span
           className="container-dashboardstats__icon"
-          style={{ background: "rgba(252, 2, 2, 0.21)", color: "#C62828" }}
+          style={{ background: "rgba(252, 2, 2, 0.21)", color: "var(--brand-primary-dark, #C62828)" }}
         >
           <CalendarDays size={17} strokeWidth={2.2} />
         </span>

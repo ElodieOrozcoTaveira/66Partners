@@ -9,6 +9,7 @@ import {
 import {
   adminLoginSchema,
   adminResetPasswordSchema,
+  adminTerritoryQuerySchema,
   adminUserIdParamSchema,
   statsRangeQuerySchema,
 } from "../validations/admin.validations.js";
@@ -55,13 +56,23 @@ router.get(
   AdminController.territoryBreakdown
 );
 
-router.get("/users", requireAdminAuth, AdminController.listUsers);
+router.get(
+  "/users",
+  requireAdminAuth,
+  validateQuery(adminTerritoryQuerySchema),
+  AdminController.listUsers
+);
 router.delete(
   "/users/:userId",
   requireAdminAuth,
   validateParams(adminUserIdParamSchema),
   AdminController.deleteUser
 );
-router.get("/activities", requireAdminAuth, AdminController.listActivities);
+router.get(
+  "/activities",
+  requireAdminAuth,
+  validateQuery(adminTerritoryQuerySchema),
+  AdminController.listActivities
+);
 
 export default router;

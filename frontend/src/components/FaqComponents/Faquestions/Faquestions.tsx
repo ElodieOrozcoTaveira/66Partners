@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { ChevronDown, HandCoins, MessageCircleQuestionMark, MessageSquareMore, Search, Shield, Star, User, UserPlus } from "lucide-react";
 import "./Faquestions.scss";
+import { useBranding } from "../../../contexts/TerritoryContext";
 
 export default function Faquestions() {
+  const { brandName, territoryOf } = useBranding();
   const faquestions = [
     {
       id: 1,
       icone: User,
-      question: "Qu'est-ce que 66Partners ?",
+      question: `Qu'est-ce que ${brandName} ?`,
       reponse:
-        "66Partners est une plateforme communautaire dédiée aux sportifs des Pyrénées-Orientales et aux sportifs passant leurs vacances dans notre beau département. Elle permet de trouver des partenaires, découvrir des activités et partager du sport près de chez soi.",
+        `${brandName} est une plateforme communautaire dédiée aux sportifs ${territoryOf} et aux sportifs passant leurs vacances dans notre beau département. Elle permet de trouver des partenaires, découvrir des activités et partager du sport près de chez soi.`,
     },
     {
       id: 2,

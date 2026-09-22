@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import { welcomeEmailTemplate } from "./emailTemplates/welcome.template.js";
 import { resetPasswordEmailTemplate } from "./emailTemplates/resetPassword.template.js";
 import { accountDeletedEmailTemplate } from "./emailTemplates/accountDeleted.template.js";
+import type { TerritoryBrand } from "./territory.services.js";
 
 const transporter = nodemailer.createTransport({
   host: "ssl0.ovh.net",
@@ -14,49 +15,59 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendWelcomeEmail(user: { email: string; pseudo: string }) {
+export async function sendWelcomeEmail(
+  user: { email: string; pseudo: string },
+  brand: TerritoryBrand,
+) {
   await transporter.sendMail({
-    from: `"66Partners" <${process.env.SMTP_USER}>`,
+    from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to: user.email,
-    subject: "Bienvenue sur 66Partners 🎉",
-    html: welcomeEmailTemplate(user.pseudo),
+    subject: `Bienvenue sur ${brand.brandName} 🎉`,
+    html: welcomeEmailTemplate(user.pseudo, brand),
   });
 }
 
 export async function sendResetPasswordEmail(
   user: { email: string; pseudo: string },
   resetUrl: string,
+  brand: TerritoryBrand,
 ) {
   await transporter.sendMail({
-    from: `"66Partners" <${process.env.SMTP_USER}>`,
+    from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to: user.email,
-    subject: "Réinitialise ton mot de passe 66Partners",
-    html: resetPasswordEmailTemplate(user.pseudo, resetUrl),
+    subject: `Réinitialise ton mot de passe ${brand.brandName}`,
+    html: resetPasswordEmailTemplate(user.pseudo, resetUrl, brand),
   });
 }
 
-export async function sendAdminResetPasswordEmail(resetUrl: string): Promise<void> {
+export async function sendAdminResetPasswordEmail(
+  resetUrl: string,
+  brand: TerritoryBrand,
+): Promise<void> {
   const to = process.env.ADMIN_RECOVERY_EMAIL;
   if (!to) return;
 
   await transporter.sendMail({
-    from: `"66Partners" <${process.env.SMTP_USER}>`,
+    from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to,
-    subject: "Réinitialise le mot de passe administrateur 66Partners",
-    html: resetPasswordEmailTemplate("Administrateur", resetUrl),
+    subject: `Réinitialise le mot de passe administrateur ${brand.brandName}`,
+    html: resetPasswordEmailTemplate("Administrateur", resetUrl, brand),
   });
 }
 
-export async function sendAccountDeletedEmail(user: { email: string; pseudo: string }) {
+export async function sendAccountDeletedEmail(
+  user: { email: string; pseudo: string },
+  brand: TerritoryBrand,
+) {
   await transporter.sendMail({
-    from: `"66Partners" <${process.env.SMTP_USER}>`,
+    from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to: user.email,
-    subject: "Votre compte 66Partners a été supprimé",
-    html: accountDeletedEmailTemplate(user.pseudo),
+    subject: `Votre compte ${brand.brandName} a été supprimé`,
+    html: accountDeletedEmailTemplate(user.pseudo, brand),
   });
 }
 

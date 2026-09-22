@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Mail, MailCheck } from "lucide-react";
 import { requestAdminPasswordReset } from "../../lib/adminAccess";
 import "../AdminLogin/AdminLogin.scss";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 /**
  * Un seul admin, pas de compte/email associé (cf. adminAccess.ts) : pas de
@@ -10,6 +11,7 @@ import "../AdminLogin/AdminLogin.scss";
  * serveur (ADMIN_RECOVERY_EMAIL).
  */
 export default function AdminMotDePasseOublie() {
+  const { asset, brandName } = useBranding();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export default function AdminMotDePasseOublie() {
   return (
     <div className="admin-login-page">
       <div className="admin-login-page__card">
-        <img src="/logo3.webp" alt="logo 66partners" className="admin-login-page__logo" />
+        <img src={asset("logo")} alt={`logo ${brandName}`} className="admin-login-page__logo" />
 
         {isSent ? (
           <>

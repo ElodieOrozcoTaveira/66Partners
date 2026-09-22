@@ -71,6 +71,13 @@ export const territories = pgTable("territories", {
   name: varchar("name", { length: 100 }).notNull(),
   slug: varchar("slug", { length: 100 }).notNull().unique(),
   brandName: varchar("brand_name", { length: 100 }).notNull(),
+  // Code INSEE du département, utilisé pour l'API géographique (communes) —
+  // générique par territoire, jamais une constante dans le code.
+  inseeDepartmentCode: varchar("insee_department_code", { length: 3 }),
+  tagline: varchar("tagline", { length: 200 }),
+  // Dossier des assets du territoire sous frontend/public (ex. "/34partners") :
+  // logo, hero, etc. trouvés par convention de noms. Null = assets par défaut.
+  assetsPath: varchar("assets_path", { length: 100 }),
   logoUrl: varchar("logo_url", { length: 255 }),
   primaryColor: varchar("primary_color", { length: 20 }),
   secondaryColor: varchar("secondary_color", { length: 20 }),

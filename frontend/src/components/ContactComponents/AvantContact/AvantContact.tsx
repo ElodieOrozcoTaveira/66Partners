@@ -18,7 +18,7 @@ export default function AvantContact() {
               <ArrowRight
                 className="container-avantcontact__fleche"
                 size={14}
-                color="#C62828"
+                color="var(--brand-primary-dark, #C62828)"
               />
             </a>
           </NavLink>

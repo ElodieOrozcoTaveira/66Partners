@@ -6,6 +6,7 @@ import { isAxiosError } from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import api from "../../lib/axios";
 import "./ModaleBienvenue.scss";
+import { useBranding } from "../../contexts/TerritoryContext";
 
 interface ModaleBienvenueProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export default function ModaleBienvenue({
   isOpen,
   onClose,
 }: ModaleBienvenueProps) {
+  const { brandName } = useBranding();
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   const [step, setStep] = useState<"welcome" | "profile">("welcome");
@@ -122,7 +124,7 @@ export default function ModaleBienvenue({
         {step === "welcome" ? (
           <div className="container-modaleBienvenue">
             <h3 className="container-modaleBienvenue__h3">
-              Bienvenue sur 66Partners <PartyPopper size={18} color="#F4B400" />
+              Bienvenue sur {brandName} <PartyPopper size={18} color="var(--brand-accent-dark, #F4B400)" />
             </h3>
             <h4 className="container-modaleBienvenue__h4">
               Ton compte est prêt ! Établis ton profil et crée tes premières

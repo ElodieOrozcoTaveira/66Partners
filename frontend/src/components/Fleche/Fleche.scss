@@ -16,7 +16,7 @@
   color: white;
   cursor: pointer;
   background-color: variables.$jaune2;
-  box-shadow: 0 6px 16px rgba(variables.$jaune2, 0.4);
+  box-shadow: 0 6px 16px variables.alpha(variables.$jaune2, 40%);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -29,7 +29,7 @@
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 22px rgba(variables.$jaune2, 0.5);
+    box-shadow: 0 10px 22px variables.alpha(variables.$jaune2, 50%);
     filter: brightness(1.05);
   }
 

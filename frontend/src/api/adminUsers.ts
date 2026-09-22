@@ -9,11 +9,13 @@ export interface AdminUserListItem {
   city: string | null;
   avatar: string | null;
   createdAt: string;
+  territories: string[];
 }
 
-export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
+export async function fetchAdminUsers(territory?: string): Promise<AdminUserListItem[]> {
   const res = await adminApi.get<{ success: boolean; users: AdminUserListItem[] }>(
     "/api/admin/users",
+    { params: { territory } },
   );
   return res.data.users;
 }

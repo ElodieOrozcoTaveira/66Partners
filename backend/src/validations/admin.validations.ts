@@ -27,6 +27,15 @@ export type AdminResetPasswordInput = z.infer<typeof adminResetPasswordSchema>;
  */
 export const statsRangeQuerySchema = z.object({
   range: z.enum(["7d", "30d", "90d"]).default("30d"),
+  // Filtre territoire optionnel (absent = tous les territoires).
+  territory: z.string().trim().min(1).max(10).optional(),
+});
+
+/**
+ * GET /admin/users, GET /admin/activities
+ */
+export const adminTerritoryQuerySchema = z.object({
+  territory: z.string().trim().min(1).max(10).optional(),
 });
 
 export type StatsRangeQuery = z.infer<typeof statsRangeQuerySchema>;
