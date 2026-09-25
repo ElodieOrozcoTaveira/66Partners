@@ -35,7 +35,7 @@ interface TerritorySwitcherProps {
  * quel que soit le navigateur ou l'endroit où le composant est monté.
  */
 export default function TerritorySwitcher({ prefix, className }: TerritorySwitcherProps) {
-  const { publicTerritories, territories, activeTerritory, setActiveTerritory, joinTerritory } =
+  const { publicTerritories, territories, testTerritories, activeTerritory, setActiveTerritory, joinTerritory } =
     useTerritory();
   const { token } = useAuth();
   const [open, setOpen] = useState(false);
@@ -48,7 +48,30 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
   const controlRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const canSwitch = publicTerritories.length > 1;
+  // Un membre voit toujours ses propres territoires, même inactifs
+  // publiquement (ex. 34 pas encore ouvert mais déjà rejoint) : `territories`
+  // (GET /api/territories/mine) n'est jamais filtré par isActive côté
+  // backend. On y ajoute les territoires publics actifs non encore rejoints
+  // (dédupliqués) pour ne jamais perdre le join direct déjà en place — sans
+  // ça, un membre du seul 66 ne verrait plus un futur territoire tout juste
+  // activé tant qu'il ne l'a pas rejoint. Un visiteur non connecté reste
+  // strictement limité aux territoires publics actifs.
+  const memberCodes = new Set(territories.map((territory) => territory.code));
+  const publicCodes = new Set(publicTerritories.map((territory) => territory.code));
+  // Territoires de test staging (cf. TerritoryContext) : ajoutés en dernier,
+  // seulement s'ils ne sont déjà couverts ni par l'appartenance réelle ni
+  // par la liste publique — jamais dupliqués, jamais prioritaires.
+  const extraTestTerritories = testTerritories.filter(
+    (territory) => !memberCodes.has(territory.code) && !publicCodes.has(territory.code),
+  );
+  const visibleTerritories = token
+    ? [
+        ...territories,
+        ...publicTerritories.filter((territory) => !memberCodes.has(territory.code)),
+        ...extraTestTerritories,
+      ]
+    : [...publicTerritories, ...extraTestTerritories];
+  const canSwitch = visibleTerritories.length > 1;
 
   useEffect(() => {
     if (!open) {
@@ -176,7 +199,7 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
                   visibility: menuPosition.ready ? "visible" : "hidden",
                 }}
               >
-                {publicTerritories.map((territory) => {
+                {visibleTerritories.map((territory) => {
                   const isActive = territory.code === activeTerritory.code;
                   return (
                     <button

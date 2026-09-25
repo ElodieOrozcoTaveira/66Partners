@@ -91,6 +91,10 @@ services:
         VITE_API_URL: https://api-staging.66partners.fr
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
         VITE_FACEBOOK_APP_ID: ${FACEBOOK_APP_ID}
+        # Ouvre le test public du switcher pour le 34 avant son activation
+        # officielle (isActive reste false en base, cf. TerritoryContext.tsx) —
+        # UNIQUEMENT ici, jamais dans docker-compose.prod.yml.
+        VITE_STAGING_TEST_TERRITORIES: "34"
         NGINX_CONF: nginx/staging.conf
     restart: unless-stopped
     ports:

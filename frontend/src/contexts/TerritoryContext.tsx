@@ -38,11 +38,28 @@ export type Territory = {
 
 const ACTIVE_TERRITORY_STORAGE_KEY = "activeTerritoryCode";
 
+// Territoires de test réservés au staging public (VITE_STAGING_TEST_TERRITORIES,
+// injecté uniquement au build du staging — cf. docker-compose.staging.yml —
+// jamais en dev/production, où la variable est absente). Permet au public
+// testeur d'essayer le changement de contexte via TerritorySwitcher AVANT
+// l'ouverture officielle d'un territoire (isActive reste false en base).
+// Volontairement tenu à l'écart de `publicTerritories`/`joinableTerritories` :
+// TerritorySwitcher est le SEUL endroit qui doit le proposer (jamais
+// l'inscription ni une autre liste publique) — cf. `activeTerritory`
+// ci-dessous et TerritorySwitcher.tsx pour les deux seuls usages autorisés.
+const STAGING_TEST_TERRITORY_CODES = ((import.meta.env.VITE_STAGING_TEST_TERRITORIES as string | undefined) ?? "")
+  .split(",")
+  .map((code) => code.trim())
+  .filter(Boolean);
+
 type TerritoryContextType = {
   /** Territoires de l'utilisateur connecté (vide si non connecté ou non chargé). */
   territories: Territory[];
   /** Territoires actifs proposés publiquement (inscription, visiteurs). */
   publicTerritories: Territory[];
+  /** Territoires de test staging (cf. STAGING_TEST_TERRITORY_CODES) — jamais
+   *  actifs publiquement, à ne consommer que depuis TerritorySwitcher. */
+  testTerritories: Territory[];
   /** Territoires parmi lesquels choisir le territoire actif : ceux de
    *  l'utilisateur connecté, sinon les territoires publics. */
   selectableTerritories: Territory[];
@@ -69,6 +86,7 @@ export function TerritoryProvider({ children }: { children: ReactNode }) {
   const { token } = useAuth();
   const [territories, setTerritories] = useState<Territory[]>([]);
   const [publicTerritories, setPublicTerritories] = useState<Territory[]>([]);
+  const [testTerritories, setTestTerritories] = useState<Territory[]>([]);
   const [activeCode, setActiveCode] = useState<string | null>(() =>
     localStorage.getItem(ACTIVE_TERRITORY_STORAGE_KEY),
   );
@@ -78,6 +96,29 @@ export function TerritoryProvider({ children }: { children: ReactNode }) {
       .get<{ territories: Territory[] }>("/api/territories")
       .then((res) => setPublicTerritories(res.data.territories.filter((t) => t.isActive)))
       .catch(() => setPublicTerritories([]));
+  }, []);
+
+  // GET /api/territories/:code n'est jamais filtré par isActive (contrairement
+  // à GET /api/territories, cf. audit P-04) : seule route permettant de
+  // résoudre les données réelles (branding, assets) d'un territoire de test
+  // encore inactif, sans jamais élargir la liste publique elle-même.
+  useEffect(() => {
+    if (STAGING_TEST_TERRITORY_CODES.length === 0) return;
+    let cancelled = false;
+    Promise.all(
+      STAGING_TEST_TERRITORY_CODES.map((code) =>
+        api
+          .get<{ territory: Territory }>(`/api/territories/${code}`)
+          .then((res) => res.data.territory)
+          .catch(() => null),
+      ),
+    ).then((results) => {
+      if (cancelled) return;
+      setTestTerritories(results.filter((t): t is Territory => t !== null));
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const loadMine = useCallback(() => {
@@ -99,8 +140,15 @@ export function TerritoryProvider({ children }: { children: ReactNode }) {
 
   // Dernier territoire choisi s'il est encore sélectionnable, sinon le
   // premier renvoyé par l'API (ordre d'ancienneté) — aucun code en dur.
+  // Repli sur `testTerritories` UNIQUEMENT si `activeCode` correspond déjà à
+  // l'un d'eux (donc explicitement choisi via TerritorySwitcher à un moment
+  // donné) : ne peut jamais devenir le territoire par défaut d'un nouveau
+  // visiteur, seul `selectableTerritories[0]` sert de repli final.
   const activeTerritory =
-    selectableTerritories.find((t) => t.code === activeCode) ?? selectableTerritories[0] ?? null;
+    selectableTerritories.find((t) => t.code === activeCode) ??
+    testTerritories.find((t) => t.code === activeCode) ??
+    selectableTerritories[0] ??
+    null;
 
   const joinableTerritories = token
     ? publicTerritories.filter((pt) => !territories.some((t) => t.id === pt.id))
@@ -178,6 +226,7 @@ export function TerritoryProvider({ children }: { children: ReactNode }) {
       value={{
         territories,
         publicTerritories,
+        testTerritories,
         selectableTerritories,
         joinableTerritories,
         activeTerritory,

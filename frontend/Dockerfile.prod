@@ -28,6 +28,14 @@ ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 ARG VITE_FACEBOOK_APP_ID=
 ENV VITE_FACEBOOK_APP_ID=$VITE_FACEBOOK_APP_ID
 
+# Codes de territoires de test proposés dans TerritorySwitcher même s'ils ne
+# sont pas encore isActive=true (cf. TerritoryContext.tsx) — vide par défaut
+# (production comme ce Dockerfile réutilisé tel quel), à ne définir QUE dans
+# docker-compose.staging.yml pour ouvrir le test public d'un territoire avant
+# son lancement officiel.
+ARG VITE_STAGING_TEST_TERRITORIES=
+ENV VITE_STAGING_TEST_TERRITORIES=$VITE_STAGING_TEST_TERRITORIES
+
 WORKDIR /app/frontend
 RUN npx vite build
 
