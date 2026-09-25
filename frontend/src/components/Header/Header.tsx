@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
 import {  NavLink, useLocation } from "react-router-dom";
 import "../Header/Header.scss";
 import Hamburger from "../BurgerComponent/Hamburger/Hamburger";
 import Connexion from "../BurgerComponent/Connexion/Connexion";
+import TerritorySwitcher from "../TerritorySwitcher/TerritorySwitcher";
 import { useHideOnScroll } from "../../hooks/useHideOnScroll";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotifications } from "../../contexts/NotificationsContext";
-import { useTerritory } from "../../contexts/TerritoryContext";
 import { useBranding } from "../../contexts/TerritoryContext";
 
 const PUBLIC_NAV_LINKS = [
@@ -40,7 +39,6 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
   const { brandName, asset } = useBranding();
   const { user } = useAuth();
   const { unreadActivitiesCount } = useNotifications();
-  const { selectableTerritories, activeTerritory, setActiveTerritory } = useTerritory();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null,
   );
@@ -88,38 +86,11 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
         />
       </nav>
       <section className="container-header__rightside">
-        {/* Territoire actif = contexte d'utilisation (jamais une autre
-            application) : onglet `34` (code département) avec chevron, quel
-            que soit l'utilisateur (dernier territoire choisi, sinon premier
-            territoire actif). Le clic fait défiler les territoires
-            sélectionnables un par un — activé dès maintenant côté front
-            même si la liste des territoires n'est pas encore calée côté
-            back (un seul territoire = le clic ne change rien). */}
-        {activeTerritory && (
-          <div className="container-header__identity">
-            <button
-              type="button"
-              className="container-header__territoryTab"
-              aria-label={`Territoire actif : ${activeTerritory.name}. Changer de territoire`}
-              onClick={() => {
-                const currentIndex = selectableTerritories.findIndex(
-                  (territory) => territory.code === activeTerritory.code,
-                );
-                const next =
-                  selectableTerritories[(currentIndex + 1) % selectableTerritories.length];
-                setActiveTerritory(next.code);
-              }}
-            >
-              <span className="container-header__territoryLabel">{activeTerritory.code}</span>
-              <ChevronDown
-                size={12}
-                strokeWidth={2.5}
-                className="container-header__territoryChevron"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-        )}
+        {/* À partir de la tablette, le burger (et donc le badge territoire
+            de Bonjour.tsx) disparaît au profit de la nav du Header — le même
+            badge doit alors rester accessible ici (cf. Header.scss, masqué
+            en mobile où Bonjour.tsx le montre déjà). */}
+        <TerritorySwitcher className="container-header__territoryBadge" />
         <Hamburger />
       </section>
     </header>

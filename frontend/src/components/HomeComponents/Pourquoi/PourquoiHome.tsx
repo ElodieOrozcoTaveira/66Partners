@@ -11,13 +11,13 @@ import { useBranding } from "../../../contexts/TerritoryContext";
 const ROUGE = "var(--brand-primary, #E6392E)";
 
 export default function PourquoiHome() {
-  const { brandName, territoryOf } = useBranding();
+  const { brandName, territoryOf, inseeDepartmentCode } = useBranding();
   const choix = [
     {
       id: 1,
       icone: UsersRound,
       titre: "Communauté locale",
-      description: "Rejoins une communauté de sportifs passionés dans le 66.",
+      description: `Rejoins une communauté de sportifs passionés dans le ${inseeDepartmentCode}.`,
     },
     {
       id: 2,
@@ -35,7 +35,7 @@ export default function PourquoiHome() {
     {
       id: 4,
       icone: MapPin,
-      titre: "Découvre le 66",
+      titre: `Découvre le ${inseeDepartmentCode}`,
       description:
         `Explore les plus beaux spots sportifs ${territoryOf}.`,
     },

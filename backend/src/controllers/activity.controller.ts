@@ -5,6 +5,7 @@ import {
   ActivityError,
   type ActivityStatus,
 } from "../services/activity.services.js";
+import { TerritoryService, TerritoryError } from "../services/territory.services.js";
 
 /**
  * CONTRÔLEUR ACTIVITÉ
@@ -58,23 +59,41 @@ export class ActivityController {
 
   /**
    * GET /api/activities
-   * Liste des activités (filtres optionnels : city, sportId, status)
+   * Liste des activités (territory obligatoire ; autres filtres optionnels :
+   * city, sportId, status). Reste public (pas d'authentification requise :
+   * les activités sont volontairement consultables par territoire), mais le
+   * territoire est vérifié côté serveur — jamais un simple passe-plat de ce
+   * que le client envoie (cf. audit P-01).
    */
   static async list(req: Request, res: Response): Promise<void> {
     try {
       const { city, sportId, status, participantId, territory } = req.query;
+
+      // `territory` déjà garanti non vide par activityFiltersSchema ; reste
+      // à vérifier qu'il correspond à un territoire réel plutôt que de
+      // renvoyer silencieusement une liste vide pour un code inconnu.
+      await TerritoryService.getByCode(territory as string);
 
       const filters: Parameters<typeof ActivityService.listActivities>[0] = {};
       if (typeof city === "string") filters.city = city;
       if (typeof sportId === "string") filters.sportId = sportId;
       if (typeof status === "string") filters.status = status as ActivityStatus;
       if (typeof participantId === "string") filters.participantId = participantId;
-      if (typeof territory === "string") filters.territory = territory;
+      filters.territory = territory as string;
 
       const activitiesList = await ActivityService.listActivities(filters);
 
       res.status(200).json({ success: true, activities: activitiesList });
     } catch (error) {
+      if (error instanceof TerritoryError) {
+        res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
       console.error("Erreur lors de la récupération des activités:", error);
       res.status(500).json({
         success: false,

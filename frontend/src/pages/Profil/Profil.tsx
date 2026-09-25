@@ -5,7 +5,6 @@ import DernieresActivites from "../../components/ProfilPage/DernieresActivites/D
 import HeroProfile from "../../components/ProfilPage/HeroProfil/HeroProfile";
 import MesSports from "../../components/ProfilPage/MesSports/MesSports";
 import StatsProfil from "../../components/ProfilPage/StatsProfil/StatsProfil";
-import TerritoireProfil from "../../components/ProfilPage/TerritoireProfil/TerritoireProfil";
 import TopProfile from "../../components/ProfilPage/TopProfil/TopProfil";
 import { useAuth } from "../../contexts/AuthContext";
 import "./Profil.scss";
@@ -24,7 +23,6 @@ export default function Profil() {
           openTo={user?.openTo ?? null}
           createdAt={user?.createdAt ?? null}
         />
-        <TerritoireProfil />
         <StatsProfil userId={user?.id ?? null} />
         <MesSports userId={user?.id ?? null} />
         <Dispo userId={user?.id ?? null} />

@@ -93,7 +93,7 @@
     background: repeating-linear-gradient(
       115deg,
       variables.$rouge 0 5px,
-      #f66a1a 5px 10px,
+      color-mix(in srgb, variables.$rouge 50%, variables.$jaune 50%) 5px 10px,
       variables.$jaune 10px 15px,
       transparent 15px 20px
     );
@@ -231,7 +231,7 @@
     }
 
     &:nth-child(2) &-icon {
-      color: #f66a1a;
+      color: color-mix(in srgb, variables.$rouge 50%, variables.$jaune 50%);
     }
 
     &:nth-child(3) &-icon {

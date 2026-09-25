@@ -46,6 +46,10 @@ export default function ActivitésProche() {
   );
 
   useEffect(() => {
+    // territoryCode se résout de façon asynchrone au premier montage : ne
+    // pas appeler avant, désormais refusé sans territoire par le backend
+    // (cf. audit P-01).
+    if (!territoryCode) return;
     api
       .get<ActivitiesResponse>("/api/activities", { params: { territory: territoryCode } })
       .then((res) => setActivities(res.data.activities))

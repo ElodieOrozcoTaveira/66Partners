@@ -10,6 +10,7 @@ import {
   unsubscribeFromPush,
   type PushSupportState,
 } from "../../../lib/webPush";
+import { useBranding } from "../../../contexts/TerritoryContext";
 import "./ModaleEditProfil.scss";
 
 interface ModaleEditProfilProps {
@@ -22,6 +23,7 @@ export default function ModaleEditProfil({
   onClose,
 }: ModaleEditProfilProps) {
   const { user, refreshUser } = useAuth();
+  const { territoryIn } = useBranding();
   const [pseudo, setPseudo] = useState("");
   const [city, setCity] = useState("");
   const [headline, setHeadline] = useState("");
@@ -175,7 +177,7 @@ export default function ModaleEditProfil({
               value={city}
               onChange={(event) => setCity(event.target.value)}
               className="container-modaleEditProfil__input"
-              placeholder="Ex. Perpignan"
+              placeholder={`Ex. une ville ${territoryIn}`}
             />
 
             <label

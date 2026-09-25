@@ -103,7 +103,7 @@ describe("POST /api/activities", () => {
 
 describe("GET /api/activities", () => {
   it("renvoie une liste vide", async () => {
-    const res = await request(app).get("/api/activities");
+    const res = await request(app).get("/api/activities?territory=66");
     expect(res.status).toBe(200);
     expect(res.body.activities).toEqual([]);
   });
@@ -114,7 +114,7 @@ describe("GET /api/activities", () => {
       .set("Authorization", `Bearer ${token}`)
       .send(validActivity());
 
-    const res = await request(app).get("/api/activities");
+    const res = await request(app).get("/api/activities?territory=66");
     expect(res.status).toBe(200);
     expect(res.body.activities).toHaveLength(1);
   });
@@ -131,7 +131,7 @@ describe("GET /api/activities", () => {
       .send(validActivity({ city: "Canet" }));
 
     const res = await request(app).get(
-      "/api/activities?city=Perpignan"
+      "/api/activities?territory=66&city=Perpignan"
     );
     expect(res.status).toBe(200);
     expect(res.body.activities).toHaveLength(1);
@@ -152,10 +152,20 @@ describe("GET /api/activities", () => {
       .send(validActivity({ sportId: otherSportId }));
 
     const res = await request(app).get(
-      `/api/activities?sportId=${sportId}`
+      `/api/activities?territory=66&sportId=${sportId}`
     );
     expect(res.status).toBe(200);
     expect(res.body.activities).toHaveLength(1);
+  });
+
+  it("refuse sans territoire (400)", async () => {
+    const res = await request(app).get("/api/activities");
+    expect(res.status).toBe(400);
+  });
+
+  it("refuse un territoire inexistant (404)", async () => {
+    const res = await request(app).get("/api/activities?territory=ZZ");
+    expect(res.status).toBe(404);
   });
 });
 

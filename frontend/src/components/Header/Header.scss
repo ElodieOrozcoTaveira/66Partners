@@ -58,74 +58,33 @@
   }
 }
 
-// Identité + territoire actif — visible dès le mobile (cf. audit PWA Étape 6),
-// pas seulement dans la nav desktop.
-.container-header__identity {
-  display: flex;
+// Masqué en mobile (le badge équivalent est déjà visible dans Bonjour.tsx,
+// via le menu burger) — affiché à partir de la tablette, où le burger
+// disparaît au profit de la nav du Header (cf. Hamburger.scss) et
+// emporterait sinon ce badge avec lui.
+// Sélecteur composé (.territory-switcher.container-header__territoryBadge) :
+// TerritorySwitcher.scss fixe déjà `.territory-switcher { display: flex }`
+// sans condition, même spécificité qu'une classe seule ici — sans ce
+// doublage, l'ordre de chargement des feuilles de style déciderait laquelle
+// des deux règles gagne, indépendamment du viewport.
+.territory-switcher.container-header__territoryBadge {
+  display: none;
   align-items: center;
-  gap: 0.3rem;
-  max-width: 34vw;
-  padding: 0.3rem 0.55rem;
+  flex-shrink: 0;
+  padding: 0.4rem 0.75rem;
   border-radius: 999px;
   background: variables.alpha(variables.$nuit, 6%);
-}
 
-.container-header__identity-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 96px;
-  font-family: "Inter", sans-serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: variables.$nuit;
-}
-
-.container-header__identity-sep {
-  font-size: 0.7rem;
-  color: variables.alpha(variables.$nuit, 35%);
-}
-
-.container-header__identity-code {
-  font-family: "Inter", sans-serif;
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: variables.$rouge2;
-}
-
-.container-header__territoryTab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  min-width: 0;
-  max-width: 40px;
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: variables.$rouge2;
-  cursor: pointer;
-}
-
-.container-header__territoryLabel {
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  text-align: center;
-}
-
-.container-header__territoryChevron {
-  color: variables.$rouge2;
-  flex-shrink: 0;
-  pointer-events: none;
+  @media (min-width: variables.$tablet) {
+    display: flex;
+  }
 }
 
 .container-header__leftside img {
+  // Chaque territoire a son propre logo, pas nécessairement le même ratio
+  // largeur/hauteur (ex. 34Partners plus large que 66Partners) : contain
+  // évite toute déformation dans la boîte fixe ci-dessous.
+  object-fit: contain;
   transition: transform 0.25s ease;
   margin-left: -1rem;
 }
@@ -275,21 +234,34 @@
     height: auto;
   }
 
+  .container-header__rightside {
+    padding: 1rem 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .territory-switcher.container-header__territoryBadge {
+    padding: 0.35rem 0.55rem;
+  }
+
+  .territory-switcher__code {
+    font-size: 0.72rem;
+  }
+
   .container-header__nav {
-    gap: 0.6rem;
-    margin-left: 0.75rem;
+    gap: 0.4rem;
+    margin-left: 0.5rem;
 
     a {
-      font-size: 0.78rem;
+      font-size: 0.72rem;
     }
 
     .container-connexion {
-      gap: 0.4rem;
+      gap: 0.3rem;
 
       &__links1,
       &__links2 {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.72rem;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.66rem;
       }
     }
   }

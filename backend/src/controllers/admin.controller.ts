@@ -7,7 +7,7 @@ import {
   AdminUsersService,
   type TimeRange,
 } from "../services/admin.services.js";
-import { TerritoryError } from "../services/territory.services.js";
+import { TerritoryError, TerritoryService } from "../services/territory.services.js";
 import { UserError } from "../services/user.services.js";
 
 /**
@@ -145,6 +145,27 @@ export class AdminController {
       res.status(500).json({
         success: false,
         message: "Erreur interne lors de la récupération de l'évolution des utilisateurs",
+      });
+    }
+  }
+
+  /**
+   * GET /api/admin/territories
+   * Liste de TOUS les territoires (actifs ou non) : contrairement à
+   * GET /api/territories (public, actifs uniquement — cf. audit P-04),
+   * l'admin doit pouvoir filtrer/inspecter un territoire avant son
+   * ouverture. Réservé à l'admin (requireAdminAuth, cf. routes).
+   */
+  static async listTerritories(_req: Request, res: Response): Promise<void> {
+    try {
+      const territories = await TerritoryService.listTerritories();
+
+      res.status(200).json({ success: true, territories });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des territoires (admin):", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération des territoires",
       });
     }
   }

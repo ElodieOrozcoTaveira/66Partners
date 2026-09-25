@@ -22,8 +22,8 @@ export default function Footer({ hideOnMobile = false }: FooterProps) {
                 className={`container-footer reveal-on-scroll${visible ? ' is-visible' : ''}${hideOnMobile ? ' container-footer--laptop-only' : ''}`}
             >
                 <img src={asset("logo")} alt="logo de l'application"
-                height={100}
-                width={120} className="container-footer__img" />
+                height={80}
+                width={100} className="container-footer__img" />
                 <div className="container-footer__underline"></div>
                 <h2 className="container-footer__h2bis">La plateforme qui connecte les sportifs {territoryOf}</h2>
                 <div className="container-footer__lieux"><MapPin size={14} color='var(--brand-accent-dark, #F4B400)'/>{territoryName}, France</div>

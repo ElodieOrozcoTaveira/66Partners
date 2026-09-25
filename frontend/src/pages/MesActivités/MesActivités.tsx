@@ -46,7 +46,10 @@ export default function MesActivités() {
   // a une notification.
 
   useEffect(() => {
-    if (!user) return;
+    // territoryCode se résout de façon asynchrone au premier montage : ne
+    // pas appeler avant, désormais refusé sans territoire par le backend
+    // (cf. audit P-01).
+    if (!user || !territoryCode) return;
     let mounted = true;
     setIsLoading(true);
 

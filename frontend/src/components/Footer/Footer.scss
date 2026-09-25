@@ -74,11 +74,17 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
+    width: 100px;
+    height: 80px;
+    // object-fit: contain plutôt que le fill par défaut : les logos des
+    // territoires n'ont pas tous le même ratio (ex. 66 en 16:9, 34 plus
+    // large) et un fill les déforme/floute selon l'écart avec la boîte fixe.
+    object-fit: contain;
 
     @media (min-width: variables.$laptop) {
-      width: 90px;
-      height: 75px;
+      width: 76px;
+      height: 63px;
       margin-top: 0.75rem;
     }
   }

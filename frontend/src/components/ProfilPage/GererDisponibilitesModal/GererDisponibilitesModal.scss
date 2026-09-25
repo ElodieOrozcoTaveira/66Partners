@@ -97,12 +97,12 @@
       height: 24px;
       border: none;
       border-radius: 50%;
-      background: rgba(198, 40, 40, 0.1);
+      background: variables.alpha(variables.$rouge2, 10%);
       color: variables.$rouge2;
       cursor: pointer;
 
       &:hover {
-        background: rgba(198, 40, 40, 0.18);
+        background: variables.alpha(variables.$rouge2, 18%);
       }
 
       &:disabled {

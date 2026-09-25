@@ -68,14 +68,18 @@ export const activityIdParamSchema = z.object({
 });
 
 /**
- * GET /activities?city=&sportId=&status=
+ * GET /activities?territory=&city=&sportId=&status=
+ *
+ * `territory` est obligatoire : la liste ne doit jamais dépendre uniquement
+ * du frontend pour rester scindée par territoire (cf. audit P-01, l'API
+ * doit être l'autorité finale, pas seulement l'appelant).
  */
 export const activityFiltersSchema = z.object({
   city: z.string().trim().min(1).optional(),
   sportId: z.uuid("Identifiant de sport invalide").optional(),
   status: statusSchema.optional(),
   participantId: z.uuid("Identifiant de participant invalide").optional(),
-  territory: z.string().trim().min(1).max(10).optional(),
+  territory: z.string().trim().min(1, "Le territoire est requis").max(10),
 });
 
 export type ActivityFiltersInput = z.infer<typeof activityFiltersSchema>;

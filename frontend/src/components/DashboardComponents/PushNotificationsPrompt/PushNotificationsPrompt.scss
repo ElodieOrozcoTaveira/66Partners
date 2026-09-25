@@ -7,8 +7,8 @@
   gap: 0.7rem;
   padding: 0.85rem 1rem;
   border-radius: 16px;
-  background: rgba(244, 180, 0, 0.1);
-  border: 1px solid rgba(244, 180, 0, 0.3);
+  background: variables.alpha(variables.$jaune2, 10%);
+  border: 1px solid variables.alpha(variables.$jaune2, 30%);
 }
 
 .push-prompt__icon {
@@ -19,7 +19,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #f4b400;
+  background: variables.$jaune2;
   color: #ffffff;
 }
 

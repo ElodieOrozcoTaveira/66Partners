@@ -3,6 +3,7 @@
 
 .container-mesSports {
   padding-bottom: 0.25rem;
+  margin-bottom: 1.5rem;
 
   &__header {
     display: flex;
@@ -165,7 +166,7 @@
 
 .mesSports-item--add {
   justify-content: center;
-  border: 1.5px dashed rgba(198, 40, 40, 0.35);
+  border: 1.5px dashed variables.alpha(variables.$rouge2, 35%);
   text-decoration: none;
   transition: background-color 0.15s ease;
 
@@ -180,6 +181,6 @@
   }
 
   &:hover {
-    background: rgba(198, 40, 40, 0.06);
+    background: variables.alpha(variables.$rouge2, 6%);
   }
 }

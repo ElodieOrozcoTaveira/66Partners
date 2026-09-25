@@ -18,6 +18,7 @@ import {
 POST /admin/auth/login
 POST /admin/auth/forgot-password
 POST /admin/auth/reset-password
+GET /admin/territories
 GET /admin/stats/overview
 GET /admin/stats/user-evolution
 GET /admin/stats/territory-breakdown
@@ -36,6 +37,8 @@ router.post(
   validateBody(adminResetPasswordSchema),
   AdminController.resetPassword
 );
+
+router.get("/territories", requireAdminAuth, AdminController.listTerritories);
 
 router.get(
   "/stats/overview",

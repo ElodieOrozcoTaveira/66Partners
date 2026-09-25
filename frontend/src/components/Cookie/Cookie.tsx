@@ -49,9 +49,12 @@ export default function CookieBanner() {
         alignItems: "center",
         zIndex: 2000
       }}
-      buttonStyle={{ 
+      buttonStyle={{
         background: "#fff",
-        color: "#ff4500",
+        // Suit la marque du territoire actif (cf. audit P-02) : même
+        // variable CSS que variables.$rouge2 côté SCSS, inutilisable ici
+        // telle quelle (styles inline, pas de contexte Sass).
+        color: "var(--brand-primary-dark, #C62828)",
         fontSize: "14px",
         padding: "10px 30px",
         borderRadius: "5px",

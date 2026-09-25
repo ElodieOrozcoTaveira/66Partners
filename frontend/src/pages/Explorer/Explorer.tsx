@@ -66,10 +66,14 @@ export default function Explorer() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Le territoire actif se résout de façon asynchrone au premier montage
+    // (TerritoryContext) : attendre qu'il soit prêt évite un appel sans
+    // territoire, désormais refusé par le backend (cf. audit P-01).
+    if (!activeTerritory) return;
     setIsLoading(true);
     Promise.all([
       api.get<ActivitiesResponse>("/api/activities", {
-        params: activeTerritory ? { territory: activeTerritory.code } : undefined,
+        params: { territory: activeTerritory.code },
       }),
       api.get<SportsResponse>("/api/sports"),
     ])

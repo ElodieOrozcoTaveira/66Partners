@@ -11,11 +11,14 @@ import { TerritoryService, TerritoryError } from "../services/territory.services
 export class TerritoryController {
   /**
    * GET /api/territories
-   * Liste de tous les territoires
+   * Liste des territoires ACTIFS uniquement — route publique, jamais un
+   * territoire en préparation (isActive=false) avant son ouverture (cf.
+   * audit P-04). Pour l'inspection admin de tous les territoires (actifs ou
+   * non), voir GET /api/admin/territories (réservé, cf. admin.routes.ts).
    */
   static async list(_req: Request, res: Response): Promise<void> {
     try {
-      const territoriesList = await TerritoryService.listTerritories();
+      const territoriesList = await TerritoryService.getActiveTerritories();
 
       res.status(200).json({ success: true, territories: territoriesList });
     } catch (error) {

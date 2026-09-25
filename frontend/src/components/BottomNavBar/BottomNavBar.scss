@@ -19,7 +19,13 @@
     display: block;
     height: 6px;
     width: 100%;
-    background: linear-gradient(90deg, #c62828 0%, #c62828 50%, #f4b400 50%, #f4b400 100%);
+    background: linear-gradient(
+      90deg,
+      variables.$rouge2 0%,
+      variables.$rouge2 50%,
+      variables.$jaune2 50%,
+      variables.$jaune2 100%
+    );
   }
 
   // À partir de la tablette, la navigation passe par le Header (cf. Header.scss).
@@ -67,9 +73,9 @@
   height: 44px;
   margin-top: -18px;
   border-radius: 50%;
-  background: #c62828;
+  background: variables.$rouge2;
   color: #ffffff;
-  box-shadow: 0 6px 16px rgba(198, 40, 40, 0.4);
+  box-shadow: 0 6px 16px variables.alpha(variables.$rouge2, 40%);
   transition: transform 0.15s ease;
 
   &:hover {
@@ -116,7 +122,7 @@
 }
 
 .container-bottomNavbar__link.active {
-  color: #c62828;
+  color: variables.$rouge2;
 }
 
 .container-bottomNavbar__link svg {

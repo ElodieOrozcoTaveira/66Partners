@@ -47,7 +47,10 @@ export default function DernieresActivites({ userId }: DernieresActivitesProps) 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) return;
+    // territoryCode se résout de façon asynchrone au premier montage : ne
+    // pas appeler avant, désormais refusé sans territoire par le backend
+    // (cf. audit P-01).
+    if (!userId || !territoryCode) return;
     let mounted = true;
 
     Promise.all([

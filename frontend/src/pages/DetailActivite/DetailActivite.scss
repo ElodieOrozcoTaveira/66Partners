@@ -134,7 +134,7 @@
   align-self: flex-start;
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  background: rgba(198, 40, 40, 0.08);
+  background: variables.alpha(variables.$rouge2, 8%);
   color: variables.$rouge2;
   font-family: "Inter", sans-serif;
   font-size: 0.78rem;
@@ -167,7 +167,7 @@
 
   &--outline {
     background: transparent;
-    border: 1px solid rgba(198, 40, 40, 0.35);
+    border: 1px solid variables.alpha(variables.$rouge2, 35%);
     color: variables.$rouge2;
   }
 }
@@ -312,7 +312,7 @@
   }
 
   &__refuse {
-    background: rgba(198, 40, 40, 0.1);
+    background: variables.alpha(variables.$rouge2, 10%);
     color: variables.$rouge2;
   }
 }

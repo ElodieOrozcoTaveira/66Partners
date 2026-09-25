@@ -35,7 +35,10 @@ export default function StatsProfil({ userId }: StatsProfilProps) {
   const [organizedCount, setOrganizedCount] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
+    // territoryCode se résout de façon asynchrone au premier montage : ne
+    // pas appeler avant, désormais refusé sans territoire par le backend
+    // (cf. audit P-01).
+    if (!userId || !territoryCode) return;
 
     let mounted = true;
     setLoading(true);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../../lib/axios";
+import adminApi from "../../../lib/adminAxios";
 import "./AdminTerritoryFilter.scss";
 
 interface AdminTerritory {
@@ -26,8 +26,8 @@ export function useAdminTerritoryFilter() {
   const [territories, setTerritories] = useState<AdminTerritory[]>([]);
 
   useEffect(() => {
-    api
-      .get<{ territories: AdminTerritory[] }>("/api/territories")
+    adminApi
+      .get<{ territories: AdminTerritory[] }>("/api/admin/territories")
       .then((res) => setTerritories(res.data.territories))
       .catch(() => setTerritories([]));
   }, []);

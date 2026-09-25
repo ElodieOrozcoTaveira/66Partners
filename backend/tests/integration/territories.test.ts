@@ -52,6 +52,17 @@ describe("GET /api/territories", () => {
     expect(territory66).toBeDefined();
     expect(territory66.isActive).toBe(true);
   });
+
+  it("n'expose jamais un territoire inactif (route publique — cf. audit P-04)", async () => {
+    const inactiveTerritory = await createTerritory({ code: "INACTV", isActive: false });
+
+    const res = await request(app).get("/api/territories");
+
+    expect(res.status).toBe(200);
+    expect(
+      res.body.territories.some((t: { code: string }) => t.code === inactiveTerritory.code)
+    ).toBe(false);
+  });
 });
 
 describe("GET /api/territories/:code", () => {
@@ -143,7 +154,7 @@ describe("POST /api/activities et territoire", () => {
     expect(emptyRes.body.activities).toEqual([]);
   });
 
-  it("sans filtre de territoire, reste public et renvoie les activités de tous les territoires (widget Accueil)", async () => {
+  it("refuse (400) une requête sans territoire : l'isolation ne dépend jamais uniquement de l'appelant (cf. audit P-01)", async () => {
     const territory34 = await createTerritory({ code: "34" });
     const { userId: creator34Id, token: creator34Token } = await createUser({
       email: "creator34list@test.com",
@@ -159,10 +170,24 @@ describe("POST /api/activities et territoire", () => {
       .set("Authorization", `Bearer ${creator34Token}`)
       .send(validActivity({ territoryId: territory34.id }));
 
-    const res = await request(app).get("/api/activities");
+    const noFilterRes = await request(app).get("/api/activities");
+    expect(noFilterRes.status).toBe(400);
 
-    expect(res.status).toBe(200);
-    expect(res.body.activities).toHaveLength(2);
+    const emptyTerritoryRes = await request(app).get("/api/activities?territory=");
+    expect(emptyTerritoryRes.status).toBe(400);
+
+    const unknownTerritoryRes = await request(app).get("/api/activities?territory=foo");
+    expect(unknownTerritoryRes.status).toBe(404);
+
+    // Aucun mélange : chaque territoire ne voit que sa propre activité.
+    const res66 = await request(app).get("/api/activities?territory=66");
+    expect(res66.status).toBe(200);
+    expect(res66.body.activities).toHaveLength(1);
+
+    const res34 = await request(app).get("/api/activities?territory=34");
+    expect(res34.status).toBe(200);
+    expect(res34.body.activities).toHaveLength(1);
+    expect(res34.body.activities[0].territoryId).toBe(territory34.id);
   });
 });
 
