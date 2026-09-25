@@ -142,7 +142,13 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
     setOpen(false);
     if (code === activeTerritory!.code) return;
     const alreadyMember = territories.some((territory) => territory.code === code);
-    if (token && !alreadyMember) {
+    // Territoire de test staging (cf. TerritoryContext) : jamais réellement
+    // actif publiquement, donc jamais rejoignable via l'API (le backend
+    // refuse à raison tout join vers un territoire isActive=false). Basculer
+    // directement le contexte local sans passer par joinTerritory — ce n'est
+    // pas une vraie appartenance, seulement un aperçu de test.
+    const isTestTerritory = testTerritories.some((territory) => territory.code === code);
+    if (token && !alreadyMember && !isTestTerritory) {
       try {
         await joinTerritory(code);
       } catch {
