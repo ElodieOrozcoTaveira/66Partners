@@ -1,7 +1,12 @@
-import { useEffect, useState } from "react";
-import { Download, Share, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Download, Share, MoreVertical, X } from "lucide-react";
 import "./InstallPwaPrompt.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
+
+// Délai laissé à Chrome/Android pour émettre nativement "beforeinstallprompt"
+// avant de basculer sur l'instruction manuelle — cf. heuristique d'engagement
+// ci-dessous.
+const ANDROID_FALLBACK_DELAY_MS = 4000;
 
 const DISMISS_KEY = "66partners-pwa-install-dismissed-until";
 const DISMISS_DAYS = 14;
@@ -39,8 +44,14 @@ export default function InstallPwaPrompt({ hasBottomNav = false }: InstallPwaPro
   const { brandName } = useBranding();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIos, setIsIos] = useState(false);
+  const [isAndroidFallback, setIsAndroidFallback] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [cookieAnswered, setCookieAnswered] = useState(hasCookieChoice);
+  // Ref plutôt qu'un state : lu dans le timeout ci-dessous sans avoir besoin
+  // de le remettre dans les dépendances de l'effet (qui ne doit se
+  // ré-exécuter que sur cookieAnswered, cf. useGoogleAuth pour le même
+  // principe).
+  const receivedNativePromptRef = useRef(false);
 
   // La bannière cookies peut être répondue APRÈS le montage de ce composant
   // (cas typique d'un nouveau compte : premier chargement du site, bannière
@@ -61,17 +72,40 @@ export default function InstallPwaPrompt({ hasBottomNav = false }: InstallPwaPro
 
     const ua = window.navigator.userAgent;
     const iosDevice = /iphone|ipad|ipod/i.test(ua) && !("MSStream" in window);
+    const androidDevice = /android/i.test(ua);
     setIsIos(iosDevice);
     if (iosDevice) setIsVisible(true);
 
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
+      receivedNativePromptRef.current = true;
       setDeferredPrompt(event as BeforeInstallPromptEvent);
       setIsVisible(true);
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    // Chrome/Android ne déclenche "beforeinstallprompt" que si son
+    // heuristique d'engagement interne l'estime satisfait — jamais garanti
+    // dès la première visite (cas typique d'un nouveau compte). Sans repli,
+    // ce visiteur ne reçoit alors AUCUNE indication qu'il peut installer.
+    // Passé ce délai sans évènement natif, on affiche l'instruction manuelle
+    // (menu du navigateur), jamais de bouton "Installer" programmatique
+    // puisqu'on n'a pas de prompt à déclencher dans ce cas.
+    let fallbackTimer: number | undefined;
+    if (androidDevice) {
+      fallbackTimer = window.setTimeout(() => {
+        if (!receivedNativePromptRef.current) {
+          setIsAndroidFallback(true);
+          setIsVisible(true);
+        }
+      }, ANDROID_FALLBACK_DELAY_MS);
+    }
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      if (fallbackTimer) window.clearTimeout(fallbackTimer);
+    };
   }, [cookieAnswered]);
 
   function dismiss() {
@@ -111,6 +145,14 @@ export default function InstallPwaPrompt({ hasBottomNav = false }: InstallPwaPro
             Installe {brandName} sur ton écran d'accueil pour un accès plus rapide et recevoir
             les notifications : appuie sur <Share size={14} className="install-pwa-prompt__icon" />{" "}
             puis « Sur l'écran d'accueil ».
+          </p>
+        </>
+      ) : isAndroidFallback ? (
+        <>
+          <p className="install-pwa-prompt__text">
+            Installe {brandName} sur ton téléphone pour un accès plus rapide : ouvre le menu{" "}
+            <MoreVertical size={14} className="install-pwa-prompt__icon" /> de ton navigateur puis
+            « Installer l'application » ou « Ajouter à l'écran d'accueil ».
           </p>
         </>
       ) : (

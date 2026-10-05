@@ -10,7 +10,10 @@
   position: fixed;
   inset: 0;
   background-color: rgba(variables.$nuit, 0.25);
-  z-index: 999;
+  // Au-dessus de .container-header (fixed, z-index: 1003) : sinon, sur toute
+  // page affichant le Header global (ex. accueil), celui-ci reste visible
+  // par-dessus l'overlay/le panneau ouvert au lieu d'être recouvert.
+  z-index: 1004;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -39,10 +42,15 @@
   height: 100vh;
   height: 100dvh;
   padding: 1rem 1rem 0.75rem;
+  // iOS PWA (status bar "black-translucent", cf. index.html) : le contenu
+  // s'étend sous l'encoche/la barre de statut — sans ce padding, le premier
+  // enfant (Bonjour) démarre à y=0 et se retrouve partiellement masqué
+  // derrière elle.
+  padding-top: calc(1rem + env(safe-area-inset-top));
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   overflow-y: auto;
   background-color: #fffbf7 ;
-  z-index: 1000;
+  z-index: 1005;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -126,19 +134,21 @@
 
 .navbar-item:hover,
 .navbar-item:has(a[aria-current="page"]) {
+  // Même dégradé rouge→jaune que mixins.gradient (variables de marque,
+  // réactives au territoire actif), ramené à 10% d'opacité — les valeurs
+  // rgba() en dur précédentes correspondaient exactement aux hex par défaut
+  // du 66 ($rouge/$jaune), ne suivaient donc jamais un autre territoire.
   background: linear-gradient(
         90deg,
-        rgba(230, 57, 46, 0.1) 0%,
-        rgba(239, 75, 45, 0.1) 35%,
-        rgba(246, 106, 26, 0.1) 70%,
-        rgba(244, 166, 29, 0.1) 100%
+        variables.alpha(variables.$rouge, 10%) 0%,
+        variables.alpha(variables.$jaune, 10%) 100%
     );
   border-radius: 12px;
   }
 
 
 .navbar-item a:hover {
-  color: orangered;
+  color: variables.$rouge2;
 }
 
 .navbar-burger {

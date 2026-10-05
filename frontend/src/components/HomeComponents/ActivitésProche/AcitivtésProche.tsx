@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { CalendarX } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useTerritory } from "../../../contexts/TerritoryContext";
+import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getSportPhoto } from "../../../lib/sportPhotos";
@@ -27,6 +27,8 @@ interface Activity {
   sportId: string;
   sportName: string;
   participantsCount: number;
+  creatorPseudo: string | null;
+  creatorAvatar: string | null;
 }
 
 interface ActivitiesResponse {
@@ -35,6 +37,7 @@ interface ActivitiesResponse {
 }
 
 export default function ActivitésProche() {
+  const { asset } = useBranding();
   const { activeTerritory } = useTerritory();
   const territoryCode = activeTerritory?.code;
   const inseeDepartmentCode = activeTerritory?.inseeDepartmentCode;
@@ -51,7 +54,9 @@ export default function ActivitésProche() {
     // (cf. audit P-01).
     if (!territoryCode) return;
     api
-      .get<ActivitiesResponse>("/api/activities", { params: { territory: territoryCode } })
+      .get<ActivitiesResponse>("/api/activities", {
+        params: { territory: territoryCode, from: new Date().toISOString() },
+      })
       .then((res) => setActivities(res.data.activities))
       .catch(() => setActivities([]));
   }, [territoryCode]);
@@ -70,14 +75,11 @@ export default function ActivitésProche() {
     }
   }
 
+  // `activities` est déjà filtrée à l'à-venir côté backend (`from`), ne
+  // reste qu'à exclure les annulées (cf. chantier filtres de date).
   const upcoming = useMemo(() => {
-    const now = Date.now();
     return activities
-      .filter(
-        (activity) =>
-          new Date(activity.startDate).getTime() > now &&
-          activity.status !== "CANCELLED",
-      )
+      .filter((activity) => activity.status !== "CANCELLED")
       .slice(0, UPCOMING_COUNT);
   }, [activities]);
 
@@ -158,6 +160,16 @@ export default function ActivitésProche() {
                   {activity.participantsCount}/{activity.maxParticipants}{" "}
                   participants
                 </p>
+                <span className="activity-card__creator">
+                  <img
+                    src={activity.creatorAvatar || asset("avatarDefault")}
+                    alt={activity.creatorPseudo ?? "Compte supprimé"}
+                    className="activity-card__creator-avatar"
+                  />
+                  {activity.creatorPseudo
+                    ? `Organisée par ${activity.creatorPseudo}`
+                    : "Organisateur du compte supprimé"}
+                </span>
                 <span
                   className="activity-card__sport"
                   style={{ background: `${color}1F`, color }}

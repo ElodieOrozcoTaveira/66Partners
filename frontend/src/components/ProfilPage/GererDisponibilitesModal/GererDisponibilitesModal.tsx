@@ -80,7 +80,10 @@ export default function GererDisponibilitesModal({
       await api.delete(`/api/users/me/availabilities/${id}`);
       onChange();
     } catch (err) {
-      console.error("GererDisponibilitesModal: failed to remove slot", err);
+      console.error(
+        "GererDisponibilitesModal: failed to remove slot",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
     } finally {
       setRemovingId(null);
     }

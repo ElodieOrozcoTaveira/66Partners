@@ -1,6 +1,11 @@
+import { lazy, Suspense } from "react";
 import { LockKeyhole } from "lucide-react";
-import ModaleContent from "../ModaleContent/ModaleContent";
 import "./Modale.scss";
+
+// Chargé à la demande : ModaleContent embarque react-icons (FaFacebook,
+// FcGoogle — aucun équivalent lucide-react disponible pour ces logos), sinon
+// présent dans le Header sur toutes les pages (cf. audit performance — P1).
+const ModaleContent = lazy(() => import("../ModaleContent/ModaleContent"));
 
 interface ModaleBtnProps {
   isOpen: boolean;
@@ -19,7 +24,9 @@ export default function ModaleBtn({ isOpen, onOpen, onClose, onSwitchToRegister 
       >
         <LockKeyhole size={16} />Se connecter 
       </button>
-      <ModaleContent isOpen={isOpen} onClose={onClose} onSwitchToRegister={onSwitchToRegister} />
+      <Suspense fallback={null}>
+        <ModaleContent isOpen={isOpen} onClose={onClose} onSwitchToRegister={onSwitchToRegister} />
+      </Suspense>
     </>
   );
 }

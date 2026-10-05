@@ -28,7 +28,7 @@ import PourquoiHome from "../../components/HomeComponents/Pourquoi/PourquoiHome"
 import { useBranding } from "../../contexts/TerritoryContext";
 
 export default function Home() {
-  const { taglineLead, taglineAccent, territoryOf } = useBranding();
+  const { taglineLeadLines, taglineAccent, territoryOf } = useBranding();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
@@ -82,9 +82,10 @@ export default function Home() {
 
           <div className="home-hero__intro">
             <h1 className="home-hero__titre">
-              {taglineLead}
-              <br />
-              <span className="home-hero__titre-accent">{taglineAccent}</span>
+              {taglineLeadLines.map((line) => (
+                <span key={line} className="home-hero__titre-ligne">{line}</span>
+              ))}
+              <span className="home-hero__titre-ligne home-hero__titre-accent">{taglineAccent}</span>
             </h1>
             <p className="home-hero__soustitre">
               La plateforme des sportifs {territoryOf}.

@@ -6,7 +6,7 @@ import { getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import "./SportsPop.scss";
 
-const DEFAULT_PHOTO = "/montagne.webp";
+const DEFAULT_PHOTO = "/66partners/landscape.webp";
 const RANDOM_COUNT = 10;
 
 function handlePhotoError(event: SyntheticEvent<HTMLImageElement>) {
@@ -79,6 +79,7 @@ export default function SportsPop() {
                     src={getSportPhoto(sport.name)}
                     alt={sport.name}
                     className="sportpop-item__photo"
+                    loading="lazy"
                     onError={handlePhotoError}
                   />
                   <span

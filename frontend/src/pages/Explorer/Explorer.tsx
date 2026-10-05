@@ -8,8 +8,11 @@ import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
 import { getSportPhoto } from "../../lib/sportPhotos";
 import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
 import { formatMonth, formatWeekday } from "../../lib/dateFormat";
+import { DATE_PRESET_LABELS, presetToRange, type DatePreset } from "../../lib/parisDateRange";
 import "./Explorer.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
+
+const DATE_PRESETS: DatePreset[] = ["all", "today", "tomorrow", "week", "weekend", "month"];
 
 type ActivityStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
@@ -30,6 +33,8 @@ interface Activity {
   status: ActivityStatus;
   sportId: string;
   sportName: string;
+  creatorPseudo: string | null;
+  creatorAvatar: string | null;
 }
 
 interface SportsResponse {
@@ -55,12 +60,16 @@ const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
 });
 
 export default function Explorer() {
-  const { brandName } = useBranding();
+  const { brandName, asset } = useBranding();
   const { activeTerritory } = useTerritory();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
   const selectedSportId = searchParams.get("sport");
+  const rawPreset = searchParams.get("when");
+  const datePreset: DatePreset = (DATE_PRESETS as string[]).includes(rawPreset ?? "")
+    ? (rawPreset as DatePreset)
+    : "all";
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,9 +80,14 @@ export default function Explorer() {
     // territoire, désormais refusé par le backend (cf. audit P-01).
     if (!activeTerritory) return;
     setIsLoading(true);
+    // Toujours au minimum "à venir" (cf. chantier filtres de date) : "Toutes"
+    // ne veut jamais dire "y compris le passé" dans une liste publique —
+    // bornes calculées sur le calendrier Europe/Paris, jamais le fuseau du
+    // navigateur (cf. parisDateRange.ts).
+    const { from, to } = presetToRange(datePreset);
     Promise.all([
       api.get<ActivitiesResponse>("/api/activities", {
-        params: { territory: activeTerritory.code },
+        params: { territory: activeTerritory.code, from, to },
       }),
       api.get<SportsResponse>("/api/sports"),
     ])
@@ -83,7 +97,7 @@ export default function Explorer() {
       })
       .catch(() => setError("Impossible de charger les activités."))
       .finally(() => setIsLoading(false));
-  }, [activeTerritory]);
+  }, [activeTerritory, datePreset]);
 
   const practicedSportIds = useMemo(
     () => new Set(activities.map((activity) => activity.sportId)),
@@ -121,6 +135,29 @@ export default function Explorer() {
         onChange={setSearch}
         placeholder="Rechercher une activité..."
       />
+
+      <div className="container-explorer__filters">
+        {DATE_PRESETS.map((preset) => {
+          const isActive = datePreset === preset;
+          return (
+            <button
+              key={preset}
+              type="button"
+              className={`filter-chip${isActive ? " filter-chip--active" : ""}`}
+              onClick={() =>
+                setSearchParams((prev) => {
+                  const next = new URLSearchParams(prev);
+                  if (preset === "all") next.delete("when");
+                  else next.set("when", preset);
+                  return next;
+                })
+              }
+            >
+              {DATE_PRESET_LABELS[preset]}
+            </button>
+          );
+        })}
+      </div>
 
       {availableSports.length > 0 && (
         <div className="container-explorer__filters">
@@ -251,6 +288,17 @@ export default function Explorer() {
                       {timeFormatter.format(startDate)}
                     </span>
                   </div>
+
+                  <span className="activity-card__creator">
+                    <img
+                      src={activity.creatorAvatar || asset("avatarDefault")}
+                      alt={activity.creatorPseudo ?? "Compte supprimé"}
+                      className="activity-card__creator-avatar"
+                    />
+                    {activity.creatorPseudo
+                      ? `Organisée par ${activity.creatorPseudo}`
+                      : "Organisateur du compte supprimé"}
+                  </span>
 
                   <div className="activity-card__footer">
                     <span className="activity-card__level">

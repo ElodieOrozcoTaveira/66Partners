@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { NavLink, useParams, useSearchParams } from "react-router-dom";
+import { NavLink, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { isAxiosError } from "axios";
 import { ArrowLeft, Send } from "lucide-react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useNotifications } from "../../../contexts/NotificationsContext";
 import { formatTime } from "../../../lib/dateFormat";
 import "./PrivateMessage.scss";
-import { useBranding } from "../../../contexts/TerritoryContext";
+import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
 
 interface MessageItem {
   id: string;
@@ -30,6 +31,9 @@ export default function PrivateMessage() {
   // groupe de l'activité (comportement historique, inchangé).
   const carpoolParticipantId = searchParams.get("carpool");
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { activeTerritory } = useTerritory();
+  const territoryCode = activeTerritory?.code;
   const { notifications, markManyAsRead } = useNotifications();
 
   const [activity, setActivity] = useState<ActivityInfo | null>(null);
@@ -42,7 +46,12 @@ export default function PrivateMessage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!activityId) return;
+    // territoryCode se résout de façon asynchrone au premier montage (ne pas
+    // appeler avant) ET change à chaque switch de territoire : rejoue alors
+    // ce chargement dans le nouveau contexte plutôt que de garder affiché un
+    // fil qui appartenait à l'ancien territoire (cf. audit isolation
+    // territoriale de la messagerie).
+    if (!activityId || !territoryCode) return;
     let mounted = true;
     setIsLoading(true);
     setNotFound(false);
@@ -50,8 +59,8 @@ export default function PrivateMessage() {
     async function load() {
       try {
         const conversationUrl = carpoolParticipantId
-          ? `/api/activities/${activityId}/conversation?carpool=${carpoolParticipantId}`
-          : `/api/activities/${activityId}/conversation`;
+          ? `/api/activities/${activityId}/conversation?carpool=${carpoolParticipantId}&territory=${territoryCode}`
+          : `/api/activities/${activityId}/conversation?territory=${territoryCode}`;
 
         const [activityRes, conversationRes] = await Promise.all([
           api.get<{ activity: ActivityInfo }>(`/api/activities/${activityId}`),
@@ -65,12 +74,23 @@ export default function PrivateMessage() {
 
         const messagesRes = await api.get<{ messages: MessageItem[] }>(
           `/api/conversations/${convId}/messages`,
+          { params: { territory: territoryCode } },
         );
         if (!mounted) return;
         setMessages([...messagesRes.data.messages].reverse());
       } catch (err) {
-        console.error("PrivateMessage: failed to load conversation", err);
-        if (mounted) setNotFound(true);
+        if (!mounted) return;
+        // Changement de territoire en cours de consultation : jamais une
+        // erreur générique, on quitte simplement ce fil devenu hors contexte.
+        if (isAxiosError(err) && err.response?.data?.code === "WRONG_TERRITORY") {
+          navigate("/messages", { replace: true });
+          return;
+        }
+        console.error(
+          "PrivateMessage: failed to load conversation",
+          err instanceof Error ? err.message : "Erreur inconnue",
+        );
+        setNotFound(true);
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -81,7 +101,7 @@ export default function PrivateMessage() {
     return () => {
       mounted = false;
     };
-  }, [activityId, carpoolParticipantId]);
+  }, [activityId, carpoolParticipantId, territoryCode, navigate]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -103,13 +123,13 @@ export default function PrivateMessage() {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const contenu = draft.trim();
-    if (!contenu || !conversationId || isSending) return;
+    if (!contenu || !conversationId || !territoryCode || isSending) return;
 
     setIsSending(true);
     try {
       const res = await api.post<{ message: MessageItem }>(
         `/api/conversations/${conversationId}/messages`,
-        { contenu },
+        { contenu, territory: territoryCode },
       );
       setMessages((prev) => [
         ...prev,
@@ -121,7 +141,10 @@ export default function PrivateMessage() {
       ]);
       setDraft("");
     } catch (err) {
-      console.error("PrivateMessage: failed to send message", err);
+      console.error(
+        "PrivateMessage: failed to send message",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
     } finally {
       setIsSending(false);
     }

@@ -12,7 +12,7 @@ import HeroSport from "../../components/SportsComponents/HeroSport/HeroSport";
 import Recherche from "../../components/SportsComponents/Recherche/Recheche";
 import ContactSport from "../../components/SportsComponents/ContactSport/ContactSport";
 
-const DEFAULT_PHOTO = "/montagne.webp";
+const DEFAULT_PHOTO = "/66partners/landscape.webp";
 
 function handlePhotoError(event: SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.onerror = null;

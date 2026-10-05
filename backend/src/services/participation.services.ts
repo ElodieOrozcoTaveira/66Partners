@@ -424,11 +424,16 @@ export class ParticipationService {
 
     // Résolution/création du fil privé AVANT la notification : si elle
     // échoue (covoiturage désactivé entre-temps, etc.), on ne notifie pas
-    // pour rien.
+    // pour rien. Le territoire passé est toujours celui de l'activité
+    // elle-même (jamais une valeur fournie par le client) : cet appel est
+    // déjà scopé à une activité précise, pas à un "territoire actif"
+    // ambigu — cf. audit isolation territoriale de la messagerie.
+    const activityTerritory = await TerritoryService.getById(activity.territoryId);
     const conversation = await ConversationService.getOrCreateCarpoolConversation(
       activityId,
       userId,
-      userId
+      userId,
+      activityTerritory.code
     );
 
     if (!participation.carpoolRequested) {

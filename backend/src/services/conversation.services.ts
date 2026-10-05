@@ -11,6 +11,7 @@ import {
 import { ActivityService } from "./activity.services.js";
 import { NotificationService } from "./notification.services.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
+import { TerritoryError, TerritoryService } from "./territory.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -42,12 +43,22 @@ export class ConversationError extends Error {
  * `participantId` : celui de la CONVERSATION visée (`null` = fil de groupe,
  * sinon fil privé covoiturage réservé à ce participant précis). Ne pas
  * confondre avec `userId`, l'utilisateur qui demande l'accès.
+ *
+ * `territoryCode` : territoire actif depuis lequel la conversation est
+ * consultée (cf. TerritoryContext côté front). Une conversation est toujours
+ * rattachée à un territoire via son activité (`activity.territoryId`,
+ * NOT NULL et immuable) — jamais une notion parallèle. Si le territoire de
+ * l'activité ne correspond pas au territoire actif demandé, la conversation
+ * n'est jamais exposée (404, jamais un fallback vers "tous les territoires").
  */
 async function assertUserCanAccessConversation(
   userId: string,
   activityId: string,
-  participantId: string | null
+  participantId: string | null,
+  territoryCode: string
 ): Promise<void> {
+  const territory = await TerritoryService.getByCode(territoryCode);
+
   const [activity] = await db
     .select()
     .from(activities)
@@ -56,6 +67,14 @@ async function assertUserCanAccessConversation(
 
   if (!activity) {
     throw new ConversationError("Activité non trouvée", "ACTIVITY_NOT_FOUND", 404);
+  }
+
+  if (activity.territoryId !== territory.id) {
+    throw new ConversationError(
+      "Cette conversation n'appartient pas au territoire actif",
+      "WRONG_TERRITORY",
+      404
+    );
   }
 
   if (activity.creatorId === userId) return;
@@ -98,9 +117,10 @@ export class ConversationService {
    */
   static async getOrCreateConversation(
     activityId: string,
-    userId: string
+    userId: string,
+    territoryCode: string
   ): Promise<Conversation> {
-    await assertUserCanAccessConversation(userId, activityId, null);
+    await assertUserCanAccessConversation(userId, activityId, null, territoryCode);
 
     // participantId IS NULL : cible bien le fil de groupe, jamais un fil
     // privé covoiturage de la même activité (cf. index uniques partiels).
@@ -140,13 +160,31 @@ export class ConversationService {
   static async getOrCreateCarpoolConversation(
     activityId: string,
     participantUserId: string,
-    requesterId: string
+    requesterId: string,
+    territoryCode: string
   ): Promise<Conversation> {
     if (requesterId !== participantUserId) {
       throw new ConversationError(
         "Cette conversation ne peut être activée que par le participant concerné",
         "FORBIDDEN",
         403
+      );
+    }
+
+    // Résolu et vérifié AVANT le retour anticipé sur fil existant ci-dessous :
+    // sans quoi une conversation déjà créée resterait accessible depuis un
+    // autre territoire que celui de son activité.
+    const territory = await TerritoryService.getByCode(territoryCode);
+
+    const activity = await ActivityService.getActivityById(activityId);
+    if (!activity) {
+      throw new ConversationError("Activité non trouvée", "ACTIVITY_NOT_FOUND", 404);
+    }
+    if (activity.territoryId !== territory.id) {
+      throw new ConversationError(
+        "Cette conversation n'appartient pas au territoire actif",
+        "WRONG_TERRITORY",
+        404
       );
     }
 
@@ -166,10 +204,6 @@ export class ConversationService {
     const existing = await findExisting();
     if (existing) return existing;
 
-    const activity = await ActivityService.getActivityById(activityId);
-    if (!activity) {
-      throw new ConversationError("Activité non trouvée", "ACTIVITY_NOT_FOUND", 404);
-    }
     if (!activity.carpoolEnabled) {
       throw new ConversationError(
         "Le covoiturage n'est pas proposé pour cette activité",
@@ -232,8 +266,11 @@ export class ConversationService {
   static async getCarpoolConversation(
     activityId: string,
     participantUserId: string,
-    requesterId: string
+    requesterId: string,
+    territoryCode: string
   ): Promise<Conversation> {
+    const territory = await TerritoryService.getByCode(territoryCode);
+
     const [activity] = await db
       .select()
       .from(activities)
@@ -242,6 +279,14 @@ export class ConversationService {
 
     if (!activity) {
       throw new ConversationError("Activité non trouvée", "ACTIVITY_NOT_FOUND", 404);
+    }
+
+    if (activity.territoryId !== territory.id) {
+      throw new ConversationError(
+        "Cette conversation n'appartient pas au territoire actif",
+        "WRONG_TERRITORY",
+        404
+      );
     }
 
     if (requesterId !== activity.creatorId && requesterId !== participantUserId) {
@@ -281,6 +326,7 @@ export class ConversationService {
   static async getMessages(
     conversationId: string,
     userId: string,
+    territoryCode: string,
     limit = 50,
     offset = 0
   ): Promise<MessageWithAuthor[]> {
@@ -298,7 +344,12 @@ export class ConversationService {
       );
     }
 
-    await assertUserCanAccessConversation(userId, conversation.activityId, conversation.participantId);
+    await assertUserCanAccessConversation(
+      userId,
+      conversation.activityId,
+      conversation.participantId,
+      territoryCode
+    );
 
     return db
       .select({
@@ -323,8 +374,13 @@ export class ConversationService {
    * créée ou rejointe (participation acceptée), avec le dernier message le
    * cas échéant. Ne crée pas les conversations manquantes (lecture seule).
    */
-  static async listMine(userId: string): Promise<ConversationSummary[]> {
-    const myActivities = await ActivityService.listActivities();
+  static async listMine(userId: string, territoryCode: string): Promise<ConversationSummary[]> {
+    // Résolution explicite (404 propre si code inconnu) plutôt que de
+    // laisser `listActivities` renvoyer silencieusement une liste vide pour
+    // un territoire qui n'existe pas — même garde qu'ailleurs (cf.
+    // assertUserCanAccessConversation).
+    await TerritoryService.getByCode(territoryCode);
+    const myActivities = await ActivityService.listActivities({ territory: territoryCode });
     const joinedRows = await db
       .select({ activityId: participations.activityId })
       .from(participations)
@@ -472,7 +528,8 @@ export class ConversationService {
   static async sendMessage(
     conversationId: string,
     userId: string,
-    contenu: string
+    contenu: string,
+    territoryCode: string
   ): Promise<Message> {
     const [conversation] = await db
       .select()
@@ -488,7 +545,12 @@ export class ConversationService {
       );
     }
 
-    await assertUserCanAccessConversation(userId, conversation.activityId, conversation.participantId);
+    await assertUserCanAccessConversation(
+      userId,
+      conversation.activityId,
+      conversation.participantId,
+      territoryCode
+    );
 
     const [created] = await db
       .insert(messages)

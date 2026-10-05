@@ -1,4 +1,4 @@
-const DEFAULT_PHOTO = "/montagne.webp";
+const DEFAULT_PHOTO = "/66partners/landscape.webp";
 
 // Clés alignées sur `sports.name` en base (voir backend/src/db/seed.ts)
 
@@ -26,6 +26,7 @@ const sportPhotos: Record<string, string> = {
   Paddle: "/sports/paddle.webp",
   Marche: "/sports/randonnee.webp",
   Roller:"/sports/roller.webp",
+  Trail: "/sports/trail.webp",
 };
 
 export function getSportPhoto(sportName: string): string {

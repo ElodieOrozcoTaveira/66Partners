@@ -68,7 +68,10 @@ export default function StatsProfil({ userId }: StatsProfilProps) {
           joinedRes.data.activities.filter((a) => a.status !== "CANCELLED").length,
         );
       } catch (err) {
-        console.error("StatsProfil: failed to fetch activities", err);
+        console.error(
+          "StatsProfil: failed to fetch activities",
+          err instanceof Error ? err.message : "Erreur inconnue",
+        );
         setOrganizedCount(0);
         setPartnersAccumulated(0);
         setJoinedCount(0);

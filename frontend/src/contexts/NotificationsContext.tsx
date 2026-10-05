@@ -55,23 +55,30 @@ const NotificationsContext = createContext<NotificationsContextType | null>(null
 const POLL_INTERVAL_MS = 20000;
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  // Sur `token` (disponible dès le premier rendu) et non `user` (qui
+  // n'existe qu'après la résolution de GET /api/users/me) : le token seul
+  // suffit à authentifier cet appel côté backend, donc plus besoin d'attendre
+  // /api/users/me pour le lancer (cf. audit perf — P1).
+  const { token } = useAuth();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const refresh = useCallback(async () => {
-    if (!user) return;
+    if (!token) return;
     try {
       const res = await api.get<NotificationsResponse>("/api/notifications");
       setNotifications(res.data.notifications);
       setUnreadCount(res.data.unreadCount);
     } catch (err) {
-      console.error("NotificationsContext: failed to fetch notifications", err);
+      console.error(
+        "NotificationsContext: failed to fetch notifications",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
     }
-  }, [user]);
+  }, [token]);
 
   useEffect(() => {
-    if (!user) {
+    if (!token) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -89,7 +96,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [user, refresh]);
+  }, [token, refresh]);
 
   async function markAsRead(id: string) {
     setNotifications((prev) =>
@@ -99,7 +106,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     try {
       await api.patch(`/api/notifications/${id}/read`);
     } catch (err) {
-      console.error("NotificationsContext: failed to mark notification as read", err);
+      console.error(
+        "NotificationsContext: failed to mark notification as read",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       refresh();
     }
   }
@@ -110,7 +120,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     try {
       await api.patch("/api/notifications/read-all");
     } catch (err) {
-      console.error("NotificationsContext: failed to mark all notifications as read", err);
+      console.error(
+        "NotificationsContext: failed to mark all notifications as read",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       refresh();
     }
   }
@@ -127,7 +140,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     try {
       await Promise.all(ids.map((id) => api.patch(`/api/notifications/${id}/read`)));
     } catch (err) {
-      console.error("NotificationsContext: failed to mark notifications as read", err);
+      console.error(
+        "NotificationsContext: failed to mark notifications as read",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       refresh();
     }
   }

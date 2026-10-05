@@ -110,7 +110,9 @@ export default function ModaleContent({
         email,
         password,
       });
-      console.debug("ModaleContent: login response", res.data);
+      if (import.meta.env.DEV) {
+        console.debug("ModaleContent: login successful");
+      }
 
       const ok = await login(res.data.token);
       if (ok) {

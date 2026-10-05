@@ -10,15 +10,24 @@ import { useAuth, type User } from "../../contexts/AuthContext";
 import api from "../../lib/axios";
 import "../Profil/Profil.scss";
 
+// Réponse du profil PUBLIC (GET /api/users/:id) : superset local de `User`
+// plutôt qu'une modification de ce type partagé (qui sert aussi à /me, hors
+// périmètre de ce chantier) — `territory` est le territoire d'inscription
+// (isDefault) de la personne consultée, jamais le territoire actif du
+// visiteur, `null` si le compte n'en a pas.
+interface PublicProfileUser extends User {
+  territory: { code: string; name: string; brandName: string } | null;
+}
+
 interface UserResponse {
   success: boolean;
-  user: User;
+  user: PublicProfileUser;
 }
 
 export default function UserProfil() {
   const { userId } = useParams<{ userId: string }>();
   const { user: currentUser } = useAuth();
-  const [profileUser, setProfileUser] = useState<User | null>(null);
+  const [profileUser, setProfileUser] = useState<PublicProfileUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,6 +84,7 @@ export default function UserProfil() {
           openTo={profileUser.openTo}
           createdAt={profileUser.createdAt}
           isOwnProfile={false}
+          territory={profileUser.territory}
         />
         <StatsProfil userId={profileUser.id} />
         <Dispo userId={profileUser.id} isOwnProfile={false} />

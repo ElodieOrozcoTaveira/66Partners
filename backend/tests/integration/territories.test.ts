@@ -32,7 +32,12 @@ function validActivity(overrides: Record<string, unknown> = {}) {
 
 beforeEach(async () => {
   await resetAll();
-  ({ token } = await createUser({ email: "creator@test.com" }));
+  // territoryCode explicite plutôt que de compter sur "premier territoire
+  // actif par createdAt" : sur une base fraîchement migrée (jamais passée
+  // par seed-territories.ts), la migration 20260921131458 insère "34" sans
+  // que "66" existe encore, donnant à "34" un createdAt antérieur — ce test
+  // doit rester déterministe indépendamment de cet historique de seed.
+  ({ token } = await createUser({ email: "creator@test.com", territoryCode: "66" }));
   sportId = await createSport("Running");
 });
 
@@ -207,6 +212,53 @@ describe("GET /api/territories/mine", () => {
     expect(res.body.territories[0].code).toBe("66");
   });
 
+  it("inclut isDefault=true pour le territoire principal de l'utilisateur", async () => {
+    const res = await request(app)
+      .get("/api/territories/mine")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const territory66 = res.body.territories.find((t: { code: string }) => t.code === "66");
+    expect(territory66.isDefault).toBe(true);
+  });
+
+  it("inclut isDefault=true pour 34 quand c'est le territoire principal choisi à l'inscription", async () => {
+    const territory34 = await createTerritory({ code: "34", isActive: true });
+    const { token: token34 } = await createUser({
+      email: "default34@test.com",
+      territoryCode: "34",
+    });
+
+    const res = await request(app)
+      .get("/api/territories/mine")
+      .set("Authorization", `Bearer ${token34}`);
+
+    expect(res.status).toBe(200);
+    const t34 = res.body.territories.find(
+      (t: { id: string }) => t.id === territory34.id
+    );
+    expect(t34.isDefault).toBe(true);
+  });
+
+  it("un utilisateur multi-territoires n'a qu'un seul isDefault=true dans la réponse", async () => {
+    const territory34 = await createTerritory({ code: "34", isActive: true });
+    await request(app)
+      .post("/api/territories/34/join")
+      .set("Authorization", `Bearer ${token}`);
+
+    const res = await request(app)
+      .get("/api/territories/mine")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.territories).toHaveLength(2);
+    const defaults = res.body.territories.filter((t: { isDefault: boolean }) => t.isDefault);
+    expect(defaults).toHaveLength(1);
+    expect(defaults[0].code).toBe("66");
+
+    const t34 = res.body.territories.find((t: { id: string }) => t.id === territory34.id);
+    expect(t34.isDefault).toBe(false);
+  });
 });
 
 describe("POST /api/territories/:code/join", () => {

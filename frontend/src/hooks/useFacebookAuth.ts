@@ -57,9 +57,31 @@ interface UseFacebookAuthOptions {
 }
 
 function extractErrorMessage(err: unknown, fallback: string): string {
-  return isAxiosError<{ message?: string }>(err) && err.response?.data?.message
-    ? err.response.data.message
-    : fallback;
+  if (isAxiosError<{ message?: string }>(err) && err.response?.data?.message) {
+    return err.response.data.message;
+  }
+  // Erreur locale (timeout, popup annulée...) avec un message déjà pensé
+  // pour l'utilisateur — ne jamais l'écraser par le fallback générique.
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
+  return fallback;
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
 }
 
 /**
@@ -106,15 +128,28 @@ export function useFacebookAuth({ onSuccess }: UseFacebookAuthOptions) {
     if (window.FB) {
       setIsSubmitting(true);
       try {
-        const fbResponse = await new Promise<{ accessToken: string }>((resolve, reject) => {
-          window.FB!.login(
-            (response) => {
-              if (response.authResponse) resolve(response.authResponse);
-              else reject(new Error("Connexion Facebook annulée."));
-            },
-            { scope: "public_profile,email" }
-          );
-        });
+        // En PWA installée (standalone), FB.login() peut ouvrir la connexion
+        // Facebook dans le navigateur système plutôt que dans une vraie
+        // popup liée à cette fenêtre (Facebook refuse son propre login dans
+        // certaines WebView) — le retour se fait alors dans un contexte
+        // navigateur DÉCONNECTÉ de celui-ci, et le callback de FB.login()
+        // n'est jamais rappelé : sans timeout, l'attente ci-dessous ne
+        // finirait jamais (constaté en conditions réelles : aucune requête
+        // /api/auth/facebook ne part alors jamais). Le timeout transforme ce
+        // blocage silencieux en message explicite et actionnable.
+        const fbResponse = await withTimeout(
+          new Promise<{ accessToken: string }>((resolve, reject) => {
+            window.FB!.login(
+              (response) => {
+                if (response.authResponse) resolve(response.authResponse);
+                else reject(new Error("Connexion Facebook annulée."));
+              },
+              { scope: "public_profile,email" }
+            );
+          }),
+          90_000,
+          "La connexion Facebook n'a pas abouti. Si tu as été redirigé vers ton navigateur, reviens sur cette page et réessaie.",
+        );
         await handleFacebookResponse(fbResponse.accessToken);
       } catch (err) {
         setError(extractErrorMessage(err, "Connexion avec Facebook impossible. Réessaie plus tard."));
@@ -197,7 +232,10 @@ export function useFacebookAuth({ onSuccess }: UseFacebookAuthOptions) {
     try {
       await api.post("/api/auth/facebook/link", { accessToken: state.accessToken });
     } catch (err) {
-      console.error("Association du compte Facebook impossible:", err);
+      console.error(
+        "Association du compte Facebook impossible:",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
     } finally {
       setState({ step: "idle" });
     }

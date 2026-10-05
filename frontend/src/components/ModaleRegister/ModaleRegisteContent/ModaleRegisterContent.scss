@@ -37,10 +37,10 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: variables.$nuit;
+    color: var(--brand-on-surface, #{variables.$nuit});
 
     &:hover {
-      color: variables.$rouge;
+      color: var(--brand-on-surface, #{variables.$rouge});
     }
   }
 }
@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: center;
   &__h3 {
-    color: variables.$nuit;
+    color: var(--brand-on-surface, #{variables.$nuit});
     font-size: 20px;
   }
   &__h4 {
@@ -59,7 +59,7 @@
     margin-top: -0.8rem;
     text-align: center;
     font-weight: 300;
-    color: variables.$nuit;
+    color: var(--brand-on-surface, #{variables.$nuit});
   }
 
   &__section {
@@ -77,7 +77,7 @@
     font-family: "Inter";
     font-size: 0.8rem;
     font-weight: bold;
-    color: variables.$nuit;
+    color: var(--brand-on-surface, #{variables.$nuit});
     margin-top: 0.45rem;
   }
 
@@ -114,7 +114,7 @@
     font-weight: bold;
 
     &--error {
-      color: variables.$rouge2;
+      color: var(--brand-on-surface, #{variables.$rouge2});
     }
 
     &--ok {
@@ -140,7 +140,7 @@
   &__error {
     font-family: "Inter";
     font-size: 0.75rem;
-    color: variables.$rouge2;
+    color: var(--brand-on-surface, #{variables.$rouge2});
     margin: 0.5rem 0 0;
   }
 
@@ -234,7 +234,7 @@
     margin-top: 1.1rem;
     font-family: "Inter";
     font-size: 0.8rem;
-    color: variables.$nuit;
+    color: var(--brand-on-surface, #{variables.$nuit});
 
     .container-modaleRegister__switch {
       border: none;
@@ -243,7 +243,7 @@
       cursor: pointer;
       font-family: inherit;
       font-size: inherit;
-      color: variables.$rouge2;
+      color: var(--brand-on-surface, #{variables.$rouge2});
       font-weight: bold;
       text-decoration: none;
 
@@ -261,16 +261,16 @@
     font-family: "Inter";
     font-size: 0.7rem;
     line-height: 1.4;
-    color: variables.$nuit;
+    color: var(--brand-on-surface, #{variables.$nuit});
     cursor: pointer;
 
     a {
-      color: variables.$rouge;
+      color: var(--brand-on-surface, #{variables.$rouge});
       text-decoration: underline;
       font-weight: bold;
 
       &:hover {
-        color: variables.$rouge2;
+        color: var(--brand-on-surface, #{variables.$rouge2});
       }
     }
   }

@@ -432,7 +432,7 @@ describe("Covoiturage", () => {
     // La conversation reste accessible (créateur) même désactivée.
     const stillAccessible = await request(app)
       .get(`/api/activities/${carpoolActivityId}/conversation`)
-      .query({ carpool: joinerId })
+      .query({ carpool: joinerId, territory: "66" })
       .set("Authorization", `Bearer ${creatorToken}`);
     expect(stillAccessible.status).toBe(200);
     expect(stillAccessible.body.conversation.id).toBe(conversationId);
@@ -458,7 +458,7 @@ describe("Covoiturage", () => {
 
     const res = await request(app)
       .get(`/api/activities/${carpoolActivityId}/conversation`)
-      .query({ carpool: joinerId })
+      .query({ carpool: joinerId, territory: "66" })
       .set("Authorization", `Bearer ${otherToken}`);
 
     expect(res.status).toBe(403);
@@ -474,13 +474,13 @@ describe("Covoiturage", () => {
     const sendByParticipant = await request(app)
       .post(`/api/conversations/${conversationId}/messages`)
       .set("Authorization", `Bearer ${joinerToken}`)
-      .send({ contenu: "On se retrouve où pour le covoiturage ?" });
+      .send({ contenu: "On se retrouve où pour le covoiturage ?", territory: "66" });
     expect(sendByParticipant.status).toBe(201);
 
     const sendByCreator = await request(app)
       .post(`/api/conversations/${conversationId}/messages`)
       .set("Authorization", `Bearer ${creatorToken}`)
-      .send({ contenu: "Devant la mairie à 9h !" });
+      .send({ contenu: "Devant la mairie à 9h !", territory: "66" });
     expect(sendByCreator.status).toBe(201);
 
     const { token: otherToken } = await createUser({ email: "third-wheel@test.com" });
@@ -492,14 +492,14 @@ describe("Covoiturage", () => {
       .set("Authorization", `Bearer ${creatorToken}`);
 
     const readByOther = await request(app)
-      .get(`/api/conversations/${conversationId}/messages`)
+      .get(`/api/conversations/${conversationId}/messages?territory=66`)
       .set("Authorization", `Bearer ${otherToken}`);
     expect(readByOther.status).toBe(403);
 
     const sendByOther = await request(app)
       .post(`/api/conversations/${conversationId}/messages`)
       .set("Authorization", `Bearer ${otherToken}`)
-      .send({ contenu: "Je peux venir aussi ?" });
+      .send({ contenu: "Je peux venir aussi ?", territory: "66" });
     expect(sendByOther.status).toBe(403);
   });
 
@@ -513,7 +513,7 @@ describe("Covoiturage", () => {
     expect(res.body.participation).not.toHaveProperty("email");
 
     const mineRes = await request(app)
-      .get("/api/conversations/mine")
+      .get("/api/conversations/mine?territory=66")
       .set("Authorization", `Bearer ${creatorToken}`);
     const mineSerialized = JSON.stringify(mineRes.body);
     expect(mineSerialized).not.toContain("joiner@test.com");

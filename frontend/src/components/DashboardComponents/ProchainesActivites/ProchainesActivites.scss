@@ -1,6 +1,7 @@
 @use "../../../styles/variables/variables.scss";
 
 .container-prochaine {
+  margin-bottom: 1.5rem;
   &__header {
     display: flex;
     align-items: center;
@@ -134,5 +135,23 @@
     font-size: 0.75rem;
     font-weight: 600;
     color: variables.$rouge2;
+  }
+
+  &__creator {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  &__creator-avatar {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
   }
 }

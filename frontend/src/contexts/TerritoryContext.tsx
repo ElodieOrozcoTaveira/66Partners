@@ -4,6 +4,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useRef,
   type ReactNode,
 } from "react";
 import api from "../lib/axios";
@@ -34,6 +35,10 @@ export type Territory = {
   tagline: string | null;
   assetsPath: string | null;
   isActive: boolean;
+  /** Présent uniquement sur les territoires de l'utilisateur connecté
+   *  (GET /api/territories/mine) : territoire principal du compte — jamais
+   *  renseigné sur `publicTerritories`/`testTerritories`. */
+  isDefault?: boolean;
 };
 
 const ACTIVE_TERRITORY_STORAGE_KEY = "activeTerritoryCode";
@@ -90,6 +95,13 @@ export function TerritoryProvider({ children }: { children: ReactNode }) {
   const [activeCode, setActiveCode] = useState<string | null>(() =>
     localStorage.getItem(ACTIVE_TERRITORY_STORAGE_KEY),
   );
+  // Détecte une CONNEXION (token absent → présent) pendant la vie de cet
+  // onglet — jamais un simple rechargement de page avec un token déjà
+  // présent (initialisé directement à la valeur courante, donc pas de faux
+  // positif au montage). Sert uniquement à forcer le territoire principal
+  // une fois juste après un login, cf. loadMine ci-dessous — ne doit jamais
+  // re-déclencher sur un rafraîchissement de session déjà active.
+  const previousTokenRef = useRef<string | null>(token);
 
   useEffect(() => {
     api
@@ -122,13 +134,37 @@ export function TerritoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loadMine = useCallback(() => {
+    // Capturé avant d'écraser la ref : seule la valeur au moment de CET
+    // appel compte pour décider si c'est une transition de connexion.
+    const isLoginTransition = !previousTokenRef.current && Boolean(token);
+    previousTokenRef.current = token;
+
     if (!token) {
       setTerritories([]);
       return Promise.resolve();
     }
     return api
       .get<{ territories: Territory[] }>("/api/territories/mine")
-      .then((res) => setTerritories(res.data.territories))
+      .then((res) => {
+        setTerritories(res.data.territories);
+        // Juste après un login (jamais sur un simple refresh de session déjà
+        // active) : le territoire principal (isDefault) devient la source de
+        // vérité, et écrase un éventuel choix localStorage périmé (ex. poste
+        // partagé, ancien compte) — cf. architecture multi-territoire §4/§13.
+        // Si aucun isDefault n'existe (compte mal configuré), on ne choisit
+        // JAMAIS arbitrairement un territoire : activeTerritory restera null
+        // via le calcul ci-dessous, état explicite plutôt qu'un repli caché.
+        if (isLoginTransition) {
+          const defaultTerritory = res.data.territories.find((t) => t.isDefault);
+          if (defaultTerritory) {
+            setActiveTerritory(defaultTerritory.code);
+          } else {
+            console.error(
+              "TerritoryContext: utilisateur connecté sans territoire principal (isDefault) — vérifier user_territories pour ce compte.",
+            );
+          }
+        }
+      })
       .catch(() => setTerritories([]));
   }, [token]);
 
@@ -138,17 +174,25 @@ export function TerritoryProvider({ children }: { children: ReactNode }) {
 
   const selectableTerritories = token ? territories : publicTerritories;
 
-  // Dernier territoire choisi s'il est encore sélectionnable, sinon le
-  // premier renvoyé par l'API (ordre d'ancienneté) — aucun code en dur.
-  // Repli sur `testTerritories` UNIQUEMENT si `activeCode` correspond déjà à
-  // l'un d'eux (donc explicitement choisi via TerritorySwitcher à un moment
-  // donné) : ne peut jamais devenir le territoire par défaut d'un nouveau
-  // visiteur, seul `selectableTerritories[0]` sert de repli final.
-  const activeTerritory =
-    selectableTerritories.find((t) => t.code === activeCode) ??
-    testTerritories.find((t) => t.code === activeCode) ??
-    selectableTerritories[0] ??
-    null;
+  // Utilisateur CONNECTÉ : jamais "le premier de la liste" comme repli (cf.
+  // §13 — interdiction explicite du fallback implicite vers 66/premier
+  // territoire). Le dernier choix explicite (switcher) prime s'il reste
+  // valide pour ce compte, sinon le territoire principal (isDefault, déjà
+  // appliqué/forcé juste après le login par loadMine ci-dessus), sinon aucun
+  // territoire actif plutôt qu'un choix arbitraire.
+  //
+  // VISITEUR : comportement historique inchangé — dernier choix explicite,
+  // sinon territoire de test déjà choisi, sinon le premier territoire public
+  // actif (ordre d'ancienneté, jamais un code en dur).
+  const activeTerritory = token
+    ? territories.find((t) => t.code === activeCode) ??
+      testTerritories.find((t) => t.code === activeCode) ??
+      territories.find((t) => t.isDefault) ??
+      null
+    : publicTerritories.find((t) => t.code === activeCode) ??
+      testTerritories.find((t) => t.code === activeCode) ??
+      publicTerritories[0] ??
+      null;
 
   const joinableTerritories = token
     ? publicTerritories.filter((pt) => !territories.some((t) => t.id === pt.id))
@@ -256,6 +300,7 @@ export function useBranding() {
   const sentences = (activeTerritory?.tagline ?? "").match(/[^.]+\./g)?.map((part) => part.trim()) ?? [];
   return {
     taglineLead: sentences.slice(0, -1).join(" "),
+    taglineLeadLines: sentences.slice(0, -1),
     taglineAccent: sentences.length > 0 ? sentences[sentences.length - 1]! : "",
     code: activeTerritory?.code ?? "",
     brandName: activeTerritory?.brandName ?? "Partners",

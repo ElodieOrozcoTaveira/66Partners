@@ -67,18 +67,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      console.debug(
-        "AuthContext: refreshUser -> token present, fetching /api/users/me",
-        { effectiveToken: effectiveToken?.slice?.(0, 20) },
-      );
+      if (import.meta.env.DEV) {
+        console.debug("AuthContext: refreshUser -> fetching /api/users/me");
+      }
       const res = await api.get<{ user: User }>("/api/users/me");
-      console.debug("AuthContext: /api/users/me response", res);
+      if (import.meta.env.DEV) {
+        console.debug("AuthContext: /api/users/me succeeded");
+      }
       setUser(res.data.user);
       return true;
-    } catch {
-      // log error details for debugging
-      // Note: error details are not available here directly, use console.trace to help
-      console.error("AuthContext: refreshUser failed", arguments);
+    } catch (err) {
+      // `err.message` uniquement (jamais l'erreur brute) : une AxiosError
+      // porte sa config de requête, donc l'en-tête Authorization avec le
+      // token — l'exposer ici re-créerait exactement la fuite qu'on corrige.
+      console.error(
+        "AuthContext: refreshUser failed",
+        err instanceof Error ? err.message : err,
+      );
       localStorage.removeItem("token");
       setToken(null);
       setUser(null);
@@ -96,10 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   async function login(newToken: string): Promise<boolean> {
-    console.debug(
-      "AuthContext: login -> saving token",
-      newToken?.slice?.(0, 20),
-    );
+    if (import.meta.env.DEV) {
+      console.debug("AuthContext: login -> saving token");
+    }
     lastLoginFailureReasonRef.current = null;
 
     try {
@@ -114,7 +118,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setToken(newToken);
     const ok = await refreshUser(newToken);
-    console.debug("AuthContext: login -> refreshUser ok?", ok);
+    if (import.meta.env.DEV) {
+      console.debug("AuthContext: login -> refreshUser ok?", ok);
+    }
     if (!ok) lastLoginFailureReasonRef.current = "profile";
     return ok;
   }

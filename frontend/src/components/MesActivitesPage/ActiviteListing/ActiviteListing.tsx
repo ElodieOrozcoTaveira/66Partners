@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { Check } from "lucide-react";
 import { ACTIVITY_NOTIFICATION_TYPES, useNotifications } from "../../../contexts/NotificationsContext";
+import { useBranding } from "../../../contexts/TerritoryContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import {
   formatDayMonth,
@@ -20,6 +21,8 @@ export interface ActiviteListItem {
   status: string;
   sportName: string;
   participantsCount: number;
+  creatorPseudo: string | null;
+  creatorAvatar: string | null;
 }
 
 interface ActiviteListingProps {
@@ -44,6 +47,7 @@ function ActiviteCard({
   const { icon: Icon, color } = getSportVisual(activity.sportName);
   const startDate = new Date(activity.startDate);
   const { notifications } = useNotifications();
+  const { asset } = useBranding();
   const unreadCount = notifications.filter(
     (notif) =>
       ACTIVITY_NOTIFICATION_TYPES.has(notif.type) &&
@@ -77,6 +81,16 @@ function ActiviteCard({
           {" · "}
           {participantsLabel(activity.participantsCount)}
         </p>
+        <span className="activite-card__creator">
+          <img
+            src={activity.creatorAvatar || asset("avatarDefault")}
+            alt={activity.creatorPseudo ?? "Compte supprimé"}
+            className="activite-card__creator-avatar"
+          />
+          {activity.creatorPseudo
+            ? `Organisée par ${activity.creatorPseudo}`
+            : "Organisateur du compte supprimé"}
+        </span>
         {!isPast && (
           <span className="activite-card__pill">{formatRelativeDay(startDate)}</span>
         )}

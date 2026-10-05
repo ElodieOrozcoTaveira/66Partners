@@ -51,7 +51,10 @@ export default function MesSports({ userId, isOwnProfile = true }: MesSportsProp
                     sportsRes.data.sports.filter((sport) => favoriteIds.has(sport.id)),
                 );
             } catch (err) {
-                console.error("MesSports: failed to fetch favorites", err);
+                console.error(
+                    "MesSports: failed to fetch favorites",
+                    err instanceof Error ? err.message : "Erreur inconnue",
+                );
                 if (mounted) setFavoriteSports([]);
             } finally {
                 if (mounted) setIsLoading(false);
@@ -74,7 +77,10 @@ export default function MesSports({ userId, isOwnProfile = true }: MesSportsProp
         try {
             await api.post(`/api/sports/${sportId}/favorite`);
         } catch (err) {
-            console.error("MesSports: failed to remove favorite", err);
+            console.error(
+                "MesSports: failed to remove favorite",
+                err instanceof Error ? err.message : "Erreur inconnue",
+            );
             setFavoriteSports((prev) => [...prev, removed]);
         }
     }

@@ -6,6 +6,7 @@ import {
   activityConversationQuerySchema,
   activityIdParamSchema,
   conversationIdParamSchema,
+  listMineQuerySchema,
   messagesQuerySchema,
   sendMessageBodySchema,
 } from "../validations/conversation.validations.js";
@@ -29,7 +30,12 @@ activityConversationRouter.get(
 );
 
 // Monté sur /api/conversations
-conversationRouter.get("/mine", requireAuth, ConversationController.listMine);
+conversationRouter.get(
+  "/mine",
+  requireAuth,
+  validate({ query: listMineQuerySchema }),
+  ConversationController.listMine
+);
 
 conversationRouter.get(
   "/:id/messages",

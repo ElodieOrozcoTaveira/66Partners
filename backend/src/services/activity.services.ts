@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import {
   activities,
@@ -76,6 +76,11 @@ export interface ActivityFilters {
   participantId?: string;
   /** Code du territoire (ex: "66") */
   territory?: string;
+  /** Borne basse (incluse) sur activities.startDate — ex. "maintenant" pour
+   *  n'exposer que les activités à venir dans les listes publiques. */
+  from?: Date;
+  /** Borne haute (incluse) sur activities.startDate. */
+  to?: Date;
 }
 
 // Erreurs métier personnalisées
@@ -223,13 +228,15 @@ export class ActivityService {
    * le nombre réel de participants acceptés (calculé à la volée).
    */
   static async listActivities(filters: ActivityFilters = {}): Promise<ActivityWithDetails[]> {
-    const { city, sportId, status, participantId, territory } = filters;
+    const { city, sportId, status, participantId, territory, from, to } = filters;
 
     const conditions = [
       city ? eq(activities.city, city) : undefined,
       sportId ? eq(activities.sportId, sportId) : undefined,
       status ? eq(activities.status, status) : undefined,
       territory ? eq(territories.code, territory) : undefined,
+      from ? gte(activities.startDate, from) : undefined,
+      to ? lte(activities.startDate, to) : undefined,
       participantId
         ? sql`exists (
             select 1 from ${participations} as participant_filter

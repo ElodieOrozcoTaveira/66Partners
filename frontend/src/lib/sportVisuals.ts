@@ -66,6 +66,7 @@ const sportVisuals: Record<string, SportVisual> = {
   Volleyball: { icon: Volleyball, color: VIOLET },
   Yoga: { icon: PersonStanding, color: ORANGE },
   Roller: {icon: Road, color:ROSE},
+  Trail: {icon: SportShoe, color: TURQUOISE},
 };
 
 export function getSportVisual(sportName: string): SportVisual {

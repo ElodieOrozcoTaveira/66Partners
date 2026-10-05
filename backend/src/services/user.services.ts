@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { sportLevelEnum, sports, userSports, users } from "../db/schema.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
+import { TerritoryService } from "./territory.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -37,6 +38,17 @@ export interface UserProfile {
 }
 
 /**
+ * Territoire d'inscription / principal (user_territories.isDefault = true)
+ * exposé sur le profil public — jamais la liste complète des territoires de
+ * l'utilisateur, jamais lié au territoire actif du visiteur qui consulte.
+ */
+export interface PublicUserTerritory {
+  code: string;
+  name: string;
+  brandName: string;
+}
+
+/**
  * Profil visible par un AUTRE utilisateur (GET /users/:id).
  * Ne doit jamais contenir l'email ni la géolocalisation exacte du
  * titulaire du compte — voir audit RGPD, chantier F-01.
@@ -52,6 +64,9 @@ export interface PublicUserProfile {
   coverPhoto: string | null;
   createdAt: Date;
   updatedAt: Date;
+  // null si le compte n'a pas (ou plus) de territoire principal — jamais un
+  // territoire inventé/choisi arbitrairement (cf. chantier territoire d'inscription).
+  territory: PublicUserTerritory | null;
 }
 
 export interface UserUpdateInput {
@@ -92,7 +107,10 @@ function toProfile(user: typeof users.$inferSelect): UserProfile {
   };
 }
 
-function toPublicProfile(user: typeof users.$inferSelect): PublicUserProfile {
+function toPublicProfile(
+  user: typeof users.$inferSelect,
+  territory: PublicUserTerritory | null
+): PublicUserProfile {
   return {
     id: user.id,
     pseudo: user.pseudo,
@@ -104,6 +122,7 @@ function toPublicProfile(user: typeof users.$inferSelect): PublicUserProfile {
     coverPhoto: user.coverPhoto,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+    territory,
   };
 }
 
@@ -128,6 +147,12 @@ export class UserService {
   /**
    * Récupération du profil PUBLIC d'un utilisateur par son ID, tel que
    * visible par un autre utilisateur (sans email ni géolocalisation).
+   *
+   * Le territoire exposé est toujours le territoire d'inscription/principal
+   * (user_territories.isDefault = true), jamais le territoire actuellement
+   * actif du visiteur qui consulte ce profil ni la liste complète des
+   * territoires du compte — cf. TerritoryService.getDefaultTerritoryForUser,
+   * déjà la source de vérité utilisée pour le branding des emails.
    */
   static async getPublicUserById(userId: string): Promise<PublicUserProfile | null> {
     const [user] = await db
@@ -140,7 +165,20 @@ export class UserService {
       return null;
     }
 
-    return toPublicProfile(user);
+    // Un territoire par défaut manquant/orphelin ne doit jamais faire
+    // échouer l'affichage du profil (cf. cas particuliers du chantier) :
+    // getDefaultTerritoryForUser renvoie proprement null via sa jointure,
+    // jamais une exception.
+    const defaultTerritory = await TerritoryService.getDefaultTerritoryForUser(userId);
+    const territory: PublicUserTerritory | null = defaultTerritory
+      ? {
+          code: defaultTerritory.code,
+          name: defaultTerritory.name,
+          brandName: defaultTerritory.brandName,
+        }
+      : null;
+
+    return toPublicProfile(user, territory);
   }
 
   /**

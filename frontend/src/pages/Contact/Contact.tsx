@@ -36,7 +36,10 @@ export default function Contact() {
       // Diagnostic minimal, indispensable pour distinguer un vrai échec
       // serveur d'une simple coupure réseau/timeout (cf. audit mobile) —
       // l'ancien catch silencieux ne laissait aucune trace exploitable.
-      console.error("Erreur envoi formulaire de contact:", err);
+      console.error(
+        "Erreur envoi formulaire de contact:",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       if (isAxiosError(err) && !err.response) {
         // Pas de réponse du serveur : timeout ou requête jamais partie
         // (réseau mobile instable, tunnel coupé...), pas une erreur métier.

@@ -22,6 +22,8 @@ interface Activity {
   participantsCount: number;
   createdAt: string;
   creatorId: string | null;
+  creatorPseudo: string | null;
+  creatorAvatar: string | null;
 }
 
 interface ActivitesAutourDeToiProps {
@@ -38,7 +40,7 @@ export default function ActivitesAutourDeToi({
   isLoading,
 }: ActivitesAutourDeToiProps) {
   const { user } = useAuth();
-  const { inseeDepartmentCode } = useBranding();
+  const { inseeDepartmentCode, asset } = useBranding();
 
   const joinedIds = useMemo(
     () => new Set(myActivities.map((activity) => activity.id)),
@@ -141,6 +143,16 @@ export default function ActivitesAutourDeToi({
                     {activity.participantsCount} participant
                     {activity.participantsCount > 1 ? "s" : ""}
                   </p>
+                  <span className="activity-card__creator">
+                    <img
+                      src={activity.creatorAvatar || asset("avatarDefault")}
+                      alt={activity.creatorPseudo ?? "Compte supprimé"}
+                      className="activity-card__creator-avatar"
+                    />
+                    {activity.creatorPseudo
+                      ? `Organisée par ${activity.creatorPseudo}`
+                      : "Organisateur du compte supprimé"}
+                  </span>
                   <span
                     className="activity-card__sport"
                     style={{ background: `${color}1F`, color }}

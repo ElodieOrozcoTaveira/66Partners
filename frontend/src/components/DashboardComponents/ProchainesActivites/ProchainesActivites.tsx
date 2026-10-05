@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useBranding } from "../../../contexts/TerritoryContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { formatMonth, formatTime, formatWeekday } from "../../../lib/dateFormat";
 import "./ProchainesActivites.scss";
@@ -14,6 +15,8 @@ interface Activity {
   status: string;
   sportName: string;
   creatorId: string | null;
+  creatorPseudo: string | null;
+  creatorAvatar: string | null;
 }
 
 interface ProchainesActivitesProps {
@@ -30,6 +33,7 @@ export default function ProchainesActivites({
   isLoading,
 }: ProchainesActivitesProps) {
   const { user } = useAuth();
+  const { asset } = useBranding();
 
   const organized = useMemo(
     () => (user ? activities.filter((activity) => activity.creatorId === user.id) : []),
@@ -38,16 +42,14 @@ export default function ProchainesActivites({
   const joined = myActivities;
 
   const next = useMemo(() => {
-    const now = Date.now();
+    // `activities`/`myActivities` sont déjà filtrées à l'à-venir côté backend
+    // (`from`, cf. Dashboard.tsx) : ne reste qu'à exclure les annulées et
+    // trier, jamais de filtre de date en React (cf. chantier filtres de date).
     const byId = new Map<string, Activity>();
     [...organized, ...joined].forEach((activity) => byId.set(activity.id, activity));
 
     return Array.from(byId.values())
-      .filter(
-        (activity) =>
-          new Date(activity.startDate).getTime() > now &&
-          activity.status !== "CANCELLED",
-      )
+      .filter((activity) => activity.status !== "CANCELLED")
       .sort(
         (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
       )[0];
@@ -100,6 +102,16 @@ export default function ProchainesActivites({
                     {formatWeekday(startDate)} {startDate.getDate()}{" "}
                     {formatMonth(startDate)} · {formatTime(startDate)}
                   </p>
+                  <span className="prochaine-card__creator">
+                    <img
+                      src={next.creatorAvatar || asset("avatarDefault")}
+                      alt={next.creatorPseudo ?? "Compte supprimé"}
+                      className="prochaine-card__creator-avatar"
+                    />
+                    {next.creatorPseudo
+                      ? `Organisée par ${next.creatorPseudo}`
+                      : "Organisateur du compte supprimé"}
+                  </span>
                 </div>
               </>
             );

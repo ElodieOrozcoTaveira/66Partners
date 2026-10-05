@@ -3,7 +3,6 @@ import webpush from "web-push";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { pushSubscriptions } from "../db/schema.js";
-import { isUniqueViolation } from "../utils/db-errors.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -52,20 +51,29 @@ export class PushService {
   }
 
   static async subscribe(userId: string, subscription: PushSubscriptionKeys): Promise<void> {
-    try {
-      await db.insert(pushSubscriptions).values({
+    // "endpoint" est UNIQUE globalement (un seul créneau d'abonnement Push
+    // par navigateur/service worker, indépendamment du compte 66Partners
+    // connecté) : sur un appareil partagé entre plusieurs comptes, le
+    // navigateur renvoie le MÊME endpoint après un changement de compte —
+    // il doit alors changer de propriétaire, jamais rester silencieusement
+    // attribué à l'ancien compte (sinon le nouveau compte "s'abonne" sans
+    // qu'aucune ligne ne lui soit jamais associée, et ne reçoit rien).
+    await db
+      .insert(pushSubscriptions)
+      .values({
         userId,
         endpoint: subscription.endpoint,
         p256dh: subscription.keys.p256dh,
         auth: subscription.keys.auth,
+      })
+      .onConflictDoUpdate({
+        target: pushSubscriptions.endpoint,
+        set: {
+          userId,
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth,
+        },
       });
-    } catch (error) {
-      // Le même navigateur peut renvoyer le même endpoint (ex. reload de la
-      // page après un premier abonnement) : ce n'est pas une erreur, on garde
-      // simplement l'abonnement existant tel quel.
-      if (isUniqueViolation(error)) return;
-      throw error;
-    }
   }
 
   static async unsubscribe(userId: string, endpoint: string): Promise<void> {

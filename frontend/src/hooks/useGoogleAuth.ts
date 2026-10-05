@@ -205,7 +205,10 @@ export function useGoogleAuth({ onSuccess }: UseGoogleAuthOptions) {
     try {
       await api.post("/api/auth/google/link", { credential: state.credential });
     } catch (err) {
-      console.error("Association du compte Google impossible:", err);
+      console.error(
+        "Association du compte Google impossible:",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
     } finally {
       setState({ step: "idle" });
     }

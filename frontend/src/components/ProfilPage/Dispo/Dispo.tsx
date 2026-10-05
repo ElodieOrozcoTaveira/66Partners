@@ -33,7 +33,10 @@ export default function Dispo({ userId, isOwnProfile = true }: DispoProps) {
       const res = await api.get<AvailabilitiesResponse>(url);
       setSlots(res.data.availabilities);
     } catch (err) {
-      console.error("Dispo: failed to fetch availabilities", err);
+      console.error(
+        "Dispo: failed to fetch availabilities",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       setSlots([]);
     } finally {
       setIsLoading(false);

@@ -86,7 +86,7 @@
   // évite toute déformation dans la boîte fixe ci-dessous.
   object-fit: contain;
   transition: transform 0.25s ease;
-  margin-left: -1rem;
+  margin-left: -0.5rem;
 }
 
 .navbar-list.show ~ .container-header .container-header__leftside {

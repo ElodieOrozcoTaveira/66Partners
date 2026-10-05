@@ -85,7 +85,10 @@ export default function Hello({ pseudo, avatar, coverPhoto }: HelloProps) {
       await refreshUser();
       closeCropModal();
     } catch (error) {
-      console.error("Impossible d'envoyer la photo", error);
+      console.error(
+        "Impossible d'envoyer la photo",
+        error instanceof Error ? error.message : "Erreur inconnue",
+      );
       window.alert("La photo n'a pas pu être envoyée.");
     } finally {
       setIsUploading(false);

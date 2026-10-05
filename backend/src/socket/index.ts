@@ -11,6 +11,7 @@ import {
   participations,
 } from "../db/schema.js";
 import { ConversationService, ConversationError } from "../services/conversation.services.js";
+import { TerritoryError } from "../services/territory.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -124,12 +125,22 @@ export const initSocket = (httpServer: HttpServer) => {
     // ── Envoyer un message ───────────────────────
     socket.on(
       "send_message",
-      async (data: { conversationId: string; contenu: string }) => {
-        const { conversationId, contenu } = data;
+      async (data: { conversationId: string; contenu: string; territory: string }) => {
+        const { conversationId, contenu, territory } = data;
 
         if (!contenu?.trim()) {
           socket.emit("error", {
             message: "Le message ne peut pas être vide.",
+          });
+          return;
+        }
+
+        // Même exigence que POST /api/conversations/:id/messages (cf. audit
+        // isolation territoriale de la messagerie) : jamais de fallback
+        // "tous territoires" sur ce second chemin d'accès aux mêmes données.
+        if (!territory?.trim()) {
+          socket.emit("error", {
+            message: "Le territoire actif est requis.",
           });
           return;
         }
@@ -141,6 +152,7 @@ export const initSocket = (httpServer: HttpServer) => {
             conversationId,
             userId,
             contenu,
+            territory,
           );
 
           io.to(`conversation:${conversationId}`).emit("new_message", {
@@ -151,7 +163,7 @@ export const initSocket = (httpServer: HttpServer) => {
             createdAt: newMessage.createdAt,
           });
         } catch (err) {
-          if (err instanceof ConversationError) {
+          if (err instanceof ConversationError || err instanceof TerritoryError) {
             socket.emit("error", { message: err.message });
             return;
           }

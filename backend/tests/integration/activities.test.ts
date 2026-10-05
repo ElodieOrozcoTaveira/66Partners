@@ -1,6 +1,8 @@
 import request from "supertest";
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import app from "../../src/app.js";
+import { activities } from "../../src/db/schema.js";
 import {
   resetAll,
   createUser,
@@ -8,6 +10,7 @@ import {
   createTerritory,
   attachUserToTerritory,
   closeTestDb,
+  testDb,
 } from "../helpers/db.js";
 
 let token: string;
@@ -166,6 +169,147 @@ describe("GET /api/activities", () => {
   it("refuse un territoire inexistant (404)", async () => {
     const res = await request(app).get("/api/activities?territory=ZZ");
     expect(res.status).toBe(404);
+  });
+});
+
+describe("GET /api/activities — filtres de date (from/to)", () => {
+  /** Crée une activité future via l'API (règle métier respectée à la
+   *  création) puis recule sa date directement en base — même pattern que
+   *  activityPhotos.test.ts::createEndedActivity. */
+  async function createActivityAt(date: Date, overrides: Record<string, unknown> = {}): Promise<string> {
+    const createRes = await request(app)
+      .post("/api/activities")
+      .set("Authorization", `Bearer ${token}`)
+      .send(validActivity(overrides));
+    const activityId = createRes.body.activity.id as string;
+
+    await testDb.update(activities).set({ startDate: date }).where(eq(activities.id, activityId));
+
+    return activityId;
+  }
+
+  it("1. ne retourne que les activités futures quand from=maintenant", async () => {
+    await createActivityAt(new Date(Date.now() + 60 * 60 * 1000), { title: "Future" });
+    await createActivityAt(new Date(Date.now() - 60 * 60 * 1000), { title: "Passée" });
+
+    const res = await request(app).get(
+      `/api/activities?territory=66&from=${encodeURIComponent(new Date().toISOString())}`
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.activities).toHaveLength(1);
+    expect(res.body.activities[0].title).toBe("Future");
+  });
+
+  it("2. exclut les activités passées des listes publiques (sans territoire autre filtre que la date)", async () => {
+    await createActivityAt(new Date(Date.now() - 24 * 60 * 60 * 1000), { title: "Hier" });
+
+    const res = await request(app).get(
+      `/api/activities?territory=66&from=${encodeURIComponent(new Date().toISOString())}`
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.activities).toEqual([]);
+  });
+
+  it("3. activité du jour même (plus tard aujourd'hui) incluse dans la plage from=maintenant/to=fin de journée", async () => {
+    const now = new Date();
+    const laterToday = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    await createActivityAt(laterToday, { title: "Plus tard aujourd'hui" });
+
+    const res = await request(app).get(
+      `/api/activities?territory=66&from=${encodeURIComponent(now.toISOString())}&to=${encodeURIComponent(endOfDay.toISOString())}`
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.activities.map((a: { title: string }) => a.title)).toContain("Plus tard aujourd'hui");
+  });
+
+  it("4. filtre from seul", async () => {
+    const t1 = await createActivityAt(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), { title: "J+2" });
+    await createActivityAt(new Date(Date.now() + 1000), { title: "Dans 1s" });
+
+    const res = await request(app).get(
+      `/api/activities?territory=66&from=${encodeURIComponent(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString())}`
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.activities.map((a: { id: string }) => a.id)).toEqual([t1]);
+  });
+
+  it("5. filtre to seul", async () => {
+    const t1 = await createActivityAt(new Date(Date.now() + 1000), { title: "Bientôt" });
+    await createActivityAt(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), { title: "Dans 3 jours" });
+
+    const res = await request(app).get(
+      `/api/activities?territory=66&to=${encodeURIComponent(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString())}`
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.activities.map((a: { id: string }) => a.id)).toEqual([t1]);
+  });
+
+  it("6. combinaison from + to : seules les activités dans l'intervalle sont retournées", async () => {
+    await createActivityAt(new Date(Date.now() + 1000), { title: "Trop tôt" });
+    const inRange = await createActivityAt(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), { title: "Dans la plage" });
+    await createActivityAt(new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), { title: "Trop tard" });
+
+    const res = await request(app).get(
+      `/api/activities?territory=66` +
+        `&from=${encodeURIComponent(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString())}` +
+        `&to=${encodeURIComponent(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString())}`
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.activities.map((a: { id: string }) => a.id)).toEqual([inRange]);
+  });
+
+  it("7/8/9. le filtre date se cumule avec le territoire (66 et 34 isolés)", async () => {
+    const territory34 = await createTerritory({ code: "34", isActive: true });
+    const { userId: creator34Id, token: creator34Token } = await createUser({
+      email: "dateterritory34@test.com",
+    });
+    await attachUserToTerritory(creator34Id, territory34.id);
+
+    const future = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    const createRes34 = await request(app)
+      .post("/api/activities")
+      .set("Authorization", `Bearer ${creator34Token}`)
+      .send(validActivity({ territoryId: territory34.id, title: "Activité 34" }));
+    const activity34Id = createRes34.body.activity.id as string;
+    await testDb.update(activities).set({ startDate: future }).where(eq(activities.id, activity34Id));
+
+    const activity66Id = await createActivityAt(future, { title: "Activité 66" });
+
+    const fromParam = encodeURIComponent(new Date().toISOString());
+
+    const res66 = await request(app).get(`/api/activities?territory=66&from=${fromParam}`);
+    expect(res66.status).toBe(200);
+    expect(res66.body.activities.map((a: { id: string }) => a.id)).toEqual([activity66Id]);
+
+    const res34 = await request(app).get(`/api/activities?territory=34&from=${fromParam}`);
+    expect(res34.status).toBe(200);
+    expect(res34.body.activities.map((a: { id: string }) => a.id)).toEqual([activity34Id]);
+  });
+
+  it("11. rejette un paramètre de date invalide (400), jamais une erreur SQL", async () => {
+    const res = await request(app).get("/api/activities?territory=66&from=not-a-date");
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("12. rejette to < from (400)", async () => {
+    const from = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    const to = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
+
+    const res = await request(app).get(
+      `/api/activities?territory=66&from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`
+    );
+
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe("INVALID_DATE_RANGE");
   });
 });
 

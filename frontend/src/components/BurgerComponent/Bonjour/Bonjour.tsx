@@ -28,15 +28,28 @@ export default function Bonjour({ onNavigate }: BonjourProps) {
     navigate("/profile");
   };
 
+  // Garde-fou indépendant de stopPropagation (déjà posé sur le badge via
+  // stopBubble) : sur certains navigateurs/tactile, un tap sur le badge
+  // territoire peut être rapporté avec une cible ambiguë et malgré tout
+  // atteindre ce handler — on vérifie donc explicitly, par le DOM réel de
+  // l'événement, qu'il ne provient pas du badge avant de naviguer/fermer le
+  // menu, plutôt que de ne compter que sur l'ordre de propagation.
+  function isFromTerritoryBadge(target: EventTarget | null): boolean {
+    return target instanceof Element && !!target.closest(".container-bonjour__territoryBadge");
+  }
+
   return (
     <>
       <div
         className={`container-bonjour ${user ? "container-bonjour--clickable" : ""}`}
-        onClick={user ? handleGoToProfile : undefined}
+        onClick={(e) => {
+          if (!user || isFromTerritoryBadge(e.target)) return;
+          handleGoToProfile();
+        }}
         role={user ? "button" : undefined}
         tabIndex={user ? 0 : undefined}
         onKeyDown={(e) => {
-          if (!user) return;
+          if (!user || isFromTerritoryBadge(e.target)) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             handleGoToProfile();
@@ -46,9 +59,14 @@ export default function Bonjour({ onNavigate }: BonjourProps) {
         <section className="container-bonjour__leftside">
           <img
             src={user?.avatar || asset("avatarDefault")}
-            alt={
-              user ? `Photo de profil de ${user.pseudo}` : "logo de montagne"
-            }
+            // Visiteur (pas de user) : ce logo de marque est purement
+            // décoratif ici — "Bonjour ! 👋 / Prêt pour de nouvelles
+            // aventures ?" juste à côté porte déjà tout le sens, et le
+            // visuel change de toute façon avec le territoire (pas toujours
+            // une montagne) — alt="" plutôt qu'une description qui serait
+            // fausse pour un autre territoire ou redondante pour un lecteur
+            // d'écran.
+            alt={user ? `Photo de profil de ${user.pseudo}` : ""}
             height={70}
             width={70}
             className="container-bonjour__img"

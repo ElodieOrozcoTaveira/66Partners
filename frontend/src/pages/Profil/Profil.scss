@@ -72,19 +72,3 @@
     max-width: 1180px;
   }
 }
-
-// La carte À propos est volontairement plus étroite que le reste des
-// sections en mobile/tablette (rejointe par les stats juste en dessous, en
-// pleine largeur) : ça aère la mise en page sous le pseudo/lieu au lieu
-// d'un bloc côte à côte. À partir du laptop, le corps est assez large pour
-// que cette même largeur réduite se lise comme un bloc perdu au milieu
-// d'un vide plutôt qu'une respiration : elle reprend alors la pleine
-// largeur, comme les autres sections.
-.profil-page__body > .container-aproposProfile {
-  align-self: center;
-  width: 75%;
-
-  @media (min-width: variables.$laptop) {
-    width: 100%;
-  }
-}

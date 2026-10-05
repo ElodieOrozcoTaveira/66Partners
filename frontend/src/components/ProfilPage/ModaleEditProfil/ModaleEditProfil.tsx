@@ -53,7 +53,10 @@ export default function ModaleEditProfil({
     } catch (err) {
       // Ne jamais laisser le toggle retomber silencieusement à "off" sans
       // explication — l'utilisateur doit savoir que l'activation a échoué.
-      console.error("Erreur lors de l'activation des notifications push:", err);
+      console.error(
+        "Erreur lors de l'activation des notifications push:",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       setPushError("Impossible d'activer les notifications pour le moment. Réessaie plus tard.");
       setPushState(await getPushSupportState());
     } finally {

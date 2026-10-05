@@ -293,6 +293,24 @@
     color: rgba(31, 41, 55, 0.65);
   }
 
+  &__creator {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(31, 41, 55, 0.6);
+  }
+
+  &__creator-avatar {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
   &__sport {
     align-self: flex-start;
     margin-top: 0.15rem;

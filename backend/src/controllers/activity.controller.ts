@@ -67,18 +67,41 @@ export class ActivityController {
    */
   static async list(req: Request, res: Response): Promise<void> {
     try {
-      const { city, sportId, status, participantId, territory } = req.query;
+      const { city, sportId, status, participantId, territory, from, to } = req.query;
 
       // `territory` déjà garanti non vide par activityFiltersSchema ; reste
       // à vérifier qu'il correspond à un territoire réel plutôt que de
       // renvoyer silencieusement une liste vide pour un code inconnu.
       await TerritoryService.getByCode(territory as string);
 
+      // Le schéma Zod (validate middleware) a déjà rejeté une date mal
+      // formée (400) avant d'arriver ici ; `req.query` reste cependant la
+      // chaîne brute (le getter Express réévalue la query string à chaque
+      // accès, le Object.assign du middleware ne survit pas jusqu'ici) —
+      // même constat que `limit`/`offset` plus bas, reparsé explicitement
+      // plutôt que supposé déjà coercé.
+      const fromDate = typeof from === "string" ? new Date(from) : undefined;
+      const toDate = typeof to === "string" ? new Date(to) : undefined;
+
+      // `to >= from` vérifié ici plutôt que via `.refine()` sur le schéma
+      // (cf. activity.validations.ts) : erreur 400 propre, jamais une requête
+      // SQL avec un intervalle inversé qui renverrait juste une liste vide.
+      if (fromDate && toDate && toDate.getTime() < fromDate.getTime()) {
+        res.status(400).json({
+          success: false,
+          message: "Le paramètre 'to' doit être postérieur ou égal à 'from'",
+          code: "INVALID_DATE_RANGE",
+        });
+        return;
+      }
+
       const filters: Parameters<typeof ActivityService.listActivities>[0] = {};
       if (typeof city === "string") filters.city = city;
       if (typeof sportId === "string") filters.sportId = sportId;
       if (typeof status === "string") filters.status = status as ActivityStatus;
       if (typeof participantId === "string") filters.participantId = participantId;
+      if (fromDate) filters.from = fromDate;
+      if (toDate) filters.to = toDate;
       filters.territory = territory as string;
 
       const activitiesList = await ActivityService.listActivities(filters);

@@ -89,8 +89,11 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
         {/* À partir de la tablette, le burger (et donc le badge territoire
             de Bonjour.tsx) disparaît au profit de la nav du Header — le même
             badge doit alors rester accessible ici (cf. Header.scss, masqué
-            en mobile où Bonjour.tsx le montre déjà). */}
-        <TerritorySwitcher className="container-header__territoryBadge" />
+            en mobile où Bonjour.tsx le montre déjà). Réservé aux connectés :
+            un visiteur choisit son territoire principal à l'inscription
+            (TerritoryPicker), jamais avant — aucun changement de territoire
+            possible tant qu'on n'est pas connecté. */}
+        {user && <TerritorySwitcher className="container-header__territoryBadge" />}
         <Hamburger />
       </section>
     </header>

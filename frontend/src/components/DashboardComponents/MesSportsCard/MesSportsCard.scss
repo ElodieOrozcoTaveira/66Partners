@@ -1,6 +1,7 @@
 @use "../../../styles/variables/variables.scss";
 
 .container-messportscard {
+  margin-bottom: 1.5rem;
   &__header {
     display: flex;
     align-items: center;

@@ -15,6 +15,8 @@ const db = drizzle(process.env.DATABASE_URL!);
  */
 
 export type Territory = typeof territories.$inferSelect;
+/** Territoire de l'utilisateur, avec son statut de territoire principal (cf. listForUser). */
+export type UserTerritory = Territory & { isDefault: boolean };
 
 export class TerritoryError extends Error {
   constructor(
@@ -39,6 +41,20 @@ export class TerritoryService {
       .select()
       .from(territories)
       .where(eq(territories.code, code))
+      .limit(1);
+
+    if (!territory) {
+      throw new TerritoryError("Territoire non trouvé", "TERRITORY_NOT_FOUND", 404);
+    }
+
+    return territory;
+  }
+
+  static async getById(id: string): Promise<Territory> {
+    const [territory] = await db
+      .select()
+      .from(territories)
+      .where(eq(territories.id, id))
       .limit(1);
 
     if (!territory) {
@@ -77,17 +93,20 @@ export class TerritoryService {
   }
 
   /**
-   * Tous les territoires auxquels l'utilisateur appartient (pour le
-   * sélecteur de territoire actif côté frontend).
+   * Tous les territoires auxquels l'utilisateur appartient, avec `isDefault`
+   * par territoire (son territoire principal — cf. attachUserToTerritory) :
+   * c'est ce qui permet au frontend de résoudre `activeTerritory` à la
+   * connexion sans retomber sur le localStorage ou "le premier de la
+   * liste" (cf. audit isolation territoriale / architecture multi-territoire).
    */
-  static async listForUser(userId: string): Promise<Territory[]> {
+  static async listForUser(userId: string): Promise<UserTerritory[]> {
     const rows = await db
-      .select({ territory: territories })
+      .select({ territory: territories, isDefault: userTerritories.isDefault })
       .from(userTerritories)
       .innerJoin(territories, eq(territories.id, userTerritories.territoryId))
       .where(eq(userTerritories.userId, userId));
 
-    return rows.map((row) => row.territory);
+    return rows.map((row) => ({ ...row.territory, isDefault: row.isDefault }));
   }
 
   /**

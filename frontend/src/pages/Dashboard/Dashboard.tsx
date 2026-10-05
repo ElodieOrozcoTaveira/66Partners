@@ -24,6 +24,8 @@ interface DashboardActivity {
   status: string;
   sportName: string;
   creatorId: string | null;
+  creatorPseudo: string | null;
+  creatorAvatar: string | null;
   participantsCount: number;
   maxParticipants: number;
   createdAt: string;
@@ -38,8 +40,15 @@ export default function Dashboard() {
   const { activeTerritory } = useTerritory();
   const territoryCode = activeTerritory?.code;
   const { user } = useAuth();
+  // DashboardStats a besoin de l'historique complet (ex. "ce mois-ci" compte
+  // aussi les activités déjà passées) : jamais filtré par date.
   const [allActivities, setAllActivities] = useState<DashboardActivity[]>([]);
   const [myActivities, setMyActivities] = useState<DashboardActivity[]>([]);
+  // ProchainesActivites / ActivitesAutourDeToi, eux, ne doivent montrer que
+  // l'à-venir — filtré côté backend (`from`), jamais récupéré en entier puis
+  // masqué en React (cf. chantier filtres de date).
+  const [upcomingActivities, setUpcomingActivities] = useState<DashboardActivity[]>([]);
+  const [upcomingMyActivities, setUpcomingMyActivities] = useState<DashboardActivity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
 
   useEffect(() => {
@@ -49,6 +58,7 @@ export default function Dashboard() {
     if (!user || !territoryCode) return;
     let mounted = true;
     setActivitiesLoading(true);
+    const from = new Date().toISOString();
 
     Promise.all([
       api.get<ActivitiesResponse>("/api/activities", {
@@ -57,16 +67,26 @@ export default function Dashboard() {
       api.get<ActivitiesResponse>("/api/activities", {
         params: { participantId: user.id, territory: territoryCode },
       }),
+      api.get<ActivitiesResponse>("/api/activities", {
+        params: { territory: territoryCode, from },
+      }),
+      api.get<ActivitiesResponse>("/api/activities", {
+        params: { participantId: user.id, territory: territoryCode, from },
+      }),
     ])
-      .then(([allRes, mineRes]) => {
+      .then(([allRes, mineRes, upcomingRes, upcomingMineRes]) => {
         if (!mounted) return;
         setAllActivities(allRes.data.activities);
         setMyActivities(mineRes.data.activities);
+        setUpcomingActivities(upcomingRes.data.activities);
+        setUpcomingMyActivities(upcomingMineRes.data.activities);
       })
       .catch(() => {
         if (!mounted) return;
         setAllActivities([]);
         setMyActivities([]);
+        setUpcomingActivities([]);
+        setUpcomingMyActivities([]);
       })
       .finally(() => {
         if (mounted) setActivitiesLoading(false);
@@ -91,13 +111,13 @@ export default function Dashboard() {
         />
         <MesSportsCard userId={user.id} />
         <ProchainesActivites
-          activities={allActivities}
-          myActivities={myActivities}
+          activities={upcomingActivities}
+          myActivities={upcomingMyActivities}
           isLoading={activitiesLoading}
         />
         <ActivitesAutourDeToi
-          activities={allActivities}
-          myActivities={myActivities}
+          activities={upcomingActivities}
+          myActivities={upcomingMyActivities}
           isLoading={activitiesLoading}
         />
       </div>

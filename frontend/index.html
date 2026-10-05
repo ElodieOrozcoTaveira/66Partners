@@ -2,10 +2,16 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Fond du Hero de la page d'accueil (Home.scss, .home-hero__photo-wrap::before) :
+         image de fond CSS, donc invisible au préchargeur HTML sans cet indice explicite.
+         Probable élément LCP — préchargée en priorité haute (cf. audit performance). -->
+    <link rel="preload" as="image" href="/66partners/hero.webp" fetchpriority="high" />
+
     <meta
       name="description"
-      content="66Partners connecte les sportifs des Pyrénées-Orientales : trouve un partenaire, crée ou rejoins une activité sportive près de chez toi."
+      content="66Partners connecte les sportifs : trouve un partenaire, crée ou rejoins une activité sportive près de chez toi."
     />
     <title>66Partners</title>
 

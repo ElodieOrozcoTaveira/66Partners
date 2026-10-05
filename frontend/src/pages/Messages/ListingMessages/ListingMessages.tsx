@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { Car } from "lucide-react";
 import api from "../../../lib/axios";
 import { useNotifications } from "../../../contexts/NotificationsContext";
+import { useTerritory } from "../../../contexts/TerritoryContext";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { formatMonth, formatTime } from "../../../lib/dateFormat";
 import "./ListingMessages.scss";
@@ -56,12 +57,22 @@ export default function ListingMessages({ search }: ListingMessagesProps) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { notifications } = useNotifications();
+  const { activeTerritory } = useTerritory();
+  const territoryCode = activeTerritory?.code;
 
   useEffect(() => {
+    // territoryCode se résout de façon asynchrone au premier montage (ne pas
+    // appeler avant) ET change à chaque switch de territoire : la liste doit
+    // alors être rechargée pour ne jamais garder des discussions de l'ancien
+    // territoire affichées (cf. audit isolation territoriale de la messagerie).
+    if (!territoryCode) return;
     let mounted = true;
+    setIsLoading(true);
 
     api
-      .get<ConversationsResponse>("/api/conversations/mine")
+      .get<ConversationsResponse>("/api/conversations/mine", {
+        params: { territory: territoryCode },
+      })
       .then((res) => {
         if (mounted) setConversations(res.data.conversations);
       })
@@ -75,7 +86,7 @@ export default function ListingMessages({ search }: ListingMessagesProps) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [territoryCode]);
 
   const filtered = conversations.filter((conversation) =>
     conversation.activityTitle.toLowerCase().includes(search.trim().toLowerCase()),

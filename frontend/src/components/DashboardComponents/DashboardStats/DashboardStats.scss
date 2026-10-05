@@ -7,6 +7,7 @@
   // de sa part de 1fr et déborde silencieusement de la carte sur mobile.
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .container-dashboardstats__card {

@@ -12,7 +12,15 @@ import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
 import { useFacebookAuth } from "../../../hooks/useFacebookAuth";
 import ModaleBienvenue from "../../ModaleBienvenue/ModaleBienvenue";
 import "./ModaleRegisterContent.scss";
-import { useBranding } from "../../../contexts/TerritoryContext";
+import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
+import {
+  loadTerritoryTheme,
+  THEME_CSS_VARS,
+  ASSET_CSS_VARS,
+  resolveTerritoryAsset,
+  probeImage,
+  type TerritoryTheme,
+} from "../../../lib/territoryAssets";
 
 interface ModaleContentProps {
   isOpen: boolean;
@@ -37,6 +45,7 @@ export default function ModaleRegisterContent({
   onSwitchToLogin,
 }: ModaleContentProps) {
   const { brandName } = useBranding();
+  const { publicTerritories } = useTerritory();
   const { login, getLastLoginFailureReason } = useAuth();
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
@@ -44,6 +53,8 @@ export default function ModaleRegisterContent({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const { territoryCode: signupTerritory, setTerritoryCode: setSignupTerritory } = useSignupTerritory();
+  const [previewTheme, setPreviewTheme] = useState<TerritoryTheme>({});
+  const [previewEmblem, setPreviewEmblem] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -63,6 +74,69 @@ export default function ModaleRegisterContent({
     confirmPassword.length > 0 && password !== confirmPassword;
   const passwordsMatch =
     confirmPassword.length > 0 && password === confirmPassword;
+
+  // Aperçu de marque : les couleurs de la modale (bouton, focus...) suivent
+  // le territoire sélectionné dans TerritoryPicker, scopé à .modale-register-
+  // content (jamais document.documentElement) — un simple aperçu avant
+  // inscription ne doit jamais modifier le thème global de l'app pour un
+  // visiteur qui n'a encore rien choisi. $rouge/$rouge2/$jaune/$jaune2 lisent
+  // déjà var(--brand-primary(-dark)/--brand-accent(-dark), repli 66) — cf.
+  // variables.scss — donc définir ces variables ici suffit à retenter tout
+  // ce qui, dans la modale, utilise déjà ces couleurs de marque.
+  useEffect(() => {
+    const territory = publicTerritories.find((t) => t.code === signupTerritory);
+    let cancelled = false;
+    loadTerritoryTheme(territory?.assetsPath).then((theme) => {
+      if (!cancelled) setPreviewTheme(theme);
+    });
+
+    // Même logique de repli que TerritoryContext : un territoire sans
+    // assetsPath (le 66) n'a pas d'emblème propre, on laisse le mixin SCSS
+    // retomber sur son repli codé en dur plutôt que de fixer explicitement
+    // la même URL ici. Pour un territoire avec assetsPath, on vérifie que
+    // le fichier existe réellement avant de l'appliquer (jamais d'image
+    // cassée si l'emblème n'a pas été déposé pour ce territoire).
+    const assetsPath = territory?.assetsPath;
+    if (!assetsPath) {
+      setPreviewEmblem(null);
+    } else {
+      const url = resolveTerritoryAsset(assetsPath, "emblem");
+      probeImage(url).then((exists) => {
+        if (!cancelled) setPreviewEmblem(exists ? url : null);
+      });
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [signupTerritory, publicTerritories]);
+
+  // Un territoire à la couleur de marque foncée (ex. le navy du 34) devient
+  // illisible en texte/lien sur son propre emblème, lui aussi sombre — le
+  // rouge/jaune par défaut du 66 reste assez clair/chaud pour ne jamais en
+  // avoir besoin. Calculé depuis la couleur réelle du territoire (jamais une
+  // exception "if territoire === 34"), donc valable pour tout futur
+  // territoire à dominante sombre.
+  function isDarkHex(hex: string): boolean {
+    const clean = hex.replace("#", "");
+    if (clean.length !== 6) return false;
+    const r = parseInt(clean.slice(0, 2), 16) / 255;
+    const g = parseInt(clean.slice(2, 4), 16) / 255;
+    const b = parseInt(clean.slice(4, 6), 16) / 255;
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.4;
+  }
+
+  const previewStyle = {
+    ...Object.fromEntries(
+      Object.entries(THEME_CSS_VARS)
+        .map(([key, cssVar]) => [cssVar, previewTheme[key as keyof TerritoryTheme]])
+        .filter(([, value]) => value),
+    ),
+    ...(previewEmblem && ASSET_CSS_VARS.emblem
+      ? { [ASSET_CSS_VARS.emblem]: `url("${previewEmblem}")` }
+      : {}),
+    ...(previewTheme.primary && isDarkHex(previewTheme.primary) ? { "--brand-on-surface": "#ffffff" } : {}),
+  } as React.CSSProperties;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -138,7 +212,9 @@ export default function ModaleRegisterContent({
         termsAccepted,
         ...(signupTerritory ? { territoryCode: signupTerritory } : {}),
       });
-      console.debug("ModaleRegister: register response", res.data);
+      if (import.meta.env.DEV) {
+        console.debug("ModaleRegister: register successful");
+      }
       // Le compte est déjà créé côté backend à ce stade (201 reçu) : une
       // erreur ici ne doit jamais être présentée comme un échec de
       // création de compte, cf. rapport § bug inscription→connexion.
@@ -170,6 +246,7 @@ export default function ModaleRegisterContent({
         className="modale-register-content"
         role="dialog"
         aria-modal="true"
+        style={previewStyle}
         onClick={(event) => event.stopPropagation()}
       >
         <button
@@ -339,6 +416,8 @@ export default function ModaleRegisterContent({
                 className="container-modaleRegister__form"
                 onSubmit={handleSubmit}
               >
+                <TerritoryPicker id="register-territory" value={signupTerritory} onChange={setSignupTerritory} />
+
                 <label
                   htmlFor="pseudo"
                   className="container-modaleRegister__label"
@@ -406,8 +485,6 @@ export default function ModaleRegisterContent({
                     <Check size={12} /> Les mots de passe correspondent
                   </p>
                 )}
-
-                <TerritoryPicker id="register-territory" value={signupTerritory} onChange={setSignupTerritory} />
 
                 <label
                   htmlFor="termsAccepted"

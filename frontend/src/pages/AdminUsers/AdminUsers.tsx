@@ -8,6 +8,7 @@ import AdminTerritoryFilter, { useAdminTerritoryFilter } from "../../components/
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import Skeleton from "../../components/AdminComponents/Skeleton/Skeleton";
+import { useBranding } from "../../contexts/TerritoryContext";
 import "./AdminUsers.scss";
 
 type ListState =
@@ -18,6 +19,7 @@ type ListState =
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 
 export default function AdminUsers() {
+  const { asset } = useBranding();
   const { territory, territoryValue, setTerritory, territories: adminTerritories } = useAdminTerritoryFilter();
   const [state, setState] = useState<ListState>({ status: "loading" });
   const [deleteTarget, setDeleteTarget] = useState<AdminUserListItem | null>(null);
@@ -96,7 +98,7 @@ export default function AdminUsers() {
             {state.data.map((user) => (
               <li key={user.id} className="admin-users-page__row">
                 <img
-                  src={user.avatar || "/66partners/avatardefault.webp"}
+                  src={user.avatar || asset("avatarDefault")}
                   alt={`Photo de profil de ${user.pseudo}`}
                   className="admin-users-page__avatar"
                 />

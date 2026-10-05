@@ -38,7 +38,10 @@ export default function PushNotificationsPrompt() {
     } catch (err) {
       // Jamais d'échec silencieux : sans ça, le bandeau reste affiché avec
       // un bouton "Activer" qui semble ne rien faire.
-      console.error("Erreur lors de l'activation des notifications push:", err);
+      console.error(
+        "Erreur lors de l'activation des notifications push:",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       setError("Impossible d'activer les notifications pour le moment. Réessaie plus tard.");
       setState(await getPushSupportState());
     } finally {

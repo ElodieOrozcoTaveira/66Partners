@@ -1,6 +1,12 @@
-import { CalendarDays, Flame, Smile, Target } from "lucide-react";
+import { CalendarDays, Flame, MapPin, Smile, Target } from "lucide-react";
 import { formatMonthYear } from "../../../lib/dateFormat";
 import './Apropos.scss';
+
+interface AproposProfileTerritory {
+    code: string;
+    name: string;
+    brandName: string;
+}
 
 interface AproposProfileProps {
     headline: string | null;
@@ -8,6 +14,11 @@ interface AproposProfileProps {
     openTo: string | null;
     createdAt: string | null;
     isOwnProfile?: boolean;
+    // Territoire d'inscription (isDefault) de la personne dont on affiche le
+    // profil — jamais le territoire actif du visiteur. Absent/undefined sur
+    // son propre profil (non demandé pour cette page, cf. chantier dédié) ;
+    // `null` explicite si le compte n'a pas de territoire principal.
+    territory?: AproposProfileTerritory | null;
 }
 
 export default function AproposProfile({
@@ -16,6 +27,7 @@ export default function AproposProfile({
     openTo,
     createdAt,
     isOwnProfile = true,
+    territory,
 }: AproposProfileProps) {
     const hasContent = Boolean(headline || lookingFor || openTo);
 
@@ -49,14 +61,22 @@ export default function AproposProfile({
                 )}
             </div>
 
-            {createdAt && (
+            {(createdAt || territory) && (
                 <>
                     <div className="container-aproposProfile__divider" />
                     <div className="container-aproposProfile__col container-aproposProfile__col--meta">
-                        <p className="container-aproposProfile__line">
-                            <CalendarDays size={16} strokeWidth={2.2} />
-                            Membre depuis {formatMonthYear(new Date(createdAt))}
-                        </p>
+                        {createdAt && (
+                            <p className="container-aproposProfile__line">
+                                <CalendarDays size={16} strokeWidth={2.2} />
+                                Membre depuis {formatMonthYear(new Date(createdAt))}
+                            </p>
+                        )}
+                        {territory && (
+                            <p className="container-aproposProfile__line">
+                                <MapPin size={16} strokeWidth={2.2} />
+                                {territory.brandName}
+                            </p>
+                        )}
                     </div>
                 </>
             )}

@@ -142,7 +142,14 @@ describe("GET /api/territories — configuration générique par territoire", ()
 describe("Filtre territoire de l'admin (Tous | 66 | 34)", () => {
   async function seedTwoTerritories() {
     const sportId = await createSport("Filtre");
-    const { userId: u66, token: t66 } = await createUser({ email: "u66@test.com" });
+    // territoryCode explicite : voir le commentaire de resetTerritory34 plus
+    // haut — sur une base fraîchement migrée, "34" peut avoir un createdAt
+    // antérieur à "66" (inséré par la migration de données elle-même avant
+    // que seed-territories.ts n'existe), ce qui romprait silencieusement
+    // l'hypothèse "premier territoire actif = 66" si elle n'était pas fixée
+    // ici explicitement — hors sujet de CE test (filtrage admin, pas le
+    // choix du territoire par défaut).
+    const { userId: u66, token: t66 } = await createUser({ email: "u66@test.com", territoryCode: "66" });
     const { userId: u34, token: t34 } = await createUser({ email: "u34@test.com", territoryCode: "34" });
     void t34;
     const territory34 = await createTerritory({ code: "34", isActive: true });

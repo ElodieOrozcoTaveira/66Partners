@@ -18,7 +18,8 @@ services:
       # le service `api` du même réseau compose.
       - VITE_DEV_PROXY_TARGET=http://api:3000
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     # `npm install` avant `dev` : les node_modules vivent dans des volumes
     # anonymes qui ne se resynchronisent pas tout seuls avec package.json
     # après un `git pull` (nouvelle dépendance ajoutée). Sans ça, il faut
@@ -58,6 +59,20 @@ services:
     # Même remarque que côté client : `npm install` garde node_modules à jour
     # avec package.json malgré le volume anonyme, sans étape manuelle après pull.
     command: sh -c "npm install && npx drizzle-kit migrate && npm run dev"
+    # `client` ne doit proxyer vers l'API qu'une fois celle-ci réellement en
+    # écoute sur :3000 — pas seulement une fois le conteneur démarré (ce que
+    # `depends_on` sans condition attend) : install + migrations prennent
+    # plusieurs secondes, pendant lesquelles Vite renvoyait sinon des
+    # ECONNREFUSED en rafale sur chaque requête /api/*. /api/health existe
+    # déjà (cf. app.ts) ; fetch natif de Node, pas besoin de curl/wget.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - node -e 'fetch("http://localhost:3000/api/health").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
 
   postgres:
     image: postgis/postgis:17-3.5-alpine

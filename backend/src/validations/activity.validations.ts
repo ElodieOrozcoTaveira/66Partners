@@ -68,11 +68,18 @@ export const activityIdParamSchema = z.object({
 });
 
 /**
- * GET /activities?territory=&city=&sportId=&status=
+ * GET /activities?territory=&city=&sportId=&status=&from=&to=
  *
  * `territory` est obligatoire : la liste ne doit jamais dépendre uniquement
  * du frontend pour rester scindée par territoire (cf. audit P-01, l'API
  * doit être l'autorité finale, pas seulement l'appelant).
+ *
+ * `from`/`to` (optionnels) : bornes d'instant (ISO, n'importe quel fuseau —
+ * le calcul des presets calendaires comme "aujourd'hui" en Europe/Paris est
+ * la responsabilité de l'appelant, cf. frontend/src/lib/parisDateRange.ts) ;
+ * `to >= from` vérifié manuellement dans le contrôleur plutôt que via
+ * `.refine()` ici, pour ne pas transformer ce schéma en ZodEffects — il est
+ * réutilisé tel quel ailleurs via `.shape` (cf. conversation.validations.ts).
  */
 export const activityFiltersSchema = z.object({
   city: z.string().trim().min(1).optional(),
@@ -80,6 +87,8 @@ export const activityFiltersSchema = z.object({
   status: statusSchema.optional(),
   participantId: z.uuid("Identifiant de participant invalide").optional(),
   territory: z.string().trim().min(1, "Le territoire est requis").max(10),
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
 });
 
 export type ActivityFiltersInput = z.infer<typeof activityFiltersSchema>;

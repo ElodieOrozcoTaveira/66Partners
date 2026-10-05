@@ -194,14 +194,14 @@ describe("DELETE /api/users/me — parcours utilisateur", () => {
       .set("Authorization", `Bearer ${creatorToken}`);
 
     const convRes = await request(app)
-      .get(`/api/activities/${activityId}/conversation`)
+      .get(`/api/activities/${activityId}/conversation?territory=66`)
       .set("Authorization", `Bearer ${participantToken}`);
     const conversationId = convRes.body.conversation.id as string;
 
     await request(app)
       .post(`/api/conversations/${conversationId}/messages`)
       .set("Authorization", `Bearer ${participantToken}`)
-      .send({ contenu: "Salut !" });
+      .send({ contenu: "Salut !", territory: "66" });
 
     const photoUrl = await uploadActivityPhoto(activityId, participantToken);
 
@@ -299,18 +299,18 @@ describe("DELETE /api/users/me — parcours utilisateur", () => {
       .set("Authorization", `Bearer ${creatorToken}`);
 
     const convRes = await request(app)
-      .get(`/api/activities/${activityId}/conversation`)
+      .get(`/api/activities/${activityId}/conversation?territory=66`)
       .set("Authorization", `Bearer ${creatorToken}`);
     const conversationId = convRes.body.conversation.id as string;
 
     await request(app)
       .post(`/api/conversations/${conversationId}/messages`)
       .set("Authorization", `Bearer ${participantToken}`)
-      .send({ contenu: "Message du participant" });
+      .send({ contenu: "Message du participant", territory: "66" });
     await request(app)
       .post(`/api/conversations/${conversationId}/messages`)
       .set("Authorization", `Bearer ${creatorToken}`)
-      .send({ contenu: "Message du créateur" });
+      .send({ contenu: "Message du créateur", territory: "66" });
 
     const del = await request(app)
       .delete("/api/users/me")

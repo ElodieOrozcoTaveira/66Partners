@@ -1,11 +1,16 @@
 import request from "supertest";
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import app from "../../src/app.js";
+import { userTerritories } from "../../src/db/schema.js";
 import {
   resetAll,
   createUser,
   createSport,
+  createTerritory,
+  attachUserToTerritory,
   closeTestDb,
+  testDb,
 } from "../helpers/db.js";
 
 let token: string;
@@ -59,14 +64,14 @@ describe("PATCH /api/users/me", () => {
     expect(res.body.user.pseudo).toBe("nouveau_pseudo");
   });
 
-  it("met à jour la bio et la ville", async () => {
+  it("met à jour le headline et la ville", async () => {
     const res = await request(app)
       .patch("/api/users/me")
       .set("Authorization", `Bearer ${token}`)
-      .send({ bio: "Je fais du sport.", city: "Perpignan" });
+      .send({ headline: "Je fais du sport.", city: "Perpignan" });
 
     expect(res.status).toBe(200);
-    expect(res.body.user.bio).toBe("Je fais du sport.");
+    expect(res.body.user.headline).toBe("Je fais du sport.");
     expect(res.body.user.city).toBe("Perpignan");
   });
 
@@ -136,6 +141,87 @@ describe("GET /api/users/:id", () => {
     expect(res.body.user).not.toHaveProperty("latitude");
     expect(res.body.user).not.toHaveProperty("longitude");
     expect(res.body.user.pseudo).toBe("user_cible");
+  });
+
+  it("1. expose le territoire d'inscription (isDefault=true) sur le profil public", async () => {
+    const res = await request(app)
+      .get(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.territory).toMatchObject({
+      code: "66",
+      name: expect.any(String),
+      brandName: "66Partners",
+    });
+  });
+
+  it("2. utilisateur multi-territoires : expose uniquement celui avec isDefault=true, jamais un autre", async () => {
+    const territory34 = await createTerritory({ code: "34", isActive: true });
+    await attachUserToTerritory(userId, territory34.id); // isDefault=false par défaut (join, jamais principal)
+
+    const res = await request(app)
+      .get(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.territory.code).toBe("66");
+  });
+
+  it("3. ne renvoie qu'un seul territoire (jamais la liste complète des memberships)", async () => {
+    const territory34 = await createTerritory({ code: "34", isActive: true });
+    await attachUserToTerritory(userId, territory34.id);
+
+    const res = await request(app)
+      .get(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.territory).not.toBeInstanceOf(Array);
+    expect(res.body.user).not.toHaveProperty("territories");
+    expect(res.body.user).not.toHaveProperty("userTerritories");
+    expect(Object.keys(res.body.user.territory).sort()).toEqual(["brandName", "code", "name"]);
+  });
+
+  it("4. utilisateur sans territoire par défaut : territory=null, jamais un territoire inventé (200, pas d'erreur)", async () => {
+    // Retire le statut isDefault du seul membership existant, sans en
+    // recréer un autre — simule un compte dont la donnée serait absente.
+    await testDb
+      .update(userTerritories)
+      .set({ isDefault: false })
+      .where(eq(userTerritories.userId, userId));
+
+    const res = await request(app)
+      .get(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.territory).toBeNull();
+  });
+
+  it("6. aucune donnée sensible exposée via le champ territory (pas d'ID interne, pas d'isActive/dates)", async () => {
+    const res = await request(app)
+      .get(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.territory).not.toHaveProperty("id");
+    expect(res.body.user.territory).not.toHaveProperty("isActive");
+    expect(res.body.user.territory).not.toHaveProperty("createdAt");
+  });
+
+  it("7. le territoire affiché ne dépend jamais d'un territoire actif transmis par le visiteur", async () => {
+    const territory34 = await createTerritory({ code: "34", isActive: true });
+    await attachUserToTerritory(userId, territory34.id);
+
+    // Un éventuel paramètre `territory` dans la query (contexte du visiteur)
+    // ne doit avoir strictement aucun effet : seul isDefault compte.
+    const res = await request(app)
+      .get(`/api/users/${userId}?territory=34`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.territory.code).toBe("66");
   });
 
   it("renvoie 404 pour un UUID inexistant", async () => {

@@ -51,6 +51,65 @@
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.5rem;
     }
+
+    // Aucune activité en base (pas un simple filtre sans résultat, cf.
+    // .explorer-state juste au-dessus) : invite les premiers testeurs à
+    // créer la toute première activité plutôt que d'afficher un texte sec.
+    &__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.4rem;
+        max-width: 420px;
+        margin: 1rem auto 0;
+        padding: 2.75rem 1.5rem;
+        border-radius: 1rem;
+        background-color: white;
+        box-shadow: 0 2px 10px rgba(variables.$nuit, 0.08);
+    }
+
+    &__empty-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        margin-bottom: 0.4rem;
+        border-radius: 50%;
+        color: variables.$rouge;
+        background: variables.alpha(variables.$rouge, 10%);
+    }
+
+    &__empty-title {
+        margin: 0;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: 1rem;
+        color: variables.$nuit;
+    }
+
+    &__empty-text {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
+        color: rgba(31, 41, 55, 0.65);
+    }
+
+    &__empty-cta {
+        display: block;
+        width: 100%;
+        margin-top: 1.5rem;
+        padding: 0.85rem;
+        border-radius: 30px;
+        text-align: center;
+        text-decoration: none;
+        color: white;
+        font-family: 'Inter', sans-serif;
+        font-weight: bold;
+        font-size: 0.9rem;
+        @include mixins.gradient;
+    }
 }
 
 .filter-chip {
@@ -240,6 +299,24 @@
                 color: variables.$rouge2;
             }
         }
+    }
+
+    &__creator {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    &__creator-avatar {
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        object-fit: cover;
     }
 
     &__footer {

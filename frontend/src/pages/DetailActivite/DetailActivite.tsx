@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { isAxiosError } from "axios";
 import { ArrowLeft, Calendar, Car, Check, MapPin, Plus, Trash2, Users, X } from "lucide-react";
 import api from "../../lib/axios";
 import { useAuth } from "../../contexts/AuthContext";
@@ -8,6 +9,7 @@ import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
 import { getSportPhoto } from "../../lib/sportPhotos";
 import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
 import { formatMonth, formatTime, formatWeekday } from "../../lib/dateFormat";
+import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import "./DetailActivite.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
 
@@ -28,6 +30,8 @@ interface ActivityDetail {
   // Nullable : le créateur a pu supprimer son compte (cf. chantier
   // suppression de compte) — l'activité reste visible, sans créateur.
   creatorId: string | null;
+  creatorPseudo: string | null;
+  creatorAvatar: string | null;
   carpoolEnabled: boolean;
 }
 
@@ -62,8 +66,13 @@ export default function DetailActivite() {
   const { asset } = useBranding();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { notifications, markManyAsRead } = useNotifications();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [activity, setActivity] = useState<ActivityDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -189,7 +198,10 @@ export default function DetailActivite() {
       );
       setMyParticipation(res.data.participation);
     } catch (err) {
-      console.error("DetailActivite: failed to join activity", err);
+      console.error(
+        "DetailActivite: failed to join activity",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       window.alert("Impossible d'envoyer la demande de participation.");
     } finally {
       setIsJoining(false);
@@ -203,7 +215,10 @@ export default function DetailActivite() {
     try {
       await api.delete(`/api/participations/${previous.id}`);
     } catch (err) {
-      console.error("DetailActivite: failed to cancel participation", err);
+      console.error(
+        "DetailActivite: failed to cancel participation",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       setMyParticipation(previous);
     }
   }
@@ -221,7 +236,10 @@ export default function DetailActivite() {
       }
       setMyParticipation((prev) => (prev ? { ...prev, carpoolRequested: wantsCarpool } : prev));
     } catch (err) {
-      console.error("DetailActivite: failed to toggle carpool", err);
+      console.error(
+        "DetailActivite: failed to toggle carpool",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       window.alert("Impossible de mettre à jour le covoiturage.");
     } finally {
       setIsTogglingCarpool(false);
@@ -242,7 +260,10 @@ export default function DetailActivite() {
         prev ? { ...prev, participantsCount: prev.participantsCount + 1 } : prev,
       );
     } catch (err) {
-      console.error("DetailActivite: failed to accept request", err);
+      console.error(
+        "DetailActivite: failed to accept request",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       window.alert("Impossible d'accepter cette demande.");
     }
   }
@@ -258,7 +279,10 @@ export default function DetailActivite() {
         ),
       );
     } catch (err) {
-      console.error("DetailActivite: failed to refuse request", err);
+      console.error(
+        "DetailActivite: failed to refuse request",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       window.alert("Impossible de refuser cette demande.");
     }
   }
@@ -278,7 +302,10 @@ export default function DetailActivite() {
       });
       loadPhotos();
     } catch (err) {
-      console.error("DetailActivite: failed to upload photo", err);
+      console.error(
+        "DetailActivite: failed to upload photo",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       window.alert("La photo n'a pas pu être envoyée.");
     } finally {
       setIsUploading(false);
@@ -290,8 +317,32 @@ export default function DetailActivite() {
     try {
       await api.delete(`/api/activity-photos/${photoId}`);
     } catch (err) {
-      console.error("DetailActivite: failed to delete photo", err);
+      console.error(
+        "DetailActivite: failed to delete photo",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
       loadPhotos();
+    }
+  }
+
+  async function handleDeleteActivity() {
+    if (!id) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await api.delete(`/api/activities/${id}`);
+      navigate("/mesactivités", { replace: true });
+    } catch (err) {
+      console.error(
+        "DetailActivite: failed to delete activity",
+        err instanceof Error ? err.message : "Erreur inconnue",
+      );
+      const message =
+        isAxiosError<{ message?: string }>(err) && err.response?.data?.message
+          ? err.response.data.message
+          : "Impossible de supprimer l'activité pour le moment. Réessaie plus tard.";
+      setDeleteError(message);
+      setIsDeleting(false);
     }
   }
 
@@ -355,6 +406,23 @@ export default function DetailActivite() {
           {LEVEL_LABELS[activity.levelRequired]}
         </span>
 
+        <NavLink
+          to={activity.creatorId ? `/profile/${activity.creatorId}` : "#"}
+          className="detailactivite-page__creator"
+          onClick={(event) => {
+            if (!activity.creatorId) event.preventDefault();
+          }}
+        >
+          <img
+            src={activity.creatorAvatar || asset("avatarDefault")}
+            alt={activity.creatorPseudo ?? "Compte supprimé"}
+            className="detailactivite-page__creator-avatar"
+          />
+          {activity.creatorPseudo
+            ? `Organisée par ${activity.creatorPseudo}`
+            : "Organisateur du compte supprimé"}
+        </NavLink>
+
         {isCreator ? (
           <section className="detailactivite-page__requests">
             <h2>Demandes de participation</h2>
@@ -415,7 +483,22 @@ export default function DetailActivite() {
               </div>
             )}
           </section>
-        ) : (
+        ) : null}
+
+        {isCreator && (
+          <section className="detailactivite-page__danger">
+            <button
+              type="button"
+              className="detailactivite-page__delete"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              <Trash2 size={15} strokeWidth={2.2} />
+              Supprimer l'activité
+            </button>
+          </section>
+        )}
+
+        {!isCreator && (
           <div className="detailactivite-page__join">
             {!myParticipation ? (
               hasEnded ? (
@@ -584,6 +667,19 @@ export default function DetailActivite() {
           </section>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        title="Supprimer définitivement cette activité ?"
+        description="Cette action est irréversible. L'activité, les demandes de participation, les discussions et les photos associées seront définitivement supprimées."
+        isSubmitting={isDeleting}
+        errorMessage={deleteError}
+        onConfirm={handleDeleteActivity}
+        onCancel={() => {
+          setIsDeleteDialogOpen(false);
+          setDeleteError(null);
+        }}
+      />
     </div>
   );
 }
