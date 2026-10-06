@@ -29,6 +29,20 @@ export class TerritoryError extends Error {
   }
 }
 
+// Territoires de test réservés au staging public (STAGING_TEST_TERRITORIES,
+// défini uniquement dans docker-compose.staging.yml — jamais en dev/prod, où
+// la variable est absente). Miroir côté backend de VITE_STAGING_TEST_TERRITORIES
+// (frontend, cf. TerritoryContext) : permet à un testeur de s'INSCRIRE
+// réellement avec ce territoire sur le staging avant son ouverture officielle
+// (isActive reste false en base, jamais modifié par cette liste). Ne
+// s'applique qu'à resolveSignupTerritory (inscription) — jamais à
+// joinTerritory (rejoindre un territoire existant depuis son profil), qui
+// reste strict. Aucun code de territoire en dur.
+const STAGING_TEST_TERRITORY_CODES = (process.env.STAGING_TEST_TERRITORIES ?? "")
+  .split(",")
+  .map((code) => code.trim())
+  .filter(Boolean);
+
 export class TerritoryService {
   // Ordonné par ancienneté : sert aussi de règle "premier territoire actif"
   // (fallback visiteur / inscription sans choix) sans aucun code en dur.
@@ -155,7 +169,8 @@ export class TerritoryService {
   static async resolveSignupTerritory(code?: string): Promise<Territory> {
     if (code) {
       const territory = await TerritoryService.getByCode(code);
-      if (!territory.isActive) {
+      const isStagingTestTerritory = STAGING_TEST_TERRITORY_CODES.includes(territory.code);
+      if (!territory.isActive && !isStagingTestTerritory) {
         throw new TerritoryError(
           "Ce territoire n'est pas encore ouvert",
           "TERRITORY_NOT_ACTIVE",

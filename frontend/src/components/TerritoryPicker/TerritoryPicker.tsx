@@ -39,11 +39,21 @@ const FALLBACK_SWATCH = "#E6392E";
  * le flux de la modale (qui scrolle déjà elle-même, overflow-y: auto) suffit.
  */
 export default function TerritoryPicker({ value, onChange, id }: TerritoryPickerProps) {
-  const { publicTerritories } = useTerritory();
+  const { publicTerritories, testTerritories } = useTerritory();
   const [swatches, setSwatches] = useState<Record<string, string>>({});
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const territoryCodes = publicTerritories.map((territory) => territory.code).join(",");
+
+  // Territoires de test staging (cf. TerritoryContext) ajoutés à la liste
+  // proposée à l'inscription — jamais dupliqués si déjà publics, jamais
+  // prioritaires. Vide en dev/prod (VITE_STAGING_TEST_TERRITORIES absente),
+  // donc sans aucun effet hors staging.
+  const publicCodes = new Set(publicTerritories.map((territory) => territory.code));
+  const visibleTerritories = [
+    ...publicTerritories,
+    ...testTerritories.filter((territory) => !publicCodes.has(territory.code)),
+  ];
+  const territoryCodes = visibleTerritories.map((territory) => territory.code).join(",");
 
   // Couleur de chaque territoire (fetch unique par territoire, mis en cache
   // par le navigateur) : purement décoratif (petit point de couleur sur
@@ -52,7 +62,7 @@ export default function TerritoryPicker({ value, onChange, id }: TerritoryPicker
   useEffect(() => {
     let cancelled = false;
     Promise.all(
-      publicTerritories.map(async (territory) => {
+      visibleTerritories.map(async (territory) => {
         const theme = await loadTerritoryTheme(territory.assetsPath);
         return [territory.code, theme.primary ?? FALLBACK_SWATCH] as const;
       }),
@@ -84,9 +94,9 @@ export default function TerritoryPicker({ value, onChange, id }: TerritoryPicker
     };
   }, [open]);
 
-  if (publicTerritories.length < 2) return null;
+  if (visibleTerritories.length < 2) return null;
 
-  const selected = publicTerritories.find((territory) => territory.code === value) ?? publicTerritories[0]!;
+  const selected = visibleTerritories.find((territory) => territory.code === value) ?? visibleTerritories[0]!;
   const selectedSwatch = swatches[selected.code] ?? FALLBACK_SWATCH;
 
   return (
@@ -117,7 +127,7 @@ export default function TerritoryPicker({ value, onChange, id }: TerritoryPicker
 
       {open && (
         <div className="territory-picker__list" role="listbox" aria-labelledby={`${id}-label`}>
-          {publicTerritories.map((territory) => {
+          {visibleTerritories.map((territory) => {
             const isActive = territory.code === value;
             return (
               <button

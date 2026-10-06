@@ -67,6 +67,11 @@ services:
       - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
       - VAPID_SUBJECT=${VAPID_SUBJECT}
+      # Miroir backend de VITE_STAGING_TEST_TERRITORIES (frontend, cf.
+      # plus bas) : permet au testeur public de RÉELLEMENT s'inscrire avec
+      # ce territoire sur ce staging avant son ouverture officielle
+      # (isActive reste false en base) — jamais défini en dev/prod.
+      - STAGING_TEST_TERRITORIES=34
     volumes:
       # Persistance des fichiers uploadés (avatars, couvertures) — sans ce
       # volume nommé, le contenu de /app/backend/uploads ne survit à aucun

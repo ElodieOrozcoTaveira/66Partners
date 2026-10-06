@@ -6,13 +6,18 @@
   box-sizing: border-box;
 }
 
+// --header-height inclut la zone de la barre de statut iOS : en PWA
+// (status bar "black-translucent" + viewport-fit=cover, cf. index.html) la
+// page s'étend dessous. Le Header ajoute ce même inset en padding-top, et
+// toutes les pages qui se décalent de --header-height suivent sans retouche.
+// Hors PWA iOS, env(safe-area-inset-top) vaut 0.
 :root {
-  --header-height: #{variables.$header-height};
+  --header-height: calc(#{variables.$header-height} + env(safe-area-inset-top));
 }
 
 @media (max-width: (variables.$tablet - 1px)) {
   :root {
-    --header-height: 78px;
+    --header-height: calc(78px + env(safe-area-inset-top));
   }
 
   // iOS Safari zoome automatiquement la page au focus de tout champ dont la

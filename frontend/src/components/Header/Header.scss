@@ -10,6 +10,9 @@
   height: var(--header-height);
   margin: 0;
   padding: 0;
+  // Réserve la zone de la barre de statut iOS (déjà comptée dans
+  // --header-height, cf. global.scss).
+  padding-top: env(safe-area-inset-top);
   display: flex;
   justify-content: space-between;
   align-items: center;

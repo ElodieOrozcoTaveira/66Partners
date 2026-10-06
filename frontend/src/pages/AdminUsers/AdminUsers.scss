@@ -5,7 +5,7 @@
   box-sizing: border-box;
   overflow-x: hidden;
   background-color: #f8f9fa;
-  padding-top: 1.25rem;
+  padding-top: calc(1.25rem + env(safe-area-inset-top));
   padding-bottom: 84px;
 
   @media (min-width: variables.$laptop) {

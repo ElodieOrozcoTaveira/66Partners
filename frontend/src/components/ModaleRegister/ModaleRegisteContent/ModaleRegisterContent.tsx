@@ -45,7 +45,7 @@ export default function ModaleRegisterContent({
   onSwitchToLogin,
 }: ModaleContentProps) {
   const { brandName } = useBranding();
-  const { publicTerritories } = useTerritory();
+  const { publicTerritories, testTerritories } = useTerritory();
   const { login, getLastLoginFailureReason } = useAuth();
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
@@ -84,7 +84,9 @@ export default function ModaleRegisterContent({
   // variables.scss — donc définir ces variables ici suffit à retenter tout
   // ce qui, dans la modale, utilise déjà ces couleurs de marque.
   useEffect(() => {
-    const territory = publicTerritories.find((t) => t.code === signupTerritory);
+    const territory =
+      publicTerritories.find((t) => t.code === signupTerritory) ??
+      testTerritories.find((t) => t.code === signupTerritory);
     let cancelled = false;
     loadTerritoryTheme(territory?.assetsPath).then((theme) => {
       if (!cancelled) setPreviewTheme(theme);
@@ -109,7 +111,7 @@ export default function ModaleRegisterContent({
     return () => {
       cancelled = true;
     };
-  }, [signupTerritory, publicTerritories]);
+  }, [signupTerritory, publicTerritories, testTerritories]);
 
   // Un territoire à la couleur de marque foncée (ex. le navy du 34) devient
   // illisible en texte/lien sur son propre emblème, lui aussi sombre — le
