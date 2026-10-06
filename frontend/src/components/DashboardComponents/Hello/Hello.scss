@@ -15,7 +15,10 @@
   &__cover {
     position: relative;
     width: 100%;
-    height: 180px;
+    // PWA iOS (status bar "black-translucent") : sans cet ajout, la
+    // couverture démarre sous la barre de statut et son logo incrusté en
+    // haut s'y retrouve rogné/flouté par sa translucidité.
+    height: calc(180px + env(safe-area-inset-top));
     @include mixins.background;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 

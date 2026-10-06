@@ -46,7 +46,12 @@
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 1rem 1.5rem 0;
+  // En mobile, c'est CE conteneur qui scrolle réellement (cf. .profil-page
+  // overflow:hidden ci-dessus) : son propre padding-bottom doit donc dégager
+  // la bottom navbar (84px, même convention que Dashboard/Messages/Admin...)
+  // + l'inset PWA (home indicator iOS), sans quoi le dernier bloc (ex.
+  // "Supprimer mon compte") se retrouve collé dessous.
+  padding: 1rem 1.5rem calc(84px + env(safe-area-inset-bottom));
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

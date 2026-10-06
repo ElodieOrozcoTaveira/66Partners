@@ -3,13 +3,19 @@
 
 .hero-profile {
   padding: 1rem 1.5rem;
+  // PWA iOS (status bar "black-translucent") : la couverture démarre sinon
+  // sous la barre de statut — le logo incrusté en haut de l'image s'y
+  // retrouve rogné/flouté par sa translucidité. On agrandit la boîte de
+  // l'inset plutôt que de la décaler, pour ne pas pousser l'avatar (ancré en
+  // bas via align-items:flex-end) plus bas que nécessaire.
+  padding-top: calc(1rem + env(safe-area-inset-top));
   display: flex;
   align-items: flex-end;
   justify-content: center;
   gap: 0.75rem;
   width: 100%;
   flex-shrink: 0;
-  min-height: 200px;
+  min-height: calc(200px + env(safe-area-inset-top));
   @include mixins.background;
   // La photo de couverture est dynamique (photo perso de chaque utilisateur,
   // cf. coverSrc dans HeroProfile.tsx) : contrairement au mixin ci-dessus
