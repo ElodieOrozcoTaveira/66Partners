@@ -355,10 +355,13 @@ describe("GET /api/activities/:id", () => {
     expect(res.status).toBe(401);
   });
 
-  it("renvoie 404 (jamais 403) pour un utilisateur qui n'est pas membre du territoire de l'activité", async () => {
+  it("renvoie l'activité (200) pour un utilisateur qui n'est pas membre du territoire de l'activité", async () => {
     // Le créateur est rattaché au territoire "34" en plus du 66 par défaut,
     // et y crée explicitement son activité. L'outsider ne rejoint jamais
-    // "34" — il ne reste membre que du 66, comme tout compte fraîchement créé.
+    // "34" — il ne reste membre que du 66, comme tout compte fraîchement créé
+    // — et doit pouvoir consulter (et rejoindre) l'activité malgré tout : un
+    // utilisateur de passage sur un autre territoire que le sien n'est plus
+    // bloqué par une notion d'appartenance.
     const { userId: creatorId, token: creator34Token } = await createUser({
       email: "creator34@test.com",
     });
@@ -377,8 +380,8 @@ describe("GET /api/activities/:id", () => {
     const outsiderRes = await request(app)
       .get(`/api/activities/${activityId}`)
       .set("Authorization", `Bearer ${outsiderToken}`);
-    expect(outsiderRes.status).toBe(404);
-    expect(outsiderRes.body.code).toBe("ACTIVITY_NOT_FOUND");
+    expect(outsiderRes.status).toBe(200);
+    expect(outsiderRes.body.activity.id).toBe(activityId);
 
     const ownerRes = await request(app)
       .get(`/api/activities/${activityId}`)

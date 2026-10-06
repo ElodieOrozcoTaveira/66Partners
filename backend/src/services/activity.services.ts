@@ -114,20 +114,17 @@ export class ActivityService {
   ): Promise<Activity> {
     await assertSportExists(data.sportId);
 
-    // Le territoire n'est jamais accepté tel quel : soit il est résolu depuis
-    // le territoire par défaut du créateur, soit — s'il est fourni par le
-    // client — son appartenance est vérifiée côté serveur avant d'être utilisée.
+    // Un utilisateur a un territoire principal (isDefault), mais n'est
+    // jamais restreint à y créer ses activités : il peut créer une activité
+    // sur n'importe quel territoire réel (ex. de passage à Montpellier tout
+    // en ayant 66Partners comme territoire principal) — l'appartenance
+    // (user_territories) ne conditionne plus rien ici, seule l'existence du
+    // territoire est vérifiée. Sans territoryId fourni par le client, on
+    // retombe sur le territoire par défaut du créateur.
     let territoryId = data.territoryId;
 
     if (territoryId) {
-      const isMember = await TerritoryService.isUserMemberOf(creatorId, territoryId);
-      if (!isMember) {
-        throw new ActivityError(
-          "Vous n'êtes pas membre de ce territoire",
-          "NOT_TERRITORY_MEMBER",
-          403
-        );
-      }
+      await TerritoryService.getById(territoryId);
     } else {
       const defaultTerritory = await TerritoryService.getDefaultTerritoryForUser(creatorId);
       if (!defaultTerritory) {
@@ -201,26 +198,15 @@ export class ActivityService {
   }
 
   /**
-   * Récupération du détail d'une activité pour un utilisateur authentifié,
-   * avec vérification de l'appartenance au territoire de l'activité. Renvoie
-   * null aussi bien si l'activité n'existe pas que si l'utilisateur n'est pas
-   * membre de son territoire (jamais 403) : on évite ainsi de confirmer
-   * l'existence d'une activité à un utilisateur qui n'y a pas accès.
+   * Récupération du détail d'une activité pour un utilisateur authentifié.
+   * Aucune vérification d'appartenance au territoire : n'importe quel
+   * utilisateur connecté peut consulter (et, via ParticipationService,
+   * rejoindre) une activité sur n'importe quel territoire, pas seulement le
+   * sien — cf. créer/rejoindre une activité de passage sur un autre
+   * territoire que son territoire principal.
    */
-  static async getActivityDetailForUser(
-    activityId: string,
-    requesterId: string
-  ): Promise<ActivityWithDetails | null> {
-    const activity = await ActivityService.getActivityById(activityId);
-    if (!activity) return null;
-
-    const isMember = await TerritoryService.isUserMemberOf(
-      requesterId,
-      activity.territoryId
-    );
-    if (!isMember) return null;
-
-    return activity;
+  static async getActivityDetailForUser(activityId: string): Promise<ActivityWithDetails | null> {
+    return ActivityService.getActivityById(activityId);
   }
 
   /**

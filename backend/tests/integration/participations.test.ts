@@ -104,7 +104,7 @@ describe("POST /api/activities/:id/join", () => {
     expect(res.status).toBe(401);
   });
 
-  it("refuse (403) si le demandeur n'est pas membre du territoire de l'activité", async () => {
+  it("autorise à rejoindre une activité sur un territoire dont le demandeur n'est pas membre (ex. de passage)", async () => {
     const territory34 = await createTerritory({ code: "34" });
     const { userId: creator34Id, token: creator34Token } = await createUser({
       email: "creator34join@test.com",
@@ -130,8 +130,8 @@ describe("POST /api/activities/:id/join", () => {
       .post(`/api/activities/${activity34Id}/join`)
       .set("Authorization", `Bearer ${joinerToken}`);
 
-    expect(res.status).toBe(403);
-    expect(res.body.code).toBe("NOT_TERRITORY_MEMBER");
+    expect(res.status).toBe(201);
+    expect(res.body.participation.activityId).toBe(activity34Id);
   });
 });
 

@@ -91,21 +91,6 @@ export class TerritoryService {
       .orderBy(asc(territories.createdAt));
   }
 
-  static async isUserMemberOf(userId: string, territoryId: string): Promise<boolean> {
-    const [membership] = await db
-      .select({ userId: userTerritories.userId })
-      .from(userTerritories)
-      .where(
-        and(
-          eq(userTerritories.userId, userId),
-          eq(userTerritories.territoryId, territoryId)
-        )
-      )
-      .limit(1);
-
-    return Boolean(membership);
-  }
-
   /**
    * Tous les territoires auxquels l'utilisateur appartient, avec `isDefault`
    * par territoire (son territoire principal — cf. attachUserToTerritory) :

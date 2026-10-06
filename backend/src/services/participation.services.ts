@@ -90,15 +90,6 @@ export class ParticipationService {
       );
     }
 
-    const isMember = await TerritoryService.isUserMemberOf(userId, activity.territoryId);
-    if (!isMember) {
-      throw new ParticipationError(
-        "Vous n'êtes pas membre du territoire de cette activité",
-        "NOT_TERRITORY_MEMBER",
-        403
-      );
-    }
-
     const [existingParticipation] = await db
       .select({ id: participations.id })
       .from(participations)

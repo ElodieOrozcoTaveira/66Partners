@@ -40,7 +40,7 @@ export class ActivityController {
         activity,
       });
     } catch (error) {
-      if (error instanceof ActivityError) {
+      if (error instanceof ActivityError || error instanceof TerritoryError) {
         res.status(error.statusCode).json({
           success: false,
           message: error.message,
@@ -151,7 +151,7 @@ export class ActivityController {
         return;
       }
 
-      const activity = await ActivityService.getActivityDetailForUser(id, req.userId);
+      const activity = await ActivityService.getActivityDetailForUser(id);
 
       if (!activity) {
         res.status(404).json({

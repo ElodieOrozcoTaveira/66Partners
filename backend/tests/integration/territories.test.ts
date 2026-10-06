@@ -115,7 +115,7 @@ describe("POST /api/activities et territoire", () => {
     expect(res.body.activity.territoryId).toBe(territory66Id);
   });
 
-  it("refuse la création (403) si l'utilisateur n'est pas membre du territoire ciblé", async () => {
+  it("crée l'activité sur un territoire ciblé même si l'utilisateur n'en est pas membre (ex. de passage)", async () => {
     const otherTerritory = await createTerritory({ code: "34" });
 
     const res = await request(app)
@@ -123,8 +123,18 @@ describe("POST /api/activities et territoire", () => {
       .set("Authorization", `Bearer ${token}`)
       .send(validActivity({ territoryId: otherTerritory.id }));
 
-    expect(res.status).toBe(403);
-    expect(res.body.code).toBe("NOT_TERRITORY_MEMBER");
+    expect(res.status).toBe(201);
+    expect(res.body.activity.territoryId).toBe(otherTerritory.id);
+  });
+
+  it("refuse la création (404) si le territoire ciblé n'existe pas", async () => {
+    const res = await request(app)
+      .post("/api/activities")
+      .set("Authorization", `Bearer ${token}`)
+      .send(validActivity({ territoryId: "00000000-0000-0000-0000-000000000000" }));
+
+    expect(res.status).toBe(404);
+    expect(res.body.code).toBe("TERRITORY_NOT_FOUND");
   });
 
   it("crée l'activité dans le territoire actif transmis (34) pour un utilisateur membre de 66 et 34", async () => {
