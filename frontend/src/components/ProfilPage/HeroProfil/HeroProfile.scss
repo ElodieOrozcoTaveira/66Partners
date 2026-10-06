@@ -47,6 +47,18 @@
   // verticalement — les anciennes valeurs (65%/80%) coupaient le logo "66
   // PARTNERS" en haut de l'image.
   &--defaultCover {
+    // Mobile/tablette : la boîte (~390×259px avec l'inset PWA) est
+    // proportionnellement plus ÉTROITE que l'image source (1829×860,
+    // ~2.1:1) — background-size:cover recadre alors les côtés, pas le
+    // haut/bas (régime inverse de laptop/desktop ci-dessous). Le logo
+    // "66 PARTNERS" occupe le quart supérieur gauche de l'image : un
+    // cadrage "center" coupait une bonne partie de son côté gauche.
+    // Ancré à gauche pour ne jamais le couper, tout l'excédent partant à
+    // droite (mer/paysage, sans perte de contenu important).
+    @media (max-width: (variables.$tablet - 1px)) {
+      background-position: left top;
+    }
+
     @media (min-width: variables.$laptop) {
       background-position: center 20%;
     }

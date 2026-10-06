@@ -98,7 +98,7 @@ export default function Hello({ pseudo, avatar, coverPhoto }: HelloProps) {
   return (
     <div className="container-hello">
       <div
-        className="container-hello__cover"
+        className={`container-hello__cover${coverPhoto ? "" : " container-hello__cover--default"}`}
         style={{ backgroundImage: `url(${coverPhoto || asset("cover")})` }}
       >
         <div className="container-hello__bell-wrap" ref={panelRef}>

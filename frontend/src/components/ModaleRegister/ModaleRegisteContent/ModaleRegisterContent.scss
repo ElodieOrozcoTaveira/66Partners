@@ -11,6 +11,12 @@
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  // PWA iOS : "inset: 0" couvre tout l'écran, y compris sous la barre de
+  // statut (viewport-fit=cover) — une modale haute (max-height: 90vh,
+  // centrée) pouvait donc se retrouver avec son bouton de fermeture
+  // partiellement sous la barre de statut, difficile/impossible à toucher.
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  box-sizing: border-box;
 }
 
 .modale-register-content {

@@ -22,6 +22,18 @@
     @include mixins.background;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 
+    // Boîte mobile proportionnellement plus étroite que l'image par défaut
+    // (1829×860, ~2.1:1) : background-size:cover recadre les côtés, pas le
+    // haut/bas. Le logo "66 PARTNERS" occupe le quart supérieur gauche —
+    // ancré à gauche pour ne jamais le couper (même raisonnement que
+    // HeroProfile). Jamais appliqué à une photo de couverture perso (cf.
+    // le modificateur --default posé uniquement sans coverPhoto).
+    &--default {
+      @media (max-width: (variables.$tablet - 1px)) {
+        background-position: left top;
+      }
+    }
+
     @media (min-width: variables.$tablet) {
       height: 230px;
       background-position: center 38%;
