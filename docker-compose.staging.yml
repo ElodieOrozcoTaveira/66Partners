@@ -71,7 +71,7 @@ services:
       # plus bas) : permet au testeur public de RÉELLEMENT s'inscrire avec
       # ce territoire sur ce staging avant son ouverture officielle
       # (isActive reste false en base) — jamais défini en dev/prod.
-      - STAGING_TEST_TERRITORIES=34
+      - STAGING_TEST_TERRITORIES=34,11
     volumes:
       # Persistance des fichiers uploadés (avatars, couvertures) — sans ce
       # volume nommé, le contenu de /app/backend/uploads ne survit à aucun
@@ -100,7 +100,7 @@ services:
         # Ouvre le test public du switcher pour le 34 avant son activation
         # officielle (isActive reste false en base, cf. TerritoryContext.tsx) —
         # UNIQUEMENT ici, jamais dans docker-compose.prod.yml.
-        VITE_STAGING_TEST_TERRITORIES: "34"
+        VITE_STAGING_TEST_TERRITORIES: "34,11"
         NGINX_CONF: nginx/staging.conf
     restart: unless-stopped
     ports:

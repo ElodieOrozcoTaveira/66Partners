@@ -34,6 +34,16 @@ export const TERRITORY_SEEDS = [
     assetsPath: "/34partners",
     isActive: false,
   },
+  {
+    code: "11",
+    name: "Aude",
+    slug: "aude",
+    brandName: "11Partners",
+    inseeDepartmentCode: "11",
+    tagline: "Ton sport. Ton partenaire. Ton 11.",
+    assetsPath: "/11partners",
+    isActive: false,
+  },
 ] as const;
 
 /**
