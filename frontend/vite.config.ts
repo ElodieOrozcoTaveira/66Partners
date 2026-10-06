@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["apple-touch-icon.png"],
+      includeAssets: ["apple-touch-icon-v2.png"],
       // Service worker écrit à la main (src/sw.ts) plutôt que généré : c'est
       // le seul moyen d'y ajouter nos propres listeners `push` /
       // `notificationclick` (le mode generateSW ne laisse pas la main dessus).
@@ -29,10 +29,10 @@ export default defineConfig({
         background_color: "#ffffff",
         theme_color: "#E6392E",
         icons: [
-          { src: "/pwa-icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-          { src: "/pwa-icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: "/pwa-icon-192-v2.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "/pwa-icon-512-v2.png", sizes: "512x512", type: "image/png", purpose: "any" },
           {
-            src: "/pwa-icon-maskable-512.png",
+            src: "/pwa-icon-maskable-512-v2.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
