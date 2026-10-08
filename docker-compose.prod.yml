@@ -12,12 +12,30 @@ services:
       - PORT=3000
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
+      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
+      - ADMIN_RECOVERY_EMAIL=${ADMIN_RECOVERY_EMAIL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
+      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
       - CORS_ORIGIN=${CORS_ORIGIN}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
+      - VAPID_SUBJECT=${VAPID_SUBJECT}
+      # Jamais STAGING_TEST_TERRITORIES ici : ce mécanisme (territoire pas
+      # encore isActive mais inscriptible/switchable quand même) est
+      # réservé au staging, cf. docker-compose.staging.yml — son absence
+      # ici est volontaire, pas un oubli.
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - internal
+    volumes:
+      - uploads_data:/app/backend/uploads
 
   # ── Frontend Vite + Nginx (reverse proxy) ─────────────────────────────────
   frontend:
@@ -26,6 +44,8 @@ services:
       dockerfile: frontend/Dockerfile.prod
       args:
         VITE_API_URL: https://api.66partners.fr
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        VITE_FACEBOOK_APP_ID: ${FACEBOOK_APP_ID}
     image: 66partners-frontend
     restart: unless-stopped
     ports:
@@ -33,10 +53,13 @@ services:
       - "443:443"
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      # Webroot certbot (challenge ACME servi par le bloc listen 80)
+      - /var/www/certbot:/var/www/certbot:ro
     depends_on:
       - api
     networks:
       - internal
+
 
   # ── PostgreSQL + PostGIS ───────────────────────────────────────────────────
   postgres:
@@ -47,7 +70,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_prod_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
@@ -61,7 +84,7 @@ services:
     image: redis:8-alpine
     restart: unless-stopped
     volumes:
-      - redis_data:/data
+      - redis_prod_data:/data
     networks:
       - internal
 
@@ -70,5 +93,6 @@ networks:
     driver: bridge
 
 volumes:
-  db_data:
-  redis_data:
+  db_prod_data:
+  redis_prod_data:
+  uploads_data:
