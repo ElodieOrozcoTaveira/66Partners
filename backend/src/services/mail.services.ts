@@ -5,10 +5,14 @@ import { resetPasswordEmailTemplate } from "./emailTemplates/resetPassword.templ
 import { accountDeletedEmailTemplate } from "./emailTemplates/accountDeleted.template.js";
 import type { TerritoryBrand } from "./territory.services.js";
 
+// Port 587 + STARTTLS obligatoire plutôt que 465 (SSL implicite) : Hetzner
+// bloque le port 465 sortant sur le serveur de prod. requireTLS refuse tout
+// envoi si le serveur ne propose pas STARTTLS (jamais d'auth en clair).
 const transporter = nodemailer.createTransport({
   host: "ssl0.ovh.net",
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
+  requireTLS: true,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
