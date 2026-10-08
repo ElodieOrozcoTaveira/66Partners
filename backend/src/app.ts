@@ -33,6 +33,15 @@ dotenv.config();
 const app = express();
 export const httpServer = createServer(app); // socket se met sur le serveur http pas sur app
 
+// Prod/staging : un seul proxy (nginx du frontend) devant l'API. Express prend
+// alors comme req.ip la dernière entrée de X-Forwarded-For, celle ajoutée par
+// nginx — sans ça, tous les visiteurs partagent l'IP de nginx et les rate
+// limits (login, mot de passe oublié...) deviennent globaux. Jamais en dev/test,
+// où aucun proxy n'est présent et l'en-tête serait falsifiable par le client.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Middleware de sécurité
 app.use(helmet(helmetOptions));
 const allowedOrigins = getAllowedOrigins();
