@@ -1,105 +1,122 @@
-import { router } from "expo-router";
-
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as WebBrowser from "expo-web-browser";
+import { Ionicons } from "@expo/vector-icons";
 
+import { AuthTabs } from "../../src/components/AuthTabs";
+import { Button } from "../../src/components/ui/Button";
+import { TextField } from "../../src/components/ui/TextField";
+import { LEGAL_URLS } from "../../src/config/env";
+import { Colors, Radius, Spacing, Typography } from "../../src/constants/theme";
 import { useAuth } from "../../src/context/AuthContext";
-import {
-  getTerritories,
-  type Territory,
-} from "../../src/services/territory.service";
+import { PASSWORD_MIN_LENGTH, validateRegister } from "../../src/lib/validation";
+import { getApiErrorMessage } from "../../src/services/api";
+import { getTerritories } from "../../src/services/territory.service";
+import type { Territory } from "../../src/types/domain";
+import { BrandProvider, useBrand, useBrandStyles } from "../../src/context/BrandContext";
+import { getBrand } from "../../src/constants/brands";
+import type { Brand } from "../../src/constants/brands";
 
+/**
+ * L'écran prend les couleurs du territoire choisi dès la sélection (aperçu
+ * du thème 66, 34, 11…), avant même la création du compte.
+ */
 export default function RegisterScreen() {
+  const [previewCode, setPreviewCode] = useState<string | null>(null);
+  return (
+    <BrandProvider code={previewCode}>
+      <RegisterForm onTerritoryChange={setPreviewCode} />
+    </BrandProvider>
+  );
+}
+
+function RegisterForm({ onTerritoryChange }: { onTerritoryChange: (code: string) => void }) {
+  const brand = useBrand();
+  const styles = useBrandStyles(makeStyles);
   const { register } = useAuth();
 
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [city, setCity] = useState("");
-
-  const [territories, setTerritories] = useState<Territory[]>([]);
-  const [territoryCode, setTerritoryCode] = useState("");
-
+  const [territoryCode, setTerritoryCodeState] = useState("");
+  const setTerritoryCode = (code: string) => {
+    setTerritoryCodeState(code);
+    onTerritoryChange(code);
+  };
   const [termsAccepted, setTermsAccepted] = useState(false);
 
+  const [territories, setTerritories] = useState<Territory[]>([]);
+  const [territoriesError, setTerritoriesError] = useState<string | null>(null);
   const [isLoadingTerritories, setIsLoadingTerritories] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadTerritories = async () => {
-      try {
-        const data = await getTerritories();
+    let cancelled = false;
 
+    getTerritories()
+      .then((data) => {
+        if (cancelled) return;
         setTerritories(data);
-
-        // S'il n'y a qu'un territoire actif, on le sélectionne automatiquement.
+        setTerritoriesError(null);
+        // Un seul territoire ouvert : sélection automatique.
         if (data.length === 1) {
-          setTerritoryCode(data[0].code);
+          setTerritoryCodeState(data[0].code);
+          onTerritoryChange(data[0].code);
         }
-      } catch (error) {
-        console.error("[REGISTER] Territoires:", error);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setTerritoriesError(
+            getApiErrorMessage(err, "Impossible de récupérer les territoires disponibles.")
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingTerritories(false);
+      });
 
-        Alert.alert(
-          "Erreur",
-          "Impossible de récupérer les territoires disponibles."
-        );
-      } finally {
-        setIsLoadingTerritories(false);
-      }
+    return () => {
+      cancelled = true;
     };
+  }, [reloadKey, onTerritoryChange]);
 
-    loadTerritories();
-  }, []);
+  const retryTerritories = () => {
+    setIsLoadingTerritories(true);
+    setReloadKey((key) => key + 1);
+  };
 
   const handleRegister = async () => {
-    if (!pseudo.trim()) {
-      Alert.alert("Champ requis", "Renseigne ton pseudo.");
+    const validationError = validateRegister({
+      pseudo,
+      email,
+      password,
+      city,
+      territoryCode,
+      termsAccepted,
+    });
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    if (!email.trim()) {
-      Alert.alert("Champ requis", "Renseigne ton email.");
-      return;
-    }
-
-    if (password.length < 8) {
-      Alert.alert(
-        "Mot de passe",
-        "Le mot de passe doit contenir au moins 8 caractères."
-      );
-      return;
-    }
-
-    if (!territoryCode) {
-      Alert.alert(
-        "Territoire",
-        "Sélectionne ton territoire."
-      );
-      return;
-    }
-
-    if (!termsAccepted) {
-      Alert.alert(
-        "Acceptation requise",
-        "Tu dois accepter les Mentions Légales et la Politique de confidentialité."
-      );
-      return;
-    }
-
+    setError(null);
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-
       await register({
         pseudo: pseudo.trim(),
         email: email.trim(),
@@ -108,363 +125,296 @@ export default function RegisterScreen() {
         territoryCode,
         termsAccepted: true,
       });
-
-      // AuthContext reçoit le JWT et l'utilisateur.
-      // La navigation vers les onglets sera automatique.
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        "Impossible de créer ton compte.";
-
-      Alert.alert("Inscription impossible", message);
-    } finally {
+      // Navigation automatique vers les onglets (garde du layout racine).
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Impossible de créer ton compte."));
       setIsSubmitting(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Text style={styles.logo}>66Partners</Text>
-
-        <Text style={styles.title}>Créer ton compte</Text>
-
-        <Text style={styles.subtitle}>
-          Rejoins ta communauté sportive.
-        </Text>
-
-        <View style={styles.form}>
-          <Text style={styles.label}>Pseudo *</Text>
-
-          <TextInput
-            style={styles.input}
-            value={pseudo}
-            onChangeText={setPseudo}
-            placeholder="Ton pseudo"
-            placeholderTextColor="#999"
-            autoCapitalize="none"
-            autoCorrect={false}
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <Image
+            source={brand.logo}
+            resizeMode="contain"
+            style={styles.logo}
+            accessibilityRole="image"
+            accessibilityLabel="66Partners"
           />
 
-          <Text style={styles.label}>Email *</Text>
+          <AuthTabs active="register" />
 
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="ton@email.com"
-            placeholderTextColor="#999"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            textContentType="emailAddress"
-          />
+          <Text style={styles.subtitle}>Rejoins ta communauté sportive.</Text>
 
-          <Text style={styles.label}>Mot de passe *</Text>
+          <View style={styles.form}>
+            <Text style={styles.label}>Territoire *</Text>
 
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="8 caractères minimum"
-            placeholderTextColor="#999"
-            secureTextEntry
-            autoCapitalize="none"
-            textContentType="newPassword"
-          />
-
-          <Text style={styles.label}>Ville</Text>
-
-          <TextInput
-            style={styles.input}
-            value={city}
-            onChangeText={setCity}
-            placeholder="Ta ville"
-            placeholderTextColor="#999"
-          />
-
-          <Text style={styles.label}>Territoire *</Text>
-
-          {isLoadingTerritories ? (
-            <View style={styles.loadingTerritories}>
-              <ActivityIndicator />
-              <Text style={styles.loadingText}>
-                Chargement des territoires...
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.territories}>
-              {territories.map((territory) => {
-                const selected = territory.code === territoryCode;
-
-                return (
-                  <Pressable
-                    key={territory.id}
-                    onPress={() => setTerritoryCode(territory.code)}
-                    style={[
-                      styles.territory,
-                      selected && styles.territorySelected,
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.radio,
-                        selected && styles.radioSelected,
-                      ]}
-                    />
-
-                    <View style={styles.territoryText}>
-                      <Text
-                        style={[
-                          styles.territoryName,
-                          selected && styles.territoryNameSelected,
-                        ]}
-                      >
-                        {territory.name}
-                      </Text>
-
-                      <Text style={styles.territoryBrand}>
-                        {territory.brandName} · {territory.code}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
-
-          <Pressable
-            onPress={() => setTermsAccepted((value) => !value)}
-            style={styles.termsRow}
-          >
-            <View
-              style={[
-                styles.checkbox,
-                termsAccepted && styles.checkboxSelected,
-              ]}
-            >
-              {termsAccepted ? (
-                <Text style={styles.checkmark}>✓</Text>
-              ) : null}
-            </View>
-
-            <Text style={styles.termsText}>
-              J'accepte les Mentions Légales et la Politique de
-              confidentialité.
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.buttonPressed,
-              (!termsAccepted ||
-                isSubmitting ||
-                isLoadingTerritories) &&
-                styles.buttonDisabled,
-            ]}
-            onPress={handleRegister}
-            disabled={
-              !termsAccepted ||
-              isSubmitting ||
-              isLoadingTerritories
-            }
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color="#fff" />
+            {isLoadingTerritories ? (
+              <View style={styles.territoryLoading}>
+                <ActivityIndicator color={brand.primary} />
+                <Text style={styles.caption}>Chargement des territoires…</Text>
+              </View>
+            ) : territoriesError ? (
+              <View style={styles.territoryError}>
+                <Text style={styles.error}>{territoriesError}</Text>
+                <Button label="Réessayer" variant="secondary" onPress={retryTerritories} />
+              </View>
             ) : (
-              <Text style={styles.buttonText}>
-                Créer mon compte
-              </Text>
+              <View style={styles.territories} accessibilityRole="radiogroup">
+                {territories.map((territory) => {
+                  const selected = territory.code === territoryCode;
+
+                  return (
+                    <Pressable
+                      key={territory.id}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected }}
+                      accessibilityLabel={`${territory.name}, ${territory.brandName}`}
+                      onPress={() => setTerritoryCode(territory.code)}
+                      style={[styles.territory, selected && styles.territorySelected]}
+                    >
+                      <View style={[styles.radio, selected && styles.radioSelected]} />
+                      <Image
+                        source={getBrand(territory.code).logo}
+                        resizeMode="contain"
+                        style={styles.territoryLogo}
+                        accessible={false}
+                      />
+                      <View style={styles.flex}>
+                        <Text style={[styles.territoryName, selected && styles.selectedText]}>
+                          {territory.name}
+                        </Text>
+                        <Text style={styles.caption}>{territory.brandName}</Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
             )}
-          </Pressable>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+            <TextField
+              label="Pseudo *"
+              value={pseudo}
+              onChangeText={setPseudo}
+              placeholder="Ton pseudo"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="username"
+              maxLength={100}
+            />
+
+            <TextField
+              label="Email *"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="ton@email.com"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+            />
+
+            <TextField
+              label="Mot de passe *"
+              value={password}
+              onChangeText={setPassword}
+              placeholder={`${PASSWORD_MIN_LENGTH} caractères minimum`}
+              isPassword
+              autoCapitalize="none"
+              autoComplete="new-password"
+              textContentType="newPassword"
+              maxLength={128}
+            />
+
+            <TextField
+              label="Ville"
+              value={city}
+              onChangeText={setCity}
+              placeholder="Ta ville (facultatif)"
+              autoComplete="address-line2"
+              maxLength={100}
+              hint="Visible sur ton profil par les autres membres."
+            />
+
+            <View style={styles.termsRow}>
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: termsAccepted }}
+                accessibilityLabel="J'accepte les Mentions légales et la Politique de confidentialité"
+                hitSlop={8}
+                onPress={() => setTermsAccepted((value) => !value)}
+                style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}
+              >
+                {termsAccepted ? <Ionicons name="checkmark" size={16} color="#fff" /> : null}
+              </Pressable>
+
+              <Text style={styles.termsText}>
+                J’accepte les{" "}
+                <Text
+                  style={styles.link}
+                  accessibilityRole="link"
+                  onPress={() => WebBrowser.openBrowserAsync(LEGAL_URLS.legalNotice)}
+                >
+                  Mentions légales
+                </Text>{" "}
+                et la{" "}
+                <Text
+                  style={styles.link}
+                  accessibilityRole="link"
+                  onPress={() => WebBrowser.openBrowserAsync(LEGAL_URLS.privacy)}
+                >
+                  Politique de confidentialité
+                </Text>
+                .
+              </Text>
+            </View>
+
+            {error ? (
+              <Text style={styles.error} accessibilityLiveRegion="polite">
+                {error}
+              </Text>
+            ) : null}
+
+            <Button
+              label="Créer mon compte"
+              onPress={handleRegister}
+              loading={isSubmitting}
+              disabled={isLoadingTerritories || Boolean(territoriesError)}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const makeStyles = (brand: Brand) =>
+  StyleSheet.create({
+  safe: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background,
   },
-
+  flex: {
+    flex: 1,
+  },
   content: {
-    paddingHorizontal: 28,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.xxl,
   },
-
   logo: {
-    fontSize: 28,
-    fontWeight: "800",
-    textAlign: "center",
-    marginBottom: 28,
+    width: 200,
+    height: 112,
+    alignSelf: "center",
+    marginBottom: Spacing.md,
   },
-
-  title: {
-    fontSize: 30,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-
   subtitle: {
-    fontSize: 16,
-    lineHeight: 23,
-    color: "#666",
-    marginBottom: 28,
+    ...Typography.body,
+    color: Colors.textSecondary,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.lg,
   },
-
   form: {
-    gap: 10,
+    gap: Spacing.lg,
   },
-
   label: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 8,
+    ...Typography.label,
+    marginBottom: -Spacing.sm,
   },
-
-  input: {
-    height: 52,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    backgroundColor: "#fafafa",
+  caption: {
+    ...Typography.caption,
   },
-
-  loadingTerritories: {
-    height: 70,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
+  territoryLoading: {
+    minHeight: 64,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
-  },
-
-  loadingText: {
-    color: "#666",
-  },
-
-  territories: {
-    gap: 10,
-  },
-
-  territory: {
-    minHeight: 70,
+    gap: Spacing.sm,
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+  },
+  territoryError: {
+    gap: Spacing.sm,
+  },
+  territories: {
+    gap: Spacing.sm,
+  },
+  territory: {
+    minHeight: 64,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fafafa",
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surface,
   },
-
   territorySelected: {
-    borderColor: "#2E7D32",
-    backgroundColor: "#F1F8F2",
+    borderColor: brand.primary,
+    backgroundColor: brand.primarySoft,
   },
-
+  territoryLogo: {
+    width: 64,
+    height: 36,
+  },
   radio: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: "#aaa",
-    marginRight: 12,
+    borderColor: Colors.textMuted,
   },
-
   radioSelected: {
-    borderColor: "#2E7D32",
-    backgroundColor: "#2E7D32",
+    borderColor: brand.primary,
+    backgroundColor: brand.primary,
   },
-
-  territoryText: {
-    flex: 1,
-  },
-
   territoryName: {
     fontSize: 16,
     fontWeight: "600",
+    color: Colors.text,
   },
-
-  territoryNameSelected: {
-    color: "#2E7D32",
+  selectedText: {
+    color: brand.primary,
   },
-
-  territoryBrand: {
-    fontSize: 13,
-    color: "#777",
-    marginTop: 3,
-  },
-
   termsRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginTop: 18,
-    gap: 10,
+    gap: Spacing.md,
+    marginTop: Spacing.sm,
   },
-
   checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 5,
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#aaa",
+    borderColor: Colors.textMuted,
     alignItems: "center",
     justifyContent: "center",
   },
-
-  checkboxSelected: {
-    borderColor: "#2E7D32",
-    backgroundColor: "#2E7D32",
+  checkboxChecked: {
+    borderColor: brand.primary,
+    backgroundColor: brand.primary,
   },
-
-  checkmark: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-
   termsText: {
     flex: 1,
-    fontSize: 13,
-    lineHeight: 19,
-    color: "#555",
+    ...Typography.caption,
+    fontSize: 14,
+    lineHeight: 20,
   },
-
-  button: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: "#2E7D32",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 18,
+  link: {
+    color: brand.primary,
+    fontWeight: "600",
+    textDecorationLine: "underline",
   },
-
-  buttonPressed: {
-    opacity: 0.8,
-  },
-
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
+  error: {
+    color: Colors.danger,
+    fontSize: 14,
   },
 });

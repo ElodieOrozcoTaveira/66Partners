@@ -1,31 +1,28 @@
+import type { Territory } from "../types/domain";
 import { api } from "./api";
 
-export interface Territory {
-  id: string;
-  code: string;
-  name: string;
-  slug: string;
-  brandName: string;
-  inseeDepartmentCode: string;
-  tagline: string;
-  assetsPath: string | null;
-  logoUrl: string | null;
-  primaryColor: string | null;
-  secondaryColor: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Territory };
 
 interface TerritoriesResponse {
   success: boolean;
   territories: Territory[];
 }
 
+/** Territoires ouverts à l'inscription. */
 export async function getTerritories(): Promise<Territory[]> {
   const response = await api.get<TerritoriesResponse>("/territories");
 
-  return response.data.territories.filter(
-    (territory) => territory.isActive
-  );
+  return response.data.territories.filter((territory) => territory.isActive);
+}
+
+/** Territoires de l'utilisateur connecté, avec son territoire principal (isDefault). */
+export async function getMyTerritories(): Promise<Territory[]> {
+  const response = await api.get<TerritoriesResponse>("/territories/mine");
+
+  return response.data.territories;
+}
+
+/** POST /territories/:code/join — rejoint un territoire ouvert (le principal ne change pas). */
+export async function joinTerritory(code: string): Promise<void> {
+  await api.post(`/territories/${encodeURIComponent(code)}/join`);
 }

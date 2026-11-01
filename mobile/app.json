@@ -1,41 +1,53 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "66Partners",
+    "slug": "66partners",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
-    "userInterfaceStyle": "automatic",
+    "scheme": "partners66",
+    "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/icon.png",
+      "bundleIdentifier": "fr.66partners.app",
+      "supportsTablet": false
     },
     "android": {
+      "package": "fr.partners66.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#E6392E",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "monochromeImage": "./assets/images/android-icon-monochrome.png",
+        "package": "fr.66partners.app"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#E2052A"
         }
       ],
       "expo-secure-store",
       "expo-image",
-      "expo-asset"
+      "expo-asset",
+      "expo-web-browser",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "66Partners accède à tes photos uniquement pour choisir ta photo de profil.",
+          "cameraPermission": "66Partners utilise l'appareil photo uniquement pour prendre ta photo de profil.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
