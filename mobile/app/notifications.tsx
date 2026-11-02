@@ -23,6 +23,8 @@ function iconFor(type: string): IconName {
       return "person-add";
     case "CARPOOL_REQUESTED":
       return "car";
+    case "ACTIVITY_REMINDER":
+      return "alarm";
     default:
       return "notifications";
   }

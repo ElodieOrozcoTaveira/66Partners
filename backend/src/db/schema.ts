@@ -245,6 +245,20 @@ export const notifications = pgTable("notifications", {
   usersIdx: index("notifications_users_id_idx").on(t.usersId),
 }))
 
+// Rappels d'activité déjà envoyés (cf. activityReminder.services.ts) : une
+// ligne par activité, membre et type de rappel. La clé primaire garantit
+// qu'un rappel n'est jamais envoyé deux fois, même si la vérification
+// périodique tourne plusieurs fois ou sur plusieurs instances.
+export const activityReminders = pgTable("activity_reminders", {
+  activityId: uuid("activity_id").notNull().references(() => activities.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // "DAY" (la veille) ou "HOUR" (1 h avant).
+  kind: varchar("kind", { length: 10 }).notNull(),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.activityId, t.userId, t.kind] }),
+}));
+
 // Un abonnement navigateur/PWA aux notifications push (Web Push standard,
 // cf. push.services.ts). Un même utilisateur peut avoir plusieurs
 // abonnements (plusieurs appareils/navigateurs) : l'endpoint identifie de
