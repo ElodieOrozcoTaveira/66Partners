@@ -16,6 +16,7 @@ export interface AppNotification {
     | "PARTICIPATION_REQUESTED"
     | "NEW_MESSAGE"
     | "CARPOOL_REQUESTED"
+    | "ACTIVITY_REMINDER"
     | string;
   contenu: string | null;
   estLu: boolean | null;
@@ -48,6 +49,8 @@ export const ACTIVITY_NOTIFICATION_TYPES = new Set([
   "PARTICIPATION_REQUESTED",
   "PARTICIPATION_ACCEPTED",
   "CARPOOL_REQUESTED",
+  // Rappel avant une activité (la veille, puis 1 h avant).
+  "ACTIVITY_REMINDER",
 ]);
 
 const NotificationsContext = createContext<NotificationsContextType | null>(null);

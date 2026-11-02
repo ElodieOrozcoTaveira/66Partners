@@ -20,7 +20,11 @@ function pushUrlFor(input: CreateNotificationInput): string | undefined {
         ? `/messages/${input.activityId}`
         : `/activities/${input.activityId}`;
   }
-  if (input.type === "PARTICIPATION_ACCEPTED" || input.type === "PARTICIPATION_REQUESTED") {
+  if (
+    input.type === "PARTICIPATION_ACCEPTED" ||
+    input.type === "PARTICIPATION_REQUESTED" ||
+    input.type === "ACTIVITY_REMINDER"
+  ) {
     return `/activities/${input.activityId}`;
   }
   return undefined;
@@ -40,7 +44,8 @@ export type NotificationType =
   | "PARTICIPATION_ACCEPTED"
   | "PARTICIPATION_REQUESTED"
   | "NEW_MESSAGE"
-  | "CARPOOL_REQUESTED";
+  | "CARPOOL_REQUESTED"
+  | "ACTIVITY_REMINDER";
 
 export interface CreateNotificationInput {
   usersId: string;
