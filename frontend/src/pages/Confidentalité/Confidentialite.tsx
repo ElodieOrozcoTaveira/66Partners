@@ -1,4 +1,4 @@
-import './Confidentalité.scss';
+import '../../styles/legal/legal.scss';
 
 export function PolitiqueConfidentialite() {
   return (
