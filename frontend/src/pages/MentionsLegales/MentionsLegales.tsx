@@ -1,3 +1,5 @@
+import '../../styles/legal/legal.scss';
+
 export function MentionsLegales() {
   return (
     <div className="legal-container">
