@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { sportLevelEnum, sports, userSports, users } from "../db/schema.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
 import { TerritoryService } from "./territory.services.js";
+import type { Gender } from "../utils/audience.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -33,6 +34,8 @@ export interface UserProfile {
   openTo: string | null;
   avatar: string | null;
   coverPhoto: string | null;
+  /** Genre déclaré (facultatif) — uniquement dans son PROPRE profil, jamais public. */
+  gender: Gender | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,6 +80,7 @@ export interface UserUpdateInput {
   openTo?: string | null;
   avatar?: string | null;
   coverPhoto?: string | null;
+  gender?: Gender | null;
 }
 
 // Erreurs métier personnalisées
@@ -102,6 +106,7 @@ function toProfile(user: typeof users.$inferSelect): UserProfile {
     openTo: user.openTo,
     avatar: user.avatar,
     coverPhoto: user.coverPhoto,
+    gender: user.gender,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

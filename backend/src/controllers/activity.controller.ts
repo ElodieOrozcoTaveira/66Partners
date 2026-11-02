@@ -6,6 +6,7 @@ import {
   type ActivityStatus,
 } from "../services/activity.services.js";
 import { TerritoryService, TerritoryError } from "../services/territory.services.js";
+import type { ActivityAudience } from "../utils/audience.js";
 
 /**
  * CONTRÔLEUR ACTIVITÉ
@@ -67,7 +68,7 @@ export class ActivityController {
    */
   static async list(req: Request, res: Response): Promise<void> {
     try {
-      const { city, sportId, status, participantId, territory, from, to } = req.query;
+      const { city, sportId, status, participantId, territory, from, to, audience } = req.query;
 
       // `territory` déjà garanti non vide par activityFiltersSchema ; reste
       // à vérifier qu'il correspond à un territoire réel plutôt que de
@@ -102,6 +103,8 @@ export class ActivityController {
       if (typeof participantId === "string") filters.participantId = participantId;
       if (fromDate) filters.from = fromDate;
       if (toDate) filters.to = toDate;
+      // Valeur déjà validée par activityFiltersSchema (ALL, WOMEN ou MEN).
+      if (typeof audience === "string") filters.audience = audience as ActivityAudience;
       filters.territory = territory as string;
 
       const activitiesList = await ActivityService.listActivities(filters);

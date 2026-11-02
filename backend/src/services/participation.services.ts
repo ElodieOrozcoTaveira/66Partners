@@ -6,6 +6,7 @@ import { isUniqueViolation } from "../utils/db-errors.js";
 import { ConversationService } from "./conversation.services.js";
 import { NotificationService } from "./notification.services.js";
 import { TerritoryService } from "./territory.services.js";
+import { checkAudience } from "../utils/audience.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -88,6 +89,13 @@ export class ParticipationService {
         "CANNOT_JOIN_OWN_ACTIVITY",
         403
       );
+    }
+
+    // Activité réservée (entre femmes / entre hommes) : contrôle serveur,
+    // genre lu en base — jamais une valeur envoyée par le client.
+    const audienceCheck = await checkAudience(userId, activity.audience);
+    if (!audienceCheck.ok) {
+      throw new ParticipationError(audienceCheck.message, audienceCheck.code, 403);
     }
 
     const [existingParticipation] = await db
