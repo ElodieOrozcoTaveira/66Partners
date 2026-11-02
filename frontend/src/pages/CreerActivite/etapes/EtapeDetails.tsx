@@ -1,6 +1,7 @@
 import { Minus, Plus } from "lucide-react";
 import { LEVEL_LABELS, LEVEL_OPTIONS } from "../../../lib/activityLabels";
 import type { CreerActiviteForm } from "../CreerActivite";
+import { AUDIENCE_LABELS, AUDIENCE_OPTIONS } from "../../../lib/audience";
 
 interface EtapeDetailsProps {
   form: CreerActiviteForm;
@@ -60,6 +61,29 @@ export default function EtapeDetails({ form, onChange }: EtapeDetailsProps) {
             <Plus size={16} />
           </button>
         </div>
+      </div>
+
+      <div className="etape-field">
+        <span className="etape-label">Qui peut participer ?</span>
+        <div className="niveau-select" role="radiogroup">
+          {AUDIENCE_OPTIONS.map((audience) => (
+            <button
+              key={audience}
+              type="button"
+              role="radio"
+              aria-checked={form.audience === audience}
+              className={`niveau-select__option${form.audience === audience ? " niveau-select__option--active" : ""}`}
+              onClick={() => onChange({ audience })}
+            >
+              {AUDIENCE_LABELS[audience]}
+            </button>
+          ))}
+        </div>
+        <p className="etape-hint">
+          {form.audience === "ALL"
+            ? "Tout le monde peut demander à participer."
+            : "Seules les personnes ayant indiqué ce genre dans leur profil pourront demander à participer. Tu acceptes ensuite chaque demande."}
+        </p>
       </div>
 
       <div className="etape-field">

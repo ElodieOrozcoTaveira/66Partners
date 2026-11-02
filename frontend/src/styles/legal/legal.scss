@@ -1,5 +1,8 @@
-@use '../../styles/variables/variables.scss';
-@use '../../styles/mixins/mixins.scss';
+// Styles communs aux pages légales (Confidentialité, Mentions légales).
+// Chaque page l'importe elle-même : avec le chargement à la demande des
+// pages, des styles importés par une seule page manquaient à l'autre.
+@use '../variables/variables.scss';
+@use '../mixins/mixins.scss';
 
 .legal-container {
   max-width: 800px;

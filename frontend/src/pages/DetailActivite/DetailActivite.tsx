@@ -12,6 +12,13 @@ import { formatMonth, formatTime, formatWeekday } from "../../lib/dateFormat";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import "./DetailActivite.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
+import ModaleGenre from "../../components/ModaleGenre/ModaleGenre";
+import {
+  AUDIENCE_LABELS,
+  AUDIENCE_RESERVED_LABELS,
+  canJoinAudience,
+  type ActivityAudience,
+} from "../../lib/audience";
 
 type ActivityStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
@@ -33,6 +40,7 @@ interface ActivityDetail {
   creatorPseudo: string | null;
   creatorAvatar: string | null;
   carpoolEnabled: boolean;
+  audience: ActivityAudience;
 }
 
 interface Photo {
@@ -85,6 +93,7 @@ export default function DetailActivite() {
 
   const [myParticipation, setMyParticipation] = useState<MyParticipation | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [isGenderModalOpen, setIsGenderModalOpen] = useState(false);
   const [requests, setRequests] = useState<ParticipationRequest[]>([]);
   const [participants, setParticipants] = useState<ParticipationRequest[]>([]);
   const [isTogglingCarpool, setIsTogglingCarpool] = useState(false);
@@ -198,11 +207,21 @@ export default function DetailActivite() {
       );
       setMyParticipation(res.data.participation);
     } catch (err) {
+      const data = isAxiosError<{ code?: string; message?: string }>(err) ? err.response?.data : undefined;
+      if (data?.code === "GENDER_REQUIRED") {
+        // Activité réservée, genre pas encore renseigné : on le demande puis on relance.
+        setIsGenderModalOpen(true);
+        return;
+      }
       console.error(
         "DetailActivite: failed to join activity",
         err instanceof Error ? err.message : "Erreur inconnue",
       );
-      window.alert("Impossible d'envoyer la demande de participation.");
+      window.alert(
+        data?.code === "AUDIENCE_RESTRICTED" && data.message
+          ? data.message
+          : "Impossible d'envoyer la demande de participation."
+      );
     } finally {
       setIsJoining(false);
     }
@@ -405,6 +424,11 @@ export default function DetailActivite() {
         <span className="detailactivite-page__level">
           {LEVEL_LABELS[activity.levelRequired]}
         </span>
+        {activity.audience !== "ALL" && (
+          <span className="detailactivite-page__level detailactivite-page__level--audience">
+            {AUDIENCE_LABELS[activity.audience]}
+          </span>
+        )}
 
         <NavLink
           to={activity.creatorId ? `/profile/${activity.creatorId}` : "#"}
@@ -508,6 +532,10 @@ export default function DetailActivite() {
               ) : activity.participantsCount >= activity.maxParticipants ? (
                 <button type="button" className="join-button" disabled>
                   Complet
+                </button>
+              ) : activity.audience !== "ALL" && !canJoinAudience(activity.audience, user?.gender) ? (
+                <button type="button" className="join-button" disabled>
+                  {AUDIENCE_RESERVED_LABELS[activity.audience]}
                 </button>
               ) : (
                 <button
@@ -680,6 +708,18 @@ export default function DetailActivite() {
           setDeleteError(null);
         }}
       />
+
+      {activity.audience !== "ALL" && (
+        <ModaleGenre
+          isOpen={isGenderModalOpen}
+          audience={activity.audience}
+          onClose={() => setIsGenderModalOpen(false)}
+          onSaved={() => {
+            setIsGenderModalOpen(false);
+            handleJoin();
+          }}
+        />
+      )}
     </div>
   );
 }

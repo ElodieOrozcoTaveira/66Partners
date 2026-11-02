@@ -88,6 +88,30 @@
     margin: 0;
   }
 
+  &__gender {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  &__genderOption {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 36px;
+    font-family: "Inter", sans-serif;
+    font-size: 0.9rem;
+    color: variables.$nuit;
+    cursor: pointer;
+
+    input {
+      accent-color: variables.$rouge;
+    }
+  }
+
   &__push {
     display: flex;
     align-items: center;

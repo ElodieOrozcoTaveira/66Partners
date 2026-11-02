@@ -13,7 +13,7 @@ describe("public d'une activité", () => {
     expect(canJoinAudience("WOMEN", "FEMALE")).toBe(true);
     expect(canJoinAudience("WOMEN", "MALE")).toBe(false);
     // Genre non renseigné : bouton affiché, le serveur demandera le genre.
-    expect(canJoinAudience("WOMEN", null)).toBe(false);
+    expect(canJoinAudience("WOMEN", null)).toBe(true);
     // Pas encore chargé : on laisse le serveur trancher.
     expect(canJoinAudience("MEN", undefined)).toBe(true);
   });

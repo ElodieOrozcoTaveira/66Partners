@@ -335,6 +335,12 @@
         border-radius: 999px;
         background: rgba(variables.$nuit, 0.06);
         color: variables.$nuit;
+
+        // Public réservé (entre femmes / entre hommes).
+        &--audience {
+            background: variables.$rouge2;
+            color: white;
+        }
     }
 
     &__participants {

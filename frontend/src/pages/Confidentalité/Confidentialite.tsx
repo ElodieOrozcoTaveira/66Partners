@@ -89,7 +89,24 @@ export function PolitiqueConfidentialite() {
           <li>Messages échangés dans le cadre de la plateforme</li>
           <li>Avis et notations laissés sur la plateforme</li>
           <li>Territoire(s) auquel/auxquels votre compte est rattaché</li>
+          <li>
+            Genre (« Femme » ou « Homme »), uniquement si vous choisissez de
+            le renseigner
+          </li>
         </ul>
+
+        <p className="legal-text">
+          <strong className="legal-bold">Genre déclaré.</strong> Cette
+          information est facultative : vous pouvez choisir « Je préfère ne
+          pas préciser », auquel cas rien n'est enregistré. Elle sert
+          uniquement à permettre d'organiser ou de rejoindre une activité
+          réservée (« entre femmes » ou « entre hommes »), le contrôle étant
+          fait automatiquement au moment de la demande de participation. Elle
+          n'est jamais affichée sur votre profil, n'est pas visible des autres
+          membres ni utilisée à d'autres fins. Vous pouvez la modifier ou la
+          retirer à tout moment depuis « Modifier mon profil » ; elle est
+          supprimée avec votre compte.
+        </p>
 
         <h3 className="legal-subtitle-sm">
           Données techniques

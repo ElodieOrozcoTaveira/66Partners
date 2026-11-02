@@ -11,6 +11,8 @@ import EtapeDetails from "./etapes/EtapeDetails";
 import EtapeApercu from "./etapes/EtapeApercu";
 import EtapeSucces from "./etapes/EtapeSucces";
 import "./CreerActivite.scss";
+import ModaleGenre from "../../components/ModaleGenre/ModaleGenre";
+import { AUDIENCE_LABELS, type ActivityAudience } from "../../lib/audience";
 
 export interface Sport {
   id: string;
@@ -29,6 +31,7 @@ export interface CreerActiviteForm {
   levelRequired: ActivityLevel;
   maxParticipants: number;
   carpoolEnabled: boolean;
+  audience: ActivityAudience;
 }
 
 const INITIAL_FORM: CreerActiviteForm = {
@@ -43,6 +46,7 @@ const INITIAL_FORM: CreerActiviteForm = {
   levelRequired: "INTERMEDIATE",
   maxParticipants: 8,
   carpoolEnabled: false,
+  audience: "ALL",
 };
 
 const STEP_META = [
@@ -63,6 +67,7 @@ export default function CreerActivite() {
   const [sports, setSports] = useState<Sport[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isGenderModalOpen, setIsGenderModalOpen] = useState(false);
 
   useEffect(() => {
     api
@@ -118,6 +123,7 @@ export default function CreerActivite() {
         levelRequired: form.levelRequired,
         maxParticipants: form.maxParticipants,
         carpoolEnabled: form.carpoolEnabled,
+        audience: form.audience,
         // Absent si aucun territoire actif n'est encore chargé : le backend
         // retombe alors sur le territoire par défaut du créateur (comportement
         // 66 actuel inchangé). L'appartenance est de toute façon toujours
@@ -126,6 +132,19 @@ export default function CreerActivite() {
       });
       setIsSuccess(true);
     } catch (error) {
+      const code = isAxiosError<{ code?: string }>(error) ? error.response?.data?.code : undefined;
+      if (code === "GENDER_REQUIRED") {
+        // Activité réservée et genre pas encore renseigné : on le demande,
+        // puis on republie.
+        setIsGenderModalOpen(true);
+        return;
+      }
+      if (code === "AUDIENCE_RESTRICTED" && form.audience !== "ALL") {
+        setSubmitError(
+          `Pour organiser une activité « ${AUDIENCE_LABELS[form.audience].toLowerCase()} », ton profil doit l'indiquer (Modifier mon profil).`
+        );
+        return;
+      }
       const message =
         isAxiosError<{ message?: string }>(error) && error.response?.data?.message
           ? error.response.data.message
@@ -214,6 +233,18 @@ export default function CreerActivite() {
           </button>
         )}
       </footer>
+
+      {form.audience !== "ALL" && (
+        <ModaleGenre
+          isOpen={isGenderModalOpen}
+          audience={form.audience}
+          onClose={() => setIsGenderModalOpen(false)}
+          onSaved={() => {
+            setIsGenderModalOpen(false);
+            handlePublish();
+          }}
+        />
+      )}
     </div>
   );
 }

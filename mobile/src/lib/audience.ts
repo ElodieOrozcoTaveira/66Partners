@@ -39,11 +39,12 @@ export function requiredGender(audience: ActivityAudience): Gender | null {
 }
 
 /**
- * Peut-on participer / organiser ? `undefined` = genre pas encore connu
- * (chargement) : on laisse faire, le serveur tranchera.
+ * Affiche-t-on « Rejoindre » ? Seul un genre DÉCLARÉ et différent bloque.
+ * Genre non renseigné (null) ou pas encore chargé (undefined) : le bouton
+ * reste, et le serveur répond GENDER_REQUIRED → on demande le genre.
  */
 export function canJoinAudience(audience: ActivityAudience, gender: Gender | null | undefined): boolean {
   const required = requiredGender(audience);
-  if (!required || gender === undefined) return true;
+  if (!required || !gender) return true;
   return gender === required;
 }
