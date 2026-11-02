@@ -47,6 +47,14 @@
           "cameraPermission": "66Partners utilise l'appareil photo uniquement pour prendre ta photo de profil.",
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "66Partners utilise ta position pour centrer la carte et compter les sportifs autour de toi. Seule une position approximative (environ 1 km) est enregistrée, jamais montrée aux autres membres.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
+        }
       ]
     ],
     "experiments": {

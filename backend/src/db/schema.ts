@@ -336,3 +336,16 @@ export const adminCredentials = pgTable("admin_credentials", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Position approximative d'un membre, pour compter les sportifs autour de soi
+// (onglet Explorer de l'app mobile). Arrondie à 2 décimales (~1 km) avant
+// enregistrement, jamais renvoyée à qui que ce soit : seul un nombre de
+// membres dans un rayon est exposé (cf. nearby.services.ts). Une ligne par
+// membre, remplacée à chaque mise à jour ; supprimée avec le compte.
+export const userLocations = pgTable("user_locations", {
+  userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  latitudeIdx: index("user_locations_latitude_idx").on(t.latitude),
+}));

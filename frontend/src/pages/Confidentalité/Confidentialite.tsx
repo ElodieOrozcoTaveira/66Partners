@@ -93,6 +93,10 @@ export function PolitiqueConfidentialite() {
             Genre (« Femme » ou « Homme »), uniquement si vous choisissez de
             le renseigner
           </li>
+          <li>
+            Position approximative (à environ 1 km près), uniquement sur
+            l'application mobile et si vous autorisez la localisation
+          </li>
         </ul>
 
         <p className="legal-text">
@@ -106,6 +110,20 @@ export function PolitiqueConfidentialite() {
           membres ni utilisée à d'autres fins. Vous pouvez la modifier ou la
           retirer à tout moment depuis « Modifier mon profil » ; elle est
           supprimée avec votre compte.
+        </p>
+
+        <p className="legal-text">
+          <strong className="legal-bold">Position approximative.</strong> Sur
+          l'application mobile, si vous autorisez l'accès à votre localisation,
+          la carte est centrée autour de vous et une position arrondie à
+          environ 1 km est enregistrée. Elle sert uniquement à afficher le
+          nombre de sportifs présents dans un rayon de 15 km : aucune position
+          n'est jamais affichée ni communiquée aux autres membres, qui ne
+          voient qu'un nombre. La localisation n'est utilisée que lorsque
+          l'application est ouverte, jamais en arrière-plan. Vous pouvez la
+          refuser ou la retirer à tout moment dans les réglages de votre
+          téléphone ; la position enregistrée est supprimée automatiquement
+          après 30 jours sans mise à jour, et avec votre compte.
         </p>
 
         <h3 className="legal-subtitle-sm">
