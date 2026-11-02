@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors, Radius, Shadow, Spacing, Typography } from "../constants/theme";
 import { calendarDaysFromNow, formatActivityDay, formatActivityTime } from "../lib/date";
 import { getSportPhoto } from "../lib/sportPhotos";
+import { SportIcon } from "./SportIcon";
 import type { Activity } from "../types/domain";
 import { useBrand, useBrandStyles } from "../context/BrandContext";
 import type { Brand } from "../constants/brands";
@@ -46,6 +47,10 @@ function ActivityCardComponent({ activity, onPress }: ActivityCardProps) {
           accessible={false}
           transition={150}
         />
+        {/* Pastille du sport, aux couleurs du sport (comme les épingles de la carte). */}
+        <View style={styles.sportBadge}>
+          <SportIcon sportName={activity.sportName} size={34} />
+        </View>
         {badge ? <Text style={styles.badge}>{badge}</Text> : null}
         {isCancelled ? (
           <Text style={[styles.status, styles.statusDanger]}>Annulée</Text>
@@ -106,6 +111,15 @@ const makeStyles = (brand: Brand) =>
   },
   photo: {
     ...StyleSheet.absoluteFill,
+  },
+  sportBadge: {
+    position: "absolute",
+    left: Spacing.sm,
+    bottom: Spacing.sm,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.background,
+    boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.3)",
   },
   badge: {
     position: "absolute",

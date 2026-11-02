@@ -225,6 +225,7 @@ export default function ExplorerScreen() {
                 <SportBubble
                   key={sport.id}
                   shape="tile"
+                  colored
                   sportName={sport.name}
                   selected={sport.id === sportId}
                   onPress={() => setSportId(sport.id === sportId ? undefined : sport.id)}

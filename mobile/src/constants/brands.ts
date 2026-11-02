@@ -7,8 +7,9 @@
  * la couleur principale remplace le rouge et l'accent remplace le jaune.
  * Les teintes "soft" et le dégradé sont propres au mobile (maquette).
  *
- * Ajouter un territoire : ajouter son entrée ici + son logo dans
- * assets/images/territories. Un code inconnu retombe sur le thème 66.
+ * Ajouter un territoire : `python3 scripts/import-territory-assets.py <code>`
+ * (copie logo + emblème du site dans assets/images/territories), puis ajouter
+ * son entrée ici. Un code inconnu retombe sur le thème 66.
  */
 
 export interface MapRegion {
@@ -130,6 +131,24 @@ const BRANDS: Record<string, Brand> = {
     require("../../assets/images/territories/emblem11.webp"),
     // Aude
     { latitude: 43.05, longitude: 2.4, latitudeDelta: 0.95, longitudeDelta: 1.6 }
+  ),
+  "31": makeBrand(
+    "31",
+    {
+      // Couleurs du logo 31Partners (cf. frontend/public/31partners/theme.json).
+      primary: "#D90A14",
+      primaryDark: "#8E0710",
+      primarySoft: "#FDE8E9",
+      accent: "#FDB402",
+      accentSoft: "#FFF4D9",
+      gradientTo: "#F26A0C",
+      badgeTo: "#FFD75E",
+      shadowRgb: "217, 10, 20",
+    },
+    require("../../assets/images/territories/logo31.webp"),
+    require("../../assets/images/territories/emblem31.webp"),
+    // Haute-Garonne
+    { latitude: 43.3, longitude: 1.25, latitudeDelta: 1.45, longitudeDelta: 1.75 }
   ),
 };
 

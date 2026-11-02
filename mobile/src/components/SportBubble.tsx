@@ -12,14 +12,24 @@ interface SportBubbleProps {
   onPress: () => void;
   /** "round" : rangée de l'accueil ; "tile" : grille de la recherche. */
   shape?: "round" | "tile";
+  /** Icône aux couleurs du sport (comme la carte) au lieu de la couleur du thème. */
+  colored?: boolean;
 }
 
 /** Pastille de sport de la maquette : icône rouge sur fond rosé + libellé. */
-export function SportBubble({ sportName, selected = false, onPress, shape = "round" }: SportBubbleProps) {
+export function SportBubble({
+  sportName,
+  selected = false,
+  onPress,
+  shape = "round",
+  colored = false,
+}: SportBubbleProps) {
   const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
-  const { icon } = getSportVisual(sportName);
+  const { icon, color } = getSportVisual(sportName);
   const isTile = shape === "tile";
+  // Couleur du sport : fond teinté (~12 % d'opacité), plein quand il est choisi.
+  const accent = colored ? color : brand.primary;
 
   return (
     <Pressable
@@ -27,21 +37,26 @@ export function SportBubble({ sportName, selected = false, onPress, shape = "rou
       accessibilityLabel={sportName}
       accessibilityState={{ selected }}
       onPress={onPress}
-      style={({ pressed }) => [isTile ? styles.tile : styles.round, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        isTile ? styles.tile : styles.round,
+        isTile && selected && colored && { borderColor: color },
+        pressed && styles.pressed,
+      ]}
     >
       <View
         style={[
           isTile ? styles.tileIcon : styles.roundIcon,
-          selected && styles.iconSelected,
+          colored && { backgroundColor: `${color}1F` },
+          selected && { backgroundColor: accent },
         ]}
       >
         <MaterialCommunityIcons
           name={icon}
           size={isTile ? 26 : 24}
-          color={selected ? Colors.textOnPrimary : brand.primary}
+          color={selected ? Colors.textOnPrimary : accent}
         />
       </View>
-      <Text style={[styles.label, selected && styles.labelSelected]} numberOfLines={1}>
+      <Text style={[styles.label, selected && { color: accent }]} numberOfLines={1}>
         {sportName}
       </Text>
     </Pressable>
@@ -84,15 +99,9 @@ const makeStyles = (brand: Brand) =>
     justifyContent: "center",
     backgroundColor: brand.primarySoft,
   },
-  iconSelected: {
-    backgroundColor: brand.primary,
-  },
   label: {
     fontSize: 12,
     fontWeight: "600",
     color: Colors.text,
-  },
-  labelSelected: {
-    color: brand.primary,
   },
 });

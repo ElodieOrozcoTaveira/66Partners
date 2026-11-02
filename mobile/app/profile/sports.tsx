@@ -16,7 +16,7 @@ import { getMyFavoriteSportIds, getSports, toggleFavoriteSport } from "../../src
 import { getMyAvailabilities } from "../../src/services/user.service";
 import type { Sport } from "../../src/types/domain";
 import { haptics } from "../../src/lib/haptics";
-import { SportBadge } from "../../src/components/SportBadge";
+import { SportBadgeRow } from "../../src/components/SportBadgeRow";
 
 /** Ignore accents et casse : "randonnee" trouve "Randonnée". */
 function normalize(text: string): string {
@@ -125,22 +125,11 @@ export default function MySportsScreen() {
             Touche le cœur d’un sport ci-dessous pour l’ajouter. Tes favoris apparaissent sur ton profil.
           </Text>
         ) : (
-          <View style={styles.favorites}>
-            {favorites.map((sport) => (
-              <Pressable
-                key={sport.id}
-                accessibilityRole="button"
-                accessibilityLabel={`Retirer ${sport.name} des favoris`}
-                onPress={() => toggle(sport)}
-                style={({ pressed }) => [styles.favoriteChip, pressed && styles.pressed]}
-              >
-                {/* Même pastille que les pins de la carte Explorer. */}
-                <SportBadge name={sport.name} size={26} />
-                <Text style={styles.favoriteLabel}>{sport.name}</Text>
-                <Ionicons name="close" size={14} color={Colors.textSecondary} />
-              </Pressable>
-            ))}
-          </View>
+          <>
+            {/* Mêmes pastilles que le profil : toucher affiche le nom du sport. */}
+            <SportBadgeRow sports={favorites} size={44} />
+            <Text style={styles.hint}>Touche une pastille pour voir le sport, ou un cœur ci-dessous pour le retirer.</Text>
+          </>
         )}
       </View>
 
@@ -262,24 +251,8 @@ const makeStyles = (brand: Brand) =>
       fontWeight: "600",
       fontSize: 14,
     },
-    favorites: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: Spacing.sm,
-    },
-    favoriteChip: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      minHeight: 36,
-      paddingHorizontal: Spacing.md,
-      borderRadius: Radius.pill,
-      backgroundColor: brand.primarySoft,
-    },
-    favoriteLabel: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: Colors.text,
+    hint: {
+      ...Typography.caption,
     },
     sectionTitle: {
       ...Typography.subheading,
