@@ -31,8 +31,10 @@ import { formatActivityDay, formatActivityTime } from "../../src/lib/date";
 import { LEVEL_LABELS } from "../../src/lib/labels";
 import { getSportPhoto } from "../../src/lib/sportPhotos";
 import { createActivity } from "../../src/services/activities.service";
-import { getApiErrorMessage } from "../../src/services/api";
+import { getApiErrorCode, getApiErrorMessage } from "../../src/services/api";
 import { haptics } from "../../src/lib/haptics";
+import { GenderPrompt } from "../../src/components/GenderPrompt";
+import { AUDIENCE_LABELS } from "../../src/lib/audience";
 
 const STEPS: { step: ActivityFormStep; label: string }[] = [
   { step: 1, label: "Infos" },
@@ -48,6 +50,7 @@ export default function CreateActivityScreen() {
   const [step, setStep] = useState<ActivityFormStep>(1);
   const [form, setForm] = useState<ActivityFormState>(() => initialActivityForm());
   const [error, setError] = useState<string | null>(null);
+  const [genderPromptVisible, setGenderPromptVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const scrollRef = useRef<ScrollViewInstance>(null);
 
@@ -90,7 +93,18 @@ export default function CreateActivityScreen() {
       setStep(1);
       router.push({ pathname: "/activity/[id]", params: { id: created.id } });
     } catch (err) {
-      setError(getApiErrorMessage(err, "Impossible de publier l'activité pour le moment."));
+      const code = getApiErrorCode(err);
+      if (code === "GENDER_REQUIRED") {
+        // Activité réservée et genre pas encore renseigné : on le demande,
+        // puis on republie (cf. GenderPrompt).
+        setGenderPromptVisible(true);
+      } else if (code === "AUDIENCE_RESTRICTED" && form.audience !== "ALL") {
+        setError(
+          `Pour organiser une activité « ${AUDIENCE_LABELS[form.audience].toLowerCase()} », ton profil doit l'indiquer (Modifier mon profil).`
+        );
+      } else {
+        setError(getApiErrorMessage(err, "Impossible de publier l'activité pour le moment."));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -141,6 +155,9 @@ export default function CreateActivityScreen() {
                     icon="speedometer-outline"
                     text={`Niveau ${LEVEL_LABELS[form.levelRequired].toLowerCase()}`}
                   />
+                  {form.audience !== "ALL" ? (
+                    <PreviewRow icon="shield-checkmark-outline" text={AUDIENCE_LABELS[form.audience]} />
+                  ) : null}
                   {form.carpoolEnabled ? <PreviewRow icon="car-outline" text="Covoiturage proposé" /> : null}
                   {form.description.trim() ? (
                     <Text style={styles.previewDescription}>{form.description.trim()}</Text>
@@ -170,6 +187,18 @@ export default function CreateActivityScreen() {
           />
         </View>
       </KeyboardAvoidingView>
+
+      {form.audience !== "ALL" ? (
+        <GenderPrompt
+          audience={form.audience}
+          visible={genderPromptVisible}
+          onCancel={() => setGenderPromptVisible(false)}
+          onSaved={() => {
+            setGenderPromptVisible(false);
+            publish();
+          }}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

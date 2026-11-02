@@ -10,6 +10,7 @@ import { SportIcon } from "./SportIcon";
 import type { Activity } from "../types/domain";
 import { useBrand, useBrandStyles } from "../context/BrandContext";
 import type { Brand } from "../constants/brands";
+import { AUDIENCE_LABELS } from "../lib/audience";
 
 interface ActivityCardProps {
   activity: Activity;
@@ -52,6 +53,9 @@ function ActivityCardComponent({ activity, onPress }: ActivityCardProps) {
           <SportIcon sportName={activity.sportName} size={34} />
         </View>
         {badge ? <Text style={styles.badge}>{badge}</Text> : null}
+        {activity.audience !== "ALL" ? (
+          <Text style={styles.audience}>{AUDIENCE_LABELS[activity.audience]}</Text>
+        ) : null}
         {isCancelled ? (
           <Text style={[styles.status, styles.statusDanger]}>Annulée</Text>
         ) : isFull ? (
@@ -134,6 +138,20 @@ const makeStyles = (brand: Brand) =>
     fontSize: 12,
     fontWeight: "800",
     color: Colors.text,
+  },
+  // Public réservé (entre femmes / entre hommes), en bas à droite de la photo.
+  audience: {
+    position: "absolute",
+    right: Spacing.sm,
+    bottom: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.pill,
+    overflow: "hidden",
+    fontSize: 12,
+    fontWeight: "800",
+    color: Colors.textOnPrimary,
+    backgroundColor: brand.primary,
   },
   status: {
     position: "absolute",

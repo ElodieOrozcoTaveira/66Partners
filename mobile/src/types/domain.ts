@@ -43,6 +43,11 @@ export interface Territory {
 }
 
 /** GET /activities, GET /activities/:id */
+/** Public d'une activité : ouverte à tous, entre femmes, entre hommes. */
+export type ActivityAudience = "ALL" | "WOMEN" | "MEN";
+/** Genre déclaré (facultatif, jamais public) ; null = « je préfère ne pas préciser ». */
+export type Gender = "FEMALE" | "MALE";
+
 export interface Activity {
   id: string;
   title: string;
@@ -58,6 +63,7 @@ export interface Activity {
   creatorId: string | null;
   territoryId: string;
   carpoolEnabled: boolean;
+  audience: ActivityAudience;
   createdAt: string;
   updatedAt: string;
   sportName: string;

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useHeaderHeight } from "expo-router/react-navigation";
 import { router } from "expo-router";
 
@@ -14,7 +15,17 @@ import {
   PSEUDO_MAX_LENGTH,
 } from "../../src/lib/validation";
 import { getApiErrorMessage } from "../../src/services/api";
-import { updateMe } from "../../src/services/user.service";
+import { getMyProfile, updateMe } from "../../src/services/user.service";
+import { useAsync } from "../../src/hooks/useAsync";
+import { useBrand } from "../../src/context/BrandContext";
+import { GENDER_EXPLANATION, GENDER_LABELS, GENDER_UNSPECIFIED_LABEL } from "../../src/lib/audience";
+import type { Gender } from "../../src/types/domain";
+
+const GENDER_OPTIONS: { value: Gender | null; label: string }[] = [
+  { value: "FEMALE", label: GENDER_LABELS.FEMALE },
+  { value: "MALE", label: GENDER_LABELS.MALE },
+  { value: null, label: GENDER_UNSPECIFIED_LABEL },
+];
 
 /** Champ texte facultatif : vide => null (effacement côté serveur). */
 function optional(value: string): string | null {
@@ -24,7 +35,17 @@ function optional(value: string): string | null {
 
 export default function EditProfileScreen() {
   const { user, setUser } = useAuth();
+  const brand = useBrand();
   const headerHeight = useHeaderHeight();
+  // Le genre n'est pas dans la session (/auth/me) : lu dans son propre profil.
+  const myProfile = useAsync(() => getMyProfile(), [], {
+    errorMessage: "Impossible de charger ton genre.",
+  });
+  const savedGender = myProfile.data ? (myProfile.data.gender ?? null) : undefined;
+  // undefined = pas touché : on garde la valeur enregistrée.
+  const [genderChoice, setGenderChoice] = useState<Gender | null | undefined>(undefined);
+  const gender = genderChoice === undefined ? savedGender : genderChoice;
+  const genderChanged = genderChoice !== undefined && savedGender !== undefined && genderChoice !== savedGender;
 
   const [pseudo, setPseudo] = useState(user?.pseudo ?? "");
   const [city, setCity] = useState(user?.city ?? "");
@@ -47,6 +68,7 @@ export default function EditProfileScreen() {
         city: optional(city),
         headline: optional(headline),
         lookingFor: optional(lookingFor),
+        ...(genderChanged ? { gender: genderChoice ?? null } : {}),
       });
       setUser(updated);
       router.back();
@@ -61,7 +83,8 @@ export default function EditProfileScreen() {
       pseudo !== (user?.pseudo ?? "") ||
       city !== (user?.city ?? "") ||
       headline !== (user?.headline ?? "") ||
-      lookingFor !== (user?.lookingFor ?? "");
+      lookingFor !== (user?.lookingFor ?? "") ||
+      genderChanged;
 
     if (!changed) {
       router.back();
@@ -121,6 +144,36 @@ export default function EditProfileScreen() {
           maxLength={PROFILE_LINE_MAX_LENGTH}
         />
 
+        <View style={styles.field}>
+          <Text style={styles.label}>Genre</Text>
+          <Text style={styles.hint}>{GENDER_EXPLANATION}</Text>
+          {savedGender === undefined ? (
+            <Text style={styles.hint}>{myProfile.error ?? "Chargement…"}</Text>
+          ) : (
+            <View accessibilityRole="radiogroup" style={styles.options}>
+              {GENDER_OPTIONS.map((option) => {
+                const selected = gender === option.value;
+                return (
+                  <Pressable
+                    key={option.label}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected }}
+                    onPress={() => setGenderChoice(option.value)}
+                    style={styles.option}
+                  >
+                    <Ionicons
+                      name={selected ? "radio-button-on" : "radio-button-off"}
+                      size={20}
+                      color={selected ? brand.primary : Colors.textMuted}
+                    />
+                    <Text style={styles.optionLabel}>{option.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+        </View>
+
         {error ? (
           <Text style={styles.error} accessibilityLiveRegion="polite">
             {error}
@@ -154,5 +207,29 @@ const styles = StyleSheet.create({
   error: {
     color: Colors.danger,
     fontSize: 14,
+  },
+  field: {
+    gap: Spacing.xs,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: Colors.text,
+  },
+  hint: {
+    ...Typography.caption,
+  },
+  options: {
+    marginTop: Spacing.xs,
+  },
+  option: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    minHeight: 44,
+  },
+  optionLabel: {
+    fontSize: 15,
+    color: Colors.text,
   },
 });

@@ -1,4 +1,4 @@
-import type { SportLevel } from "../types/domain";
+import type { ActivityAudience, SportLevel } from "../types/domain";
 
 /**
  * Formulaire de création d'activité (3 étapes, maquette). Les contrôles
@@ -27,6 +27,7 @@ export interface ActivityFormState {
   levelRequired: SportLevel;
   maxParticipants: number;
   carpoolEnabled: boolean;
+  audience: ActivityAudience;
 }
 
 /** Demain, à l'heure pleine suivante : point de départ du sélecteur. */
@@ -47,6 +48,7 @@ export function initialActivityForm(now: Date = new Date()): ActivityFormState {
     levelRequired: "INTERMEDIATE",
     maxParticipants: 8,
     carpoolEnabled: false,
+    audience: "ALL",
   };
 }
 
@@ -106,6 +108,7 @@ export interface CreateActivityPayload {
   levelRequired: SportLevel;
   maxParticipants: number;
   carpoolEnabled: boolean;
+  audience: ActivityAudience;
   territoryId?: string;
 }
 
@@ -124,6 +127,7 @@ export function buildActivityPayload(form: ActivityFormState, territoryId?: stri
     levelRequired: form.levelRequired,
     maxParticipants: form.maxParticipants,
     carpoolEnabled: form.carpoolEnabled,
+    audience: form.audience,
     ...(territoryId ? { territoryId } : {}),
   };
 }
@@ -140,6 +144,7 @@ export function formFromActivity(activity: {
   levelRequired: SportLevel;
   maxParticipants: number;
   carpoolEnabled: boolean;
+  audience?: ActivityAudience;
 }): ActivityFormState {
   return {
     sportId: activity.sportId,
@@ -154,6 +159,7 @@ export function formFromActivity(activity: {
     levelRequired: activity.levelRequired,
     maxParticipants: activity.maxParticipants,
     carpoolEnabled: activity.carpoolEnabled,
+    audience: activity.audience ?? "ALL",
   };
 }
 
@@ -168,6 +174,7 @@ export type ActivityChanges = Partial<{
   levelRequired: SportLevel;
   maxParticipants: number;
   carpoolEnabled: boolean;
+  audience: ActivityAudience;
 }>;
 
 /**
@@ -193,5 +200,6 @@ export function buildActivityChanges(original: ActivityFormState, form: Activity
   if (form.levelRequired !== original.levelRequired) changes.levelRequired = form.levelRequired;
   if (form.maxParticipants !== original.maxParticipants) changes.maxParticipants = form.maxParticipants;
   if (form.carpoolEnabled !== original.carpoolEnabled) changes.carpoolEnabled = form.carpoolEnabled;
+  if (form.audience !== original.audience) changes.audience = form.audience;
   return changes;
 }

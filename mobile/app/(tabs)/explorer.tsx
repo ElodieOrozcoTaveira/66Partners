@@ -25,9 +25,10 @@ import { DATE_FILTER_LABELS, matchesDateFilter, type DateFilter } from "../../sr
 import { LEVEL_LABELS } from "../../src/lib/labels";
 import { getActivities } from "../../src/services/activities.service";
 import { getSports } from "../../src/services/sports.service";
-import type { Activity, SportLevel } from "../../src/types/domain";
+import type { Activity, ActivityAudience, SportLevel } from "../../src/types/domain";
 import { useBrand, useBrandStyles } from "../../src/context/BrandContext";
 import type { Brand } from "../../src/constants/brands";
+import { AUDIENCE_LABELS, AUDIENCES } from "../../src/lib/audience";
 
 const SPORTS_PREVIEW = 8;
 const DATE_FILTERS = Object.keys(DATE_FILTER_LABELS) as DateFilter[];
@@ -53,6 +54,7 @@ export default function ExplorerScreen() {
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [level, setLevel] = useState<SportLevel | null>(null);
   const [carpoolOnly, setCarpoolOnly] = useState(false);
+  const [audience, setAudience] = useState<ActivityAudience>("ALL");
   const [showAllSports, setShowAllSports] = useState(false);
   const [view, setView] = useState<"list" | "map">("map");
 
@@ -83,20 +85,24 @@ export default function ExplorerScreen() {
           normalize(`${activity.title} ${activity.city} ${activity.sportName}`).includes(needle)) &&
         matchesDateFilter(activity.startDate, dateFilter) &&
         (!level || activity.levelRequired === level) &&
-        (!carpoolOnly || activity.carpoolEnabled)
+        (!carpoolOnly || activity.carpoolEnabled) &&
+        (audience === "ALL" || activity.audience === audience)
     );
-  }, [activities.data, query, dateFilter, level, carpoolOnly]);
+  }, [activities.data, query, dateFilter, level, carpoolOnly, audience]);
 
   const openActivity = useCallback((activity: Activity) => {
     router.push({ pathname: "/activity/[id]", params: { id: activity.id } });
   }, []);
 
-  const hasFilters = Boolean(query || sportId || level || carpoolOnly || dateFilter !== "all");
+  const hasFilters = Boolean(
+    query || sportId || level || carpoolOnly || dateFilter !== "all" || audience !== "ALL"
+  );
   const resetFilters = () => {
     setQuery("");
     setDateFilter("all");
     setLevel(null);
     setCarpoolOnly(false);
+    setAudience("ALL");
     setSportId(undefined);
   };
 
@@ -262,6 +268,16 @@ export default function ExplorerScreen() {
                 label={LEVEL_LABELS[value]}
                 selected={level === value}
                 onPress={() => setLevel(level === value ? null : value)}
+              />
+            ))}
+          </FilterRow>
+          <FilterRow label="Public">
+            {AUDIENCES.map((value) => (
+              <Chip
+                key={value}
+                label={value === "ALL" ? "Tous" : AUDIENCE_LABELS[value]}
+                selected={audience === value}
+                onPress={() => setAudience(value)}
               />
             ))}
           </FilterRow>

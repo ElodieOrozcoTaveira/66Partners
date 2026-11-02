@@ -23,6 +23,7 @@ import { getSports } from "../services/sports.service";
 import type { Sport, SportLevel } from "../types/domain";
 import { ErrorState, LoadingState } from "./ui/StateViews";
 import { TextField } from "./ui/TextField";
+import { AUDIENCE_LABELS, AUDIENCES } from "../lib/audience";
 
 /**
  * Champs du formulaire d'activité, partagés entre la création (en étapes)
@@ -115,12 +116,16 @@ export function DetailFields({
   update,
   departmentCode,
   minParticipants = MIN_PARTICIPANTS,
+  audienceLocked = false,
 }: {
   form: ActivityFormState;
   update: Update;
   departmentCode: string | null;
   /** Modification : nombre de participants déjà acceptés. */
   minParticipants?: number;
+  /** Modification avec des participants acceptés : on ne peut plus restreindre
+   *  le public (règle serveur AUDIENCE_LOCKED), seulement revenir à « tous ». */
+  audienceLocked?: boolean;
 }) {
   const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
@@ -283,6 +288,37 @@ export function DetailFields({
         </View>
       </View>
 
+      <View style={styles.field}>
+        <Text style={styles.label}>Qui peut participer ?</Text>
+        <View style={styles.chipsWrap} accessibilityRole="radiogroup">
+          {AUDIENCES.map((audience) => {
+            const selected = form.audience === audience;
+            const disabled = audienceLocked && audience !== "ALL" && !selected;
+            return (
+              <Pressable
+                key={audience}
+                accessibilityRole="radio"
+                accessibilityState={{ selected, disabled }}
+                disabled={disabled}
+                onPress={() => update({ audience })}
+                style={[styles.chip, selected && styles.chipSelected, disabled && styles.chipDisabled]}
+              >
+                <Text style={[styles.chipLabel, selected && styles.chipLabelSelected]}>
+                  {AUDIENCE_LABELS[audience]}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text style={styles.muted}>
+          {audienceLocked
+            ? "Des participants sont déjà acceptés : le public ne peut plus être restreint."
+            : form.audience === "ALL"
+              ? "Tout le monde peut demander à participer."
+              : "Seules les personnes ayant indiqué ce genre dans leur profil pourront demander à participer. Tu acceptes ensuite chaque demande."}
+        </Text>
+      </View>
+
       <View style={styles.switchRow}>
         <View style={styles.flex}>
           <Text style={styles.label}>Covoiturage</Text>
@@ -392,6 +428,9 @@ const makeStyles = (brand: Brand) =>
       borderWidth: 1,
       borderColor: Colors.border,
       backgroundColor: Colors.background,
+    },
+    chipDisabled: {
+      opacity: 0.4,
     },
     chipSelected: {
       borderColor: brand.primary,

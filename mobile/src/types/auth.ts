@@ -1,3 +1,5 @@
+import type { Gender } from "./domain";
+
 /** Profil de l'utilisateur connecté (GET /auth/me, GET/PATCH /users/me). */
 export interface User {
   id: string;
@@ -9,6 +11,8 @@ export interface User {
   openTo: string | null;
   avatar: string | null;
   coverPhoto?: string | null;
+  /** Uniquement via GET/PATCH /users/me (jamais /auth/me ni un profil public). */
+  gender?: Gender | null;
   createdAt: string;
   updatedAt?: string;
 }

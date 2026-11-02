@@ -18,7 +18,7 @@ import {
   type ActivityFormState,
 } from "../../../src/lib/activityForm";
 import { getActivity, updateActivity } from "../../../src/services/activities.service";
-import { getApiErrorMessage } from "../../../src/services/api";
+import { getApiErrorCode, getApiErrorMessage } from "../../../src/services/api";
 import type { Activity } from "../../../src/types/domain";
 
 /** Modification d'une activité par son organisateur (PATCH, champs modifiés uniquement). */
@@ -85,7 +85,14 @@ function EditForm({ activity }: { activity: Activity }) {
       await updateActivity(activity.id, changes);
       router.back();
     } catch (err) {
-      setError(getApiErrorMessage(err, "Impossible d'enregistrer les modifications."));
+      const code = getApiErrorCode(err);
+      if (code === "GENDER_REQUIRED" || code === "AUDIENCE_RESTRICTED") {
+        setError(
+          "Pour réserver ton activité à un public, ton profil doit indiquer le genre correspondant (Modifier mon profil)."
+        );
+      } else {
+        setError(getApiErrorMessage(err, "Impossible d'enregistrer les modifications."));
+      }
       setIsSaving(false);
     }
   };
@@ -104,6 +111,7 @@ function EditForm({ activity }: { activity: Activity }) {
             update={update}
             departmentCode={departmentCode}
             minParticipants={activity.participantsCount}
+            audienceLocked={activity.participantsCount > 0}
           />
           {error ? (
             <Text style={styles.error} accessibilityLiveRegion="assertive">

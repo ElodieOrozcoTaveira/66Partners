@@ -1,5 +1,5 @@
 import type { User } from "../types/auth";
-import type { Availability, PublicUser, UserSport, Weekday } from "../types/domain";
+import type { Availability, Gender, PublicUser, UserSport, Weekday } from "../types/domain";
 import type { AvatarFile } from "../lib/avatarFile";
 import { api } from "./api";
 
@@ -23,6 +23,15 @@ export interface UpdateProfileInput {
   headline?: string | null;
   lookingFor?: string | null;
   openTo?: string | null;
+  /** null = « je préfère ne pas préciser ». */
+  gender?: Gender | null;
+}
+
+/** GET /users/me : son propre profil complet (dont le genre déclaré). */
+export async function getMyProfile(): Promise<User> {
+  const response = await api.get<{ success: boolean; user: User }>("/users/me");
+
+  return response.data.user;
 }
 
 export async function updateMe(input: UpdateProfileInput): Promise<User> {

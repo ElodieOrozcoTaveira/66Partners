@@ -30,10 +30,13 @@ import {
   refuseParticipation,
   updateActivity,
 } from "../../src/services/activities.service";
-import { getApiErrorMessage } from "../../src/services/api";
+import { getApiErrorCode, getApiErrorMessage } from "../../src/services/api";
+import { getMyProfile } from "../../src/services/user.service";
+import { GenderPrompt } from "../../src/components/GenderPrompt";
+import { AUDIENCE_LABELS, AUDIENCE_RESERVED_LABELS, canJoinAudience } from "../../src/lib/audience";
 import { WEB_ORIGIN } from "../../src/config/env";
 import { haptics } from "../../src/lib/haptics";
-import type { Activity, Participation, ParticipationWithUser } from "../../src/types/domain";
+import type { Activity, Gender, Participation, ParticipationWithUser } from "../../src/types/domain";
 import { useBrand, useBrandStyles } from "../../src/context/BrandContext";
 import type { Brand } from "../../src/constants/brands";
 
@@ -44,6 +47,9 @@ interface ActivityDetail {
   participants: ParticipationWithUser[] | null;
   /** Instant du chargement : référence pour savoir si l'activité est passée. */
   loadedAt: number;
+  /** Mon genre déclaré, chargé seulement pour une activité réservée dont je ne
+   *  suis pas l'organisateur (undefined sinon : le serveur tranchera). */
+  myGender?: Gender | null;
 }
 
 async function loadDetail(id: string, userId: string): Promise<ActivityDetail> {
@@ -56,7 +62,16 @@ async function loadDetail(id: string, userId: string): Promise<ActivityDetail> {
   const canSeeParticipants = isCreator || myParticipation?.status === "ACCEPTED";
   const participants = canSeeParticipants ? await getParticipations(id) : null;
 
-  return { activity, myParticipation, participants, loadedAt: Date.now() };
+  // Activité réservée : on vérifie tôt si je peux demander à participer,
+  // pour afficher « Réservée aux femmes » plutôt qu'un bouton voué à l'échec.
+  const myGender =
+    activity.audience !== "ALL" && !isCreator && !myParticipation
+      ? await getMyProfile()
+          .then((me) => me.gender ?? null)
+          .catch(() => undefined)
+      : undefined;
+
+  return { activity, myParticipation, participants, loadedAt: Date.now(), myGender };
 }
 
 export default function ActivityDetailScreen() {
@@ -66,6 +81,7 @@ export default function ActivityDetailScreen() {
   const { user } = useAuth();
   const userId = user?.id ?? "";
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const [genderPromptVisible, setGenderPromptVisible] = useState(false);
 
   const detail = useAsync(() => loadDetail(id, userId), [id, userId], {
     enabled: Boolean(id && userId),
@@ -109,6 +125,28 @@ export default function ActivityDetailScreen() {
     },
     [refresh]
   );
+
+  // Demande de participation. Activité réservée sans genre renseigné : le
+  // serveur répond GENDER_REQUIRED, on le demande puis on relance.
+  const requestToJoin = async (activityId: string) => {
+    setPendingAction("join");
+    try {
+      await joinActivity(activityId);
+      haptics.success();
+      refresh();
+    } catch (err) {
+      if (getApiErrorCode(err) === "GENDER_REQUIRED") {
+        setGenderPromptVisible(true);
+      } else {
+        haptics.warning();
+        Alert.alert("Action impossible", getApiErrorMessage(err, "Impossible d'envoyer ta demande."));
+        // AUDIENCE_RESTRICTED : le profil a pu changer, on recharge l'écran.
+        refresh();
+      }
+    } finally {
+      setPendingAction(null);
+    }
+  };
 
   if (detail.isLoading) return <LoadingState />;
   if (!detail.data) {
@@ -254,6 +292,13 @@ export default function ActivityDetailScreen() {
       footer = <Text style={styles.caption}>Cette activité n’accepte plus de demandes.</Text>;
     } else if (isFull) {
       footer = <Text style={styles.caption}>Cette activité est complète.</Text>;
+    } else if (activity.audience !== "ALL" && !canJoinAudience(activity.audience, detail.data.myGender)) {
+      footer = (
+        <View style={styles.reserved} accessible accessibilityRole="text">
+          <Ionicons name="lock-closed-outline" size={18} color={Colors.textSecondary} />
+          <Text style={styles.caption}>{AUDIENCE_RESERVED_LABELS[activity.audience]}</Text>
+        </View>
+      );
     } else {
       footer = (
         <Button
@@ -261,9 +306,7 @@ export default function ActivityDetailScreen() {
           accessibilityHint="Envoie une demande à l’organisateur, qui pourra l’accepter."
           loading={pendingAction === "join"}
           disabled={pendingAction !== null}
-          onPress={() =>
-            runAction("join", () => joinActivity(activity.id), "Impossible d'envoyer ta demande.")
-          }
+          onPress={() => requestToJoin(activity.id)}
         />
       );
     }
@@ -352,6 +395,9 @@ export default function ActivityDetailScreen() {
             <Text style={styles.tag}>{activity.sportName}</Text>
             <Text style={styles.tag}>Niveau {LEVEL_LABELS[activity.levelRequired].toLowerCase()}</Text>
             {activity.carpoolEnabled ? <Text style={styles.tag}>Covoiturage</Text> : null}
+            {activity.audience !== "ALL" ? (
+              <Text style={[styles.tag, styles.tagAudience]}>{AUDIENCE_LABELS[activity.audience]}</Text>
+            ) : null}
           </View>
 
           <Section title="Organisateur">
@@ -497,6 +543,18 @@ export default function ActivityDetailScreen() {
         </Pressable>
       </SafeAreaView>
 
+      {activity.audience !== "ALL" ? (
+        <GenderPrompt
+          audience={activity.audience}
+          visible={genderPromptVisible}
+          onCancel={() => setGenderPromptVisible(false)}
+          onSaved={() => {
+            setGenderPromptVisible(false);
+            requestToJoin(activity.id);
+          }}
+        />
+      ) : null}
+
       {footer ? (
         <SafeAreaView edges={["bottom"]} style={styles.footer}>
           {footer}
@@ -619,10 +677,22 @@ const makeStyles = (brand: Brand) =>
     color: brand.primary,
     backgroundColor: brand.primarySoft,
   },
+  // Public réservé : badge plein, bien visible.
+  tagAudience: {
+    color: Colors.textOnPrimary,
+    backgroundColor: brand.primary,
+  },
   caption: {
     ...Typography.caption,
     fontSize: 14,
     textAlign: "center",
+  },
+  reserved: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
+    minHeight: 48,
   },
   captionLeft: {
     ...Typography.caption,
