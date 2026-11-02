@@ -56,7 +56,9 @@ function loadVilles(departmentCode: string): Promise<IndexedVille[]> {
   const url = new URL(GEO_API_URL);
   url.searchParams.set("codeDepartement", departmentCode);
   url.searchParams.set("fields", "nom,centre,codesPostaux");
-  url.searchParams.set("limit", "500");
+  // Pas de limite : l'API renvoie toutes les communes du département (la
+  // Haute-Garonne en compte 586 ; une limite à 500 faisait disparaître
+  // Toulouse, code 31555).
 
   const request = fetch(url.toString())
     .then((response) => {

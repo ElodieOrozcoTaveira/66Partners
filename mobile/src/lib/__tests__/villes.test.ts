@@ -33,6 +33,13 @@ describe("searchVilles", () => {
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
+  it("demande toutes les communes du département, sans limite (le 31 compte 586 communes)", async () => {
+    await searchVilles("31", "toulouse");
+    const url = String((globalThis.fetch as jest.Mock).mock.calls[0][0]);
+    expect(url).toContain("codeDepartement=31");
+    expect(url).not.toContain("limit=");
+  });
+
   it("ignore les communes sans coordonnées", async () => {
     expect(await searchVilles("66", "sans")).toEqual([]);
   });
