@@ -150,6 +150,42 @@ const BRANDS: Record<string, Brand> = {
     // Haute-Garonne
     { latitude: 43.3, longitude: 1.25, latitudeDelta: 1.45, longitudeDelta: 1.75 }
   ),
+  "32": makeBrand(
+    "32",
+    {
+      // Couleurs du logo 32Partners (cf. frontend/public/32partners/theme.json).
+      primary: "#A8150F",
+      primaryDark: "#6E0E08",
+      primarySoft: "#F9E7E6",
+      accent: "#FEBF03",
+      accentSoft: "#FFF5DA",
+      gradientTo: "#D4651A",
+      badgeTo: "#FFD95E",
+      shadowRgb: "168, 21, 15",
+    },
+    require("../../assets/images/territories/logo32.webp"),
+    require("../../assets/images/territories/emblem32.webp"),
+    // Gers
+    { latitude: 43.68, longitude: 0.45, latitudeDelta: 0.95, longitudeDelta: 1.65 }
+  ),
+  "09": makeBrand(
+    "09",
+    {
+      // Couleurs du logo 09Partners (cf. frontend/public/09partners/theme.json).
+      primary: "#1F7A12",
+      primaryDark: "#0B3A1E",
+      primarySoft: "#E7F2E4",
+      accent: "#F6B80E",
+      accentSoft: "#FFF6D9",
+      gradientTo: "#6DAA2C",
+      badgeTo: "#FFDD5E",
+      shadowRgb: "31, 122, 18",
+    },
+    require("../../assets/images/territories/logo09.webp"),
+    require("../../assets/images/territories/emblem09.webp"),
+    // Ariège
+    { latitude: 42.93, longitude: 1.5, latitudeDelta: 0.9, longitudeDelta: 1.5 }
+  ),
 };
 
 export function getBrand(code: string | null | undefined): Brand {
