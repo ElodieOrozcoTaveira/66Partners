@@ -1,11 +1,12 @@
 import { z } from "zod";
-import { activitiesStatusEnum, sportLevelEnum } from "../db/schema.js";
+import { activitiesStatusEnum, activityAudienceEnum, sportLevelEnum } from "../db/schema.js";
 import { sanitizeText } from "../utils/sanitize.js";
 
 // Validation Zod pour les activités
 
 const levelRequiredSchema = z.enum(sportLevelEnum.enumValues);
 const statusSchema = z.enum(activitiesStatusEnum.enumValues);
+const audienceSchema = z.enum(activityAudienceEnum.enumValues);
 
 const futureDate = z.coerce.date().refine((date) => date.getTime() > Date.now(), {
   message: "La date de l'activité doit être dans le futur",
@@ -29,6 +30,7 @@ export const createActivitySchema = z.object({
   sportId: z.uuid("Identifiant de sport invalide"),
   territoryId: z.uuid("Identifiant de territoire invalide").optional(),
   carpoolEnabled: z.boolean().optional(),
+  audience: audienceSchema.optional(),
 });
 
 export type CreateActivityInput = z.infer<typeof createActivitySchema>;
@@ -52,6 +54,7 @@ export const updateActivitySchema = z
     status: statusSchema,
     sportId: z.uuid("Identifiant de sport invalide"),
     carpoolEnabled: z.boolean(),
+    audience: audienceSchema,
   })
   .partial()
   .refine((data) => Object.keys(data).length > 0, {
@@ -89,6 +92,7 @@ export const activityFiltersSchema = z.object({
   territory: z.string().trim().min(1, "Le territoire est requis").max(10),
   from: z.coerce.date().optional(),
   to: z.coerce.date().optional(),
+  audience: audienceSchema.optional(),
 });
 
 export type ActivityFiltersInput = z.infer<typeof activityFiltersSchema>;

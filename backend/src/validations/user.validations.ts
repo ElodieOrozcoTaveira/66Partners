@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sportLevelEnum } from "../db/schema.js";
+import { genderEnum, sportLevelEnum } from "../db/schema.js";
 import { sanitizeText } from "../utils/sanitize.js";
 
 // Validation Zod pour le profil utilisateur
@@ -16,6 +16,8 @@ export const updateUserSchema = z
     openTo: z.string().trim().max(200).transform(sanitizeText).nullable(),
     avatar: z.url("URL d'avatar invalide").max(255).nullable(),
     coverPhoto: z.url("URL de couverture invalide").max(255).nullable(),
+    // Facultatif ; null = "je préfère ne pas préciser".
+    gender: z.enum(genderEnum.enumValues).nullable(),
   })
   .partial()
   .refine((data) => Object.keys(data).length > 0, {

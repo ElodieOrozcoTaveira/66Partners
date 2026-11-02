@@ -12,6 +12,7 @@ import {
   users,
 } from "../db/schema.js";
 import { TerritoryService } from "./territory.services.js";
+import { checkAudience, type ActivityAudience } from "../utils/audience.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -52,6 +53,8 @@ export interface ActivityCreateInput {
    *  du créateur au territoire est toujours vérifiée côté serveur. */
   territoryId?: string;
   carpoolEnabled?: boolean;
+  /** Ouverte à tous (défaut) ou réservée — l'organisateur doit en faire partie. */
+  audience?: ActivityAudience;
 }
 
 export interface ActivityUpdateInput {
@@ -66,6 +69,7 @@ export interface ActivityUpdateInput {
   status?: ActivityStatus;
   sportId?: string;
   carpoolEnabled?: boolean;
+  audience?: ActivityAudience;
 }
 
 export interface ActivityFilters {
@@ -81,6 +85,8 @@ export interface ActivityFilters {
   from?: Date;
   /** Borne haute (incluse) sur activities.startDate. */
   to?: Date;
+  /** Public de l'activité (ex. "WOMEN" pour les sorties entre femmes). */
+  audience?: ActivityAudience;
 }
 
 // Erreurs métier personnalisées
@@ -113,6 +119,13 @@ export class ActivityService {
     data: ActivityCreateInput
   ): Promise<Activity> {
     await assertSportExists(data.sportId);
+
+    // Activité réservée : l'organisateur doit lui-même en faire partie
+    // (une sortie "entre femmes" est organisée par une femme).
+    if (data.audience && data.audience !== "ALL") {
+      const check = await checkAudience(creatorId, data.audience);
+      if (!check.ok) throw new ActivityError(check.message, check.code, 403);
+    }
 
     // Un utilisateur a un territoire principal (isDefault), mais n'est
     // jamais restreint à y créer ses activités : il peut créer une activité
@@ -177,6 +190,7 @@ export class ActivityService {
         creatorId: activities.creatorId,
         territoryId: activities.territoryId,
         carpoolEnabled: activities.carpoolEnabled,
+        audience: activities.audience,
         createdAt: activities.createdAt,
         updatedAt: activities.updatedAt,
         sportName: sports.name,
@@ -214,7 +228,7 @@ export class ActivityService {
    * le nombre réel de participants acceptés (calculé à la volée).
    */
   static async listActivities(filters: ActivityFilters = {}): Promise<ActivityWithDetails[]> {
-    const { city, sportId, status, participantId, territory, from, to } = filters;
+    const { city, sportId, status, participantId, territory, from, to, audience } = filters;
 
     const conditions = [
       city ? eq(activities.city, city) : undefined,
@@ -223,6 +237,7 @@ export class ActivityService {
       territory ? eq(territories.code, territory) : undefined,
       from ? gte(activities.startDate, from) : undefined,
       to ? lte(activities.startDate, to) : undefined,
+      audience ? eq(activities.audience, audience) : undefined,
       participantId
         ? sql`exists (
             select 1 from ${participations} as participant_filter
@@ -249,6 +264,7 @@ export class ActivityService {
         creatorId: activities.creatorId,
         territoryId: activities.territoryId,
         carpoolEnabled: activities.carpoolEnabled,
+        audience: activities.audience,
         createdAt: activities.createdAt,
         updatedAt: activities.updatedAt,
         sportName: sports.name,
@@ -295,6 +311,23 @@ export class ActivityService {
 
     if (data.sportId) {
       await assertSportExists(data.sportId);
+    }
+
+    if (data.audience && data.audience !== activity.audience) {
+      // Revenir à "ouverte à tous" est toujours possible. Restreindre (ou
+      // changer de public) exclurait des participants déjà acceptés : refusé
+      // dès qu'il y en a un.
+      if (data.audience !== "ALL") {
+        if (activity.participantsCount > 0) {
+          throw new ActivityError(
+            "Le public ne peut plus être restreint : des participants ont déjà été acceptés.",
+            "AUDIENCE_LOCKED",
+            409
+          );
+        }
+        const check = await checkAudience(requesterId, data.audience);
+        if (!check.ok) throw new ActivityError(check.message, check.code, 403);
+      }
     }
 
     const [updatedActivity] = await db

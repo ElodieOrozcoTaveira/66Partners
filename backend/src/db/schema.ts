@@ -6,6 +6,12 @@ import { sql } from "drizzle-orm";
 export const sportLevelEnum = pgEnum("sport_level", ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"]);
 export const participationStatusEnum = pgEnum("participation_status", ["PENDING", "ACCEPTED", "REFUSED"]);
 export const activitiesStatusEnum = pgEnum("activities_status", ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]);
+// Genre déclaré (facultatif, jamais public) : sert uniquement à contrôler
+// l'accès aux activités réservées (cf. activities.audience). Pas de valeur
+// "je préfère ne pas préciser" stockée : c'est l'absence de valeur (null).
+export const genderEnum = pgEnum("gender", ["FEMALE", "MALE"]);
+// Public d'une activité : ouverte à tous (par défaut), entre femmes, entre hommes.
+export const activityAudienceEnum = pgEnum("activity_audience", ["ALL", "WOMEN", "MEN"]);
 export const weekdayEnum = pgEnum("weekday", [
   "MONDAY",
   "TUESDAY",
@@ -43,6 +49,10 @@ export const users = pgTable("users", {
   // comptes créés avant l'introduction de cette exigence n'ont pas cette
   // preuve et ne sont pas invités à l'accepter rétroactivement.
   termsAcceptedAt: timestamp("terms_accepted_at"),
+  // Facultatif, renseigné par l'utilisateur lui-même (profil, ou au moment
+  // de rejoindre une activité réservée). Jamais exposé aux autres membres :
+  // seul GET /users/me (son propre profil) le renvoie.
+  gender: genderEnum("gender"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -157,6 +167,10 @@ export const activities = pgTable("activities", {
   // covoiturage (cf. participations.carpoolRequested). Désactiver ce champ
   // n'efface jamais l'historique des conversations déjà créées.
   carpoolEnabled: boolean("carpool_enabled").notNull().default(false),
+  // Ouverte à tous, ou réservée (entre femmes / entre hommes) : contrôlé
+  // côté serveur à la création, à la modification et à chaque demande de
+  // participation (cf. utils/audience.ts).
+  audience: activityAudienceEnum("audience").notNull().default("ALL"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => ({
