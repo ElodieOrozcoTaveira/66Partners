@@ -141,6 +141,12 @@
   font-weight: 700;
 }
 
+// Public réservé (entre femmes / entre hommes) : badge plein, bien visible.
+.detailactivite-page__level--audience {
+  background: variables.$rouge2;
+  color: white;
+}
+
 .detailactivite-page__creator {
   align-self: flex-start;
   display: flex;

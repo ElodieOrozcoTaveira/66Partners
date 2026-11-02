@@ -1,9 +1,10 @@
-import { Calendar, Car, MapPin, Signal, Users } from "lucide-react";
+import { Calendar, Car, MapPin, ShieldCheck, Signal, Users } from "lucide-react";
 import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
 import { getSportPhoto } from "../../../lib/sportPhotos";
 import { LEVEL_LABELS } from "../../../lib/activityLabels";
 import { formatDayMonth, formatTime, formatWeekdayLong } from "../../../lib/dateFormat";
 import type { CreerActiviteForm } from "../CreerActivite";
+import { AUDIENCE_LABELS } from "../../../lib/audience";
 
 interface EtapeApercuProps {
   form: CreerActiviteForm;
@@ -50,6 +51,12 @@ export default function EtapeApercu({ form, sportName }: EtapeApercuProps) {
             <Users size={15} />
             {form.maxParticipants} participants max
           </li>
+          {form.audience !== "ALL" && (
+            <li>
+              <ShieldCheck size={15} />
+              {AUDIENCE_LABELS[form.audience]}
+            </li>
+          )}
           {form.carpoolEnabled && (
             <li>
               <Car size={15} />

@@ -12,6 +12,18 @@ import {
 } from "../../../lib/webPush";
 import { useBranding } from "../../../contexts/TerritoryContext";
 import "./ModaleEditProfil.scss";
+import {
+  GENDER_EXPLANATION,
+  GENDER_LABELS,
+  GENDER_UNSPECIFIED_LABEL,
+  type Gender,
+} from "../../../lib/audience";
+
+const GENDER_CHOICES: { value: Gender | null; label: string }[] = [
+  { value: "FEMALE", label: GENDER_LABELS.FEMALE },
+  { value: "MALE", label: GENDER_LABELS.MALE },
+  { value: null, label: GENDER_UNSPECIFIED_LABEL },
+];
 
 interface ModaleEditProfilProps {
   isOpen: boolean;
@@ -29,6 +41,7 @@ export default function ModaleEditProfil({
   const [headline, setHeadline] = useState("");
   const [lookingFor, setLookingFor] = useState("");
   const [openTo, setOpenTo] = useState("");
+  const [gender, setGender] = useState<Gender | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pushState, setPushState] = useState<PushSupportState | "checking">("checking");
@@ -93,6 +106,7 @@ export default function ModaleEditProfil({
     setHeadline(user?.headline ?? "");
     setLookingFor(user?.lookingFor ?? "");
     setOpenTo(user?.openTo ?? "");
+    setGender(user?.gender ?? null);
   }, [isOpen, user]);
 
   if (!isOpen) return null;
@@ -114,6 +128,7 @@ export default function ModaleEditProfil({
         headline: headline.trim() || null,
         lookingFor: lookingFor.trim() || null,
         openTo: openTo.trim() || null,
+        gender,
       });
       await refreshUser();
       onClose();
@@ -230,6 +245,22 @@ export default function ModaleEditProfil({
               placeholder="Ex. Ouvert à de nouveaux sports et défis."
               maxLength={200}
             />
+
+            <fieldset className="container-modaleEditProfil__gender">
+              <legend className="container-modaleEditProfil__label">Genre</legend>
+              <p className="container-modaleEditProfil__pushHint">{GENDER_EXPLANATION}</p>
+              {GENDER_CHOICES.map((choice) => (
+                <label key={choice.label} className="container-modaleEditProfil__genderOption">
+                  <input
+                    type="radio"
+                    name="edit-gender"
+                    checked={gender === choice.value}
+                    onChange={() => setGender(choice.value)}
+                  />
+                  {choice.label}
+                </label>
+              ))}
+            </fieldset>
 
             {error && (
               <p className="container-modaleEditProfil__error">{error}</p>

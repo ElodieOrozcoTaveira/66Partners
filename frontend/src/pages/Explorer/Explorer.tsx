@@ -11,6 +11,7 @@ import { formatMonth, formatWeekday } from "../../lib/dateFormat";
 import { DATE_PRESET_LABELS, presetToRange, type DatePreset } from "../../lib/parisDateRange";
 import "./Explorer.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
+import { AUDIENCE_LABELS, AUDIENCE_OPTIONS, type ActivityAudience } from "../../lib/audience";
 
 const DATE_PRESETS: DatePreset[] = ["all", "today", "tomorrow", "week", "weekend", "month"];
 
@@ -35,6 +36,7 @@ interface Activity {
   sportName: string;
   creatorPseudo: string | null;
   creatorAvatar: string | null;
+  audience: ActivityAudience;
 }
 
 interface SportsResponse {
@@ -66,6 +68,10 @@ export default function Explorer() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
   const selectedSportId = searchParams.get("sport");
+  // Filtre « Public » (?public=WOMEN|MEN) ; absent = toutes les activités.
+  const rawAudience = searchParams.get("public");
+  const audienceFilter: ActivityAudience =
+    rawAudience === "WOMEN" || rawAudience === "MEN" ? rawAudience : "ALL";
   const rawPreset = searchParams.get("when");
   const datePreset: DatePreset = (DATE_PRESETS as string[]).includes(rawPreset ?? "")
     ? (rawPreset as DatePreset)
@@ -113,8 +119,9 @@ export default function Explorer() {
     const query = search.trim().toLowerCase();
     return activities
       .filter((activity) => !selectedSportId || activity.sportId === selectedSportId)
+      .filter((activity) => audienceFilter === "ALL" || activity.audience === audienceFilter)
       .filter((activity) => !query || activity.title.toLowerCase().includes(query));
-  }, [activities, selectedSportId, search]);
+  }, [activities, selectedSportId, audienceFilter, search]);
 
   if (isLoading)
     return <p className="explorer-state">Chargement des activités...</p>;
@@ -159,6 +166,28 @@ export default function Explorer() {
         })}
       </div>
 
+      <div className="container-explorer__filters" role="radiogroup" aria-label="Public">
+        {AUDIENCE_OPTIONS.map((audience) => (
+          <button
+            key={audience}
+            type="button"
+            role="radio"
+            aria-checked={audienceFilter === audience}
+            className={`filter-chip${audienceFilter === audience ? " filter-chip--active" : ""}`}
+            onClick={() =>
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                if (audience === "ALL") next.delete("public");
+                else next.set("public", audience);
+                return next;
+              })
+            }
+          >
+            {audience === "ALL" ? "Tous publics" : AUDIENCE_LABELS[audience]}
+          </button>
+        ))}
+      </div>
+
       {availableSports.length > 0 && (
         <div className="container-explorer__filters">
           <button
@@ -200,7 +229,7 @@ export default function Explorer() {
       )}
 
       {filteredActivities.length === 0 ? (
-        search.trim() || selectedSportId ? (
+        search.trim() || selectedSportId || audienceFilter !== "ALL" ? (
           <p className="explorer-state">
             Aucune activité ne correspond à ta recherche.
           </p>
@@ -304,6 +333,11 @@ export default function Explorer() {
                     <span className="activity-card__level">
                       {LEVEL_LABELS[activity.levelRequired]}
                     </span>
+                    {activity.audience !== "ALL" && (
+                      <span className="activity-card__level activity-card__level--audience">
+                        {AUDIENCE_LABELS[activity.audience]}
+                      </span>
+                    )}
                     <span
                       className={`activity-card__participants${isFull ? " activity-card__participants--full" : ""}`}
                     >

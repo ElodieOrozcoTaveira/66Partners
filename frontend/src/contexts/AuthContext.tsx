@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import api from "../lib/axios";
+import type { Gender } from "../lib/audience";
 
 export type User = {
   id: string;
@@ -18,6 +19,9 @@ export type User = {
   openTo: string | null;
   avatar: string | null;
   coverPhoto: string | null;
+  /** Genre déclaré (facultatif, jamais public) — renvoyé uniquement par
+   *  GET /api/users/me ; null = « je préfère ne pas préciser ». */
+  gender?: Gender | null;
   createdAt: string;
 };
 
