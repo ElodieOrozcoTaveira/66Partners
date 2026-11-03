@@ -1,186 +1,233 @@
 @use "../../../styles/variables/variables.scss";
 @use "../../../styles/mixins/mixins.scss";
 
+// « Mes sports » : carte avec des vignettes photo (comme les cartes d'activité).
 .container-mesSports {
-  padding-bottom: 0.25rem;
-  margin-bottom: 1.5rem;
+  @include mixins.carte;
+  padding: 1.25rem;
+
+  @media (min-width: variables.$tablet) {
+    padding: 1.5rem;
+  }
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
-    margin: 0 0 0.45rem;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: variables.alpha(variables.$rouge, 10%);
+    color: variables.$rouge;
+    flex-shrink: 0;
   }
 
   &__h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
     margin: 0;
-    font-family: "Inter", sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #64748b;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: variables.$encre;
+  }
 
-    svg {
-      flex-shrink: 0;
-      color: variables.$rouge2;
-    }
+  &__count {
+    margin: 0.1rem 0 0;
+    font-size: 0.82rem;
+    color: variables.$texte2;
   }
 
   &__manage {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.1rem;
-    flex-shrink: 0;
-    font-family: "Inter", sans-serif;
-    font-size: 0.75rem;
+    gap: 0.35rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: 1.5px solid variables.$bordure;
+    color: variables.$encre;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: variables.$rouge2;
     text-decoration: none;
+    transition: border-color 0.18s ease, color 0.18s ease;
 
     &:hover {
-      text-decoration: underline;
+      border-color: variables.$rouge;
+      color: variables.$rouge;
     }
   }
 
-  &__text {
-    margin: 0;
-    font-family: "Inter", sans-serif;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: variables.$nuit;
-    white-space: pre-line;
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+    gap: 0.75rem;
+
+    @media (min-width: variables.$tablet) {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
   }
 
   &__empty {
-    margin: 0;
-    font-family: "Inter", sans-serif;
-    font-size: 0.85rem;
-    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 1.1rem;
+    border-radius: 16px;
+    background: variables.$fond2;
+
+    p {
+      margin: 0;
+      line-height: 1.55;
+      color: variables.$texte2;
+    }
   }
 
-  &__list {
-    display: flex;
-    align-items: flex-start;
-    flex-wrap: nowrap;
-    gap: 0.75rem;
-    overflow-x: auto;
-    padding-bottom: 0.2rem;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    // Le body de la page laisse assez de largeur à partir du laptop pour
-    // que la liste des sports s'étale plutôt que défile : plus besoin du
-    // scroll horizontal pensé pour mobile.
-    @media (min-width: variables.$laptop) {
-      flex-wrap: wrap;
-      overflow-x: visible;
-      gap: 1rem;
-    }
+  &__none {
+    margin: 0;
+    color: variables.$texte3;
+    font-size: 0.9rem;
   }
 }
 
-.mesSports-item {
+.mesSports-tile {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 0.4rem;
-  width: 80px;
-  padding: 0.75rem 0.5rem 0.6rem;
-  border-radius: 14px;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
   overflow: hidden;
-  box-sizing: border-box;
+  background: variables.$fond2;
 
-  @media (min-width: variables.$laptop) {
-    width: 104px;
-    padding: 1rem 0.6rem 0.8rem;
+  &--skeleton {
+    display: block;
   }
 
   &__link {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
+    justify-content: space-between;
+    padding: 0.6rem;
     text-decoration: none;
+
+    img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.35s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.06);
+    }
+  }
+
+  &__shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0.65) 100%);
   }
 
   &__badge {
-    display: flex;
+    position: relative;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  &__name {
+    position: relative;
+    color: #ffffff;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   }
 
   &__remove {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 0.5rem;
+    right: 0.5rem;
     z-index: 1;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 15px;
-    height: 15px;
-    margin: 0;
+    width: 26px;
+    height: 26px;
     padding: 0;
-    border: 2px solid white;
+    border: none;
     border-radius: 50%;
-    background-color: rgba(31, 41, 55, 0.55);
-    color: white;
+    background: rgba(255, 255, 255, 0.92);
+    color: variables.$encre;
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
 
     &:hover {
-      background-color: variables.$rouge2;
+      background: variables.$rouge;
+      color: #ffffff;
+    }
+
+    // Sur ordinateur : visible au survol de la vignette (toujours visible au toucher).
+    @media (hover: hover) {
+      opacity: 0;
     }
   }
 
-  &__name {
-    max-width: 100%;
-    font-family: "Inter", sans-serif;
-    font-size: 0.72rem;
+  &:hover &__remove,
+  &__remove:focus-visible {
+    opacity: 1;
+  }
+
+  &--add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px dashed variables.alpha(variables.$rouge, 35%);
+    background: variables.alpha(variables.$rouge, 4%);
+    color: variables.$rouge;
     font-weight: 700;
-    color: variables.$nuit;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+
+    &:hover {
+      background: variables.alpha(variables.$rouge, 9%);
+      border-color: variables.$rouge;
+    }
   }
 
-  &__bar {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 3px;
-  }
-}
-
-.mesSports-item--add {
-  justify-content: center;
-  border: 1.5px dashed variables.alpha(variables.$rouge2, 35%);
-  text-decoration: none;
-  transition: background-color 0.15s ease;
-
-  .mesSports-item__badge {
-    color: variables.$rouge2;
-  }
-
-  .mesSports-item__name {
-    color: variables.$rouge2;
-    white-space: normal;
-    line-height: 1.2;
-  }
-
-  &:hover {
-    background: variables.alpha(variables.$rouge2, 6%);
+  &__plus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    color: #ffffff;
+    @include mixins.gradient;
   }
 }
