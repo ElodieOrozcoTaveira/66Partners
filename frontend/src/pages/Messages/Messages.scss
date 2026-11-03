@@ -47,7 +47,8 @@
 .messages-page__title {
   margin: 0;
   font-family: "Manrope", sans-serif;
-  font-size: 1.3rem;
+  font-size: clamp(1.8rem, 3.6vw, 2.4rem);
   font-weight: 800;
+  letter-spacing: -0.025em;
   color: variables.$nuit;
 }

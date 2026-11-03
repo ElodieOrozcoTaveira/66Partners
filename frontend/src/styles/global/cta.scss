@@ -1,0 +1,79 @@
+@use "../variables/variables.scss";
+@use "../mixins/mixins.scss";
+
+// Encarts d'appel en bas des pages secondaires (Sports, FAQ, Comment ça
+// marche, Pourquoi, Contact) : un seul style pour toute la refonte, au
+// dégradé du territoire, bouton jaune de l'accent.
+.container-contactsport,
+.container-reponse,
+.container-prêt,
+.container-cases__rejoindre,
+.container-question {
+  width: min(1120px, calc(100% - 2.5rem)) !important;
+  max-width: none !important;
+  margin: 2.5rem auto 1rem !important;
+  padding: 2.25rem 1.75rem !important;
+  border-radius: 28px !important;
+  @include mixins.gradient-important;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  text-align: center;
+  color: #ffffff;
+
+  @media (min-width: variables.$tablet) {
+    padding: 2.75rem 3rem !important;
+  }
+
+  h2,
+  h3 {
+    margin: 0 !important;
+    font-family: "Manrope", sans-serif !important;
+    font-size: clamp(1.35rem, 2.6vw, 1.8rem) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+    color: #ffffff !important;
+    text-align: center !important;
+  }
+
+  h4,
+  p {
+    margin: 0 !important;
+    font-size: 0.98rem !important;
+    font-weight: 500 !important;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-align: center !important;
+  }
+
+  a,
+  button {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 46px;
+    padding: 0 1.4rem !important;
+    border: none !important;
+    border-radius: 999px !important;
+    @include mixins.badge-accent;
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.18s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    svg {
+      stroke: currentColor !important;
+    }
+  }
+}
