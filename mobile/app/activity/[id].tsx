@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View, Platform, Share } from "react-native";
+import { Alert, Animated, Pressable, RefreshControl, StyleSheet, View, Platform, Share } from "react-native";
 import { Text } from "../../src/components/ui/Text";
 import { router, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { setStatusBarStyle } from "expo-status-bar";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Avatar } from "../../src/components/ui/Avatar";
 import { Button } from "../../src/components/ui/Button";
 import { ErrorState, LoadingState } from "../../src/components/ui/StateViews";
-import { Colors, Gradients, Radius, Shadow, Spacing, Typography } from "../../src/constants/theme";
+import { Colors, Fonts, Gradients, Radius, Shadow, Spacing, Typography } from "../../src/constants/theme";
 import { useAuth } from "../../src/context/AuthContext";
 import { useTerritory } from "../../src/context/TerritoryContext";
 import { useAsync } from "../../src/hooks/useAsync";
-import { formatActivityWhen } from "../../src/lib/date";
+import { formatActivityDay, formatActivityTime, formatActivityWhen, formatStartsIn } from "../../src/lib/date";
+import { SportIcon } from "../../src/components/SportIcon";
 import { getSportPhoto } from "../../src/lib/sportPhotos";
 import {
   ACTIVITY_STATUS_LABELS,
@@ -76,6 +78,9 @@ async function loadDetail(id: string, userId: string): Promise<ActivityDetail> {
   return { activity, myParticipation, participants, loadedAt: Date.now(), myGender };
 }
 
+/** Hauteur de la photo en tête de l'écran. */
+const HERO_HEIGHT = 280;
+
 export default function ActivityDetailScreen() {
   const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
@@ -88,6 +93,25 @@ export default function ActivityDetailScreen() {
   const userId = user?.id ?? "";
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [genderPromptVisible, setGenderPromptVisible] = useState(false);
+
+  // Défilement : photo en parallaxe, barre du haut qui devient opaque.
+  const [scrollY] = useState(() => new Animated.Value(0));
+  const solidHeader = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle(solidHeader.current ? "dark" : "light");
+      const listener = scrollY.addListener(({ value }) => {
+        const solid = value > HERO_HEIGHT - 90;
+        if (solid === solidHeader.current) return;
+        solidHeader.current = solid;
+        setStatusBarStyle(solid ? "dark" : "light");
+      });
+      return () => {
+        scrollY.removeListener(listener);
+        setStatusBarStyle("dark");
+      };
+    }, [scrollY])
+  );
 
   const detail = useAsync(() => loadDetail(id, userId), [id, userId], {
     enabled: Boolean(id && userId),
@@ -352,8 +376,10 @@ export default function ActivityDetailScreen() {
   return (
     <View style={styles.screen}>
       <Stack.Screen options={{ headerShown: false, title: activity.sportName }} />
-      <ScrollView
+      <Animated.ScrollView
         contentContainerStyle={styles.scroll}
+        scrollEventThrottle={16}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
         refreshControl={
           <RefreshControl
             refreshing={detail.isRefreshing}
@@ -363,13 +389,52 @@ export default function ActivityDetailScreen() {
         }
       >
         <View style={styles.hero}>
-          <Image
-            source={getSportPhoto(activity.sportName)}
-            contentFit="cover"
-            style={StyleSheet.absoluteFill}
-            accessible={false}
-          />
-          <View style={[styles.heroShade, StyleSheet.absoluteFill]} />
+          {/* Parallaxe au défilement, agrandissement quand on tire vers le bas. */}
+          <Animated.View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                transform: [
+                  {
+                    translateY: scrollY.interpolate({
+                      inputRange: [-HERO_HEIGHT, 0, HERO_HEIGHT],
+                      outputRange: [-HERO_HEIGHT / 2, 0, HERO_HEIGHT * 0.4],
+                      extrapolateRight: "clamp",
+                    }),
+                  },
+                  {
+                    scale: scrollY.interpolate({
+                      inputRange: [-HERO_HEIGHT, 0],
+                      outputRange: [2, 1],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <Image
+              source={getSportPhoto(activity.sportName)}
+              contentFit="cover"
+              style={StyleSheet.absoluteFill}
+              accessible={false}
+            />
+            <View style={[styles.heroShade, StyleSheet.absoluteFill]} />
+          </Animated.View>
+          <View style={styles.heroContent}>
+            <View style={styles.heroSport}>
+              <SportIcon sportName={activity.sportName} size={34} />
+            </View>
+            <Text style={styles.heroSportName} numberOfLines={1}>
+              {activity.sportName}
+            </Text>
+            {!isClosed ? (
+              <View style={styles.heroCountdown}>
+                <Ionicons name="time" size={13} color={Colors.text} />
+                <Text style={styles.heroCountdownText}>{formatStartsIn(activity.startDate)}</Text>
+              </View>
+            ) : null}
+          </View>
         </View>
 
         <View style={styles.sheet}>
@@ -377,20 +442,41 @@ export default function ActivityDetailScreen() {
             {activity.title}
           </Text>
 
-          <View style={styles.infoList}>
-            <InfoRow icon="location-outline" text={activity.city} />
-            <InfoRow icon="calendar-outline" text={formatActivityWhen(activity.startDate)} />
+          <View style={styles.infoCard}>
+            <InfoRow
+              icon="calendar"
+              label="Quand"
+              text={`${formatActivityDay(new Date(activity.startDate))} · ${formatActivityTime(new Date(activity.startDate))}`}
+            />
+            <View style={styles.infoDivider} />
+            <InfoRow icon="location" label="Où" text={activity.city} />
+            <View style={styles.infoDivider} />
             <View style={styles.infoRow}>
-              <Ionicons name="people-outline" size={18} color={brand.primary} />
-              <Text style={styles.body}>
-                {activity.participantsCount}/{activity.maxParticipants} participants
-                {!isClosed && !isFull
-                  ? ` · ${placesLeft} place${placesLeft > 1 ? "s" : ""}`
-                  : ""}
-              </Text>
-              <Text style={[styles.statusChip, statusTone]}>
-                {isFull && !isClosed ? "Complète" : statusLabel}
-              </Text>
+              <View style={styles.infoIcon}>
+                <Ionicons name="people" size={18} color={brand.primary} />
+              </View>
+              <View style={styles.flex}>
+                <View style={styles.infoHeader}>
+                  <Text style={styles.infoLabel}>Participants</Text>
+                  <Text style={[styles.statusChip, statusTone]}>
+                    {isFull && !isClosed ? "Complète" : statusLabel}
+                  </Text>
+                </View>
+                <Text style={styles.infoValue}>
+                  {activity.participantsCount}/{activity.maxParticipants}
+                  {!isClosed && !isFull ? ` · ${placesLeft} place${placesLeft > 1 ? "s" : ""} restante${placesLeft > 1 ? "s" : ""}` : ""}
+                </Text>
+                <View style={styles.gauge} accessible={false}>
+                  <View
+                    style={[
+                      styles.gaugeFill,
+                      {
+                        width: `${Math.max(Math.min(1, activity.participantsCount / Math.max(1, activity.maxParticipants)), 0.04) * 100}%`,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
             </View>
           </View>
 
@@ -526,10 +612,18 @@ export default function ActivityDetailScreen() {
             </Section>
           ) : null}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Bouton retour posé sur la photo */}
       <SafeAreaView edges={["top"]} style={styles.topBar} pointerEvents="box-none">
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            styles.topBarBackground,
+            { opacity: scrollY.interpolate({ inputRange: [HERO_HEIGHT - 130, HERO_HEIGHT - 80], outputRange: [0, 1], extrapolate: "clamp" }) },
+          ]}
+        />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Retour"
@@ -539,6 +633,17 @@ export default function ActivityDetailScreen() {
         >
           <Ionicons name="arrow-back" size={22} color={Colors.text} />
         </Pressable>
+        <Animated.View
+          style={[
+            styles.topBarTitleWrap,
+            { opacity: scrollY.interpolate({ inputRange: [HERO_HEIGHT - 90, HERO_HEIGHT - 50], outputRange: [0, 1], extrapolate: "clamp" }) },
+          ]}
+          pointerEvents="none"
+        >
+          <Text style={styles.topBarTitle} numberOfLines={1}>
+            {activity.title}
+          </Text>
+        </Animated.View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Partager l'activité"
@@ -587,17 +692,24 @@ export default function ActivityDetailScreen() {
 
 function InfoRow({
   icon,
+  label,
   text,
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
+  label: string;
   text: string;
 }) {
   const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
   return (
-    <View style={styles.infoRow}>
-      <Ionicons name={icon} size={18} color={brand.primary} />
-      <Text style={styles.body}>{text}</Text>
+    <View style={styles.infoRow} accessible accessibilityLabel={`${label} : ${text}`}>
+      <View style={styles.infoIcon}>
+        <Ionicons name={icon} size={18} color={brand.primary} />
+      </View>
+      <View style={styles.flex}>
+        <Text style={styles.infoLabel}>{label}</Text>
+        <Text style={styles.infoValue}>{text}</Text>
+      </View>
     </View>
   );
 }
@@ -627,8 +739,108 @@ const makeStyles = (brand: Brand) =>
     flex: 1,
   },
   hero: {
-    height: 260,
+    height: HERO_HEIGHT,
     backgroundColor: Colors.text,
+    justifyContent: "flex-end",
+  },
+  heroContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: 24 + Spacing.md,
+  },
+  heroSport: {
+    borderRadius: 19,
+    borderWidth: 2,
+    borderColor: Colors.background,
+  },
+  heroSportName: {
+    flexShrink: 1,
+    fontSize: 16,
+    fontWeight: "700",
+    color: Colors.textOnPrimary,
+  },
+  heroCountdown: {
+    marginLeft: "auto",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 5,
+    borderRadius: Radius.pill,
+    backgroundColor: brand.accent,
+    backgroundImage: brand.badgeGradient,
+  },
+  heroCountdownText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: Colors.text,
+  },
+  infoCard: {
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.background,
+    ...Shadow.card,
+  },
+  infoDivider: {
+    height: 1,
+    marginLeft: 52,
+    backgroundColor: Colors.border,
+  },
+  infoIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: brand.primarySoft,
+  },
+  infoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  infoLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: Colors.textSecondary,
+  },
+  infoValue: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: Colors.text,
+  },
+  gauge: {
+    height: 5,
+    marginTop: 6,
+    borderRadius: 3,
+    overflow: "hidden",
+    backgroundColor: Colors.surface,
+  },
+  gaugeFill: {
+    height: "100%",
+    borderRadius: 3,
+    backgroundColor: brand.primary,
+    backgroundImage: brand.gradient,
+  },
+  topBarBackground: {
+    backgroundColor: Colors.background,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.border,
+  },
+  topBarTitleWrap: {
+    flex: 1,
+    justifyContent: "center",
+    marginTop: Spacing.sm,
+  },
+  topBarTitle: {
+    fontFamily: Fonts.heading,
+    fontSize: 16,
+    color: Colors.text,
   },
   heroShade: {
     backgroundImage: Gradients.photoShade,
@@ -645,14 +857,11 @@ const makeStyles = (brand: Brand) =>
     ...Typography.heading,
     fontSize: 24,
   },
-  infoList: {
-    marginTop: Spacing.md,
-    gap: Spacing.sm,
-  },
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.sm,
+    gap: Spacing.md,
+    paddingVertical: Spacing.md,
   },
   body: {
     ...Typography.body,
@@ -804,7 +1013,9 @@ const makeStyles = (brand: Brand) =>
     right: 0,
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.sm,
   },
   roundButton: {
     width: 42,

@@ -1,15 +1,20 @@
 import { useCallback, useRef } from "react";
-import { Alert, Image, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Image as RNImage, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "../../src/components/ui/Text";
 import { router, useFocusEffect } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { setStatusBarStyle } from "expo-status-bar";
+import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { AvatarEditor } from "../../src/components/AvatarEditor";
 import { LEGAL_URLS } from "../../src/config/env";
 import type { Brand } from "../../src/constants/brands";
-import { Colors, Radius, Shadow, Spacing, Typography } from "../../src/constants/theme";
+import { Colors, Fonts, Radius, Shadow, Spacing, Typography } from "../../src/constants/theme";
+import { formatMonthYear } from "../../src/lib/date";
+import { resolveMediaUrl } from "../../src/services/api";
+import { FadeIn } from "../../src/components/ui/FadeIn";
 import { useAuth } from "../../src/context/AuthContext";
 import { useBrand, useBrandStyles } from "../../src/context/BrandContext";
 import { useTerritory } from "../../src/context/TerritoryContext";
@@ -23,6 +28,7 @@ type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 export default function ProfileScreen() {
   const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
   const { activeTerritory } = useTerritory();
   const territoryCode = activeTerritory?.code;
@@ -48,6 +54,9 @@ export default function ProfileScreen() {
     useCallback(() => {
       if (hasFocused.current) refresh();
       hasFocused.current = true;
+      // Bannière colorée : barre d'état claire tant que l'onglet est affiché.
+      setStatusBarStyle("light");
+      return () => setStatusBarStyle("dark");
     }, [refresh])
   );
 
@@ -63,58 +72,91 @@ export default function ProfileScreen() {
   const stat = (value: number | undefined) => (value === undefined ? "–" : String(value));
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={styles.topBar}>
-        <Image source={brand.logo} resizeMode="contain" style={styles.logo} accessible={false} />
-        <Text style={styles.screenTitle} accessibilityRole="header">
-          Mon profil
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Paramètres"
-          onPress={() => router.push("/settings")}
-          hitSlop={10}
-        >
-          <Ionicons name="settings-outline" size={26} color={Colors.text} />
-        </Pressable>
+    <ScrollView
+      style={styles.safe}
+      contentContainerStyle={styles.scroll}
+      refreshControl={
+        <RefreshControl
+          refreshing={data.isRefreshing}
+          onRefresh={data.refresh}
+          tintColor={Colors.textOnPrimary}
+          progressViewOffset={insets.top}
+        />
+      }
+    >
+      {/* Bannière : photo de couverture, sinon l'emblème du territoire. */}
+      <View style={[styles.banner, { height: insets.top + 150 }]}>
+        <Image
+          source={resolveMediaUrl(user.coverPhoto) ?? brand.emblem}
+          contentFit="cover"
+          style={StyleSheet.absoluteFill}
+          accessible={false}
+        />
+        <View style={styles.bannerTint} />
+        <View style={[styles.bannerBar, { paddingTop: insets.top + Spacing.sm }]}>
+          <Text style={styles.bannerTitle}>Mon profil</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Paramètres"
+            onPress={() => router.push("/settings")}
+            hitSlop={10}
+            style={({ pressed }) => [styles.bannerButton, pressed && styles.pressed]}
+          >
+            <Ionicons name="settings-outline" size={22} color={Colors.textOnPrimary} />
+          </Pressable>
+        </View>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={data.isRefreshing} onRefresh={data.refresh} tintColor={brand.primary} />
-        }
-      >
-        {/* Carte d'identité */}
-        <View style={[styles.card, styles.identity]}>
-          <AvatarEditor size={96} />
-          <View style={styles.identityText}>
-            <Text style={styles.pseudo} numberOfLines={1}>
-              {user.pseudo}
-            </Text>
-            {activeTerritory || user.city ? (
+      <View style={styles.content}>
+        {/* Identité, centrée sous la bannière */}
+        <View style={styles.identity}>
+          <View style={styles.avatarRing}>
+            <AvatarEditor size={104} />
+          </View>
+          <Text style={styles.pseudo} numberOfLines={1} accessibilityRole="header">
+            {user.pseudo}
+          </Text>
+          <View style={styles.identityMeta}>
+            {user.city || activeTerritory ? (
               <View style={styles.row}>
-                <Ionicons name="location" size={16} color={brand.primary} />
+                <Ionicons name="location" size={14} color={brand.primary} />
                 <Text style={styles.caption} numberOfLines={1}>
                   {user.city ?? activeTerritory?.name}
                 </Text>
               </View>
             ) : null}
-            {user.headline ? (
-              <Text style={styles.headline} numberOfLines={2}>
-                {user.headline}
-              </Text>
-            ) : null}
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push("/profile/edit")}
-              style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
-            >
-              <Ionicons name="pencil" size={16} color={Colors.text} />
-              <Text style={styles.editLabel}>Modifier mon profil</Text>
-            </Pressable>
+            <View style={styles.row}>
+              <Ionicons name="sparkles" size={14} color={brand.primary} />
+              <Text style={styles.caption}>Membre depuis {formatMonthYear(user.createdAt)}</Text>
+            </View>
           </View>
+          {user.headline ? (
+            <Text style={styles.headline} numberOfLines={2}>
+              {user.headline}
+            </Text>
+          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push("/profile/edit")}
+            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+          >
+            <Ionicons name="pencil" size={15} color={brand.primary} />
+            <Text style={styles.editLabel}>Modifier mon profil</Text>
+          </Pressable>
         </View>
+
+        {/* Mon activité */}
+        <FadeIn>
+          {data.error && !data.data ? (
+            <Text style={styles.error}>{data.error}</Text>
+          ) : (
+            <View style={styles.stats} accessibilityLabel="Mon activité">
+              <Stat icon="shoe-sneaker" value={stat(data.data?.participations)} label="Sorties" />
+              <Stat icon="calendar-star" value={stat(data.data?.created)} label="Créées" />
+              <Stat icon="medal" value={stat(data.data?.sports.length)} label="Sports" />
+            </View>
+          )}
+        </FadeIn>
 
         {/* Territoire actif (menu latéral de la maquette) */}
         {activeTerritory ? (
@@ -124,7 +166,7 @@ export default function ProfileScreen() {
             onPress={() => router.push("/territory")}
             style={({ pressed }) => [styles.card, styles.territoryCard, pressed && styles.pressed]}
           >
-            <Image source={brand.logo} resizeMode="contain" style={styles.territoryLogo} accessible={false} />
+            <RNImage source={brand.logo} resizeMode="contain" style={styles.territoryLogo} accessible={false} />
             <View style={styles.identityText}>
               <Text style={styles.territoryLabel}>Territoire actif</Text>
               <Text style={styles.territoryName}>{activeTerritory.name}</Text>
@@ -133,25 +175,6 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={18} color={brand.primary} />
           </Pressable>
         ) : null}
-
-        {/* Mon activité */}
-        <View style={styles.statsCard}>
-          <View style={styles.row}>
-            <Ionicons name="stats-chart" size={18} color={brand.primary} />
-            <Text style={styles.cardTitle}>Mon activité</Text>
-          </View>
-          {data.error && !data.data ? (
-            <Text style={styles.error}>{data.error}</Text>
-          ) : (
-            <View style={styles.stats}>
-              <Stat icon="shoe-sneaker" value={stat(data.data?.participations)} label="sorties" />
-              <View style={styles.statDivider} />
-              <Stat icon="calendar-star" value={stat(data.data?.created)} label="créées" />
-              <View style={styles.statDivider} />
-              <Stat icon="medal" value={stat(data.data?.sports.length)} label="sports" />
-            </View>
-          )}
-        </View>
 
         {/* Raccourcis */}
         <View style={styles.links}>
@@ -206,8 +229,8 @@ export default function ProfileScreen() {
           <Ionicons name="log-out-outline" size={22} color={brand.primary} />
           <Text style={styles.logoutLabel}>Se déconnecter</Text>
         </Pressable>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -224,7 +247,9 @@ function Stat({
   const styles = useBrandStyles(makeStyles);
   return (
     <View style={styles.stat} accessible accessibilityLabel={`${value} ${label}`}>
-      <MaterialCommunityIcons name={icon} size={26} color={brand.primary} />
+      <View style={styles.statIcon}>
+        <MaterialCommunityIcons name={icon} size={20} color={brand.primary} />
+      </View>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
@@ -292,25 +317,41 @@ const makeStyles = (brand: Brand) =>
       flex: 1,
       backgroundColor: Colors.background,
     },
-    topBar: {
+    scroll: {
+      paddingBottom: Spacing.xxl,
+    },
+    banner: {
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+      overflow: "hidden",
+      backgroundColor: brand.primary,
+    },
+    bannerTint: {
+      ...StyleSheet.absoluteFill,
+      backgroundImage: brand.gradientDiagonal,
+      opacity: 0.85,
+    },
+    bannerBar: {
       flexDirection: "row",
       alignItems: "center",
-      gap: Spacing.md,
+      justifyContent: "space-between",
       paddingHorizontal: Spacing.lg,
-      paddingVertical: Spacing.sm,
     },
-    logo: {
-      width: 92,
-      height: 52,
+    bannerTitle: {
+      fontFamily: Fonts.headingExtraBold,
+      fontSize: 22,
+      color: Colors.textOnPrimary,
     },
-    screenTitle: {
-      ...Typography.title,
-      fontSize: 24,
-      flex: 1,
+    bannerButton: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
     },
     content: {
       paddingHorizontal: Spacing.lg,
-      paddingBottom: Spacing.xxl,
       gap: Spacing.md,
     },
     pressed: {
@@ -329,10 +370,24 @@ const makeStyles = (brand: Brand) =>
       ...Shadow.card,
     },
     identity: {
-      flexDirection: "row",
       alignItems: "center",
-      gap: Spacing.lg,
-      padding: Spacing.lg,
+      gap: Spacing.xs,
+      marginTop: -56,
+      marginBottom: Spacing.sm,
+    },
+    avatarRing: {
+      padding: 4,
+      borderRadius: 60,
+      backgroundColor: Colors.background,
+      boxShadow: "0px 6px 18px rgba(31, 41, 55, 0.15)",
+      marginBottom: Spacing.xs,
+    },
+    identityMeta: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
+      columnGap: Spacing.md,
+      rowGap: 2,
     },
     identityText: {
       flex: 1,
@@ -340,15 +395,19 @@ const makeStyles = (brand: Brand) =>
     },
     pseudo: {
       ...Typography.title,
-      fontSize: 24,
+      fontSize: 26,
+      textAlign: "center",
     },
     caption: {
       ...Typography.caption,
-      fontSize: 15,
+      fontSize: 14,
       flexShrink: 1,
     },
     headline: {
-      ...Typography.caption,
+      ...Typography.body,
+      textAlign: "center",
+      color: Colors.textSecondary,
+      paddingHorizontal: Spacing.lg,
     },
     editButton: {
       flexDirection: "row",
@@ -356,16 +415,15 @@ const makeStyles = (brand: Brand) =>
       justifyContent: "center",
       gap: Spacing.sm,
       marginTop: Spacing.sm,
-      minHeight: 42,
-      paddingHorizontal: Spacing.md,
+      minHeight: 40,
+      paddingHorizontal: Spacing.lg,
       borderRadius: Radius.pill,
-      borderWidth: 2,
-      borderColor: brand.primary,
+      backgroundColor: brand.primarySoft,
     },
     editLabel: {
       fontWeight: "700",
       fontSize: 14,
-      color: Colors.text,
+      color: brand.primary,
     },
     territoryCard: {
       flexDirection: "row",
@@ -389,12 +447,6 @@ const makeStyles = (brand: Brand) =>
       fontWeight: "700",
       fontSize: 14,
     },
-    statsCard: {
-      padding: Spacing.lg,
-      borderRadius: Radius.lg,
-      backgroundColor: Colors.surface,
-      gap: Spacing.md,
-    },
     cardTitle: {
       ...Typography.subheading,
       fontSize: 18,
@@ -405,27 +457,36 @@ const makeStyles = (brand: Brand) =>
     },
     stats: {
       flexDirection: "row",
-      alignItems: "center",
+      gap: Spacing.sm,
     },
     stat: {
       flex: 1,
       alignItems: "center",
       gap: 2,
+      paddingVertical: Spacing.md,
+      borderRadius: Radius.lg,
+      backgroundColor: Colors.background,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      ...Shadow.card,
     },
-    statDivider: {
-      width: 1,
-      alignSelf: "stretch",
-      backgroundColor: Colors.border,
+    statIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 4,
+      backgroundColor: brand.primarySoft,
     },
     statValue: {
+      fontFamily: Fonts.headingExtraBold,
       fontSize: 24,
-      fontWeight: "800",
       color: Colors.text,
     },
     statLabel: {
       ...Typography.caption,
-      fontSize: 14,
-      color: Colors.text,
+      fontSize: 13,
     },
     links: {
       gap: Spacing.sm,

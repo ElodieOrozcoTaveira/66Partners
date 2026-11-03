@@ -84,14 +84,16 @@ const BRANDS: Record<string, Brand> = {
   "66": makeBrand(
     "66",
     {
-      primary: "#E6392E",
-      primaryDark: "#C62828",
-      primarySoft: "#FDECEA",
-      accent: "#F4A61D",
-      accentSoft: "#FEF3DE",
-      gradientTo: "#F47B20",
-      badgeTo: "#F7C948",
-      shadowRgb: "230, 57, 46",
+      // Couleurs catalanes : rouge franc et jaune vif, sans orange (le
+      // dégradé reste dans les rouges, le jaune est réservé aux badges).
+      primary: "#C4121A",
+      primaryDark: "#930D13",
+      primarySoft: "#FBE6E7",
+      accent: "#FFCC00",
+      accentSoft: "#FFF7D1",
+      gradientTo: "#DE1F22",
+      badgeTo: "#FFE14D",
+      shadowRgb: "196, 18, 26",
     },
     require("../../assets/images/logo.webp"),
     require("../../assets/images/territories/emblem66.webp"),

@@ -53,10 +53,16 @@ export function EmptyState({
   actionLabel,
   onAction,
 }: EmptyStateProps) {
+  const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
   return (
     <View style={styles.container}>
-      <Ionicons name={icon} size={44} color={Colors.textMuted} />
+      {/* Icône dans des cercles aux couleurs du territoire. */}
+      <View style={styles.emptyRing} accessible={false}>
+        <View style={styles.emptyCircle}>
+          <Ionicons name={icon} size={34} color={brand.primary} />
+        </View>
+      </View>
       <Text style={styles.title}>{title}</Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
       {actionLabel && onAction ? (
@@ -75,8 +81,28 @@ const makeStyles = (brand: Brand) =>
     padding: Spacing.xl,
     gap: Spacing.sm,
   },
+  emptyRing: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: brand.primarySoft,
+    backgroundColor: Colors.background,
+  },
+  emptyCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: brand.primarySoft,
+  },
   title: {
     ...Typography.subheading,
+    fontSize: 18,
     textAlign: "center",
   },
   message: {
