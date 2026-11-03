@@ -1,4 +1,11 @@
-import { calendarDaysFromNow, formatActivityWhen, formatMonthYear, formatRelativeTime, matchesDateFilter } from "../date";
+import {
+  calendarDaysFromNow,
+  formatActivityWhen,
+  formatMonthYear,
+  formatRelativeTime,
+  formatStartsIn,
+  matchesDateFilter,
+} from "../date";
 
 describe("calendarDaysFromNow (calendrier Europe/Paris)", () => {
   it("compte en jours calendaires, pas en tranches de 24 h", () => {
@@ -81,5 +88,28 @@ describe("formatRelativeTime", () => {
 describe("formatMonthYear", () => {
   it("affiche le mois et l'année à Paris", () => {
     expect(formatMonthYear("2026-10-31T23:30:00Z")).toBe("novembre 2026");
+  });
+});
+
+describe("formatStartsIn", () => {
+  // Mardi 3 novembre 2026, 10:00 à Paris (09:00 UTC).
+  const now = new Date("2026-11-03T09:00:00Z");
+
+  it("en minutes la dernière heure", () => {
+    expect(formatStartsIn("2026-11-03T09:25:00Z", now)).toBe("Dans 25 min");
+  });
+
+  it("en heures le jour même", () => {
+    expect(formatStartsIn("2026-11-03T17:30:00Z", now)).toBe("Dans 8 h");
+  });
+
+  it("demain, puis en jours, puis la date", () => {
+    expect(formatStartsIn("2026-11-04T06:00:00Z", now)).toBe("Demain");
+    expect(formatStartsIn("2026-11-07T09:00:00Z", now)).toBe("Dans 4 jours");
+    expect(formatStartsIn("2026-11-20T09:00:00Z", now)).toBe("Vendredi 20 novembre");
+  });
+
+  it("une fois commencée", () => {
+    expect(formatStartsIn("2026-11-03T08:30:00Z", now)).toBe("C'est parti !");
   });
 });

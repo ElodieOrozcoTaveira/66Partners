@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { Redirect, Stack, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";

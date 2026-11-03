@@ -40,6 +40,10 @@ export function ActivityCardSkeleton() {
         <View style={[styles.line, styles.title]} />
         <View style={[styles.line, styles.medium]} />
         <View style={[styles.line, styles.short]} />
+        <View style={styles.footer}>
+          <View style={styles.avatar} />
+          <View style={[styles.line, styles.short]} />
+        </View>
       </View>
     </Animated.View>
   );
@@ -61,18 +65,30 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   card: {
-    borderRadius: Radius.lg,
+    borderRadius: Radius.lg + 2,
     backgroundColor: Colors.background,
     overflow: "hidden",
     ...Shadow.card,
   },
   photo: {
-    height: 110,
+    height: 150,
     backgroundColor: Colors.surface,
   },
   body: {
     padding: Spacing.md,
     gap: Spacing.sm,
+  },
+  footer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  avatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.surface,
   },
   line: {
     height: 12,

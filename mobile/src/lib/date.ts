@@ -61,6 +61,23 @@ export function formatActivityWhen(isoDate: string, now: Date = new Date()): str
   return `${formatActivityDay(date)} · ${time}`;
 }
 
+/**
+ * Compte à rebours court avant le début : "Dans 25 min", "Dans 3 h",
+ * "Demain", "Dans 4 jours", puis la date ; "C'est parti !" une fois commencé.
+ */
+export function formatStartsIn(isoDate: string, now: Date = new Date()): string {
+  const date = new Date(isoDate);
+  const minutes = Math.floor((date.getTime() - now.getTime()) / 60_000);
+  if (minutes <= 0) return "C'est parti !";
+  if (minutes < 60) return `Dans ${minutes} min`;
+
+  const days = calendarDaysFromNow(date, now);
+  if (days === 0) return `Dans ${Math.floor(minutes / 60)} h`;
+  if (days === 1) return "Demain";
+  if (days < 7) return `Dans ${days} jours`;
+  return formatActivityDay(date);
+}
+
 const weekdayFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: TIME_ZONE,
   weekday: "short",

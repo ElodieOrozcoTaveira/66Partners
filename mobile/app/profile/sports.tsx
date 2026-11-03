@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Text, TextInput } from "../../src/components/ui/Text";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { AvailabilityEditor } from "../../src/components/AvailabilityEditor";

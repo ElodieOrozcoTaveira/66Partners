@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./ui/Text";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { Colors, Radius, Spacing } from "../constants/theme";

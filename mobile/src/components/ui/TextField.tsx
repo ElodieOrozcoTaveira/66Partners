@@ -2,12 +2,11 @@ import { forwardRef, useState } from "react";
 import {
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   View,
   type TextInputInstance,
   type TextInputProps,
 } from "react-native";
+import { Text, TextInput } from "./Text";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Colors, Radius, Spacing, Typography } from "../../constants/theme";

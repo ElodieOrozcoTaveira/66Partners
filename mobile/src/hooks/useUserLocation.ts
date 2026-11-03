@@ -15,10 +15,12 @@ export type LocationStatus = "idle" | "locating" | "granted" | "denied" | "unava
  * - À l'ouverture : si l'autorisation est déjà donnée, on localise ; si elle
  *   n'a jamais été demandée, on la demande ; si elle a été refusée, on ne
  *   redemande pas (la carte reste sur le territoire).
+ *   Avec `{ ask: false }` (accueil), on ne demande jamais : on localise
+ *   seulement si l'autorisation a déjà été donnée.
  * - `locate()` (bouton « Me localiser ») redemande l'autorisation si le
  *   système le permet, sinon propose d'ouvrir les réglages.
  */
-export function useUserLocation() {
+export function useUserLocation({ ask = true }: { ask?: boolean } = {}) {
   const [status, setStatus] = useState<LocationStatus>("idle");
   const [coords, setCoords] = useState<Coordinates | null>(null);
   const mounted = useRef(true);
@@ -50,7 +52,7 @@ export function useUserLocation() {
     (async () => {
       try {
         let permission = await Location.getForegroundPermissionsAsync();
-        if (permission.status === "undetermined" && permission.canAskAgain) {
+        if (ask && permission.status === "undetermined" && permission.canAskAgain) {
           permission = await Location.requestForegroundPermissionsAsync();
         }
         if (!mounted.current) return;
@@ -63,7 +65,7 @@ export function useUserLocation() {
     return () => {
       mounted.current = false;
     };
-  }, [readPosition]);
+  }, [readPosition, ask]);
 
   const locate = useCallback(async (): Promise<Coordinates | null> => {
     try {

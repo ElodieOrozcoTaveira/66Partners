@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, Platform, Share } from "react-native";
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View, Platform, Share } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { router, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -32,6 +33,7 @@ import {
 } from "../../src/services/activities.service";
 import { getApiErrorCode, getApiErrorMessage } from "../../src/services/api";
 import { getMyProfile } from "../../src/services/user.service";
+import { Celebration } from "../../src/components/Celebration";
 import { GenderPrompt } from "../../src/components/GenderPrompt";
 import { AUDIENCE_LABELS, AUDIENCE_RESERVED_LABELS, canJoinAudience } from "../../src/lib/audience";
 import { WEB_ORIGIN } from "../../src/config/env";
@@ -77,7 +79,11 @@ async function loadDetail(id: string, userId: string): Promise<ActivityDetail> {
 export default function ActivityDetailScreen() {
   const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // celebrate=created : on arrive juste après avoir publié l'activité.
+  const { id, celebrate } = useLocalSearchParams<{ id: string; celebrate?: string }>();
+  const [celebration, setCelebration] = useState<"joined" | "created" | null>(
+    celebrate === "created" ? "created" : null
+  );
   const { user } = useAuth();
   const userId = user?.id ?? "";
   const [pendingAction, setPendingAction] = useState<string | null>(null);
@@ -133,6 +139,7 @@ export default function ActivityDetailScreen() {
     try {
       await joinActivity(activityId);
       haptics.success();
+      setCelebration("joined");
       refresh();
     } catch (err) {
       if (getApiErrorCode(err) === "GENDER_REQUIRED") {
@@ -560,6 +567,20 @@ export default function ActivityDetailScreen() {
           {footer}
         </SafeAreaView>
       ) : null}
+
+      <Celebration
+        visible={celebration !== null}
+        title={celebration === "created" ? "Activité publiée !" : "Demande envoyée !"}
+        message={
+          celebration === "created"
+            ? "Les sportifs de ton territoire peuvent maintenant la voir et te rejoindre."
+            : "L’organisateur va recevoir ta demande. Tu seras prévenu dès qu’il répond."
+        }
+        onClose={() => {
+          setCelebration(null);
+          if (celebrate) router.setParams({ celebrate: "" });
+        }}
+      />
     </View>
   );
 }

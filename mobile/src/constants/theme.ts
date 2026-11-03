@@ -45,10 +45,44 @@ export const Radius = {
   pill: 999,
 } as const;
 
+/**
+ * Polices de la charte (comme le site) : Manrope pour les titres, Inter pour
+ * le texte. Chargées au démarrage (app/_layout.tsx). Chaque graisse est une
+ * police à part : le composant Text (src/components/ui/Text.tsx) choisit la
+ * bonne à partir du fontWeight des styles.
+ */
+export const Fonts = {
+  regular: "Inter_400Regular",
+  medium: "Inter_500Medium",
+  semiBold: "Inter_600SemiBold",
+  bold: "Inter_700Bold",
+  extraBold: "Inter_800ExtraBold",
+  heading: "Manrope_700Bold",
+  headingExtraBold: "Manrope_800ExtraBold",
+} as const;
+
+/** Police Inter correspondant à une graisse CSS ("400" … "900", "bold"…). */
+export function interForWeight(weight: string | number | undefined): string {
+  switch (String(weight ?? "400")) {
+    case "500":
+      return Fonts.medium;
+    case "600":
+      return Fonts.semiBold;
+    case "700":
+    case "bold":
+      return Fonts.bold;
+    case "800":
+    case "900":
+      return Fonts.extraBold;
+    default:
+      return Fonts.regular;
+  }
+}
+
 export const Typography = {
-  title: { fontSize: 28, fontWeight: "800", color: Colors.text },
-  heading: { fontSize: 20, fontWeight: "700", color: Colors.text },
-  subheading: { fontSize: 16, fontWeight: "700", color: Colors.text },
+  title: { fontSize: 28, fontFamily: Fonts.headingExtraBold, color: Colors.text },
+  heading: { fontSize: 20, fontFamily: Fonts.heading, color: Colors.text },
+  subheading: { fontSize: 16, fontFamily: Fonts.heading, color: Colors.text },
   body: { fontSize: 15, lineHeight: 22, color: Colors.text },
   caption: { fontSize: 13, lineHeight: 18, color: Colors.textSecondary },
   label: { fontSize: 14, fontWeight: "600", color: Colors.text },

@@ -2,10 +2,10 @@ import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
-  Text,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { Text } from "./Text";
 
 import { Colors, Radius, Spacing, TOUCH_TARGET } from "../../constants/theme";
 import { useBrandStyles } from "../../context/BrandContext";

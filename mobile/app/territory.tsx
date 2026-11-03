@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "../src/components/ui/Text";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 

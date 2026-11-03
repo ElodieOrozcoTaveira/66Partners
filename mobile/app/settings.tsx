@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "../src/components/ui/Text";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import Constants from "expo-constants";

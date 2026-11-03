@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Switch,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text, TextInput } from "../../src/components/ui/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,12 +20,13 @@ import { EmptyState, ErrorState, LoadingState } from "../../src/components/ui/St
 import { Colors, Radius, Spacing, Typography } from "../../src/constants/theme";
 import { useTerritory } from "../../src/context/TerritoryContext";
 import { useAsync } from "../../src/hooks/useAsync";
+import { FadeIn } from "../../src/components/ui/FadeIn";
+import { haptics } from "../../src/lib/haptics";
+import { useNearbyCount } from "../../src/hooks/useNearbyCount";
 import { useUserLocation } from "../../src/hooks/useUserLocation";
 import { DATE_FILTER_LABELS, matchesDateFilter, type DateFilter } from "../../src/lib/date";
 import { LEVEL_LABELS } from "../../src/lib/labels";
 import { getActivities } from "../../src/services/activities.service";
-import { shareLocationAndCount, type NearbyCount } from "../../src/services/nearby.service";
-import { distanceKm, type Coordinates } from "../../src/lib/geo";
 import { getSports } from "../../src/services/sports.service";
 import type { Activity, ActivityAudience, SportLevel } from "../../src/types/domain";
 import { useBrand, useBrandStyles } from "../../src/context/BrandContext";
@@ -62,29 +62,7 @@ export default function ExplorerScreen() {
   const [view, setView] = useState<"list" | "map">("map");
   // Demandée à la première ouverture de l'onglet (la carte s'y affiche d'emblée).
   const location = useUserLocation();
-
-  // Sportifs autour de soi : on ne redemande que si l'on a bougé d'au moins
-  // 1 km (la position arrive souvent deux fois : récente, puis fraîche).
-  const [nearby, setNearby] = useState<NearbyCount | null>(null);
-  const lastSent = useRef<Coordinates | null>(null);
-  useEffect(() => {
-    const coords = location.coords;
-    if (!coords) return;
-    if (lastSent.current && distanceKm(lastSent.current, coords) < 1) return;
-    lastSent.current = coords;
-    let cancelled = false;
-    shareLocationAndCount(coords)
-      .then((result) => {
-        if (!cancelled) setNearby(result);
-      })
-      .catch(() => {
-        // Compteur indisponible : la carte reste utilisable sans.
-        lastSent.current = null;
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [location.coords]);
+  const nearby = useNearbyCount(location.coords);
 
   const sports = useAsync(() => getSports(), [], {
     errorMessage: "Impossible de récupérer les sports.",
@@ -354,8 +332,11 @@ export default function ExplorerScreen() {
           />
         ) : (
           <View style={styles.results}>
-            {results.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} onPress={openActivity} />
+            {results.map((activity, index) => (
+              // Apparition en cascade des premières cartes seulement.
+              <FadeIn key={activity.id} delay={Math.min(index, 6) * 60}>
+                <ActivityCard activity={activity} onPress={openActivity} from={location.coords} />
+              </FadeIn>
             ))}
           </View>
         )}
@@ -414,7 +395,10 @@ function Chip({
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      onPress={onPress}
+      onPress={() => {
+        haptics.selection();
+        onPress();
+      }}
       style={[styles.chip, selected && styles.chipSelected]}
     >
       <Text style={[styles.chipLabel, selected && styles.chipLabelSelected]}>{label}</Text>

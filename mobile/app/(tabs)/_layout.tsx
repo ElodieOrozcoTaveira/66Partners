@@ -2,7 +2,8 @@ import { StyleSheet, View } from "react-native";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import { Colors } from "../../src/constants/theme";
+import { Colors, Fonts } from "../../src/constants/theme";
+import { haptics } from "../../src/lib/haptics";
 import { useBrand, useBrandStyles } from "../../src/context/BrandContext";
 import { useNotifications } from "../../src/context/NotificationsContext";
 import type { Brand } from "../../src/constants/brands";
@@ -52,6 +53,8 @@ export default function TabsLayout() {
   const styles = useBrandStyles(makeStyles);
   return (
     <Tabs
+      // Petite vibration au changement d'onglet.
+      screenListeners={{ tabPress: () => haptics.selection() }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: brand.primary,
@@ -109,7 +112,7 @@ const makeStyles = (brand: Brand) =>
   },
   label: {
     fontSize: 11,
-    fontWeight: "600",
+    fontFamily: Fonts.semiBold,
   },
   createButton: {
     width: 42,

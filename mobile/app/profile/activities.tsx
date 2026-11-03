@@ -3,6 +3,7 @@ import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 
 import { ActivityCard } from "../../src/components/ActivityCard";
+import { FadeIn } from "../../src/components/ui/FadeIn";
 import { ActivityListSkeleton } from "../../src/components/ActivityCardSkeleton";
 import { EmptyState, ErrorState } from "../../src/components/ui/StateViews";
 import { Colors, Spacing } from "../../src/constants/theme";
@@ -62,7 +63,11 @@ export default function MyActivitiesScreen() {
           style={styles.screen}
           data={list.data ?? []}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ActivityCard activity={item} onPress={openActivity} />}
+          renderItem={({ item, index }) => (
+            <FadeIn delay={Math.min(index, 6) * 60}>
+              <ActivityCard activity={item} onPress={openActivity} />
+            </FadeIn>
+          )}
           contentContainerStyle={styles.content}
           ItemSeparatorComponent={Separator}
           refreshControl={

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Button } from "./ui/Button";

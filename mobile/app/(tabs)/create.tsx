@@ -5,9 +5,9 @@ import {
   ScrollView,
   type ScrollViewInstance,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -91,7 +91,7 @@ export default function CreateActivityScreen() {
       haptics.success();
       setForm(initialActivityForm());
       setStep(1);
-      router.push({ pathname: "/activity/[id]", params: { id: created.id } });
+      router.push({ pathname: "/activity/[id]", params: { id: created.id, celebrate: "created" } });
     } catch (err) {
       const code = getApiErrorCode(err);
       if (code === "GENDER_REQUIRED") {

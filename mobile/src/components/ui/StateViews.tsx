@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Colors, Spacing, Typography } from "../../constants/theme";

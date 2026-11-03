@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./ui/Text";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -7,8 +8,11 @@ import { useBrand, useBrandStyles } from "../context/BrandContext";
 import { useNotifications } from "../context/NotificationsContext";
 import type { Brand } from "../constants/brands";
 
-/** Cloche de l'en-tête d'accueil, avec le nombre de notifications non lues. */
-export function NotificationBell() {
+/**
+ * Cloche de l'en-tête d'accueil, avec le nombre de notifications non lues.
+ * `onColor` : version claire, posée sur le dégradé du territoire.
+ */
+export function NotificationBell({ onColor = false }: { onColor?: boolean }) {
   const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
   const { unreadCount } = useNotifications();
@@ -21,12 +25,12 @@ export function NotificationBell() {
       }
       hitSlop={6}
       onPress={() => router.push("/notifications")}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.button, onColor && styles.buttonOnColor, pressed && styles.pressed]}
     >
       <Ionicons
         name={unreadCount > 0 ? "notifications" : "notifications-outline"}
         size={24}
-        color={brand.primary}
+        color={onColor ? Colors.textOnPrimary : brand.primary}
       />
       {unreadCount > 0 ? (
         <View style={styles.badge} accessible={false}>
@@ -46,6 +50,9 @@ const makeStyles = (brand: Brand) =>
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: brand.primarySoft,
+    },
+    buttonOnColor: {
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
     },
     pressed: {
       opacity: 0.7,

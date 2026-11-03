@@ -1,5 +1,6 @@
 import { useCallback, useState, type ComponentProps } from "react";
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { Text } from "../src/components/ui/Text";
 import { router, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
