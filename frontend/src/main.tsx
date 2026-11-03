@@ -1,3 +1,5 @@
+// Doit être importé en premier : capte « beforeinstallprompt » au plus tôt.
+import "./lib/pwaInstall";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
