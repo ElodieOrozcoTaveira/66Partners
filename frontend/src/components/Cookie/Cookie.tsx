@@ -2,6 +2,8 @@
 'use client';
 
 import CookieConsent from "react-cookie-consent";
+import { NavLink } from "react-router-dom";
+import { Cookie } from "lucide-react";
 import { loadGoogleAnalytics } from "../Analytics/Analytics";
 import { COOKIE_CONSENT_NAME } from "../../lib/cookieConsent";
 import './Cookie.scss';
@@ -40,38 +42,28 @@ export default function CookieBanner() {
       buttonText="Accepter"
       declineButtonText="Refuser"
       enableDeclineButton
+      flipButtons
       onAccept={handleAccept}
       onDecline={handleDecline}
-      containerClasses="cookie-banner"
       cookieName={COOKIE_CONSENT_NAME}
-      style={{
-        padding: "20px",
-        alignItems: "center",
-        zIndex: 2000
-      }}
-      buttonStyle={{
-        background: "#fff",
-        // Suit la marque du territoire actif (cf. audit P-02) : même
-        // variable CSS que variables.$rouge2 côté SCSS, inutilisable ici
-        // telle quelle (styles inline, pas de contexte Sass).
-        color: "var(--brand-primary-dark, #C62828)",
-        fontSize: "14px",
-        padding: "10px 30px",
-        borderRadius: "5px",
-        fontWeight: "600"
-      }}
-      declineButtonStyle={{
-        background: "transparent",
-        color: "#fff",
-        border: "2px solid #fff",
-        fontSize: "14px",
-        padding: "10px 30px",
-        borderRadius: "5px",
-        fontWeight:'bold',
-      }}
+      // Styles inline de la librairie désactivés : carte flottante de la
+      // refonte (cf. Cookie.scss).
+      disableStyles
+      containerClasses="cookie-banner"
+      contentClasses="cookie-banner__content"
+      buttonWrapperClasses="cookie-banner__actions"
+      buttonClasses="cookie-banner__accept"
+      declineButtonClasses="cookie-banner__decline"
       expires={365}
     >
-      🍪 Ce site utilise des cookies pour améliorer votre expérience et analyser le trafic 🍪{" "}
+      <span className="cookie-banner__icon" aria-hidden="true">
+        <Cookie size={20} />
+      </span>
+      <span className="cookie-banner__text">
+        <strong>Tes données, ton choix</strong>
+        Nous utilisons des cookies de mesure d'audience pour améliorer le site.{" "}
+        <NavLink to="/confidentialite">En savoir plus</NavLink>
+      </span>
     </CookieConsent>
   );
 }
