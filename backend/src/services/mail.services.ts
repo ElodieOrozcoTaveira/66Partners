@@ -62,6 +62,58 @@ export async function sendAdminResetPasswordEmail(
   });
 }
 
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+const REPORT_REASON_LABELS: Record<string, string> = {
+  HARASSMENT: "Harcèlement ou insultes",
+  INAPPROPRIATE: "Contenu inapproprié",
+  SPAM: "Faux profil ou spam",
+  DANGEROUS: "Comportement dangereux",
+  OTHER: "Autre",
+};
+
+const REPORT_CONTEXT_LABELS: Record<string, string> = {
+  PROFILE: "un profil",
+  MESSAGE: "un message",
+  ACTIVITY: "une activité",
+  PHOTO: "une photo",
+};
+
+/** Alerte l'admin d'un nouveau signalement (à traiter rapidement, exigence des stores). */
+export async function sendReportAlertEmail(report: {
+  context: string;
+  reason: string;
+  details: string | null;
+  targetExcerpt: string | null;
+  reporter: { pseudo: string } | null;
+  reportedUser: { pseudo: string; openReports: number } | null;
+}): Promise<void> {
+  const to = process.env.ADMIN_RECOVERY_EMAIL;
+  if (!to) return;
+
+  const adminUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/admin/signalements`;
+  const reported = report.reportedUser
+    ? `${escapeHtml(report.reportedUser.pseudo)} (${report.reportedUser.openReports} signalement(s) en attente)`
+    : "compte supprimé";
+
+  await transporter.sendMail({
+    from: `"66Partners" <${process.env.SMTP_USER}>`,
+    to,
+    subject: `Nouveau signalement : ${REPORT_REASON_LABELS[report.reason] ?? report.reason}`,
+    html: `
+      <h1>Nouveau signalement</h1>
+      <p><strong>Contenu :</strong> ${REPORT_CONTEXT_LABELS[report.context] ?? report.context}</p>
+      <p><strong>Motif :</strong> ${REPORT_REASON_LABELS[report.reason] ?? report.reason}</p>
+      <p><strong>Membre signalé :</strong> ${reported}</p>
+      <p><strong>Signalé par :</strong> ${report.reporter ? escapeHtml(report.reporter.pseudo) : "compte supprimé"}</p>
+      ${report.targetExcerpt ? `<p><strong>Contenu signalé :</strong><br>${escapeHtml(report.targetExcerpt).replace(/\n/g, "<br>")}</p>` : ""}
+      ${report.details ? `<p><strong>Précisions :</strong><br>${escapeHtml(report.details).replace(/\n/g, "<br>")}</p>` : ""}
+      <p><a href="${adminUrl}">Traiter le signalement dans l'espace admin</a></p>
+    `,
+  });
+}
+
 export async function sendAccountDeletedEmail(
   user: { email: string; pseudo: string },
   brand: TerritoryBrand,

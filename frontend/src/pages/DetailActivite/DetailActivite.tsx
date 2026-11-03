@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { isAxiosError } from "axios";
-import { ArrowLeft, Calendar, Car, Check, MapPin, Plus, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, Calendar, Car, Check, Flag, MapPin, Plus, Trash2, Users, X } from "lucide-react";
 import api from "../../lib/axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { ACTIVITY_NOTIFICATION_TYPES, useNotifications } from "../../contexts/NotificationsContext";
@@ -10,6 +10,9 @@ import { getSportPhoto } from "../../lib/sportPhotos";
 import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
 import { formatMonth, formatTime, formatWeekday } from "../../lib/dateFormat";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
+import ModerationCard from "../../components/Moderation/ModerationCard";
+import ReportDialog from "../../components/Moderation/ReportDialog";
+import type { ReportTarget } from "../../api/moderation";
 import "./DetailActivite.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
 import ModaleGenre from "../../components/ModaleGenre/ModaleGenre";
@@ -75,6 +78,7 @@ export default function DetailActivite() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
   const { notifications, markManyAsRead } = useNotifications();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -678,7 +682,7 @@ export default function DetailActivite() {
                 {photos.map((photo) => (
                   <div key={photo.id} className="detailactivite-photo">
                     <img src={photo.url} alt={`Photo ajoutée par ${photo.authorPseudo}`} />
-                    {photo.uploaderId === user?.id && (
+                    {photo.uploaderId === user?.id ? (
                       <button
                         type="button"
                         className="detailactivite-photo__remove"
@@ -687,6 +691,16 @@ export default function DetailActivite() {
                       >
                         <Trash2 size={13} />
                       </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="detailactivite-photo__remove"
+                        onClick={() => setReportTarget({ context: "PHOTO", targetId: photo.id })}
+                        aria-label="Signaler la photo"
+                        title="Signaler la photo"
+                      >
+                        <Flag size={13} />
+                      </button>
                     )}
                   </div>
                 ))}
@@ -694,7 +708,22 @@ export default function DetailActivite() {
             )}
           </section>
         )}
+
+        {/* Signaler l'activité / bloquer l'organisateur (pas sur ses propres activités). */}
+        {!isCreator && (
+          <ModerationCard
+            report={{ context: "ACTIVITY", targetId: activity.id, label: "Signaler cette activité" }}
+            block={
+              activity.creatorId
+                ? { userId: activity.creatorId, pseudo: activity.creatorPseudo ?? "l'organisateur" }
+                : undefined
+            }
+            onBlocked={() => navigate("/explorer", { replace: true })}
+          />
+        )}
       </div>
+
+      <ReportDialog target={reportTarget} onClose={() => setReportTarget(null)} />
 
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}

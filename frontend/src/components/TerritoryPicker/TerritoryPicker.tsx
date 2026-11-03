@@ -5,8 +5,8 @@ import { loadTerritoryTheme } from "../../lib/territoryAssets";
 import "./TerritoryPicker.scss";
 
 /**
- * Territoire principal choisi à l'inscription (classique ou via Google /
- * Facebook). Par défaut : le territoire actuellement affiché à l'écran.
+ * Territoire principal choisi à l'inscription (classique ou via Google).
+ * Par défaut : le territoire actuellement affiché à l'écran.
  * Le composant ne s'affiche que si plusieurs territoires actifs existent ;
  * sinon le seul territoire actif est utilisé sans rien demander.
  */

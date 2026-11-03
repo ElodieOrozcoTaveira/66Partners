@@ -1,0 +1,91 @@
+@use "../../../styles/variables/variables.scss";
+
+.admin-bar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.admin-bar-list__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+}
+
+.admin-bar-list__row--link {
+  cursor: pointer;
+  border-radius: 8px;
+
+  &:hover .admin-bar-list__label {
+    color: variables.$rouge2;
+  }
+
+  &:focus-visible {
+    outline: 2px solid variables.$rouge2;
+    outline-offset: 3px;
+  }
+}
+
+.admin-bar-list__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-bar-list__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: variables.$nuit;
+}
+
+.admin-bar-list__value {
+  flex-shrink: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: variables.$nuit;
+
+  small {
+    font-family: "Inter", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+}
+
+.admin-bar-list__track {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+
+.admin-bar-list__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c62828 0%, #f4b400 100%);
+}
+
+.admin-bar-list__empty {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  color: #64748b;
+}

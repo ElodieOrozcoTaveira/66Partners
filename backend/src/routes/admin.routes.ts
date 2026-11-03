@@ -9,10 +9,16 @@ import {
 import {
   adminLoginSchema,
   adminResetPasswordSchema,
+  adminActivityIdParamSchema,
   adminTerritoryQuerySchema,
   adminUserIdParamSchema,
   statsRangeQuerySchema,
 } from "../validations/admin.validations.js";
+import {
+  adminReportIdParamSchema,
+  adminReportStatusSchema,
+  adminReportsQuerySchema,
+} from "../validations/moderation.validations.js";
 
 /*
 POST /admin/auth/login
@@ -22,9 +28,14 @@ GET /admin/territories
 GET /admin/stats/overview
 GET /admin/stats/user-evolution
 GET /admin/stats/territory-breakdown
+GET /admin/stats/insights
 GET /admin/users
+GET /admin/users/:userId
 DELETE /admin/users/:userId
 GET /admin/activities
+GET /admin/activities/:activityId
+GET /admin/reports
+PATCH /admin/reports/:reportId
 */
 
 const router = Router();
@@ -60,10 +71,23 @@ router.get(
 );
 
 router.get(
+  "/stats/insights",
+  requireAdminAuth,
+  validateQuery(adminTerritoryQuerySchema),
+  AdminController.insights
+);
+
+router.get(
   "/users",
   requireAdminAuth,
   validateQuery(adminTerritoryQuerySchema),
   AdminController.listUsers
+);
+router.get(
+  "/users/:userId",
+  requireAdminAuth,
+  validateParams(adminUserIdParamSchema),
+  AdminController.userDetail
 );
 router.delete(
   "/users/:userId",
@@ -76,6 +100,26 @@ router.get(
   requireAdminAuth,
   validateQuery(adminTerritoryQuerySchema),
   AdminController.listActivities
+);
+router.get(
+  "/activities/:activityId",
+  requireAdminAuth,
+  validateParams(adminActivityIdParamSchema),
+  AdminController.activityDetail
+);
+
+router.get(
+  "/reports",
+  requireAdminAuth,
+  validateQuery(adminReportsQuerySchema),
+  AdminController.listReports
+);
+router.patch(
+  "/reports/:reportId",
+  requireAdminAuth,
+  validateParams(adminReportIdParamSchema),
+  validateBody(adminReportStatusSchema),
+  AdminController.updateReport
 );
 
 export default router;

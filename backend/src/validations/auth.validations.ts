@@ -105,35 +105,3 @@ export const googleLinkSchema = z.object({
 });
 
 export type GoogleLinkInput = z.infer<typeof googleLinkSchema>;
-
-/**
- * POST /auth/facebook
- */
-export const facebookAuthSchema = z.object({
-  accessToken: z.string().min(1, "Jeton Facebook requis"),
-});
-
-export type FacebookAuthInput = z.infer<typeof facebookAuthSchema>;
-
-/**
- * POST /auth/facebook/complete
- */
-export const facebookCompleteSchema = z.object({
-  accessToken: z.string().min(1, "Jeton Facebook requis"),
-  territoryCode: z.string().trim().min(1).max(10).optional(),
-  termsAccepted: z.literal(
-    true,
-    "Tu dois accepter les Mentions Légales et la Politique de confidentialité pour créer un compte."
-  ),
-});
-
-export type FacebookCompleteInput = z.infer<typeof facebookCompleteSchema>;
-
-/**
- * POST /auth/facebook/link
- */
-export const facebookLinkSchema = z.object({
-  accessToken: z.string().min(1, "Jeton Facebook requis"),
-});
-
-export type FacebookLinkInput = z.infer<typeof facebookLinkSchema>;

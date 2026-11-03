@@ -157,3 +157,57 @@
   background: #ffffff;
   border-radius: 16px;
 }
+
+.admin-activities-page__row--link {
+  align-items: center;
+  flex-wrap: nowrap;
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1);
+
+    strong {
+      color: variables.$rouge2;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid variables.$rouge2;
+    outline-offset: 2px;
+  }
+}
+
+.admin-activities-page__title-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.admin-activities-page__meta {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+
+.admin-activities-page__meta-item--full {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.admin-activities-page__meta-item--pending {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.admin-activities-page__chevron {
+  flex-shrink: 0;
+  color: #cbd5e1;
+}
+
+.admin-activities-page__date {
+  @media (max-width: 479px) {
+    display: none;
+  }
+}

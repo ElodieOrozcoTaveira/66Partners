@@ -9,8 +9,14 @@ export function MentionsLegales() {
         Conformément aux dispositions de la loi n°2004-575 du 21 juin 2004
         pour la confiance dans l'économie numérique, il est précisé aux
         utilisateurs de la plateforme 66Partners et de ses déclinaisons
-        territoriales l'identité des différents intervenants dans le cadre
-        de sa réalisation et de son suivi.
+        territoriales (34Partners, 11Partners, 31Partners, 32Partners,
+        09Partners, 30Partners, 81Partners) l'identité des différents
+        intervenants dans le cadre de sa réalisation et de son suivi. Ces
+        mentions s'appliquent au site web et à l'application mobile.
+        <br />
+        <br />
+        Elles comprennent également les conditions d'utilisation du
+        service, que vous acceptez en créant un compte.
       </p>
 
       <hr className="legal-divider" />
@@ -61,6 +67,10 @@ export function MentionsLegales() {
           </li>
 
           <li>
+            <span className="legal-label">Téléphone :</span> +49 (0)9831 505-0
+          </li>
+
+          <li>
             <span className="legal-label">Site web :</span>{' '}
             <a
               className="legal-link"
@@ -98,6 +108,80 @@ export function MentionsLegales() {
         <p className="legal-text">
           Les contenus publiés par les utilisateurs restent soumis aux
           droits qui leur sont applicables.
+        </p>
+      </section>
+
+      <hr className="legal-divider" />
+
+      <section className="legal-section">
+        <h2 className="legal-subtitle">Conditions d'utilisation</h2>
+
+        <h3 className="legal-subtitle-sm">Objet du service</h3>
+        <p className="legal-text">
+          La plateforme permet à des sportifs de se rencontrer, de proposer
+          et de rejoindre des activités sportives près de chez eux, et
+          d'échanger avec les autres participants. L'inscription est
+          gratuite.
+        </p>
+
+        <h3 className="legal-subtitle-sm">Compte</h3>
+        <p className="legal-text">
+          Vous vous engagez à fournir des informations exactes, à garder
+          votre mot de passe confidentiel et à n'utiliser qu'un seul compte.
+          Vous pouvez supprimer votre compte à tout moment depuis
+          l'application (Profil &gt; Paramètres) ou le site (Mon profil).
+        </p>
+
+        <h3 className="legal-subtitle-sm">Règles de conduite</h3>
+        <p className="legal-text">
+          La plateforme applique une tolérance zéro envers les contenus et
+          comportements abusifs. Il est notamment interdit de :
+        </p>
+        <ul className="legal-list">
+          <li>harceler, menacer, insulter ou discriminer un autre membre ;</li>
+          <li>
+            publier des contenus à caractère sexuel, violent, haineux,
+            illégal ou portant atteinte aux droits d'autrui (photos de
+            personnes sans leur accord, par exemple) ;
+          </li>
+          <li>usurper l'identité d'une autre personne ou créer un faux profil ;</li>
+          <li>
+            utiliser le service à des fins commerciales, publicitaires ou de
+            démarchage sans autorisation ;
+          </li>
+          <li>
+            mettre volontairement en danger d'autres participants lors d'une
+            activité.
+          </li>
+        </ul>
+
+        <h3 className="legal-subtitle-sm">Signalement, blocage et modération</h3>
+        <p className="legal-text">
+          Chaque membre peut signaler un profil, un message, une activité ou
+          une photo, et bloquer un autre membre. Les signalements sont
+          examinés rapidement par l'équipe de la plateforme, qui peut
+          supprimer un contenu, avertir, suspendre ou supprimer le compte
+          d'un membre qui ne respecte pas ces règles, sans préavis en cas
+          de manquement grave. En cas de danger immédiat, contactez le 17
+          (police) ou le 112.
+        </p>
+
+        <h3 className="legal-subtitle-sm">Activités sportives</h3>
+        <p className="legal-text">
+          Les activités sont organisées par les membres eux-mêmes, et non par
+          la plateforme. Chaque participant pratique sous sa propre
+          responsabilité : il lui appartient de vérifier que l'activité
+          correspond à son niveau et à sa condition physique, et de
+          disposer, le cas échéant, d'une assurance adaptée. Le covoiturage
+          éventuel est convenu directement entre les membres concernés.
+        </p>
+
+        <h3 className="legal-subtitle-sm">Contenus publiés</h3>
+        <p className="legal-text">
+          Vous restez responsable des contenus que vous publiez (profil,
+          messages, photos, activités) et garantissez disposer des droits
+          nécessaires. Vous autorisez la plateforme à les afficher aux
+          autres membres concernés, dans le seul cadre du service.
         </p>
       </section>
 
@@ -144,7 +228,7 @@ export function MentionsLegales() {
       <hr className="legal-divider" />
 
       <p className="legal-update">
-        Dernière mise à jour : septembre 2026
+        Dernière mise à jour : novembre 2026
       </p>
     </div>
   );

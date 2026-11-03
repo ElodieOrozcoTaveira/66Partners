@@ -9,7 +9,6 @@ import { sendWelcomeEmail, sendResetPasswordEmail } from "./mail.services.js";
 import { TerritoryService } from "./territory.services.js";
 import { SocialAccountService, type SocialProvider } from "./socialAccount.services.js";
 import type { GoogleProfile } from "./google.services.js";
-import type { FacebookProfile } from "./facebook.services.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -61,12 +60,7 @@ function derivePseudoFromGoogleProfile(profile: GoogleProfile): string {
   return base.slice(0, 100);
 }
 
-function derivePseudoFromFacebookProfile(profile: FacebookProfile): string {
-  const base = profile.firstName || profile.name || profile.email.split("@")[0] || "Sportif";
-  return base.slice(0, 100);
-}
-
-// État métier renvoyé par POST /api/auth/{google,facebook} — jamais de
+// État métier renvoyé par POST /api/auth/google — jamais de
 // création ni de fusion à ce stade, uniquement un constat sur l'état du
 // compte :
 // - LOGGED_IN : ce compte social est déjà lié à un utilisateur 66Partners.
@@ -81,8 +75,7 @@ export type SocialLoginStatus =
   | { status: "NEW_ACCOUNT"; email: string }
   | { status: "EMAIL_ALREADY_REGISTERED"; email: string };
 
-// Conservé pour compatibilité de nommage avec le code existant (Google a été
-// implémenté avant que Facebook ne généralise ce type).
+// Conservé pour compatibilité de nommage avec le code existant.
 export type GoogleLoginStatus = SocialLoginStatus;
 
 interface SocialIdentity {
@@ -418,7 +411,7 @@ export class AuthService {
 
   /**
    * Constate l'état d'un compte pour un fournisseur social donné — ne crée
-   * et ne fusionne jamais rien. Partagé par Google et Facebook : la logique
+   * et ne fusionne jamais rien. Générique (fournisseur en paramètre) : la logique
    * est strictement identique une fois `providerUserId`/`email` vérifiés
    * cryptographiquement par le service du provider concerné.
    */
@@ -561,7 +554,7 @@ export class AuthService {
 
     if (linkedUserId && linkedUserId !== userId) {
       throw new AuthError(
-        `Ce compte ${provider === "google" ? "Google" : "Facebook"} est déjà associé à un autre compte 66Partners.`,
+        "Ce compte Google est déjà associé à un autre compte 66Partners.",
         `${provider.toUpperCase()}_ACCOUNT_ALREADY_LINKED`,
         409
       );
@@ -637,34 +630,5 @@ export class AuthService {
 
   static async linkGoogleAccount(userId: string, profile: GoogleProfile): Promise<void> {
     return AuthService.linkSocialAccount(userId, "google", profile.sub, profile.email);
-  }
-
-  // ─── Facebook ──────────────────────────────────────────────────────────
-
-  /**
-   * POST /api/auth/facebook — `profile` a déjà été vérifié par
-   * verifyFacebookAccessToken() (Graph API /debug_token + /me) avant
-   * d'arriver ici.
-   */
-  static async loginWithFacebook(profile: FacebookProfile): Promise<SocialLoginStatus> {
-    return AuthService.loginWithSocialAccount("facebook", profile.id, profile.email);
-  }
-
-  static async completeFacebookSignup(
-    profile: FacebookProfile,
-    _termsAccepted: true,
-    territoryCode?: string
-  ): Promise<UserData> {
-    return AuthService.completeSocialSignup("facebook", {
-      territoryCode,
-      providerUserId: profile.id,
-      email: profile.email,
-      pseudo: derivePseudoFromFacebookProfile(profile),
-      avatar: profile.picture,
-    });
-  }
-
-  static async linkFacebookAccount(userId: string, profile: FacebookProfile): Promise<void> {
-    return AuthService.linkSocialAccount(userId, "facebook", profile.id, profile.email);
   }
 }

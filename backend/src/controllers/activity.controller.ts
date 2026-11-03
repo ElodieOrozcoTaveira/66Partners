@@ -5,6 +5,7 @@ import {
   ActivityError,
   type ActivityStatus,
 } from "../services/activity.services.js";
+import { BlockService } from "../services/block.services.js";
 import { TerritoryService, TerritoryError } from "../services/territory.services.js";
 import type { ActivityAudience } from "../utils/audience.js";
 
@@ -106,6 +107,9 @@ export class ActivityController {
       // Valeur déjà validée par activityFiltersSchema (ALL, WOMEN ou MEN).
       if (typeof audience === "string") filters.audience = audience as ActivityAudience;
       filters.territory = territory as string;
+      // Route publique : filtre des membres bloqués seulement si connecté (optionalAuth).
+      const viewerId = (req as AuthenticatedRequest).userId;
+      if (viewerId) filters.viewerId = viewerId;
 
       const activitiesList = await ActivityService.listActivities(filters);
 
@@ -156,7 +160,8 @@ export class ActivityController {
 
       const activity = await ActivityService.getActivityDetailForUser(id);
 
-      if (!activity) {
+      // Activité d'un membre bloqué (dans un sens ou dans l'autre) : introuvable.
+      if (!activity || (await BlockService.isBlockedBetween(req.userId, activity.creatorId))) {
         res.status(404).json({
           success: false,
           message: "Activité non trouvée",

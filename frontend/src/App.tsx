@@ -52,7 +52,10 @@ const AdminReinitialiserMotDePasse = lazy(
 const AdminStats = lazy(() => import("./pages/AdminStats/AdminStats"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers/AdminUsers"));
 const AdminActivities = lazy(() => import("./pages/AdminActivities/AdminActivities"));
+const AdminUserDetail = lazy(() => import("./pages/AdminUserDetail/AdminUserDetail"));
+const AdminActivityDetail = lazy(() => import("./pages/AdminActivityDetail/AdminActivityDetail"));
 const AdminSettings = lazy(() => import("./pages/AdminSettings/AdminSettings"));
+const AdminReports = lazy(() => import("./pages/AdminReports/AdminReports"));
 
 // Fallback minimal, identique au spinner déjà utilisé par ProtectedRoute
 // pendant la résolution de l'auth — cohérent avec le design existant, pas de
@@ -117,6 +120,9 @@ export default function App() {
             <Route path="/admin/stats" element={<Suspense fallback={<RouteFallback />}><AdminStats /></Suspense>} />
             <Route path="/admin/utilisateurs" element={<Suspense fallback={<RouteFallback />}><AdminUsers /></Suspense>} />
             <Route path="/admin/activites" element={<Suspense fallback={<RouteFallback />}><AdminActivities /></Suspense>} />
+            <Route path="/admin/utilisateurs/:userId" element={<Suspense fallback={<RouteFallback />}><AdminUserDetail /></Suspense>} />
+            <Route path="/admin/activites/:activityId" element={<Suspense fallback={<RouteFallback />}><AdminActivityDetail /></Suspense>} />
+            <Route path="/admin/signalements" element={<Suspense fallback={<RouteFallback />}><AdminReports /></Suspense>} />
             <Route path="/admin/settings" element={<Suspense fallback={<RouteFallback />}><AdminSettings /></Suspense>} />
           </Route>
         </Routes>

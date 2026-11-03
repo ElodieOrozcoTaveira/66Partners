@@ -2,6 +2,7 @@ import "dotenv/config";
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { activities, conversations, participations, users } from "../db/schema.js";
+import { BlockService, notBlockedWith } from "./block.services.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
 import { ConversationService } from "./conversation.services.js";
 import { NotificationService } from "./notification.services.js";
@@ -91,6 +92,12 @@ export class ParticipationService {
       );
     }
 
+    // Blocage entre le membre et l'organisateur : l'activité lui est
+    // invisible, la demande est refusée sans révéler le blocage.
+    if (await BlockService.isBlockedBetween(userId, activity.creatorId)) {
+      throw new ParticipationError("Activité non trouvée", "ACTIVITY_NOT_FOUND", 404);
+    }
+
     // Activité réservée (entre femmes / entre hommes) : contrôle serveur,
     // genre lu en base — jamais une valeur envoyée par le client.
     const audienceCheck = await checkAudience(userId, activity.audience);
@@ -178,6 +185,14 @@ export class ParticipationService {
       throw new ParticipationError(
         "Seul le créateur de l'activité peut accepter cette demande",
         "FORBIDDEN",
+        403
+      );
+    }
+
+    if (await BlockService.isBlockedBetween(requesterId, participation.userId)) {
+      throw new ParticipationError(
+        "Impossible d'accepter ce membre",
+        "BLOCKED_MEMBER",
         403
       );
     }
@@ -371,12 +386,16 @@ export class ParticipationService {
       .from(participations)
       .innerJoin(users, eq(users.id, participations.userId))
       .where(
-        isCreator
-          ? eq(participations.activityId, activityId)
-          : and(
-              eq(participations.activityId, activityId),
-              eq(participations.status, "ACCEPTED")
-            )
+        and(
+          isCreator
+            ? eq(participations.activityId, activityId)
+            : and(
+                eq(participations.activityId, activityId),
+                eq(participations.status, "ACCEPTED")
+              ),
+          // Membres bloqués (dans un sens ou dans l'autre) : absents de la liste.
+          notBlockedWith(requesterId, participations.userId)
+        )
       )
       .orderBy(desc(participations.createdAt));
   }

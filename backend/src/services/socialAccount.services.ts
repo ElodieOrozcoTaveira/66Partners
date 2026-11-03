@@ -5,7 +5,7 @@ import { socialAccounts } from "../db/schema.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
-export type SocialProvider = "google" | "facebook";
+export type SocialProvider = "google";
 
 export interface SocialAccountLink {
   userId: string;
@@ -19,7 +19,7 @@ export interface SocialAccountLink {
  *
  * Table dédiée (social_accounts) plutôt qu'une surcharge de `users` :
  * un compte 66Partners reste un compte global, éventuellement lié à
- * plusieurs fournisseurs ("google" et "facebook" aujourd'hui).
+ * plusieurs fournisseurs (seul "google" aujourd'hui).
  */
 export class SocialAccountService {
   static async findUserIdByProvider(

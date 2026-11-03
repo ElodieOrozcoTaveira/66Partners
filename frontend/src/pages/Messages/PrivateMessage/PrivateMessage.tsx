@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { NavLink, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Flag, Send } from "lucide-react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useNotifications } from "../../../contexts/NotificationsContext";
 import { formatTime } from "../../../lib/dateFormat";
 import "./PrivateMessage.scss";
+import "../../../components/ConfirmDialog/ConfirmDialog.scss";
+import "../../../components/Moderation/Moderation.scss";
+import ReportDialog from "../../../components/Moderation/ReportDialog";
+import BlockDialog from "../../../components/Moderation/BlockDialog";
+import type { ReportTarget } from "../../../api/moderation";
 import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
 
 interface MessageItem {
@@ -43,6 +48,9 @@ export default function PrivateMessage() {
   const [notFound, setNotFound] = useState(false);
   const [draft, setDraft] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [moderation, setModeration] = useState<{ messageId: string; userId: string; pseudo: string } | null>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const [blockTarget, setBlockTarget] = useState<{ userId: string; pseudo: string } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -210,12 +218,67 @@ export default function PrivateMessage() {
                     {formatTime(new Date(message.createdAt))}
                   </span>
                 </div>
+                {!isMine && (
+                  <button
+                    type="button"
+                    className="message-row__flag"
+                    onClick={() =>
+                      setModeration({ messageId: message.id, userId: message.usersId, pseudo: message.authorPseudo })
+                    }
+                    aria-label={`Signaler ce message ou bloquer ${message.authorPseudo}`}
+                    title="Signaler ou bloquer"
+                  >
+                    <Flag size={13} strokeWidth={2.2} />
+                  </button>
+                )}
               </div>
             );
           })
         )}
         <div ref={bottomRef} />
       </div>
+
+      {/* Message choisi : signaler le message ou bloquer son auteur. */}
+      {moderation && (
+        <div className="confirm-dialog-overlay" onClick={() => setModeration(null)}>
+          <div className="confirm-dialog" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <h3 className="confirm-dialog__title">Message de {moderation.pseudo}</h3>
+            <div className="confirm-dialog__actions moderation-choice">
+              <button
+                type="button"
+                className="confirm-dialog__cancel"
+                onClick={() => {
+                  setReportTarget({ context: "MESSAGE", targetId: moderation.messageId });
+                  setModeration(null);
+                }}
+              >
+                Signaler ce message
+              </button>
+              <button
+                type="button"
+                className="confirm-dialog__confirm"
+                onClick={() => {
+                  setBlockTarget({ userId: moderation.userId, pseudo: moderation.pseudo });
+                  setModeration(null);
+                }}
+              >
+                Bloquer {moderation.pseudo}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <ReportDialog target={reportTarget} onClose={() => setReportTarget(null)} />
+      <BlockDialog
+        member={blockTarget}
+        onClose={() => setBlockTarget(null)}
+        onBlocked={() => {
+          // Ses messages disparaissent tout de suite (le serveur les masque aussi).
+          const blockedId = blockTarget?.userId;
+          setMessages((current) => current.filter((item) => item.usersId !== blockedId));
+          setBlockTarget(null);
+        }}
+      />
 
       <form className="privatemessage-page__composer" onSubmit={handleSubmit}>
         <input

@@ -8,6 +8,7 @@ import {
   participations,
   users,
 } from "../db/schema.js";
+import { BlockService, notBlockedWith } from "./block.services.js";
 import { ActivityService } from "./activity.services.js";
 import { NotificationService } from "./notification.services.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
@@ -363,7 +364,8 @@ export class ConversationService {
       })
       .from(messages)
       .innerJoin(users, eq(users.id, messages.usersId))
-      .where(eq(messages.conversationsId, conversationId))
+      // Messages des membres bloqués (dans un sens ou dans l'autre) masqués.
+      .where(and(eq(messages.conversationsId, conversationId), notBlockedWith(userId, messages.usersId)))
       .orderBy(desc(messages.createdAt))
       .limit(limit)
       .offset(offset);
@@ -424,7 +426,8 @@ export class ConversationService {
       const recentMessages = await db
         .select()
         .from(messages)
-        .where(inArray(messages.conversationsId, conversationIds))
+        // Aperçu du dernier message : jamais celui d'un membre bloqué.
+        .where(and(inArray(messages.conversationsId, conversationIds), notBlockedWith(userId, messages.usersId)))
         .orderBy(desc(messages.createdAt));
 
       for (const message of recentMessages) {
@@ -604,6 +607,7 @@ export class ConversationService {
     // Le créateur peut avoir supprimé son compte (creatorId -> null) : plus
     // personne à notifier côté "créateur", le fil reste néanmoins utilisable.
     if (!recipientId || recipientId === senderId) return;
+    if (await BlockService.isBlockedBetween(senderId, recipientId)) return;
 
     const [sender] = await db
       .select({ pseudo: users.pseudo })
@@ -655,6 +659,10 @@ export class ConversationService {
       ),
     );
     recipientIds.delete(senderId);
+    // Pas de notification entre membres qui se sont bloqués.
+    for (const hiddenId of await BlockService.hiddenUserIds(senderId)) {
+      recipientIds.delete(hiddenId);
+    }
 
     await Promise.all(
       Array.from(recipientIds).map((usersId) =>

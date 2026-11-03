@@ -23,10 +23,6 @@ ENV VITE_API_URL=$VITE_API_URL
 ARG VITE_GOOGLE_CLIENT_ID=
 ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
-# App ID Facebook Login (SDK JS) — même logique que Google ci-dessus : pas un
-# secret, vide par défaut (bouton Facebook inactif sans valeur explicite).
-ARG VITE_FACEBOOK_APP_ID=
-ENV VITE_FACEBOOK_APP_ID=$VITE_FACEBOOK_APP_ID
 
 # Codes de territoires de test proposés dans TerritorySwitcher même s'ils ne
 # sont pas encore isActive=true (cf. TerritoryContext.tsx) — vide par défaut

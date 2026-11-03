@@ -174,3 +174,30 @@
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
   border: 1px solid rgba(31, 41, 55, 0.06);
 }
+
+.admin-insights__intro {
+  margin: -0.35rem 0 0.8rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.admin-insights__subtitle {
+  margin: 1.05rem 0 0.6rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.admin-insights__note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  color: #475569;
+}

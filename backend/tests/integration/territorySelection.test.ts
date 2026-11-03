@@ -11,6 +11,7 @@ jest.unstable_mockModule("../../src/services/mail.services.js", () => ({
   sendAdminResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   sendAccountDeletedEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   sendContactEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  sendReportAlertEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
 }));
 
 const request = (await import("supertest")).default;

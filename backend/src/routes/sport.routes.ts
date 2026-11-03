@@ -3,6 +3,7 @@ import { SportController } from "../controllers/sport.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { requireAdminAuth } from "../middlewares/adminAuth.middleware.js";
 import { validate } from "../middlewares/validation.middleware.js";
+import { hideIfBlocked } from "../middlewares/block.middleware.js";
 import {
   createSportSchema,
   sportIdParamSchema,
@@ -29,6 +30,7 @@ router.get(
   "/favorites/:id",
   requireAuth,
   validate({ params: userIdParamSchema }),
+  hideIfBlocked("id"),
   SportController.listFavoritesForUser
 );
 router.get("/:id", validate({ params: sportIdParamSchema }), SportController.getById);

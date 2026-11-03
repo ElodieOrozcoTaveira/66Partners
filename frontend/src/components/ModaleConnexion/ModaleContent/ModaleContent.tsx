@@ -2,13 +2,11 @@ import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { HandMetal, X } from "lucide-react";
-import { FaFacebook } from "react-icons/fa";
 import TerritoryPicker, { useSignupTerritory } from "../../TerritoryPicker/TerritoryPicker";
 import PasswordInput from "../../PasswordInput/PasswordInput";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
-import { useFacebookAuth } from "../../../hooks/useFacebookAuth";
 import "./ModaleContent.scss";
 import { useBranding } from "../../../contexts/TerritoryContext";
 
@@ -24,11 +22,6 @@ interface LoginResponse {
   token: string;
 }
 
-// Droits Facebook Login pas encore validés par Meta : bouton masqué en
-// attendant, sans retirer le flux (useFacebookAuth) pour le réactiver d'un
-// coup une fois l'app validée.
-const FACEBOOK_LOGIN_ENABLED = false;
-
 export default function ModaleContent({
   isOpen,
   onClose,
@@ -42,7 +35,6 @@ export default function ModaleContent({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [termsAcceptedGoogle, setTermsAcceptedGoogle] = useState(false);
-  const [termsAcceptedFacebook, setTermsAcceptedFacebook] = useState(false);
   const { territoryCode: signupTerritory, setTerritoryCode: setSignupTerritory } = useSignupTerritory();
 
   function handleSocialAuthSuccess() {
@@ -52,7 +44,6 @@ export default function ModaleContent({
 
   const googleAuth = useGoogleAuth({ onSuccess: handleSocialAuthSuccess });
   const { buttonRef: googleButtonRef } = useGoogleButton(googleAuth.handleCredential);
-  const facebookAuth = useFacebookAuth({ onSuccess: handleSocialAuthSuccess });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -77,24 +68,20 @@ export default function ModaleContent({
       setError(null);
       setIsSubmitting(false);
       setTermsAcceptedGoogle(false);
-      setTermsAcceptedFacebook(false);
       googleAuth.reset();
-      facebookAuth.reset();
     }
-    // googleAuth/facebookAuth sont recréés à chaque render (hooks locaux) :
+    // googleAuth est recréé à chaque render (hooks locaux) :
     // seul isOpen doit déclencher cette remise à zéro.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // Un compte {brandName} existe déjà avec l'email Google/Facebook : préremplit
+  // Un compte {brandName} existe déjà avec l'email Google : préremplit
   // le formulaire mot de passe classique, déjà affiché juste en dessous.
   useEffect(() => {
     if (googleAuth.state.step === "linkPending") {
       setEmail(googleAuth.state.email);
-    } else if (facebookAuth.state.step === "linkPending") {
-      setEmail(facebookAuth.state.email);
     }
-  }, [googleAuth.state, facebookAuth.state]);
+  }, [googleAuth.state]);
 
   if (!isOpen) return null;
 
@@ -118,8 +105,6 @@ export default function ModaleContent({
       if (ok) {
         if (googleAuth.state.step === "linkPending") {
           await googleAuth.linkAfterPasswordLogin();
-        } else if (facebookAuth.state.step === "linkPending") {
-          await facebookAuth.linkAfterPasswordLogin();
         }
         onClose();
         navigate("/dashboard");
@@ -134,9 +119,9 @@ export default function ModaleContent({
       setError("Email ou mot de passe incorrect.");
       // Si échec de connexion (mot de passe erroné ou compte inexistant),
       // basculer vers la modale d'inscription au lieu de la page — sauf si
-      // on est justement en train d'associer Google/Facebook à un compte
+      // on est justement en train d'associer Google à un compte
       // qui, lui, existe déjà : rester ici pour laisser réessayer le mot de passe.
-      if (googleAuth.state.step !== "linkPending" && facebookAuth.state.step !== "linkPending") {
+      if (googleAuth.state.step !== "linkPending") {
         onSwitchToRegister();
       }
     } finally {
@@ -211,57 +196,6 @@ export default function ModaleContent({
               </p>
             </section>
           </div>
-        ) : facebookAuth.state.step === "newAccount" ? (
-          <div className="container-modaleConnexion">
-            <h3 className="container-modaleConnexion__h3">Finalise ton inscription</h3>
-            <h4 className="container-modaleConnexion__h4">
-              Connecté·e avec {facebookAuth.state.email} <HandMetal size={12} color="var(--brand-accent-dark, #F4B400)" />
-            </h4>
-
-            <section className="container-modaleConnexion__section">
-              <TerritoryPicker id="facebook-territory" value={signupTerritory} onChange={setSignupTerritory} />
-              <label htmlFor="facebook-terms" className="container-modaleConnexion__checkboxLabel">
-                <input
-                  id="facebook-terms"
-                  type="checkbox"
-                  checked={termsAcceptedFacebook}
-                  onChange={(event) => setTermsAcceptedFacebook(event.target.checked)}
-                  className="container-modaleConnexion__checkbox"
-                />
-                J'ai lu et j'accepte les{" "}
-                <NavLink to="/mentionslegales" onClick={onClose}>
-                  Mentions Légales
-                </NavLink>{" "}
-                et la{" "}
-                <NavLink to="/confidentialite" onClick={onClose}>
-                  Politique de confidentialité
-                </NavLink>{" "}
-                de {brandName}.
-              </label>
-
-              {facebookAuth.error && (
-                <p className="container-modaleConnexion__error">{facebookAuth.error}</p>
-              )}
-
-              <button
-                type="button"
-                className="container-modaleConnexion__submit"
-                disabled={facebookAuth.isSubmitting}
-                onClick={() => facebookAuth.completeSignup(termsAcceptedFacebook, signupTerritory)}
-              >
-                {facebookAuth.isSubmitting ? "Création..." : "Créer mon compte"}
-              </button>
-              <p className="container-modaleConnexion__register">
-                <button
-                  type="button"
-                  className="container-modaleConnexion__switch"
-                  onClick={() => facebookAuth.reset()}
-                >
-                  Annuler
-                </button>
-              </p>
-            </section>
-          </div>
         ) : (
           <div className="container-modaleConnexion">
             <h3 className="container-modaleConnexion__h3">Se connecter</h3>
@@ -274,12 +208,6 @@ export default function ModaleContent({
                 <p className="container-modaleConnexion__info">
                   Un compte existe déjà avec {googleAuth.state.email}. Connecte-toi avec ton mot
                   de passe pour associer Google.
-                </p>
-              )}
-              {FACEBOOK_LOGIN_ENABLED && facebookAuth.state.step === "linkPending" && (
-                <p className="container-modaleConnexion__info">
-                  Un compte existe déjà avec {facebookAuth.state.email}. Connecte-toi avec ton mot
-                  de passe pour associer Facebook.
                 </p>
               )}
 
@@ -344,24 +272,10 @@ export default function ModaleContent({
 
               <div className="container-modaleConnexion__social">
                 <span className="container-modaleConnexion__googleSlot" ref={googleButtonRef} />
-                {FACEBOOK_LOGIN_ENABLED && (
-                  <button
-                    type="button"
-                    className="container-modaleConnexion__socialBtn"
-                    onClick={() => facebookAuth.handleLogin()}
-                    disabled={facebookAuth.isSubmitting}
-                  >
-                    <FaFacebook size={18} color="#1877F2" />
-                    {facebookAuth.isSubmitting ? "Connexion..." : "Facebook"}
-                  </button>
-                )}
               </div>
 
               {googleAuth.error && googleAuth.state.step === "idle" && (
                 <p className="container-modaleConnexion__error">{googleAuth.error}</p>
-              )}
-              {FACEBOOK_LOGIN_ENABLED && facebookAuth.error && facebookAuth.state.step === "idle" && (
-                <p className="container-modaleConnexion__error">{facebookAuth.error}</p>
               )}
 
               <p className="container-modaleConnexion__register">

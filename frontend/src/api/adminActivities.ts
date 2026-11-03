@@ -12,6 +12,50 @@ export interface AdminActivityListItem {
   creatorPseudo: string | null;
   createdAt: string;
   sportName: string;
+  creatorId: string | null;
+  status: string;
+  levelRequired: string;
+  maxParticipants: number;
+  /** Participants acceptés (même calcul que l'application). */
+  participantsCount: number;
+  pendingCount: number;
+  territoryCode: string;
+}
+
+export interface AdminActivityDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  sportName: string;
+  city: string;
+  latitude: number | null;
+  longitude: number | null;
+  startDate: string;
+  levelRequired: string;
+  maxParticipants: number;
+  status: string;
+  carpoolEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  territory: { code: string; name: string };
+  creator: { id: string; pseudo: string; avatar: string | null } | null;
+  participants: {
+    userId: string;
+    pseudo: string;
+    avatar: string | null;
+    status: string;
+    carpoolRequested: boolean;
+    createdAt: string;
+  }[];
+  counts: {
+    accepted: number;
+    pending: number;
+    refused: number;
+    conversations: number;
+    messages: number;
+    photos: number;
+  };
+  lastMessageAt: string | null;
 }
 
 export async function fetchAdminActivities(territory?: string): Promise<AdminActivityListItem[]> {
@@ -20,4 +64,11 @@ export async function fetchAdminActivities(territory?: string): Promise<AdminAct
     { params: { territory } },
   );
   return res.data.activities;
+}
+
+export async function fetchAdminActivity(activityId: string): Promise<AdminActivityDetail> {
+  const res = await adminApi.get<{ success: boolean; activity: AdminActivityDetail }>(
+    `/api/admin/activities/${activityId}`,
+  );
+  return res.data.activity;
 }

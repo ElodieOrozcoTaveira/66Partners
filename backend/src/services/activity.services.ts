@@ -11,6 +11,7 @@ import {
   territories,
   users,
 } from "../db/schema.js";
+import { notBlockedWith } from "./block.services.js";
 import { TerritoryService } from "./territory.services.js";
 import { checkAudience, type ActivityAudience } from "../utils/audience.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
@@ -87,6 +88,8 @@ export interface ActivityFilters {
   to?: Date;
   /** Public de l'activité (ex. "WOMEN" pour les sorties entre femmes). */
   audience?: ActivityAudience;
+  /** Membre connecté : les activités des membres bloqués (dans les deux sens) sont exclues. */
+  viewerId?: string;
 }
 
 // Erreurs métier personnalisées
@@ -228,7 +231,7 @@ export class ActivityService {
    * le nombre réel de participants acceptés (calculé à la volée).
    */
   static async listActivities(filters: ActivityFilters = {}): Promise<ActivityWithDetails[]> {
-    const { city, sportId, status, participantId, territory, from, to, audience } = filters;
+    const { city, sportId, status, participantId, territory, from, to, audience, viewerId } = filters;
 
     const conditions = [
       city ? eq(activities.city, city) : undefined,
@@ -238,6 +241,7 @@ export class ActivityService {
       from ? gte(activities.startDate, from) : undefined,
       to ? lte(activities.startDate, to) : undefined,
       audience ? eq(activities.audience, audience) : undefined,
+      viewerId ? notBlockedWith(viewerId, activities.creatorId) : undefined,
       participantId
         ? sql`exists (
             select 1 from ${participations} as participant_filter

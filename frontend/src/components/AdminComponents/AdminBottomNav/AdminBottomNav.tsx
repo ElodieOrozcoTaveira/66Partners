@@ -1,10 +1,13 @@
-import { ChartNoAxesColumn, Settings } from "lucide-react";
+import { CalendarDays, ChartNoAxesColumn, Flag, Settings, Users } from "lucide-react";
 import { createPortal } from "react-dom";
 import { NavLink } from "react-router-dom";
 import "./AdminBottomNav.scss";
 
 const NAV_ITEMS = [
   { to: "/admin/stats", icon: ChartNoAxesColumn, label: "Statistiques" },
+  { to: "/admin/utilisateurs", icon: Users, label: "Utilisateurs" },
+  { to: "/admin/activites", icon: CalendarDays, label: "Activités" },
+  { to: "/admin/signalements", icon: Flag, label: "Signalements" },
   { to: "/admin/settings", icon: Settings, label: "Paramètres" },
 ];
 

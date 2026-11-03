@@ -1,0 +1,71 @@
+@use "../../styles/variables/variables.scss";
+
+.admin-activity-detail__gap {
+  display: block;
+  margin-top: 0.55rem;
+}
+
+.admin-activity-detail__hero {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.admin-activity-detail__sport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.admin-activity-detail__hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+
+  strong {
+    font-family: "Manrope", sans-serif;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: variables.$nuit;
+    text-transform: capitalize;
+  }
+
+  span {
+    font-family: "Inter", sans-serif;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+}
+
+.admin-activity-detail__sport-name {
+  font-weight: 700;
+  color: variables.$rouge2 !important;
+}
+
+.admin-activity-detail__inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.admin-activity-detail__description {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #334155;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.admin-facts a {
+  color: variables.$rouge2;
+  font-weight: 700;
+  text-decoration: none;
+}

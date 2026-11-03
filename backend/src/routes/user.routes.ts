@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user.controller.js";
 import { AvailabilityController } from "../controllers/availability.controller.js";
+import { ModerationController } from "../controllers/moderation.controller.js";
+import { hideIfBlocked } from "../middlewares/block.middleware.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { validate, validateBody } from "../middlewares/validation.middleware.js";
 import { uploadImage } from "../middlewares/upload.middleware.js";
@@ -27,6 +29,9 @@ DELETE /users/me/sports/:sportId
 GET /users/me/availabilities
 POST /users/me/availabilities
 DELETE /users/me/availabilities/:availabilityId
+GET /users/me/blocks
+POST /users/:id/block
+DELETE /users/:id/block
 GET /users/:id
 GET /users/:id/sports
 GET /users/:id/availabilities
@@ -79,22 +84,31 @@ router.delete(
   AvailabilityController.remove
 );
 
+// Blocages (avant "/:id" : "me" n'est pas un identifiant).
+router.get("/me/blocks", requireAuth, ModerationController.listBlocks);
+router.post("/:id/block", requireAuth, validate({ params: userIdParamSchema }), ModerationController.block);
+router.delete("/:id/block", requireAuth, validate({ params: userIdParamSchema }), ModerationController.unblock);
+
+// Profil public : introuvable pour un membre bloqué (dans les deux sens).
 router.get(
   "/:id",
   requireAuth,
   validate({ params: userIdParamSchema }),
+  hideIfBlocked("id"),
   UserController.getUserById
 );
 router.get(
   "/:id/sports",
   requireAuth,
   validate({ params: userIdParamSchema }),
+  hideIfBlocked("id"),
   UserController.listUserSports
 );
 router.get(
   "/:id/availabilities",
   requireAuth,
   validate({ params: userIdParamSchema }),
+  hideIfBlocked("id"),
   AvailabilityController.listForUser
 );
 
