@@ -94,6 +94,16 @@ export const TERRITORY_SEEDS = [
     assetsPath: "/81partners",
     isActive: true,
   },
+  {
+    code: "82",
+    name: "Tarn-et-Garonne",
+    slug: "tarn-et-garonne",
+    brandName: "82Partners",
+    inseeDepartmentCode: "82",
+    tagline: "Ton sport. Ton partenaire. Ton 82.",
+    assetsPath: "/82partners",
+    isActive: true,
+  },
 ] as const;
 
 /**
