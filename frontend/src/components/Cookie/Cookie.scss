@@ -1,7 +1,119 @@
+@use "../../styles/variables/variables.scss";
 @use "../../styles/mixins/mixins.scss";
 
+// Bandeau cookies de la refonte : carte blanche flottante en bas de l'écran.
 .cookie-banner {
-  @include mixins.gradient;
-  
+  position: fixed;
+  left: 1rem;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: 2000;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid variables.$bordure;
+  box-shadow: 0 20px 50px rgba(31, 41, 55, 0.2);
+  font-family: "Inter", sans-serif;
+  color: variables.$texte;
+  animation: cookie-banner-in 0.35s ease both;
+
+  @media (min-width: variables.$tablet) {
+    left: 1.5rem;
+    right: auto;
+    max-width: 640px;
+    bottom: 1.5rem;
+  }
+
+  &__content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    flex: 1 1 18rem;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: variables.alpha(variables.$rouge, 10%);
+    color: variables.$rouge;
+  }
+
+  &__text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: variables.$texte2;
+
+    strong {
+      display: block;
+      margin-bottom: 0.1rem;
+      font-family: "Manrope", sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      color: variables.$encre;
+    }
+
+    a {
+      color: variables.$rouge;
+      font-weight: 700;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-left: auto;
+  }
+
+  &__accept,
+  &__decline {
+    min-height: 44px;
+    padding: 0 1.3rem;
+    border-radius: 999px;
+    font-family: "Inter", sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.18s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  &__accept {
+    border: none;
+    @include mixins.gradient;
+    color: #ffffff;
+  }
+
+  &__decline {
+    border: 1.5px solid variables.$bordure;
+    background: #ffffff;
+    color: variables.$encre;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
+@keyframes cookie-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
