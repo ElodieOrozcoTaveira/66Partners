@@ -32,34 +32,49 @@
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   }
 
-  &__empty {
-    @include mixins.carte;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 2.5rem 1.5rem;
-    text-align: center;
-
-    h3 {
-      margin: 0.4rem 0 0;
-      font-size: 1.25rem;
-    }
-
-    p {
-      margin: 0 0 0.6rem;
-      color: variables.$texte2;
-    }
+  &__skeleton {
+    height: 330px;
+    border-radius: variables.$radius;
+    background: variables.$fond2;
   }
 
-  &__empty-icon {
+  // Territoire sans sortie à venir : encart court.
+  &__first {
+    @include mixins.carte;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.25rem;
+    padding: 1.4rem 1.5rem;
+    background: color-mix(in srgb, var(--brand-accent, #FFCC00) 12%, white);
+  }
+
+  &__first-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: variables.alpha(variables.$rouge, 10%);
-    color: variables.$rouge;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    color: #ffffff;
+    @include mixins.gradient;
+  }
+
+  &__first-text {
+    flex: 1;
+    min-width: 14rem;
+
+    h2 {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0.25rem 0 0;
+      color: variables.$texte2;
+    }
   }
 }

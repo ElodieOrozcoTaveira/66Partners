@@ -109,9 +109,9 @@ export default function Home() {
         />
       </Suspense>
 
-      <Bento />
       <ActivitésProche />
       <HowItWorks />
+      <Bento />
       <PourquoiHome />
       <AppAndroid />
 

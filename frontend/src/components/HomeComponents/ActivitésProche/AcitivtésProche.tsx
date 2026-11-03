@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
-import { ArrowRight, CalendarX } from "lucide-react";
+import { ArrowRight, CalendarPlus } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
 import ActivityCard from "../../ActivityCard/ActivityCard";
@@ -41,12 +41,14 @@ interface ActivitiesResponse {
 }
 
 export default function ActivitésProche() {
-  const { territoryOf } = useBranding();
+  const { territoryOf, territoryIn } = useBranding();
   const { activeTerritory } = useTerritory();
   const territoryCode = activeTerritory?.code;
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activities, setActivities] = useState<Activity[]>([]);
+  // Évite d'afficher l'encart « aucune sortie » avant la fin du chargement.
+  const [isLoaded, setIsLoaded] = useState(false);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null,
   );
@@ -61,7 +63,8 @@ export default function ActivitésProche() {
         params: { territory: territoryCode, from: new Date().toISOString() },
       })
       .then((res) => setActivities(res.data.activities))
-      .catch(() => setActivities([]));
+      .catch(() => setActivities([]))
+      .finally(() => setIsLoaded(true));
   }, [territoryCode]);
 
   useEffect(() => {
@@ -86,6 +89,40 @@ export default function ActivitésProche() {
       .slice(0, UPCOMING_COUNT);
   }, [activities]);
 
+  // Territoire sans sortie à venir (ex. tout juste ouvert) : encart court
+  // plutôt qu'une section vide en haut de page.
+  if (isLoaded && upcoming.length === 0) {
+    return (
+      <section className="nearby page-container" aria-labelledby="nearby-titre">
+        <div className="nearby__first">
+          <span className="nearby__first-icon">
+            <CalendarPlus size={24} />
+          </span>
+          <div className="nearby__first-text">
+            <h2 id="nearby-titre">Lance la première sortie {territoryIn}</h2>
+            <p>Propose une activité : les sportifs de ton territoire pourront te rejoindre.</p>
+          </div>
+          <NavLink to="/mesactivités/nouvelle" className="btn btn--primary" onClick={handleExplorerClick}>
+            Créer une activité
+          </NavLink>
+        </div>
+
+        <Suspense fallback={null}>
+          <ModaleContent
+            isOpen={activeModal === "login"}
+            onClose={() => setActiveModal(null)}
+            onSwitchToRegister={() => setActiveModal("register")}
+          />
+          <ModaleRegisterContent
+            isOpen={activeModal === "register"}
+            onClose={() => setActiveModal(null)}
+            onSwitchToLogin={() => setActiveModal("login")}
+          />
+        </Suspense>
+      </section>
+    );
+  }
+
   return (
     <section className="nearby page-container" aria-labelledby="nearby-titre">
       <div className="nearby__head">
@@ -100,16 +137,11 @@ export default function ActivitésProche() {
         </NavLink>
       </div>
 
-      {upcoming.length === 0 ? (
-        <div className="nearby__empty">
-          <span className="nearby__empty-icon">
-            <CalendarX size={26} />
-          </span>
-          <h3>Pas encore d'activité autour de toi</h3>
-          <p>Sois le premier à en créer une et lance le mouvement près de chez toi !</p>
-          <NavLink to="/mesactivités/nouvelle" className="btn btn--primary" onClick={handleExplorerClick}>
-            Créer une activité
-          </NavLink>
+      {!isLoaded ? (
+        <div className="nearby__grid" aria-busy="true">
+          {[0, 1, 2].map((key) => (
+            <span key={key} className="nearby__skeleton" />
+          ))}
         </div>
       ) : (
         <div className="nearby__grid">
