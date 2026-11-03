@@ -449,6 +449,13 @@ export interface AdminUserListItem {
   createdAt: string;
   /** Codes des territoires dont l'utilisateur est membre. */
   territories: string[];
+  email: string;
+  /** Territoire principal (isDefault), null si aucun. */
+  defaultTerritory: string | null;
+  /** Fournisseurs de connexion liés ("google"). */
+  providers: string[];
+  activitiesCreated: number;
+  participations: number;
 }
 
 export class AdminUsersService {
@@ -461,26 +468,46 @@ export class AdminUsersService {
         pseudo: users.pseudo,
         city: users.city,
         avatar: users.avatar,
+        email: users.email,
         createdAt: users.createdAt,
       })
       .from(users)
       .where(userInTerritory(territoryId))
       .orderBy(desc(users.createdAt));
 
-    const memberships = await db
-      .select({ userId: userTerritories.userId, code: territories.code })
-      .from(userTerritories)
-      .innerJoin(territories, eq(territories.id, userTerritories.territoryId));
+    const [memberships, providerRows, createdRows, participationRows] = await Promise.all([
+      db
+        .select({ userId: userTerritories.userId, code: territories.code, isDefault: userTerritories.isDefault })
+        .from(userTerritories)
+        .innerJoin(territories, eq(territories.id, userTerritories.territoryId)),
+      rowsOf(sql`select user_id, provider from social_accounts`),
+      rowsOf(sql`select creator_id as user_id, count(*) as count from activities where creator_id is not null group by creator_id`),
+      rowsOf(sql`select user_id, count(*) as count from participations group by user_id`),
+    ]);
 
     const codesByUser = new Map<string, string[]>();
+    const defaultByUser = new Map<string, string>();
     for (const m of memberships) {
       codesByUser.set(m.userId, [...(codesByUser.get(m.userId) ?? []), m.code]);
+      if (m.isDefault) defaultByUser.set(m.userId, m.code);
     }
+    const providersByUser = new Map<string, string[]>();
+    for (const row of providerRows) {
+      const id = String(row.user_id);
+      providersByUser.set(id, [...(providersByUser.get(id) ?? []), String(row.provider)]);
+    }
+    const countMap = (list: Row[]) => new Map(list.map((row) => [String(row.user_id), num(row.count)]));
+    const createdByUser = countMap(createdRows);
+    const participationsByUser = countMap(participationRows);
 
     return rows.map((row) => ({
       ...row,
       createdAt: row.createdAt.toISOString(),
       territories: codesByUser.get(row.id) ?? [],
+      defaultTerritory: defaultByUser.get(row.id) ?? null,
+      providers: providersByUser.get(row.id) ?? [],
+      activitiesCreated: createdByUser.get(row.id) ?? 0,
+      participations: participationsByUser.get(row.id) ?? 0,
     }));
   }
 
@@ -502,6 +529,14 @@ export interface AdminActivityListItem {
   creatorPseudo: string | null;
   createdAt: string;
   sportName: string;
+  creatorId: string | null;
+  status: string;
+  levelRequired: string;
+  maxParticipants: number;
+  /** Participants acceptés (même calcul que l'application). */
+  participantsCount: number;
+  pendingCount: number;
+  territoryCode: string;
 }
 
 export class AdminActivitiesService {
@@ -517,17 +552,571 @@ export class AdminActivitiesService {
         creatorPseudo: users.pseudo,
         createdAt: activities.createdAt,
         sportName: sports.name,
+        creatorId: activities.creatorId,
+        status: activities.status,
+        levelRequired: activities.levelRequired,
+        maxParticipants: activities.maxParticipants,
+        territoryCode: territories.code,
+        participantsCount: sql<number>`(select count(*) from participations p where p.activity_id = ${activities.id} and p.status = 'ACCEPTED')`,
+        pendingCount: sql<number>`(select count(*) from participations p where p.activity_id = ${activities.id} and p.status = 'PENDING')`,
       })
       .from(activities)
       .leftJoin(users, eq(users.id, activities.creatorId))
       .innerJoin(sports, eq(sports.id, activities.sportId))
+      .innerJoin(territories, eq(territories.id, activities.territoryId))
       .where(activityInTerritory(territoryId))
       .orderBy(desc(activities.createdAt));
 
     return rows.map((row) => ({
       ...row,
+      participantsCount: Number(row.participantsCount),
+      pendingCount: Number(row.pendingCount),
       startDate: row.startDate.toISOString(),
       createdAt: row.createdAt.toISOString(),
     }));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Vue détaillée de l'application (lecture seule) : indicateurs "depuis le
+// lancement", fiches utilisateur et activité. Aucune écriture, aucun contenu
+// de message exposé (seulement des compteurs) : l'admin voit l'activité de
+// l'application, pas les conversations privées.
+// ---------------------------------------------------------------------------
+
+type Row = Record<string, unknown>;
+
+async function rowsOf<T extends Row>(query: ReturnType<typeof sql>): Promise<T[]> {
+  const result = await db.execute(query);
+  return result.rows as T[];
+}
+
+function num(value: unknown): number {
+  return Number(value ?? 0);
+}
+
+// Les colonnes "timestamp" (sans fuseau) contiennent de l'UTC : en SQL brut
+// le driver les renvoie en texte sans suffixe, on les relit donc en UTC
+// (même convention que Drizzle pour les requêtes typées).
+function iso(value: unknown): string {
+  if (value instanceof Date) return value.toISOString();
+  const text = String(value);
+  const hasZone = /(Z|[+-]\d{2}(:?\d{2})?)$/.test(text);
+  return new Date(hasZone ? text : `${text.replace(" ", "T")}Z`).toISOString();
+}
+
+function isoOrNull(value: unknown): string | null {
+  return value == null ? null : iso(value);
+}
+
+function activityScope(territoryId: string | undefined) {
+  return territoryId ? sql`a.territory_id = ${territoryId}` : sql`true`;
+}
+
+function userScope(territoryId: string | undefined) {
+  return territoryId
+    ? sql`u.id in (select user_id from user_territories where territory_id = ${territoryId})`
+    : sql`true`;
+}
+
+export interface NamedCount {
+  name: string;
+  count: number;
+}
+
+export interface StatsInsights {
+  totals: {
+    users: number;
+    activities: number;
+    participations: number;
+    conversations: number;
+    messages: number;
+    photos: number;
+    favorites: number;
+    availabilities: number;
+    pushUsers: number;
+  };
+  engagement: {
+    /** Utilisateurs ayant créé ou rejoint au moins une activité. */
+    activeUsers: number;
+    usersWithAvatar: number;
+    usersWithFavorites: number;
+  };
+  activities: {
+    upcoming: number;
+    past: number;
+    byStatus: Record<string, number>;
+    byLevel: Record<string, number>;
+    /** Taux de remplissage moyen (participants acceptés / places), hors annulées. */
+    fillRatePct: number;
+    avgParticipants: number;
+    carpoolEnabled: number;
+  };
+  participationsByStatus: Record<string, number>;
+  signupMethods: NamedCount[];
+  topSports: NamedCount[];
+  favoriteSports: NamedCount[];
+  activityCities: NamedCount[];
+  userCities: NamedCount[];
+  topOrganizers: { id: string; pseudo: string; avatar: string | null; count: number }[];
+  topParticipants: { id: string; pseudo: string; avatar: string | null; count: number }[];
+}
+
+function toRecord(rows: Row[], key: string): Record<string, number> {
+  return Object.fromEntries(rows.map((row) => [String(row[key]), num(row.count)]));
+}
+
+function toNamed(rows: Row[], key: string): NamedCount[] {
+  return rows.map((row) => ({ name: String(row[key]), count: num(row.count) }));
+}
+
+export class AdminInsightsService {
+  static async getInsights(territoryCode?: string): Promise<StatsInsights> {
+    const territoryId = await resolveTerritoryId(territoryCode);
+    const inActivity = activityScope(territoryId);
+    const inUsers = userScope(territoryId);
+    const now = new Date().toISOString();
+
+    const [
+      totalsRows,
+      engagementRows,
+      timingRows,
+      statusRows,
+      levelRows,
+      fillRows,
+      participationRows,
+      signupRows,
+      sportRows,
+      favoriteRows,
+      activityCityRows,
+      userCityRows,
+      organizerRows,
+      participantRows,
+    ] = await Promise.all([
+      rowsOf(sql`
+        select
+          (select count(*) from users u where ${inUsers}) as users,
+          (select count(*) from activities a where ${inActivity}) as activities,
+          (select count(*) from participations p join activities a on a.id = p.activity_id where ${inActivity}) as participations,
+          (select count(*) from conversations c join activities a on a.id = c.activity_id where ${inActivity}) as conversations,
+          (select count(*) from messages m join conversations c on c.id = m.conversations_id join activities a on a.id = c.activity_id where ${inActivity}) as messages,
+          (select count(*) from activity_photos ph join activities a on a.id = ph.activity_id where ${inActivity}) as photos,
+          (select count(*) from sport_favorites f join users u on u.id = f.user_id where ${inUsers}) as favorites,
+          (select count(*) from availabilities av join users u on u.id = av.user_id where ${inUsers}) as availabilities,
+          (select count(distinct ps.user_id) from push_subscriptions ps join users u on u.id = ps.user_id where ${inUsers}) as push_users
+      `),
+      rowsOf(sql`
+        select
+          count(*) filter (
+            where exists (select 1 from activities x where x.creator_id = u.id)
+               or exists (select 1 from participations x where x.user_id = u.id)
+          ) as active_users,
+          count(*) filter (where u.avatar is not null) as with_avatar,
+          count(*) filter (where exists (select 1 from sport_favorites x where x.user_id = u.id)) as with_favorites
+        from users u where ${inUsers}
+      `),
+      rowsOf(sql`
+        select
+          count(*) filter (where a.start_date >= ${now}::timestamp and a.status <> 'CANCELLED') as upcoming,
+          count(*) filter (where a.start_date < ${now}::timestamp and a.status <> 'CANCELLED') as past,
+          count(*) filter (where a.carpool_enabled) as carpool
+        from activities a where ${inActivity}
+      `),
+      rowsOf(sql`select a.status, count(*) as count from activities a where ${inActivity} group by a.status`),
+      rowsOf(sql`select a.level_required, count(*) as count from activities a where ${inActivity} group by a.level_required`),
+      rowsOf(sql`
+        select
+          coalesce(round(avg(least(1.0, coalesce(acc.n, 0)::numeric / nullif(a.max_participants, 0))) * 100), 0) as fill_rate,
+          coalesce(round(avg(coalesce(acc.n, 0)), 1), 0) as avg_participants
+        from activities a
+        left join (
+          select activity_id, count(*) as n from participations where status = 'ACCEPTED' group by activity_id
+        ) acc on acc.activity_id = a.id
+        where ${inActivity} and a.status <> 'CANCELLED'
+      `),
+      rowsOf(sql`
+        select p.status, count(*) as count
+        from participations p join activities a on a.id = p.activity_id
+        where ${inActivity} group by p.status
+      `),
+      rowsOf(sql`
+        select coalesce(sa.provider, 'email') as method, count(distinct u.id) as count
+        from users u left join social_accounts sa on sa.user_id = u.id
+        where ${inUsers} group by 1 order by 2 desc
+      `),
+      rowsOf(sql`
+        select s.name, count(*) as count
+        from activities a join sports s on s.id = a.sport_id
+        where ${inActivity} group by s.name order by count desc, s.name limit 8
+      `),
+      rowsOf(sql`
+        select s.name, count(*) as count
+        from sport_favorites f join sports s on s.id = f.sport_id join users u on u.id = f.user_id
+        where ${inUsers} group by s.name order by count desc, s.name limit 8
+      `),
+      rowsOf(sql`
+        select a.city, count(*) as count from activities a
+        where ${inActivity} group by a.city order by count desc, a.city limit 8
+      `),
+      rowsOf(sql`
+        select u.city, count(*) as count from users u
+        where ${inUsers} and u.city is not null and u.city <> ''
+        group by u.city order by count desc, u.city limit 8
+      `),
+      rowsOf(sql`
+        select u.id, u.pseudo, u.avatar, count(*) as count
+        from activities a join users u on u.id = a.creator_id
+        where ${inActivity} group by u.id order by count desc, u.pseudo limit 5
+      `),
+      rowsOf(sql`
+        select u.id, u.pseudo, u.avatar, count(*) as count
+        from participations p join users u on u.id = p.user_id join activities a on a.id = p.activity_id
+        where ${inActivity} and p.status = 'ACCEPTED'
+        group by u.id order by count desc, u.pseudo limit 5
+      `),
+    ]);
+
+    const totals = totalsRows[0] ?? {};
+    const engagement = engagementRows[0] ?? {};
+    const timing = timingRows[0] ?? {};
+    const fill = fillRows[0] ?? {};
+    const people = (rows: Row[]) =>
+      rows.map((row) => ({
+        id: String(row.id),
+        pseudo: String(row.pseudo),
+        avatar: (row.avatar as string | null) ?? null,
+        count: num(row.count),
+      }));
+
+    return {
+      totals: {
+        users: num(totals.users),
+        activities: num(totals.activities),
+        participations: num(totals.participations),
+        conversations: num(totals.conversations),
+        messages: num(totals.messages),
+        photos: num(totals.photos),
+        favorites: num(totals.favorites),
+        availabilities: num(totals.availabilities),
+        pushUsers: num(totals.push_users),
+      },
+      engagement: {
+        activeUsers: num(engagement.active_users),
+        usersWithAvatar: num(engagement.with_avatar),
+        usersWithFavorites: num(engagement.with_favorites),
+      },
+      activities: {
+        upcoming: num(timing.upcoming),
+        past: num(timing.past),
+        byStatus: toRecord(statusRows, "status"),
+        byLevel: toRecord(levelRows, "level_required"),
+        fillRatePct: num(fill.fill_rate),
+        avgParticipants: num(fill.avg_participants),
+        carpoolEnabled: num(timing.carpool),
+      },
+      participationsByStatus: toRecord(participationRows, "status"),
+      signupMethods: toNamed(signupRows, "method"),
+      topSports: toNamed(sportRows, "name"),
+      favoriteSports: toNamed(favoriteRows, "name"),
+      activityCities: toNamed(activityCityRows, "city"),
+      userCities: toNamed(userCityRows, "city"),
+      topOrganizers: people(organizerRows),
+      topParticipants: people(participantRows),
+    };
+  }
+}
+
+export class AdminDetailError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public statusCode: number = 404
+  ) {
+    super(message);
+    this.name = "AdminDetailError";
+  }
+}
+
+export interface AdminUserDetail {
+  id: string;
+  email: string;
+  pseudo: string;
+  city: string | null;
+  headline: string | null;
+  lookingFor: string | null;
+  openTo: string | null;
+  avatar: string | null;
+  coverPhoto: string | null;
+  hasPassword: boolean;
+  providers: string[];
+  termsAcceptedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  pushEnabled: boolean;
+  territories: { code: string; name: string; isDefault: boolean; joinedAt: string }[];
+  favoriteSports: string[];
+  availabilities: { weekday: string; startTime: string; endTime: string }[];
+  counts: {
+    activitiesCreated: number;
+    participations: number;
+    participationsAccepted: number;
+    messagesSent: number;
+    photos: number;
+    notificationsUnread: number;
+  };
+  activitiesCreated: {
+    id: string;
+    title: string;
+    sportName: string;
+    city: string;
+    startDate: string;
+    status: string;
+    participantsCount: number;
+    maxParticipants: number;
+  }[];
+  participations: {
+    activityId: string;
+    title: string;
+    sportName: string;
+    startDate: string;
+    activityStatus: string;
+    status: string;
+    createdAt: string;
+  }[];
+}
+
+const WEEKDAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+
+export class AdminUserDetailService {
+  static async get(userId: string): Promise<AdminUserDetail> {
+    const [user] = await rowsOf(sql`
+      select id, email, pseudo, city, headline, looking_for, open_to, avatar, cover_photo,
+        (password is not null) as has_password, terms_accepted_at, created_at, updated_at
+      from users where id = ${userId}
+    `);
+    if (!user) throw new AdminDetailError("Utilisateur introuvable", "USER_NOT_FOUND");
+
+    const [
+      providerRows,
+      territoryRows,
+      favoriteRows,
+      availabilityRows,
+      countRows_,
+      createdRows,
+      participationRows,
+    ] = await Promise.all([
+      rowsOf(sql`select provider from social_accounts where user_id = ${userId} order by provider`),
+      rowsOf(sql`
+        select t.code, t.name, ut.is_default, ut.joined_at
+        from user_territories ut join territories t on t.id = ut.territory_id
+        where ut.user_id = ${userId} order by ut.is_default desc, t.code
+      `),
+      rowsOf(sql`
+        select s.name from sport_favorites f join sports s on s.id = f.sport_id
+        where f.user_id = ${userId} order by s.name
+      `),
+      rowsOf(sql`select weekday, start_time, end_time from availabilities where user_id = ${userId}`),
+      rowsOf(sql`
+        select
+          (select count(*) from activities where creator_id = ${userId}) as created,
+          (select count(*) from participations where user_id = ${userId}) as participations,
+          (select count(*) from participations where user_id = ${userId} and status = 'ACCEPTED') as accepted,
+          (select count(*) from messages where users_id = ${userId}) as messages,
+          (select count(*) from activity_photos where uploader_id = ${userId}) as photos,
+          (select count(*) from notifications where users_id = ${userId} and est_lu = false) as unread,
+          (select count(*) from push_subscriptions where user_id = ${userId}) as push
+      `),
+      rowsOf(sql`
+        select a.id, a.title, s.name as sport_name, a.city, a.start_date, a.status, a.max_participants,
+          (select count(*) from participations p where p.activity_id = a.id and p.status = 'ACCEPTED') as participants
+        from activities a join sports s on s.id = a.sport_id
+        where a.creator_id = ${userId} order by a.start_date desc
+      `),
+      rowsOf(sql`
+        select a.id as activity_id, a.title, s.name as sport_name, a.start_date, a.status as activity_status,
+          p.status, p.created_at
+        from participations p join activities a on a.id = p.activity_id join sports s on s.id = a.sport_id
+        where p.user_id = ${userId} order by a.start_date desc
+      `),
+    ]);
+
+    const counts = countRows_[0] ?? {};
+
+    return {
+      id: String(user.id),
+      email: String(user.email),
+      pseudo: String(user.pseudo),
+      city: (user.city as string | null) ?? null,
+      headline: (user.headline as string | null) ?? null,
+      lookingFor: (user.looking_for as string | null) ?? null,
+      openTo: (user.open_to as string | null) ?? null,
+      avatar: (user.avatar as string | null) ?? null,
+      coverPhoto: (user.cover_photo as string | null) ?? null,
+      hasPassword: Boolean(user.has_password),
+      providers: providerRows.map((row) => String(row.provider)),
+      termsAcceptedAt: isoOrNull(user.terms_accepted_at),
+      createdAt: iso(user.created_at),
+      updatedAt: iso(user.updated_at),
+      pushEnabled: num(counts.push) > 0,
+      territories: territoryRows.map((row) => ({
+        code: String(row.code),
+        name: String(row.name),
+        isDefault: Boolean(row.is_default),
+        joinedAt: iso(row.joined_at),
+      })),
+      favoriteSports: favoriteRows.map((row) => String(row.name)),
+      availabilities: availabilityRows
+        .map((row) => ({
+          weekday: String(row.weekday),
+          startTime: String(row.start_time),
+          endTime: String(row.end_time),
+        }))
+        .sort(
+          (a, b) =>
+            WEEKDAY_ORDER.indexOf(a.weekday) - WEEKDAY_ORDER.indexOf(b.weekday) ||
+            a.startTime.localeCompare(b.startTime)
+        ),
+      counts: {
+        activitiesCreated: num(counts.created),
+        participations: num(counts.participations),
+        participationsAccepted: num(counts.accepted),
+        messagesSent: num(counts.messages),
+        photos: num(counts.photos),
+        notificationsUnread: num(counts.unread),
+      },
+      activitiesCreated: createdRows.map((row) => ({
+        id: String(row.id),
+        title: String(row.title),
+        sportName: String(row.sport_name),
+        city: String(row.city),
+        startDate: iso(row.start_date),
+        status: String(row.status),
+        participantsCount: num(row.participants),
+        maxParticipants: num(row.max_participants),
+      })),
+      participations: participationRows.map((row) => ({
+        activityId: String(row.activity_id),
+        title: String(row.title),
+        sportName: String(row.sport_name),
+        startDate: iso(row.start_date),
+        activityStatus: String(row.activity_status),
+        status: String(row.status),
+        createdAt: iso(row.created_at),
+      })),
+    };
+  }
+}
+
+export interface AdminActivityDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  sportName: string;
+  city: string;
+  latitude: number | null;
+  longitude: number | null;
+  startDate: string;
+  levelRequired: string;
+  maxParticipants: number;
+  status: string;
+  carpoolEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  territory: { code: string; name: string };
+  creator: { id: string; pseudo: string; avatar: string | null } | null;
+  participants: {
+    userId: string;
+    pseudo: string;
+    avatar: string | null;
+    status: string;
+    carpoolRequested: boolean;
+    createdAt: string;
+  }[];
+  counts: {
+    accepted: number;
+    pending: number;
+    refused: number;
+    conversations: number;
+    messages: number;
+    photos: number;
+  };
+  lastMessageAt: string | null;
+}
+
+export class AdminActivityDetailService {
+  static async get(activityId: string): Promise<AdminActivityDetail> {
+    const [activity] = await rowsOf(sql`
+      select a.id, a.title, a.description, s.name as sport_name, a.city, a.latitude, a.longitude,
+        a.start_date, a.level_required, a.max_participants, a.status, a.carpool_enabled,
+        a.created_at, a.updated_at, t.code as territory_code, t.name as territory_name,
+        u.id as creator_id, u.pseudo as creator_pseudo, u.avatar as creator_avatar
+      from activities a
+      join sports s on s.id = a.sport_id
+      join territories t on t.id = a.territory_id
+      left join users u on u.id = a.creator_id
+      where a.id = ${activityId}
+    `);
+    if (!activity) throw new AdminDetailError("Activité introuvable", "ACTIVITY_NOT_FOUND");
+
+    const [participantRows, countRows_] = await Promise.all([
+      rowsOf(sql`
+        select u.id as user_id, u.pseudo, u.avatar, p.status, p.carpool_requested, p.created_at
+        from participations p join users u on u.id = p.user_id
+        where p.activity_id = ${activityId}
+        order by case p.status when 'ACCEPTED' then 0 when 'PENDING' then 1 else 2 end, p.created_at
+      `),
+      rowsOf(sql`
+        select
+          (select count(*) from conversations where activity_id = ${activityId}) as conversations,
+          (select count(*) from messages m join conversations c on c.id = m.conversations_id where c.activity_id = ${activityId}) as messages,
+          (select max(m.created_at) from messages m join conversations c on c.id = m.conversations_id where c.activity_id = ${activityId}) as last_message_at,
+          (select count(*) from activity_photos where activity_id = ${activityId}) as photos
+      `),
+    ]);
+
+    const counts = countRows_[0] ?? {};
+    const byStatus = (status: string) => participantRows.filter((row) => row.status === status).length;
+
+    return {
+      id: String(activity.id),
+      title: String(activity.title),
+      description: (activity.description as string | null) ?? null,
+      sportName: String(activity.sport_name),
+      city: String(activity.city),
+      latitude: activity.latitude == null ? null : Number(activity.latitude),
+      longitude: activity.longitude == null ? null : Number(activity.longitude),
+      startDate: iso(activity.start_date),
+      levelRequired: String(activity.level_required),
+      maxParticipants: num(activity.max_participants),
+      status: String(activity.status),
+      carpoolEnabled: Boolean(activity.carpool_enabled),
+      createdAt: iso(activity.created_at),
+      updatedAt: iso(activity.updated_at),
+      territory: { code: String(activity.territory_code), name: String(activity.territory_name) },
+      creator: activity.creator_id
+        ? {
+            id: String(activity.creator_id),
+            pseudo: String(activity.creator_pseudo),
+            avatar: (activity.creator_avatar as string | null) ?? null,
+          }
+        : null,
+      participants: participantRows.map((row) => ({
+        userId: String(row.user_id),
+        pseudo: String(row.pseudo),
+        avatar: (row.avatar as string | null) ?? null,
+        status: String(row.status),
+        carpoolRequested: Boolean(row.carpool_requested),
+        createdAt: iso(row.created_at),
+      })),
+      counts: {
+        accepted: byStatus("ACCEPTED"),
+        pending: byStatus("PENDING"),
+        refused: byStatus("REFUSED"),
+        conversations: num(counts.conversations),
+        messages: num(counts.messages),
+        photos: num(counts.photos),
+      },
+      lastMessageAt: isoOrNull(counts.last_message_at),
+    };
   }
 }

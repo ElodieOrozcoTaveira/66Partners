@@ -4,7 +4,7 @@ import "./ModaleRegisterBtn/ModaleRegisterBtn.scss";
 import "../BurgerComponent/Connexion/Connexion.scss";
 
 // Chargé à la demande : ModaleRegisterContent embarque react-icons
-// (FaFacebook, FcGoogle — aucun équivalent lucide-react disponible pour ces
+// (FcGoogle — aucun équivalent lucide-react disponible pour ces
 // logos), sinon présent dans le Header sur toutes les pages (cf. audit
 // performance — P1).
 const ModaleRegisterContent = lazy(

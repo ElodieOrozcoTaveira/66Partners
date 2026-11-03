@@ -1,0 +1,87 @@
+@use "../../styles/variables/variables.scss";
+
+.admin-reports__error {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.8rem;
+  color: variables.$rouge2;
+}
+
+.admin-report {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__context {
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  &__excerpt {
+    margin: 0;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.75rem;
+    background: #f5f5f5;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: variables.$nuit;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  &__photo {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 0.75rem;
+    object-fit: cover;
+  }
+
+  &__details {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: variables.$nuit;
+  }
+
+  &__meta {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  &__action {
+    align-self: flex-start;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: variables.$nuit;
+    font-family: "Inter", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &--primary {
+      border-color: variables.$nuit;
+      background: variables.$nuit;
+      color: #ffffff;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

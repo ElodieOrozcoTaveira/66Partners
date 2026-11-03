@@ -3,6 +3,7 @@ import CompteDanger from "../../components/ProfilPage/CompteDanger/CompteDanger"
 import Dispo from "../../components/ProfilPage/Dispo/Dispo";
 import DernieresActivites from "../../components/ProfilPage/DernieresActivites/DernieresActivites";
 import HeroProfile from "../../components/ProfilPage/HeroProfil/HeroProfile";
+import MembresBloques from "../../components/ProfilPage/MembresBloques/MembresBloques";
 import MesSports from "../../components/ProfilPage/MesSports/MesSports";
 import StatsProfil from "../../components/ProfilPage/StatsProfil/StatsProfil";
 import TopProfile from "../../components/ProfilPage/TopProfil/TopProfil";
@@ -27,6 +28,7 @@ export default function Profil() {
         <MesSports userId={user?.id ?? null} />
         <Dispo userId={user?.id ?? null} />
         <DernieresActivites userId={user?.id ?? null} />
+        <MembresBloques />
         <CompteDanger />
       </div>
     </div>

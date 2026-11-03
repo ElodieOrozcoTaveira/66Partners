@@ -2,14 +2,12 @@ import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { NavLink } from "react-router-dom";
 import { Check, X } from "lucide-react";
-import { FaFacebook } from "react-icons/fa";
 import { isAxiosError } from "axios";
 import TerritoryPicker, { useSignupTerritory } from "../../TerritoryPicker/TerritoryPicker";
 import PasswordInput from "../../PasswordInput/PasswordInput";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
-import { useFacebookAuth } from "../../../hooks/useFacebookAuth";
 import ModaleBienvenue from "../../ModaleBienvenue/ModaleBienvenue";
 import "./ModaleRegisterContent.scss";
 import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
@@ -34,11 +32,6 @@ interface RegisterResponse {
   token: string;
 }
 
-// Droits Facebook Login pas encore validés par Meta : bouton masqué en
-// attendant, sans retirer le flux (useFacebookAuth) pour le réactiver d'un
-// coup une fois l'app validée.
-const FACEBOOK_LOGIN_ENABLED = false;
-
 export default function ModaleRegisterContent({
   isOpen,
   onClose,
@@ -59,7 +52,6 @@ export default function ModaleRegisterContent({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [termsAcceptedGoogle, setTermsAcceptedGoogle] = useState(false);
-  const [termsAcceptedFacebook, setTermsAcceptedFacebook] = useState(false);
 
   function handleSocialAuthSuccess() {
     onClose();
@@ -68,7 +60,6 @@ export default function ModaleRegisterContent({
 
   const googleAuth = useGoogleAuth({ onSuccess: handleSocialAuthSuccess });
   const { buttonRef: googleButtonRef } = useGoogleButton(googleAuth.handleCredential);
-  const facebookAuth = useFacebookAuth({ onSuccess: handleSocialAuthSuccess });
 
   const passwordsMismatch =
     confirmPassword.length > 0 && password !== confirmPassword;
@@ -166,11 +157,9 @@ export default function ModaleRegisterContent({
       setError(null);
       setIsSubmitting(false);
       setTermsAcceptedGoogle(false);
-      setTermsAcceptedFacebook(false);
       googleAuth.reset();
-      facebookAuth.reset();
     }
-    // googleAuth/facebookAuth sont recréés à chaque render (hooks locaux) :
+    // googleAuth est recréé à chaque render (hooks locaux) :
     // seul isOpen doit déclencher cette remise à zéro.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -332,79 +321,6 @@ export default function ModaleRegisterContent({
               </button>
             </section>
           </div>
-        ) : facebookAuth.state.step === "newAccount" ? (
-          <div className="container-modaleRegister">
-            <h3 className="container-modaleRegister__h3">Finalise ton inscription</h3>
-            <h4 className="container-modaleRegister__h4">
-              Connecté·e avec {facebookAuth.state.email}
-            </h4>
-
-            <section className="container-modaleRegister__section">
-              <TerritoryPicker id="facebook-territory-r" value={signupTerritory} onChange={setSignupTerritory} />
-              <label htmlFor="facebook-terms" className="container-modaleRegister__checkboxLabel">
-                <input
-                  id="facebook-terms"
-                  type="checkbox"
-                  checked={termsAcceptedFacebook}
-                  onChange={(event) => setTermsAcceptedFacebook(event.target.checked)}
-                  className="container-modaleRegister__checkbox"
-                />
-                J'ai lu et j'accepte les{" "}
-                <NavLink to="/mentionslegales" onClick={onClose}>
-                  Mentions Légales
-                </NavLink>{" "}
-                et la{" "}
-                <NavLink to="/confidentialite" onClick={onClose}>
-                  Politique de confidentialité
-                </NavLink>{" "}
-                de {brandName}.
-              </label>
-
-              {facebookAuth.error && (
-                <p className="container-modaleRegister__error">{facebookAuth.error}</p>
-              )}
-
-              <button
-                type="button"
-                className="container-modaleRegister__submit"
-                disabled={facebookAuth.isSubmitting}
-                onClick={() => facebookAuth.completeSignup(termsAcceptedFacebook, signupTerritory)}
-              >
-                {facebookAuth.isSubmitting ? "Création..." : "Créer mon compte"}
-              </button>
-              <p className="container-modaleRegister__register">
-                <button
-                  type="button"
-                  className="container-modaleRegister__switch"
-                  onClick={() => facebookAuth.reset()}
-                >
-                  Annuler
-                </button>
-              </p>
-            </section>
-          </div>
-        ) : facebookAuth.state.step === "linkPending" ? (
-          <div className="container-modaleRegister">
-            <h3 className="container-modaleRegister__h3">Compte déjà existant</h3>
-
-            <section className="container-modaleRegister__section">
-              <p className="container-modaleRegister__info">
-                Un compte {brandName} existe déjà avec {facebookAuth.state.email}. Connecte-toi
-                avec ton mot de passe pour associer Facebook à ce compte.
-              </p>
-
-              <button
-                type="button"
-                className="container-modaleRegister__submit"
-                onClick={() => {
-                  facebookAuth.reset();
-                  onSwitchToLogin();
-                }}
-              >
-                Se connecter
-              </button>
-            </section>
-          </div>
         ) : (
           <div className="container-modaleRegister">
             <h3 className="container-modaleRegister__h3">Créer un compte</h3>
@@ -541,24 +457,10 @@ export default function ModaleRegisterContent({
 
               <div className="container-modaleRegister__social">
                 <span className="container-modaleRegister__googleSlot" ref={googleButtonRef} />
-                {FACEBOOK_LOGIN_ENABLED && (
-                  <button
-                    type="button"
-                    className="container-modaleRegister__socialBtn"
-                    onClick={() => facebookAuth.handleLogin()}
-                    disabled={facebookAuth.isSubmitting}
-                  >
-                    <FaFacebook size={18} color="#1877F2" />
-                    {facebookAuth.isSubmitting ? "Connexion..." : "Facebook"}
-                  </button>
-                )}
               </div>
 
               {googleAuth.error && (
                 <p className="container-modaleRegister__error">{googleAuth.error}</p>
-              )}
-              {FACEBOOK_LOGIN_ENABLED && facebookAuth.error && (
-                <p className="container-modaleRegister__error">{facebookAuth.error}</p>
               )}
             </section>
           </div>

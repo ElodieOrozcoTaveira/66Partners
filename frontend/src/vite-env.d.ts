@@ -33,24 +33,4 @@ interface Window {
       };
     };
   };
-  // Injecté par le SDK JavaScript Facebook (connect.facebook.net/.../sdk.js)
-  // — chargé dynamiquement, cf. hooks/useFacebookAuth.ts. Surface minimale
-  // utilisée par l'app (FB.init + FB.login), pas une reprise complète des
-  // types du SDK Facebook.
-  fbAsyncInit?: () => void;
-  FB?: {
-    init: (config: {
-      appId: string;
-      version: string;
-      cookie?: boolean;
-      xfbml?: boolean;
-    }) => void;
-    login: (
-      callback: (response: {
-        authResponse?: { accessToken: string; userID: string } | null;
-        status?: string;
-      }) => void,
-      options?: { scope?: string }
-    ) => void;
-  };
 }

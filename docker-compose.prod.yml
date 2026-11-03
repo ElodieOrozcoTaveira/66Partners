@@ -16,8 +16,6 @@ services:
       - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
       - ADMIN_RECOVERY_EMAIL=${ADMIN_RECOVERY_EMAIL}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
-      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
       - CORS_ORIGIN=${CORS_ORIGIN}
       - FRONTEND_URL=${FRONTEND_URL}
       - SMTP_USER=${SMTP_USER}
@@ -45,7 +43,6 @@ services:
       args:
         VITE_API_URL: https://api.66partners.fr
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-        VITE_FACEBOOK_APP_ID: ${FACEBOOK_APP_ID}
     image: 66partners-frontend
     restart: unless-stopped
     ports:

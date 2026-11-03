@@ -23,6 +23,7 @@ import StatCard from "../../components/AdminComponents/StatCard/StatCard";
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import UserEvolutionChart from "../../components/AdminComponents/UserEvolutionChart/UserEvolutionChart";
 import TerritoryDonutChart from "../../components/AdminComponents/TerritoryDonutChart/TerritoryDonutChart";
+import AdminInsights from "./AdminInsights";
 import "./AdminStats.scss";
 import AdminTerritoryFilter, { useAdminTerritoryFilter } from "../../components/AdminComponents/AdminTerritoryFilter/AdminTerritoryFilter";
 import { useBranding } from "../../contexts/TerritoryContext";
@@ -164,6 +165,7 @@ export default function AdminStats() {
                 value={overviewData?.participations.value ?? null}
                 deltaPct={overviewData?.participations.deltaPct}
                 loading={overviewLoading}
+                onClick={() => navigate("/admin/activites")}
               />
               <StatCard
                 icon={MessageSquareMore}
@@ -206,6 +208,8 @@ export default function AdminStats() {
           error={territories.status === "error"}
           onRetry={() => loadTerritories(range)}
         />
+
+        <AdminInsights territory={territory} />
       </div>
       <AdminBottomNav />
     </div>

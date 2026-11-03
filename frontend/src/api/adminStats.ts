@@ -56,3 +56,60 @@ export async function fetchTerritoryBreakdown(range: TimeRange): Promise<Territo
   );
   return res.data.items;
 }
+
+export interface NamedCount {
+  name: string;
+  count: number;
+}
+
+export interface RankedPerson {
+  id: string;
+  pseudo: string;
+  avatar: string | null;
+  count: number;
+}
+
+/** Indicateurs "depuis le lancement" (GET /api/admin/stats/insights). */
+export interface StatsInsights {
+  totals: {
+    users: number;
+    activities: number;
+    participations: number;
+    conversations: number;
+    messages: number;
+    photos: number;
+    favorites: number;
+    availabilities: number;
+    pushUsers: number;
+  };
+  engagement: {
+    activeUsers: number;
+    usersWithAvatar: number;
+    usersWithFavorites: number;
+  };
+  activities: {
+    upcoming: number;
+    past: number;
+    byStatus: Record<string, number>;
+    byLevel: Record<string, number>;
+    fillRatePct: number;
+    avgParticipants: number;
+    carpoolEnabled: number;
+  };
+  participationsByStatus: Record<string, number>;
+  signupMethods: NamedCount[];
+  topSports: NamedCount[];
+  favoriteSports: NamedCount[];
+  activityCities: NamedCount[];
+  userCities: NamedCount[];
+  topOrganizers: RankedPerson[];
+  topParticipants: RankedPerson[];
+}
+
+export async function fetchStatsInsights(territory?: string): Promise<StatsInsights> {
+  const res = await adminApi.get<{ success: boolean; insights: StatsInsights }>(
+    "/api/admin/stats/insights",
+    { params: { territory } },
+  );
+  return res.data.insights;
+}

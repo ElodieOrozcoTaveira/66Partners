@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { LockKeyhole } from "lucide-react";
 import "./Modale.scss";
 
-// Chargé à la demande : ModaleContent embarque react-icons (FaFacebook,
+// Chargé à la demande : ModaleContent embarque react-icons (
 // FcGoogle — aucun équivalent lucide-react disponible pour ces logos), sinon
 // présent dans le Header sur toutes les pages (cf. audit performance — P1).
 const ModaleContent = lazy(() => import("../ModaleContent/ModaleContent"));

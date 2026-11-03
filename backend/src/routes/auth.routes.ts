@@ -3,7 +3,6 @@ import { AuthController } from "../controllers/auth.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { validateBody } from "../middlewares/validation.middleware.js";
 import {
-  facebookAuthLimiter,
   forgotPasswordLimiter,
   googleAuthLimiter,
   loginLimiter,
@@ -11,9 +10,6 @@ import {
   resetPasswordLimiter,
 } from "../middlewares/rateLimit.middleware.js";
 import {
-  facebookAuthSchema,
-  facebookCompleteSchema,
-  facebookLinkSchema,
   forgotPasswordSchema,
   googleAuthSchema,
   googleCompleteSchema,
@@ -32,9 +28,6 @@ POST /reset-password
 POST /google
 POST /google/complete
 POST /google/link
-POST /facebook
-POST /facebook/complete
-POST /facebook/link
 */
 
 const router = Router();
@@ -77,25 +70,6 @@ router.post(
   googleAuthLimiter,
   validateBody(googleLinkSchema),
   AuthController.googleLink
-);
-router.post(
-  "/facebook",
-  facebookAuthLimiter,
-  validateBody(facebookAuthSchema),
-  AuthController.facebookAuth
-);
-router.post(
-  "/facebook/complete",
-  facebookAuthLimiter,
-  validateBody(facebookCompleteSchema),
-  AuthController.facebookComplete
-);
-router.post(
-  "/facebook/link",
-  requireAuth,
-  facebookAuthLimiter,
-  validateBody(facebookLinkSchema),
-  AuthController.facebookLink
 );
 
 export default router;

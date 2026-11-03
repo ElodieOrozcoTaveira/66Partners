@@ -1,7 +1,11 @@
 import type { Request, Response } from "express";
 import {
   AdminActivitiesService,
+  AdminActivityDetailService,
   AdminAuthError,
+  AdminDetailError,
+  AdminInsightsService,
+  AdminUserDetailService,
   AdminAuthService,
   AdminStatsService,
   AdminUsersService,
@@ -9,6 +13,7 @@ import {
 } from "../services/admin.services.js";
 import { TerritoryError, TerritoryService } from "../services/territory.services.js";
 import { UserError } from "../services/user.services.js";
+import { ReportError, ReportService, type ReportStatus } from "../services/report.services.js";
 
 /**
  * CONTRÔLEUR ADMIN
@@ -254,6 +259,105 @@ export class AdminController {
         success: false,
         message: "Erreur interne lors de la suppression de l'utilisateur",
       });
+    }
+  }
+
+  /**
+   * GET /api/admin/stats/insights
+   * Indicateurs "depuis le lancement" (totaux, répartitions, classements).
+   */
+  static async insights(req: Request, res: Response): Promise<void> {
+    try {
+      const insights = await AdminInsightsService.getInsights(req.query.territory as string | undefined);
+
+      res.status(200).json({ success: true, insights });
+    } catch (error) {
+      if (error instanceof TerritoryError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+
+      console.error("Erreur lors de la récupération des indicateurs admin:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération des indicateurs",
+      });
+    }
+  }
+
+  /**
+   * GET /api/admin/users/:userId
+   */
+  static async userDetail(req: Request, res: Response): Promise<void> {
+    try {
+      const user = await AdminUserDetailService.get(req.params.userId as string);
+
+      res.status(200).json({ success: true, user });
+    } catch (error) {
+      if (error instanceof AdminDetailError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+
+      console.error("Erreur lors de la récupération de la fiche utilisateur:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération de la fiche utilisateur",
+      });
+    }
+  }
+
+  /**
+   * GET /api/admin/activities/:activityId
+   */
+  static async activityDetail(req: Request, res: Response): Promise<void> {
+    try {
+      const activity = await AdminActivityDetailService.get(req.params.activityId as string);
+
+      res.status(200).json({ success: true, activity });
+    } catch (error) {
+      if (error instanceof AdminDetailError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+
+      console.error("Erreur lors de la récupération de la fiche activité:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur interne lors de la récupération de la fiche activité",
+      });
+    }
+  }
+
+  /**
+   * GET /api/admin/reports?status=OPEN|RESOLVED
+   */
+  static async listReports(req: Request, res: Response): Promise<void> {
+    try {
+      const status = req.query.status as ReportStatus | undefined;
+      const reports = await ReportService.list(status ? { status } : {});
+      res.status(200).json({ success: true, reports });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des signalements:", error);
+      res.status(500).json({ success: false, message: "Erreur interne lors de la récupération des signalements" });
+    }
+  }
+
+  /**
+   * PATCH /api/admin/reports/:reportId  { status: "OPEN" | "RESOLVED" }
+   */
+  static async updateReport(req: Request, res: Response): Promise<void> {
+    try {
+      const { status } = req.body as { status: ReportStatus };
+      await ReportService.setStatus(req.params.reportId as string, status);
+      res.status(200).json({ success: true });
+    } catch (error) {
+      if (error instanceof ReportError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+      console.error("Erreur lors de la mise à jour du signalement:", error);
+      res.status(500).json({ success: false, message: "Erreur interne lors de la mise à jour du signalement" });
     }
   }
 }

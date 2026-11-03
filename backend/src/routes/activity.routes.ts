@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { ActivityController } from "../controllers/activity.controller.js";
 import { ParticipationController } from "../controllers/participation.controller.js";
-import { requireAuth } from "../middlewares/auth.middleware.js";
+import { optionalAuth, requireAuth } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validation.middleware.js";
 import {
   activityFiltersSchema,
@@ -25,7 +25,7 @@ DELETE /activities/:id/carpool
 
 const router = Router();
 
-router.get("/", validate({ query: activityFiltersSchema }), ActivityController.list);
+router.get("/", optionalAuth, validate({ query: activityFiltersSchema }), ActivityController.list);
 router.get(
   "/:id",
   requireAuth,

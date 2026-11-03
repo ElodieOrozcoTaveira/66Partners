@@ -289,7 +289,7 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
 }));
 
 // Fournisseurs d'identité externes rattachés à un compte 66Partners (Google
-// pour l'instant, potentiellement Facebook plus tard — table dédiée plutôt
+// pour l'instant, d'autres fournisseurs possibles plus tard) — table dédiée plutôt
 // que de surcharger `users`, pour permettre plusieurs fournisseurs par
 // utilisateur sans jamais faire du social la seule voie d'authentification).
 // provider_user_id = claim "sub" du token du fournisseur (jamais l'email
@@ -335,6 +335,55 @@ export const adminCredentials = pgTable("admin_credentials", {
   resetTokenExpiresAt: timestamp("reset_token_expires_at"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+
+// --- Modération : signalements et blocages entre membres -------------------
+// (exigence des stores pour une app avec échanges entre utilisateurs).
+
+export const reportReasonEnum = pgEnum("report_reason", [
+  "HARASSMENT",
+  "INAPPROPRIATE",
+  "SPAM",
+  "DANGEROUS",
+  "OTHER",
+]);
+// Ce qui est signalé : un profil, un message, une activité ou une photo.
+export const reportContextEnum = pgEnum("report_context", ["PROFILE", "MESSAGE", "ACTIVITY", "PHOTO"]);
+export const reportStatusEnum = pgEnum("report_status", ["OPEN", "RESOLVED"]);
+
+export const userReports = pgTable("user_reports", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  // SET NULL plutôt que CASCADE : un signalement reste consultable par
+  // l'admin même si l'un des deux comptes est supprimé ensuite.
+  reporterId: uuid("reporter_id").references(() => users.id, { onDelete: "set null" }),
+  reportedUserId: uuid("reported_user_id").references(() => users.id, { onDelete: "set null" }),
+  context: reportContextEnum("context").notNull(),
+  // Identifiant du message / de l'activité / de la photo (pas de clé
+  // étrangère : le contenu peut être supprimé, le signalement reste).
+  targetId: uuid("target_id"),
+  // Copie du contenu signalé au moment du signalement, pour que l'admin
+  // puisse juger même si l'auteur le supprime ensuite.
+  targetExcerpt: text("target_excerpt"),
+  reason: reportReasonEnum("reason").notNull(),
+  details: varchar("details", { length: 1000 }),
+  status: reportStatusEnum("status").notNull().default("OPEN"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  resolvedAt: timestamp("resolved_at"),
+}, (t) => ({
+  statusIdx: index("user_reports_status_idx").on(t.status),
+  reportedIdx: index("user_reports_reported_user_id_idx").on(t.reportedUserId),
+}));
+
+// Blocage : blockerId ne veut plus voir blockedId. Appliqué dans les deux
+// sens (profils, activités, messages, photos), cf. block.services.ts.
+export const userBlocks = pgTable("user_blocks", {
+  blockerId: uuid("blocker_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  blockedId: uuid("blocked_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.blockerId, t.blockedId] }),
+  blockedIdx: index("user_blocks_blocked_id_idx").on(t.blockedId),
+}));
 
 // Position approximative d'un membre, pour compter les sportifs autour de soi
 // (onglet Explorer de l'app mobile). Arrondie à 2 décimales (~1 km) avant

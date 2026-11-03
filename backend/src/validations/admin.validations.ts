@@ -46,3 +46,10 @@ export type StatsRangeQuery = z.infer<typeof statsRangeQuerySchema>;
 export const adminUserIdParamSchema = z.object({
   userId: z.uuid("Identifiant utilisateur invalide"),
 });
+
+/**
+ * GET /admin/activities/:activityId
+ */
+export const adminActivityIdParamSchema = z.object({
+  activityId: z.uuid("Identifiant d'activité invalide"),
+});

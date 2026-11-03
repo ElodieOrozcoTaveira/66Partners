@@ -11,7 +11,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import "./Home.scss";
 
-// Chargées à la demande : ces modales embarquent react-icons (FaFacebook,
+// Chargées à la demande : ces modales embarquent react-icons (
 // FcGoogle — aucun équivalent lucide-react disponible), sinon présentes dans
 // le bundle initial via la Home (seule page conservée hors code-splitting —
 // cf. audit performance P1).

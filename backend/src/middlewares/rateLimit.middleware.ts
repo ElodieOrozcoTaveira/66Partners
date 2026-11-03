@@ -104,14 +104,6 @@ export const googleAuthLimiter = createAuthRateLimiter({
   message: "Trop de tentatives de connexion avec Google. Réessaie dans quelques minutes.",
 });
 
-// Même logique que googleAuthLimiter (limite par IP seule, le token Facebook
-// n'est pas un email en clair dans le corps de la requête).
-export const facebookAuthLimiter = createAuthRateLimiter({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  message: "Trop de tentatives de connexion avec Facebook. Réessaie dans quelques minutes.",
-});
-
 // Même logique que googleAuthLimiter : pas d'email dans le corps de la
 // requête admin (mot de passe partagé, pas de compte), limite par IP seule.
 export const adminForgotPasswordLimiter = createAuthRateLimiter({
@@ -124,4 +116,12 @@ export const adminResetPasswordLimiter = createAuthRateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 20,
   message: "Trop de tentatives. Réessaie dans quelques minutes.",
+});
+
+// Signalements : large pour un usage normal, mais empêche d'inonder la
+// modération (et la boîte mail admin) depuis une même adresse.
+export const reportLimiter = createAuthRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 20,
+  message: "Trop de signalements envoyés. Réessaie plus tard.",
 });

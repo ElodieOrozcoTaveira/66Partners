@@ -2,7 +2,6 @@ import type { Request, Response } from "express";
 import { AuthService, AuthError } from "../services/auth.services.js";
 import { TerritoryError } from "../services/territory.services.js";
 import { verifyGoogleCredential } from "../services/google.services.js";
-import { verifyFacebookAccessToken } from "../services/facebook.services.js";
 import { SocialAuthError } from "../services/socialAuthError.js";
 import { signToken } from "../utils/jwt.js";
 import type { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
@@ -268,101 +267,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * POST /api/auth/facebook
-   * Constate l'état d'un compte Facebook (connecté / nouveau / email déjà pris)
-   * — ne crée et ne fusionne jamais rien (cf. AuthService.loginWithFacebook).
-   */
-  static async facebookAuth(req: Request, res: Response): Promise<void> {
-    try {
-      const { accessToken } = req.body;
-      const profile = await verifyFacebookAccessToken(accessToken);
-      const result = await AuthService.loginWithFacebook(profile);
-
-      if (result.status === "LOGGED_IN") {
-        const token = signToken({ id: result.user.id });
-        res.status(200).json({
-          success: true,
-          status: "LOGGED_IN",
-          message: "Connexion réussie",
-          user: result.user,
-          token,
-        });
-        return;
-      }
-
-      res.status(200).json({ success: true, status: result.status, email: result.email });
-    } catch (error) {
-      AuthController.handleSocialAuthError(
-        error,
-        res,
-        "Erreur lors de l'authentification Facebook",
-        "l'authentification Facebook"
-      );
-    }
-  }
-
-  /**
-   * POST /api/auth/facebook/complete
-   * Seule voie de création d'un compte Facebook — exige termsAccepted=true
-   * (déjà revalidé par Zod avant ce handler).
-   */
-  static async facebookComplete(req: Request, res: Response): Promise<void> {
-    try {
-      const { accessToken } = req.body;
-      const profile = await verifyFacebookAccessToken(accessToken);
-      const newUser = await AuthService.completeFacebookSignup(profile, true, req.body.territoryCode);
-      const token = signToken({ id: newUser.id });
-
-      res.status(201).json({
-        success: true,
-        message: "Inscription réussie",
-        user: newUser,
-        token,
-      });
-    } catch (error) {
-      AuthController.handleSocialAuthError(
-        error,
-        res,
-        "Erreur lors de l'inscription avec Facebook",
-        "l'inscription avec Facebook"
-      );
-    }
-  }
-
-  /**
-   * POST /api/auth/facebook/link
-   * Associe Facebook au compte déjà authentifié (req.userId, requireAuth) —
-   * jamais de fusion automatique par email seul.
-   */
-  static async facebookLink(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      if (!req.userId) {
-        res.status(401).json({
-          success: false,
-          message: "Authentification requise",
-          code: "UNAUTHENTICATED",
-        });
-        return;
-      }
-
-      const { accessToken } = req.body;
-      const profile = await verifyFacebookAccessToken(accessToken);
-      await AuthService.linkFacebookAccount(req.userId, profile);
-
-      res.status(200).json({ success: true, message: "Compte Facebook associé." });
-    } catch (error) {
-      AuthController.handleSocialAuthError(
-        error,
-        res,
-        "Erreur lors de l'association du compte Facebook",
-        "l'association du compte Facebook"
-      );
-    }
-  }
-
   // Jamais logger `req.body`/le jeton du provider — uniquement le message de
-  // l'erreur, cf. audit sécurité Google, étendu à Facebook.
+  // l'erreur, cf. audit sécurité Google.
   private static handleSocialAuthError(
     error: unknown,
     res: Response,

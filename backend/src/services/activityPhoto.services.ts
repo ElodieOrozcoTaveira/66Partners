@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { activities, activityPhotos, participations, users } from "../db/schema.js";
 import { signFileUrl } from "../utils/fileAccessToken.js";
+import { notBlockedWith } from "./block.services.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -96,7 +97,8 @@ export class ActivityPhotoService {
       })
       .from(activityPhotos)
       .innerJoin(users, eq(users.id, activityPhotos.uploaderId))
-      .where(eq(activityPhotos.activityId, activityId))
+      // Photos des membres bloqués (dans un sens ou dans l'autre) masquées.
+      .where(and(eq(activityPhotos.activityId, activityId), notBlockedWith(userId, activityPhotos.uploaderId)))
       .orderBy(desc(activityPhotos.createdAt));
 
     // Le demandeur a déjà prouvé son droit d'accès ci-dessus (créateur ou

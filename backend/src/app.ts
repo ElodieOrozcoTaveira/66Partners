@@ -19,6 +19,7 @@ import notificationRoutes from './routes/notification.routes.js';
 import pushRoutes from './routes/push.routes.js';
 import territoryRoutes from './routes/territory.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import reportRoutes from "./routes/report.routes.js";
 import nearbyRoutes from "./routes/nearby.routes.js";
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import { getAllowedOrigins, helmetOptions, verifyOrigin } from './middlewares/security.middleware.js';
@@ -83,6 +84,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/push', pushRoutes);
 app.use('/api/territories', territoryRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/api/nearby', nearbyRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 

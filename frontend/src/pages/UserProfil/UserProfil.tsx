@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import AproposProfile from "../../components/ProfilPage/A propos/Apropos";
 import Dispo from "../../components/ProfilPage/Dispo/Dispo";
 import HeroProfile from "../../components/ProfilPage/HeroProfil/HeroProfile";
@@ -8,6 +8,7 @@ import StatsProfil from "../../components/ProfilPage/StatsProfil/StatsProfil";
 import TopProfile from "../../components/ProfilPage/TopProfil/TopProfil";
 import { useAuth, type User } from "../../contexts/AuthContext";
 import api from "../../lib/axios";
+import ModerationCard from "../../components/Moderation/ModerationCard";
 import "../Profil/Profil.scss";
 
 // Réponse du profil PUBLIC (GET /api/users/:id) : superset local de `User`
@@ -27,6 +28,7 @@ interface UserResponse {
 export default function UserProfil() {
   const { userId } = useParams<{ userId: string }>();
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
   const [profileUser, setProfileUser] = useState<PublicProfileUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +91,11 @@ export default function UserProfil() {
         <StatsProfil userId={profileUser.id} />
         <Dispo userId={profileUser.id} isOwnProfile={false} />
         <MesSports userId={profileUser.id} isOwnProfile={false} />
+        <ModerationCard
+          report={{ context: "PROFILE", targetId: profileUser.id, label: "Signaler ce membre" }}
+          block={{ userId: profileUser.id, pseudo: profileUser.pseudo }}
+          onBlocked={() => navigate("/dashboard", { replace: true })}
+        />
       </div>
     </div>
   );

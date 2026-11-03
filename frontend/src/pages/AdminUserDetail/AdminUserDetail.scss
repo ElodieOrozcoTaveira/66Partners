@@ -1,0 +1,61 @@
+@use "../../styles/variables/variables.scss";
+
+.admin-user-detail__identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-user-detail__avatar {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.admin-user-detail__identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+
+  strong {
+    font-family: "Manrope", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: variables.$nuit;
+  }
+
+  a,
+  span,
+  em {
+    font-family: "Inter", sans-serif;
+    font-size: 0.8rem;
+    color: #64748b;
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    color: variables.$rouge2;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  em {
+    font-style: italic;
+    color: #475569;
+  }
+}
+
+.admin-user-detail__subtitle {
+  margin: 1rem 0 0.55rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}

@@ -33,7 +33,7 @@ export type User = {
 //   bloquant le stockage, quota dépassé...) — jamais un échec d'auth ;
 // - "profile" : le token est mémorisé mais /api/users/me a échoué.
 // login() garde un retour booléen (inchangé) pour ne pas casser les autres
-// appelants (useGoogleAuth/useFacebookAuth) qui ne font qu'un `if (ok)`.
+// appelants (useGoogleAuth) qui ne font qu'un `if (ok)`.
 // Exposée via une fonction (pas une valeur d'état) : un appelant qui fait
 // `const ok = await login(token); ...getLastLoginFailureReason()` doit lire
 // la valeur à jour au moment de l'appel, pas celle capturée au dernier

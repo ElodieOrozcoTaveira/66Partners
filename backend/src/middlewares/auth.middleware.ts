@@ -35,3 +35,24 @@ export function requireAuth(
     });
   }
 }
+
+/**
+ * Route publique qui s'adapte au membre connecté (ex. liste des activités
+ * sans celles des membres bloqués) : renseigne req.userId si un jeton valide
+ * est fourni, sans jamais refuser la requête sinon.
+ */
+export function optionalAuth(
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+): void {
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith("Bearer ")) {
+    try {
+      req.userId = verifyToken(authHeader.slice("Bearer ".length)).id;
+    } catch {
+      // Jeton invalide ou expiré : la route reste publique, simplement sans filtre.
+    }
+  }
+  next();
+}
