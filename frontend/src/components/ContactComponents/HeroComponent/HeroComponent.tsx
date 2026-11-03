@@ -1,22 +1,12 @@
-import './HeroComponent.scss';
-import { useRevealOnScroll } from "../../../hooks/useRevealOnScroll";
+import PageHero from "../../PageHero/PageHero";
 
 export default function HeroComponent() {
-  const left = useRevealOnScroll<HTMLElement>();
-
   return (
-    <div className="container-contactHero">
-      <section
-        ref={left.ref}
-        className={`container-contactHero__left reveal-on-scroll${left.visible ? " is-visible" : ""}`}
-      >
-        <h2 className="container-contactHero__h2">Contact</h2>
-        <p className="container-contactHero__p">
-           Une question, une suggestion ou besoin d'aide? Notre équipe est là
-        pour vous accompagner. N'hésitez pas à nous contacter, nous répondrons
-        dans les plus brefs délais.
-        </p>
-      </section>
-    </div>
+    <PageHero
+      as="h2"
+      eyebrow="Contact"
+      title="Une question ? Écris-nous."
+      text="Une suggestion ou besoin d'aide ? Notre équipe est là pour t'accompagner et te répond dans les plus brefs délais."
+    />
   );
 }

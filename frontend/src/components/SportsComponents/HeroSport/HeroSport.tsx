@@ -1,22 +1,13 @@
-import './HeroSport.scss';
-import { useRevealOnScroll } from "../../../hooks/useRevealOnScroll";
+import PageHero from "../../PageHero/PageHero";
 import { useBranding } from "../../../contexts/TerritoryContext";
 
 export default function HeroSport() {
   const { brandName, territoryIn } = useBranding();
-  const left = useRevealOnScroll<HTMLElement>();
-
   return (
-    <div className="container-contactSport">
-      <section
-        ref={left.ref}
-        className={`container-contactSport__left reveal-on-scroll${left.visible ? " is-visible" : ""}`}
-      >
-        <h2 className="container-contactSport__h2">Sports</h2>
-        <p className="container-contactSport__p">
-           Découvre toutes les activités disponibles {territoryIn} proposées par {brandName}, et trouve ton partenaire.
-        </p>
-      </section>
-    </div>
+    <PageHero
+      eyebrow={brandName}
+      title="Sports"
+      text={`Découvre toutes les activités disponibles ${territoryIn} proposées par ${brandName}, et trouve ton partenaire.`}
+    />
   );
 }
