@@ -186,6 +186,44 @@ const BRANDS: Record<string, Brand> = {
     // Ariège
     { latitude: 42.93, longitude: 1.5, latitudeDelta: 0.9, longitudeDelta: 1.5 }
   ),
+  "30": makeBrand(
+    "30",
+    {
+      // Turquoise du Gardon sous le pont du Gard (logo 30Partners), plutôt
+      // que le vert : se distingue du 09 (cf. frontend/public/30partners/theme.json).
+      primary: "#087F78",
+      primaryDark: "#05524D",
+      primarySoft: "#E2F3F1",
+      accent: "#FDC41C",
+      accentSoft: "#FFF6DA",
+      gradientTo: "#2BB5A5",
+      badgeTo: "#FFDD5E",
+      shadowRgb: "8, 127, 120",
+    },
+    require("../../assets/images/territories/logo30.webp"),
+    require("../../assets/images/territories/emblem30.webp"),
+    // Gard
+    { latitude: 43.98, longitude: 4.1, latitudeDelta: 1.15, longitudeDelta: 1.8 }
+  ),
+  "81": makeBrand(
+    "81",
+    {
+      // Brique d'Albi, la « ville rouge » (logo 81Partners), plutôt que le
+      // rouge vif : se distingue du 31 (cf. frontend/public/81partners/theme.json).
+      primary: "#B8461C",
+      primaryDark: "#7E2E10",
+      primarySoft: "#FBEBE4",
+      accent: "#FDAE03",
+      accentSoft: "#FFF3D6",
+      gradientTo: "#E8792F",
+      badgeTo: "#FFD45E",
+      shadowRgb: "184, 70, 28",
+    },
+    require("../../assets/images/territories/logo81.webp"),
+    require("../../assets/images/territories/emblem81.webp"),
+    // Tarn
+    { latitude: 43.8, longitude: 2.2, latitudeDelta: 1.0, longitudeDelta: 1.6 }
+  ),
 };
 
 export function getBrand(code: string | null | undefined): Brand {
