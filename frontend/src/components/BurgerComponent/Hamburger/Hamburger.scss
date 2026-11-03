@@ -9,7 +9,9 @@
 .navbar-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(variables.$nuit, 0.25);
+  background-color: rgba(31, 41, 55, 0.35);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   // Au-dessus de .container-header (fixed, z-index: 1003) : sinon, sur toute
   // page affichant le Header global (ex. accueil), celui-ci reste visible
   // par-dessus l'overlay/le panneau ouvert au lieu d'être recouvert.
@@ -20,16 +22,15 @@
   transition:
     opacity 0.25s ease,
     visibility 0.25s ease;
-    
 }
 
 .navbar-overlay.show {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  
 }
 
+// Panneau latéral de la refonte : blanc chaud, coins arrondis côté page.
 .navbar-panel {
   position: fixed;
   top: 0;
@@ -38,18 +39,19 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  width: 72vw;
+  gap: 0.25rem;
+  width: min(340px, 86vw);
   height: 100vh;
   height: 100dvh;
-  padding: 1rem 1rem 0.75rem;
+  padding: 0.9rem 0.9rem 0.75rem;
   // iOS PWA (status bar "black-translucent", cf. index.html) : le contenu
-  // s'étend sous l'encoche/la barre de statut — sans ce padding, le premier
-  // enfant (Bonjour) démarre à y=0 et se retrouve partiellement masqué
-  // derrière elle.
-  padding-top: calc(1rem + env(safe-area-inset-top));
+  // s'étend sous l'encoche/la barre de statut.
+  padding-top: calc(0.9rem + env(safe-area-inset-top));
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   overflow-y: auto;
-  background-color: #fffbf7 ;
+  background-color: variables.$fond;
+  border-radius: 28px 0 0 28px;
+  box-shadow: -20px 0 50px rgba(31, 41, 55, 0.18);
   z-index: 1005;
   opacity: 0;
   visibility: hidden;
@@ -57,8 +59,81 @@
   transform: translateX(100%);
   transition:
     opacity 0.25s ease,
-    transform 0.25s ease,
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
     visibility 0.25s ease;
+
+  &__close {
+    position: absolute;
+    top: calc(1.4rem + env(safe-area-inset-top));
+    left: 1.4rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+
+  &__section {
+    margin: 0.9rem 0.6rem 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: variables.$texte3;
+  }
+
+  &__footer {
+    margin-top: auto;
+    padding: 1rem 0.6rem 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__tagline {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: variables.$encre;
+
+    span {
+      color: variables.$rouge;
+    }
+  }
+
+  &__social {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    span {
+      margin-right: auto;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: variables.$texte2;
+    }
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid variables.$bordure;
+      background: #ffffff;
+      color: variables.$rouge;
+    }
+  }
 }
 
 .navbar-panel.show {
@@ -71,93 +146,79 @@
 .navbar-list {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.2rem;
   list-style: none;
   margin: 0;
   padding: 0;
   width: 100%;
-  border-radius: 20px;
 }
 
 .navbar-item {
   width: 100%;
-}
 
-.navbar-item a {
-  color: #242a36;
-  text-decoration: none;
-  font-size: 0.7rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem;
-  text-align: right;
-  padding: 0.7rem 0.2rem;
-  margin-bottom: 0.1rem;
-  font-family: "Inter";
-}
+  a {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.55rem 0.6rem;
+    border-radius: 16px;
+    color: variables.$encre;
+    text-decoration: none;
+    font-family: "Inter", sans-serif;
+    font-size: 0.98rem;
+    font-weight: 600;
+    transition: background-color 0.18s ease, color 0.18s ease;
 
-.navbar-item__arrow {
-  color: variables.$rouge2;
-  order: 2;
-}
+    &:hover {
+      background: #ffffff;
+    }
 
-.navbar-item__label {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  order: 1;
-}
+    &[aria-current="page"] {
+      background: variables.alpha(variables.$rouge, 9%);
+      color: variables.$rouge;
+      font-weight: 700;
 
-.navbar-item__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
+      .navbar-item__icon {
+        @include mixins.gradient;
+        color: #ffffff;
+      }
 
-.navbar-item:hover .navbar-item__icon {
-  @include mixins.gradient;
-  color: white;
-}
-
-.navbar-item a[aria-current="page"] .navbar-item__icon {
-  @include mixins.gradient;
-  color: white;
-}
-
-.navbar-item:hover,
-.navbar-item:has(a[aria-current="page"]) {
-  // Même dégradé rouge→jaune que mixins.gradient (variables de marque,
-  // réactives au territoire actif), ramené à 10% d'opacité — les valeurs
-  // rgba() en dur précédentes correspondaient exactement aux hex par défaut
-  // du 66 ($rouge/$jaune), ne suivaient donc jamais un autre territoire.
-  background: linear-gradient(
-        90deg,
-        variables.alpha(variables.$rouge, 10%) 0%,
-        variables.alpha(variables.$jaune, 10%) 100%
-    );
-  border-radius: 12px;
+      .navbar-item__chevron {
+        color: variables.$rouge;
+      }
+    }
   }
 
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: variables.alpha(variables.$rouge, 9%);
+    color: variables.$rouge;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
 
-.navbar-item a:hover {
-  color: variables.$rouge2;
+  &__label {
+    flex: 1;
+  }
+
+  &__chevron {
+    flex-shrink: 0;
+    color: variables.$texte3;
+  }
 }
 
 .navbar-burger {
-  color: variables.$nuit;
-  background-color: white;
-  border: none;
+  color: variables.$encre;
+  background-color: #ffffff;
+  border: 1px solid variables.$bordure;
   border-radius: 999px;
   cursor: pointer;
-  padding: 0.45rem;
+  padding: 0.5rem;
   position: relative;
   z-index: 1001;
   display: flex;
@@ -177,14 +238,52 @@
   pointer-events: none;
 }
 
+// Boutons de connexion dans le panneau (Connexion.tsx).
+.navbar-panel .container-connexion {
+  margin: 0.9rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid variables.$bordure;
+  gap: 0.6rem;
+
+  &__links1,
+  &__links2 {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  // Se connecter : dégradé du territoire.
+  &__links1 {
+    color: #ffffff;
+  }
+
+  // S'inscrire : bouton clair.
+  &__links2 {
+    background: #ffffff;
+    border: 1.5px solid variables.$bordure;
+    color: variables.$encre;
+  }
+
+  // Se déconnecter : discret.
+  &__logout {
+    background: #ffffff;
+    box-shadow: none;
+    border: 1.5px solid variables.$bordure;
+    color: variables.$texte2;
+  }
+}
+
 // À partir de la tablette, la navigation passe par le Header (liens visibles,
 // cf. Header.scss) plutôt que par le burger — cohérent avec la bottom nav qui
 // disparaît elle aussi à ce même seuil (cf. BottomNavBar.scss).
-@media (min-width:variables.$tablet){
-  .navbar{
+@media (min-width: variables.$tablet) {
+  .navbar {
     display: none;
   }
-  .navbar-list{
+  .navbar-list {
     display: flex;
   }
 }

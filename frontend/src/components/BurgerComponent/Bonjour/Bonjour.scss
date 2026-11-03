@@ -1,56 +1,48 @@
 @use "../../../styles/variables/variables.scss";
 @use "../../../styles/mixins/mixins.scss";
 
+// En-tête du menu : carte au dégradé du territoire posée sur son emblème
+// (comme l'en-tête du tableau de bord et de l'app mobile).
 .container-bonjour {
   position: relative;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
-  padding: 2rem 1rem 1rem 1rem;
-  margin-top: -1rem;
-  margin-left: -1rem;
-  margin-right: -1rem;
-  margin-bottom: 1.5rem;
-  width: calc(100% + 2rem);
-  height: 130px;
-  box-sizing: border-box;
-  border-bottom: 1.5px solid rgb(238, 238, 238);
+  gap: 0.85rem;
+  padding: 4rem 1rem 1.1rem;
+  border-radius: 22px;
+  overflow: hidden;
   background-image: var(--brand-emblem-image, url("/66partners/emblem.webp"));
-  background-position: center;
   background-size: cover;
-  background-repeat: no-repeat;
-  background-position: top 35% right 20%;
-  border-bottom-right-radius: 35px;
-  filter: sepia(0.1) brightness(1.15) contrast(1);
+  background-position: center;
+  color: #ffffff;
+  box-sizing: border-box;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(135deg, variables.$rouge2 0%, variables.$rouge 55%, variables.$marque-clair 100%);
+    opacity: 0.9;
+  }
 
   &--clickable {
     cursor: pointer;
-    filter: brightness(1.08);
-    border-bottom: none;
+  }
 
-    // Le fond emblem.webp (66partners) a des zones très claires (ciel jaune pâle) selon
-    // le cadrage : sans ce voile, le nom/sous-titre en blanc y devient
-    // illisible. Voile posé en ::before pour rester sous le contenu (avatar,
-    // texte, chevron), qui reste en flux normal par-dessus.
-    &::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.22);
-      border-bottom-right-radius: 35px;
-      pointer-events: none;
-    }
+  &__leftside {
+    flex-shrink: 0;
+  }
 
-    .container-bonjour__h3 {
-      color: #ffffff;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-    }
-
-    .container-bonjour__p {
-      color: rgba(255, 255, 255, 0.92);
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-    }
+  &__img {
+    display: block;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    background: #ffffff;
   }
 
   &__rightside {
@@ -58,44 +50,40 @@
     min-width: 0;
   }
 
-  &__chevron {
-    flex-shrink: 0;
-    margin-left: auto;
-    color: #ffffff;
-  }
-
-  &__img {
-    border-radius: 50%;
-    object-fit: cover;
-    transition: transform 0.2s ease;
-    height: 90px;
-    width: 90px;
-    border: solid 1px white;
-
-    &:hover {
-      transform: scale(1.03);
-    }
-  }
   &__nameRow {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
   }
 
   &__h3 {
-    color: variables.$jaune;
-    text-shadow: 1px 1px 2px white;
-
-    font-size: 16px;
-    margin-bottom: -0.2rem;
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  // Badge détaché en haut à droite de la carte, au-dessus du fond emblem —
-  // séparé du nom pour ne pas surcharger la ligne du pseudo.
+  &__p {
+    margin: 0.1rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  &__chevron {
+    flex-shrink: 0;
+    color: #ffffff;
+  }
+
+  // Changement de territoire, en haut à droite de la carte.
   &__territoryBadge {
     position: absolute;
-    top: 0.6rem;
-    right: 0.6rem;
+    top: 1rem;
+    right: 1rem;
     z-index: 2;
   }
 
@@ -103,39 +91,9 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    padding: 0.45rem 0.8rem;
+    padding: 0.4rem 0.75rem;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
   }
-  &__p {
-    color: whitesmoke;
-    text-shadow: 2px 2px 2px variables.$jaune2;
-    font-weight: 600;
-    font-size: 12px;
-    margin-right: 1rem;
-    text-align: left;
-  }
-}
-
-//tablette
-
-@media screen and (min-width: variables.$tablet) and (max-width: 1023px) {
-  .container-bonjour {
-    min-height: 190px;
-    height: auto;
-    padding-top: 3rem;
-    padding-bottom: 3rem;
-    background-position: top 80% right 20%;
-    &__h3 {
-      font-size: 20px;
-    }
-    &__p {
-      font-size: 14px;
-      margin-right: 10rem;
-    }
-  }
-}
-
-@media (min-width: variables.$desktop) {
 }

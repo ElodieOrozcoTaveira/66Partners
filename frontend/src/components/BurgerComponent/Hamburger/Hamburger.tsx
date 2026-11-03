@@ -1,6 +1,7 @@
 import {
   Bike,
   CalendarDays,
+  ChevronRight,
   CircleQuestionMark,
   Flag,
   Home,
@@ -9,13 +10,16 @@ import {
   Mail,
   MessageSquareMore,
   Star,
+  UserRound,
+  X,
   type LucideIcon,
 } from "lucide-react";
+import { FaFacebook } from "react-icons/fa";
+import { SiInstagram } from "react-icons/si";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink } from "react-router-dom";
 import "./Hamburger.scss";
-import FollowUs from "../followUs/FollowUs";
 import Connexion from "../Connexion/Connexion";
 import Bonjour from "../Bonjour/Bonjour";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -37,17 +41,18 @@ const PUBLIC_NAV_ITEMS: NavItem[] = [
 ];
 
 const APP_NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Accueil", icon: Home },
+  { to: "/dashboard", label: "Accueil", icon: Home },
   { to: "/sports", label: "Sports", icon: Bike },
   { to: "/explorer", label: "Activités", icon: CalendarDays },
   { to: "/messages", label: "Messages", icon: MessageSquareMore },
   { to: "/mesactivités", label: "Mes activités", icon: Flag },
+  { to: "/profile", label: "Mon profil", icon: UserRound },
   { to: "/FAQ", label: "FAQ", icon: CircleQuestionMark },
   { to: "/contact", label: "Contact", icon: Mail },
 ];
 
 export default function Hamburger() {
-  const { brandName } = useBranding();
+  const { brandName, taglineLead, taglineAccent } = useBranding();
   const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
@@ -144,20 +149,32 @@ export default function Hamburger() {
             onClick={toggleMenu}
             aria-hidden="true"
           />
-          <div className={`navbar-panel ${isMenuOpen ? "show" : ""}`}>
+          <div
+            className={`navbar-panel ${isMenuOpen ? "show" : ""}`}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+          >
+            <button
+              type="button"
+              className="navbar-panel__close"
+              onClick={toggleMenu}
+              aria-label="Fermer le menu"
+            >
+              <X size={20} />
+            </button>
             <Bonjour onNavigate={toggleMenu} />
 
+            <p className="navbar-panel__section">Navigation</p>
             <ul id="mobile-navigation" className="navbar-list">
               {navItems.map((item) => (
                 <li className="navbar-item" key={item.to}>
-                  <NavLink to={item.to} onClick={toggleMenu}>
-                    <span className="navbar-item__arrow">&gt;</span>
-                    <span className="navbar-item__label">
-                      <span className="navbar-item__icon">
-                        <item.icon size={14} color="currentColor" />
-                      </span>
-                      {item.label}
+                  <NavLink to={item.to} end={item.to === "/"} onClick={toggleMenu}>
+                    <span className="navbar-item__icon">
+                      <item.icon size={18} color="currentColor" />
                     </span>
+                    <span className="navbar-item__label">{item.label}</span>
+                    <ChevronRight className="navbar-item__chevron" size={18} />
                   </NavLink>
                 </li>
               ))}
@@ -169,7 +186,30 @@ export default function Hamburger() {
               onClose={() => setActiveModal(null)}
             />
 
-            <FollowUs />
+            <div className="navbar-panel__footer">
+              <p className="navbar-panel__tagline">
+                {taglineLead} <span>{taglineAccent}</span>
+              </p>
+              <div className="navbar-panel__social">
+                <span>Suivez-nous</span>
+                <a
+                  href="https://www.instagram.com/66par.tners/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Suivez-nous sur Instagram"
+                >
+                  <SiInstagram size={17} />
+                </a>
+                <a
+                  href="https://www.facebook.com/66Partners"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Suivez-nous sur Facebook"
+                >
+                  <FaFacebook size={18} />
+                </a>
+              </div>
+            </div>
           </div>
         </>,
         document.body,
