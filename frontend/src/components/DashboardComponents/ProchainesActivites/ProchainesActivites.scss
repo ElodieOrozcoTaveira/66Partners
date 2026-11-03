@@ -1,157 +1,189 @@
 @use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
 
-.container-prochaine {
-  margin-bottom: 1.5rem;
-  &__header {
+// « Ta prochaine sortie » : grande carte photo à cheval sur l'en-tête
+// (comme l'accueil de l'app mobile).
+.next-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 250px;
+  padding: 1.1rem;
+  border-radius: 26px;
+  background-color: variables.$rouge2;
+  background-size: cover;
+  background-position: center;
+  color: #ffffff;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: 0 18px 44px variables.alpha(variables.$rouge, 30%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  @media (min-width: variables.$tablet) {
+    min-height: 280px;
+    padding: 1.5rem;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+
+    .next-hero__go {
+      transform: translateX(3px);
+    }
+  }
+
+  &--placeholder {
+    background: variables.$fond2;
+    box-shadow: none;
+  }
+
+  &__shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 20%, rgba(0, 0, 0, 0.72) 100%);
+  }
+
+  &__top,
+  &__bottom {
+    position: relative;
+  }
+
+  &__top {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.7rem;
+    align-items: flex-start;
   }
 
-  &__h2 {
-    margin: 0;
-    font-family: "Manrope", sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: variables.$nuit;
-  }
-
-  &__link {
-    font-family: "Inter", sans-serif;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: variables.$rouge2;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  &__empty {
-    display: flex;
+  &__countdown {
+    @include mixins.badge-accent;
+    display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin: 0;
-    padding: 1rem;
-    border-radius: 20px;
-    background: white;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-    border: 1px solid rgba(31, 41, 55, 0.06);
-
-    p {
-      flex: 1;
-      min-width: 160px;
-      margin: 0;
-      font-family: "Inter", sans-serif;
-      font-size: 0.8rem;
-      line-height: 1.4;
-      color: #64748b;
-    }
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 800;
   }
 
-  &__emptyIcon {
-    display: flex;
+  &__sport {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(198, 40, 40, 0.1);
-    color: variables.$rouge2;
+    border: 2px solid #ffffff;
   }
 
-  &__emptyCta {
-    flex-shrink: 0;
-    padding: 0.5rem 1rem;
-    border: 1.5px solid variables.$rouge2;
-    border-radius: 999px;
-    font-family: "Inter", sans-serif;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: variables.$rouge2;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: background-color 0.15s ease;
-
-    &:hover {
-      background: rgba(198, 40, 40, 0.06);
-    }
-  }
-}
-
-.prochaine-card {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 1rem 1.15rem;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(31, 41, 55, 0.06);
-  text-decoration: none;
-
-  &__badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-  }
-
-  &__body {
+  &__bottom {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
+    gap: 0.4rem;
+    padding-right: 3rem;
+  }
+
+  &__kicker {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
   }
 
   &__title {
     margin: 0;
     font-family: "Manrope", sans-serif;
-    font-size: 0.98rem;
-    font-weight: 700;
-    color: variables.$nuit;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: #ffffff;
   }
 
   &__meta {
-    margin: 0;
-    font-family: "Inter", sans-serif;
-    font-size: 0.78rem;
-    color: #64748b;
-  }
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
 
-  &__date {
-    margin: 0;
-    font-family: "Inter", sans-serif;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: variables.$rouge2;
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
   }
 
   &__creator {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    font-family: "Inter", sans-serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #64748b;
+    gap: 0.45rem;
+    margin-top: 0.25rem;
+    font-size: 0.82rem;
+    opacity: 0.92;
+
+    img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #ffffff;
+    }
   }
 
-  &__creator-avatar {
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
+  &__go {
+    position: absolute;
+    right: 1.1rem;
+    bottom: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    object-fit: cover;
+    background: #ffffff;
+    color: variables.$encre;
+    transition: transform 0.2s ease;
+  }
+}
+
+.next-empty {
+  @include mixins.carte;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: variables.$ombre-flottante;
+
+  h2 {
+    margin: 0.35rem 0 0;
+    font-size: 1.35rem;
+  }
+
+  p {
+    margin: 0;
+    color: variables.$texte2;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: variables.alpha(variables.$rouge, 10%);
+    color: variables.$rouge;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
   }
 }

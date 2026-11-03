@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { isAxiosError } from "axios";
-import { ArrowLeft, Calendar, Car, Check, Flag, MapPin, Plus, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, Calendar, Car, Check, Clock, Flag, MapPin, Plus, Trash2, Users, X } from "lucide-react";
 import api from "../../lib/axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { ACTIVITY_NOTIFICATION_TYPES, useNotifications } from "../../contexts/NotificationsContext";
 import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
 import { getSportPhoto } from "../../lib/sportPhotos";
 import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
-import { formatMonth, formatTime, formatWeekday } from "../../lib/dateFormat";
+import { formatStartsIn, formatTime, formatWeekdayLong, formatDayMonth } from "../../lib/dateFormat";
+import Celebration from "../../components/Celebration/Celebration";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import ModerationCard from "../../components/Moderation/ModerationCard";
 import ReportDialog from "../../components/Moderation/ReportDialog";
@@ -97,6 +98,8 @@ export default function DetailActivite() {
 
   const [myParticipation, setMyParticipation] = useState<MyParticipation | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  // Célébration après une demande envoyée (comme l'app mobile).
+  const [showCelebration, setShowCelebration] = useState(false);
   const [isGenderModalOpen, setIsGenderModalOpen] = useState(false);
   const [requests, setRequests] = useState<ParticipationRequest[]>([]);
   const [participants, setParticipants] = useState<ParticipationRequest[]>([]);
@@ -210,6 +213,7 @@ export default function DetailActivite() {
         `/api/activities/${id}/join`,
       );
       setMyParticipation(res.data.participation);
+      setShowCelebration(true);
     } catch (err) {
       const data = isAxiosError<{ code?: string; message?: string }>(err) ? err.response?.data : undefined;
       if (data?.code === "GENDER_REQUIRED") {
@@ -404,35 +408,73 @@ export default function DetailActivite() {
           <Icon size={16} />
           {activity.sportName}
         </span>
+        {!hasEnded && activity.status !== "CANCELLED" ? (
+          <span className="detailactivite-page__countdown">
+            <Clock size={14} /> {formatStartsIn(startDate)}
+          </span>
+        ) : null}
       </div>
 
       <div className="detailactivite-page__body">
         <h1 className="detailactivite-page__title">{activity.title}</h1>
 
-        <div className="detailactivite-page__meta">
-          <span>
-            <Calendar size={15} />
-            {formatWeekday(startDate)} {startDate.getDate()} {formatMonth(startDate)} ·{" "}
-            {formatTime(startDate)}
+        <div className="detailactivite-page__tags">
+          <span className="detailactivite-page__level">
+            {LEVEL_LABELS[activity.levelRequired]}
           </span>
-          <span>
-            <MapPin size={15} />
-            {activity.city}
-          </span>
-          <span>
-            <Users size={15} />
-            {activity.participantsCount}/{activity.maxParticipants} participants
-          </span>
+          {activity.audience !== "ALL" && (
+            <span className="detailactivite-page__level detailactivite-page__level--audience">
+              {AUDIENCE_LABELS[activity.audience]}
+            </span>
+          )}
         </div>
 
-        <span className="detailactivite-page__level">
-          {LEVEL_LABELS[activity.levelRequired]}
-        </span>
-        {activity.audience !== "ALL" && (
-          <span className="detailactivite-page__level detailactivite-page__level--audience">
-            {AUDIENCE_LABELS[activity.audience]}
-          </span>
-        )}
+        {/* Infos clés en carte (comme l'app mobile) : quand, où, participants. */}
+        <div className="detailactivite-page__info">
+          <div className="detailactivite-page__info-row">
+            <span className="detailactivite-page__info-icon">
+              <Calendar size={18} />
+            </span>
+            <div>
+              <span className="detailactivite-page__info-label">Quand</span>
+              <span className="detailactivite-page__info-value">
+                {formatWeekdayLong(startDate)} {formatDayMonth(startDate)} · {formatTime(startDate)}
+              </span>
+            </div>
+          </div>
+          <div className="detailactivite-page__info-row">
+            <span className="detailactivite-page__info-icon">
+              <MapPin size={18} />
+            </span>
+            <div>
+              <span className="detailactivite-page__info-label">Où</span>
+              <span className="detailactivite-page__info-value">{activity.city}</span>
+            </div>
+          </div>
+          <div className="detailactivite-page__info-row">
+            <span className="detailactivite-page__info-icon">
+              <Users size={18} />
+            </span>
+            <div className="detailactivite-page__info-grow">
+              <span className="detailactivite-page__info-label">Participants</span>
+              <span className="detailactivite-page__info-value">
+                {activity.participantsCount}/{activity.maxParticipants}
+                {activity.participantsCount < activity.maxParticipants
+                  ? ` · ${activity.maxParticipants - activity.participantsCount} place${
+                      activity.maxParticipants - activity.participantsCount > 1 ? "s" : ""
+                    } restante${activity.maxParticipants - activity.participantsCount > 1 ? "s" : ""}`
+                  : " · Complet"}
+              </span>
+              <span className="detailactivite-page__gauge" aria-hidden="true">
+                <span
+                  style={{
+                    width: `${Math.max(Math.min(1, activity.participantsCount / Math.max(1, activity.maxParticipants)), 0.04) * 100}%`,
+                  }}
+                />
+              </span>
+            </div>
+          </div>
+        </div>
 
         <NavLink
           to={activity.creatorId ? `/profile/${activity.creatorId}` : "#"}
@@ -749,6 +791,12 @@ export default function DetailActivite() {
           }}
         />
       )}
+      <Celebration
+        open={showCelebration}
+        title="Demande envoyée !"
+        message="L'organisateur va recevoir ta demande. Tu seras prévenu dès qu'il répond."
+        onClose={() => setShowCelebration(false)}
+      />
     </div>
   );
 }

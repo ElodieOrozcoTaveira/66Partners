@@ -8,15 +8,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   padding: 0;
   border: none;
   border-radius: 50%;
   color: white;
   cursor: pointer;
-  background-color: variables.$jaune2;
-  box-shadow: 0 6px 16px variables.alpha(variables.$jaune2, 40%);
+  background-color: variables.$rouge;
+  box-shadow: 0 8px 20px variables.alpha(variables.$rouge, 35%);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -29,7 +29,7 @@
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 22px variables.alpha(variables.$jaune2, 50%);
+    box-shadow: 0 10px 24px variables.alpha(variables.$rouge, 45%);
     filter: brightness(1.05);
   }
 

@@ -7,16 +7,16 @@ Inter:tout le reste (navigations, textes, forumaires, cartes, tableaux)
 //Variables couleurs
 
 //V1
-$rouge : var(--brand-primary, #E6392E);
-$jaune : var(--brand-accent, #F4A61D);
+$rouge : var(--brand-primary, #C4121A);
+$jaune : var(--brand-accent, #FFCC00);
 $nuit : #1F2937;
 $bleufonce:#242a36;
 $beige : #FFF7EB;
 $gris : #F5F5F5;
 $burger:#fef8f3;
 //V2
-$rouge2 : var(--brand-primary-dark, #C62828);
-$jaune2 : var(--brand-accent-dark, #F4B400);
+$rouge2 : var(--brand-primary-dark, #930D13);
+$jaune2 : var(--brand-accent-dark, #E0A800);
 $nuit2 : #1E2A38;
 $beige2 : #F7F3EC;
 $gris2 : #E6E6E6;
@@ -29,7 +29,25 @@ $gris2 : #E6E6E6;
   @return color-mix(in srgb, #{$color} $percent, transparent);
 }
 
-$header-height: 100px;
+// Refonte 2026 (alignée sur l'app mobile) : fond blanc chaud, beige de la
+// charte pour les sections, couleurs du territoire pour les temps forts.
+$fond: #FFFCF8;
+$fond2: #FFF7EB;
+$encre: #1F2937;
+$texte: #1F2937;
+$texte2: #5B6270;
+$texte3: #8A909B;
+$bordure: #EFE7DA;
+$radius-sm: 12px;
+$radius: 18px;
+$radius-lg: 28px;
+$ombre-carte: 0 1px 2px rgba(17, 19, 24, 0.04), 0 8px 24px rgba(17, 19, 24, 0.06);
+$ombre-flottante: 0 18px 50px rgba(17, 19, 24, 0.14);
+// Fin de dégradé : la couleur du territoire éclaircie (jamais d'orange entre
+// le rouge et le jaune, cf. thème mobile).
+$marque-clair: color-mix(in srgb, var(--brand-primary, #C4121A) 78%, white);
+
+$header-height: 76px;
 
 /*Breakpoint*/
 

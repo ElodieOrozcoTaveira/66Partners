@@ -1,170 +1,79 @@
 import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
-import { CalendarX, MapPin, Users } from "lucide-react";
+import { ArrowRight, CalendarX } from "lucide-react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { useBranding } from "../../../contexts/TerritoryContext";
-import { getIconColor, getSportVisual } from "../../../lib/sportVisuals";
-import { getSportPhoto } from "../../../lib/sportPhotos";
-import { formatMonth, formatWeekday } from "../../../lib/dateFormat";
-import "../../HomeComponents/ActivitésProche/ActivitésProche.scss";
+import ActivityCard, { type ActivityCardData } from "../../ActivityCard/ActivityCard";
+import type { Coordinates } from "../../../lib/geo";
 import "./ActivitesAutourDeToi.scss";
 
-const RECENT_COUNT = 4;
+// Les prochaines à venir (comme l'accueil de l'app mobile).
+const UPCOMING_COUNT = 10;
 
-interface Activity {
-  id: string;
-  title: string;
-  city: string;
-  startDate: string;
-  maxParticipants: number;
+interface Activity extends ActivityCardData {
   status: string;
-  sportName: string;
-  participantsCount: number;
   createdAt: string;
   creatorId: string | null;
-  creatorPseudo: string | null;
-  creatorAvatar: string | null;
 }
 
 interface ActivitesAutourDeToiProps {
-  /** Toutes les activités (déjà chargées par Dashboard.tsx). */
+  /** Toutes les activités à venir (déjà chargées par Dashboard.tsx). */
   activities: Activity[];
   /** Activités auxquelles l'utilisateur participe. */
   myActivities: Activity[];
   isLoading: boolean;
+  /** Position de l'utilisateur (distance sur les cartes). */
+  from?: Coordinates | null;
 }
 
-export default function ActivitesAutourDeToi({
-  activities,
-  myActivities,
-  isLoading,
-}: ActivitesAutourDeToiProps) {
+/** « À venir autour de toi » : carrousel de cartes, sans les sorties déjà miennes. */
+export default function ActivitesAutourDeToi({ activities, myActivities, isLoading, from }: ActivitesAutourDeToiProps) {
   const { user } = useAuth();
-  const { inseeDepartmentCode, asset } = useBranding();
 
-  const joinedIds = useMemo(
-    () => new Set(myActivities.map((activity) => activity.id)),
-    [myActivities],
-  );
+  const joinedIds = useMemo(() => new Set(myActivities.map((activity) => activity.id)), [myActivities]);
 
-  const recent = useMemo(() => {
-    const isMine = (activity: Activity) =>
-      activity.creatorId === user?.id || joinedIds.has(activity.id);
-
-    return [...activities]
-      .filter((activity) => activity.status !== "CANCELLED")
-      .sort((a, b) => {
-        const mineDiff = Number(isMine(b)) - Number(isMine(a));
-        if (mineDiff !== 0) return mineDiff;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      })
-      .slice(0, RECENT_COUNT);
+  const upcoming = useMemo(() => {
+    // Les miennes sont déjà en haut (« Ta prochaine sortie », Mes activités) :
+    // pas de doublon ici.
+    const isMine = (activity: Activity) => activity.creatorId === user?.id || joinedIds.has(activity.id);
+    return activities
+      .filter((activity) => activity.status !== "CANCELLED" && !isMine(activity))
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+      .slice(0, UPCOMING_COUNT);
   }, [activities, joinedIds, user]);
 
   return (
-    <div className="container-autourdetoi">
-      <div className="container-autourdetoi__header">
-        <h2 className="container-autourdetoi__h2">Activités autour de toi</h2>
-        <NavLink to="/explorer" className="container-autourdetoi__link">
-          Voir tout
+    <section className="dash-section" aria-labelledby="dash-autour">
+      <div className="dash-section__head">
+        <h2 id="dash-autour" className="dash-section__title">À venir autour de toi</h2>
+        <NavLink to="/explorer" className="dash-section__link">
+          Voir tout <ArrowRight size={15} />
         </NavLink>
       </div>
 
       {isLoading ? (
-        <p className="container-autourdetoi__empty">Chargement...</p>
-      ) : recent.length === 0 ? (
-        <div className="container-activitesproche__empty">
-          <span className="container-activitesproche__empty-icon">
-            <CalendarX size={26} />
+        <div className="dash-carousel" aria-busy="true">
+          {[0, 1, 2].map((key) => (
+            <div key={key} className="dash-carousel__skeleton" />
+          ))}
+        </div>
+      ) : upcoming.length === 0 ? (
+        <div className="dash-empty">
+          <span className="dash-empty__icon">
+            <CalendarX size={24} />
           </span>
-          <h3 className="container-activitesproche__empty-title">
-            Pas encore d'activité autour de toi
-          </h3>
-          <p className="container-activitesproche__empty-text">
-            Sois le premier à en créer une et lance le mouvement près de chez toi !
-          </p>
-          <NavLink to="/mesactivités/nouvelle" className="container-activitesproche__cta">
+          <h3>Aucune activité à venir</h3>
+          <p>Lance la première sortie de ton territoire : d'autres sportifs pourront te rejoindre.</p>
+          <NavLink to="/mesactivités/nouvelle" className="btn btn--primary">
             Créer une activité
           </NavLink>
         </div>
       ) : (
-        <div className="container-autourdetoi__list">
-          {recent.map((activity) => {
-            const startDate = new Date(activity.startDate);
-            const isMine =
-              activity.creatorId === user?.id || joinedIds.has(activity.id);
-            const { icon: Icon, color } = getSportVisual(activity.sportName);
-
-            return (
-              <NavLink
-                key={activity.id}
-                to={`/activities/${activity.id}`}
-                className="activity-card"
-              >
-                <div className="activity-card__photo-wrap">
-                  <img
-                    src={getSportPhoto(activity.sportName)}
-                    alt={activity.sportName}
-                    className="activity-card__photo"
-                    loading="lazy"
-                  />
-                  <span
-                    className="autourdetoi-sport-badge"
-                    style={{ backgroundColor: color, color: getIconColor(color) }}
-                  >
-                    <Icon size={14} strokeWidth={2.2} />
-                  </span>
-                  {isMine && (
-                    <span className="autourdetoi-mine-badge">Inscrit·e</span>
-                  )}
-                  <div className="activity-card__date">
-                    <span className="activity-card__date-day">
-                      {formatWeekday(startDate)}
-                    </span>
-                    <div className="activity-card__date-body">
-                      <span className="activity-card__date-number">
-                        {startDate.getDate()}
-                      </span>
-                      <span className="activity-card__date-month">
-                        {formatMonth(startDate)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="activity-card__body">
-                  <h3 className="activity-card__title">{activity.title}</h3>
-                  <p className="activity-card__meta">
-                    <MapPin size={12} strokeWidth={2.2} />
-                    {activity.city}{inseeDepartmentCode ? ` (${inseeDepartmentCode})` : ""}
-                  </p>
-                  <p className="activity-card__meta">
-                    <Users size={12} strokeWidth={2.2} />
-                    {activity.participantsCount} participant
-                    {activity.participantsCount > 1 ? "s" : ""}
-                  </p>
-                  <span className="activity-card__creator">
-                    <img
-                      src={activity.creatorAvatar || asset("avatarDefault")}
-                      alt={activity.creatorPseudo ?? "Compte supprimé"}
-                      className="activity-card__creator-avatar"
-                    />
-                    {activity.creatorPseudo
-                      ? `Organisée par ${activity.creatorPseudo}`
-                      : "Organisateur du compte supprimé"}
-                  </span>
-                  <span
-                    className="activity-card__sport"
-                    style={{ background: `${color}1F`, color }}
-                  >
-                    {activity.sportName}
-                  </span>
-                </div>
-              </NavLink>
-            );
-          })}
+        <div className="dash-carousel">
+          {upcoming.map((activity) => (
+            <ActivityCard key={activity.id} activity={activity} from={from} compact />
+          ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }

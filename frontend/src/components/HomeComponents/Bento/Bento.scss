@@ -1,0 +1,323 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.bento {
+  padding: 5.5rem 0 2rem;
+
+  &__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+    margin-bottom: 2.75rem;
+  }
+
+  &__titre {
+    @include mixins.display(clamp(2rem, 4.4vw, 3.2rem));
+    margin: 0;
+  }
+
+  &__intro {
+    margin: 0;
+    max-width: 34rem;
+    color: variables.$texte2;
+    line-height: 1.6;
+  }
+
+  &__grid {
+    display: grid;
+    gap: 1rem;
+
+    @media (min-width: variables.$laptop) {
+      grid-template-columns: repeat(12, 1fr);
+    }
+  }
+
+  &__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-height: 360px;
+    padding: 2rem;
+    border-radius: variables.$radius-lg;
+    border: 1px solid variables.$bordure;
+    overflow: hidden;
+
+    @media (min-width: variables.$laptop) {
+      grid-column: span 5;
+
+      &--wide {
+        grid-column: span 7;
+        flex-direction: row;
+        align-items: stretch;
+
+        .bento__text {
+          flex: 1 1 52%;
+        }
+
+        .bento__visual {
+          flex: 1 1 48%;
+        }
+      }
+    }
+
+    h3 {
+      margin: 0.35rem 0 0.6rem;
+      font-family: "Manrope", sans-serif;
+      font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      color: variables.$texte2;
+    }
+
+    &--white {
+      background: #ffffff;
+    }
+
+    // Carte au dégradé du territoire.
+    &--brand {
+      @include mixins.gradient;
+      border-color: transparent;
+      color: #ffffff;
+
+      h3 {
+        color: #ffffff;
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .bento__kicker {
+        color: variables.$jaune;
+      }
+    }
+
+    &--beige {
+      background: variables.$fond2;
+    }
+
+    &--accent {
+      background: color-mix(in srgb, var(--brand-accent, #FFCC00) 14%, white);
+      border-color: color-mix(in srgb, var(--brand-accent, #FFCC00) 35%, white);
+    }
+  }
+
+  &__kicker {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: variables.$rouge;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 1.1rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: variables.$encre;
+    }
+
+    svg {
+      color: variables.$rouge;
+      flex-shrink: 0;
+    }
+  }
+
+  &__visual {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.7rem;
+  }
+
+  // Explorer : filtres + mini cartes.
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+
+    span {
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid variables.$bordure;
+      background: variables.$fond;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: variables.$texte;
+
+      &.is-active {
+        @include mixins.gradient;
+        border-color: transparent;
+        color: #ffffff;
+      }
+    }
+  }
+
+  &__mini-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid variables.$bordure;
+    box-shadow: variables.$ombre-carte;
+
+    img {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      min-width: 0;
+      flex: 1;
+    }
+
+    strong {
+      font-size: 0.88rem;
+      color: variables.$encre;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: variables.$rouge;
+    }
+
+    em {
+      font-style: normal;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #2e7d32;
+      padding-right: 0.3rem;
+    }
+  }
+
+  // Communauté : bulles de discussion.
+  &__bubble {
+    align-self: flex-start;
+    max-width: 85%;
+    padding: 0.7rem 0.95rem;
+    border-radius: 18px 18px 18px 6px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 0.9rem;
+    color: #ffffff;
+
+    &--me {
+      align-self: flex-end;
+      border-radius: 18px 18px 6px 18px;
+      background: #ffffff;
+      color: variables.$encre;
+    }
+  }
+
+  &__icons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+    }
+  }
+
+  // Publier : bouton + et rappel.
+  &__visual--publish {
+    align-items: center;
+    min-height: 120px;
+  }
+
+  &__fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    color: #ffffff;
+    @include mixins.gradient;
+  }
+
+  &__toast {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: variables.$ombre-carte;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: variables.$encre;
+
+    svg {
+      color: variables.$rouge;
+    }
+  }
+
+  // Profil : statistiques.
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+
+    div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.1rem;
+      padding: 1.1rem 0.5rem;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1px solid variables.$bordure;
+    }
+
+    strong {
+      font-family: "Manrope", sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: variables.$encre;
+    }
+
+    span {
+      font-size: 0.8rem;
+      color: variables.$texte2;
+    }
+  }
+}

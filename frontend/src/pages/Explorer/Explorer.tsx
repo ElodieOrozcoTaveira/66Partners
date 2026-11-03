@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
-import { CalendarPlus, Clock, MapPin, Users } from "lucide-react";
+import { CalendarPlus, Navigation, Users } from "lucide-react";
 import api from "../../lib/axios";
 import { useTerritory } from "../../contexts/TerritoryContext";
 import Recherche from "../../components/SportsComponents/Recherche/Recheche";
 import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
-import { getSportPhoto } from "../../lib/sportPhotos";
-import { LEVEL_LABELS, type ActivityLevel } from "../../lib/activityLabels";
-import { formatMonth, formatWeekday } from "../../lib/dateFormat";
+import { type ActivityLevel } from "../../lib/activityLabels";
+import ActivityCard from "../../components/ActivityCard/ActivityCard";
+import { useUserLocation } from "../../hooks/useUserLocation";
+import { useNearbyCount } from "../../hooks/useNearbyCount";
+import { DEFAULT_SEARCH_RADIUS_KM, distanceKm, nearbyLabel } from "../../lib/geo";
 import { DATE_PRESET_LABELS, presetToRange, type DatePreset } from "../../lib/parisDateRange";
 import "./Explorer.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
@@ -37,6 +39,8 @@ interface Activity {
   creatorPseudo: string | null;
   creatorAvatar: string | null;
   audience: ActivityAudience;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface SportsResponse {
@@ -49,20 +53,12 @@ interface ActivitiesResponse {
   activities: Activity[];
 }
 
-const STATUS_LABELS: Record<ActivityStatus, string> = {
-  PENDING: "Ouverte",
-  CONFIRMED: "Confirmée",
-  CANCELLED: "Annulée",
-  COMPLETED: "Terminée",
-};
-
-const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
 export default function Explorer() {
-  const { brandName, asset } = useBranding();
+  const { brandName, territoryOf } = useBranding();
+  // « Autour de moi » : position demandée seulement au clic (ou déjà accordée).
+  const location = useUserLocation();
+  const nearby = useNearbyCount(location.coords);
+  const [aroundMe, setAroundMe] = useState(false);
   const { activeTerritory } = useTerritory();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -120,8 +116,25 @@ export default function Explorer() {
     return activities
       .filter((activity) => !selectedSportId || activity.sportId === selectedSportId)
       .filter((activity) => audienceFilter === "ALL" || activity.audience === audienceFilter)
-      .filter((activity) => !query || activity.title.toLowerCase().includes(query));
-  }, [activities, selectedSportId, audienceFilter, search]);
+      .filter((activity) => !query || activity.title.toLowerCase().includes(query))
+      .filter((activity) => {
+        if (!aroundMe || !location.coords) return true;
+        if (activity.latitude == null || activity.longitude == null) return false;
+        return (
+          distanceKm(location.coords, { latitude: activity.latitude, longitude: activity.longitude }) <=
+          DEFAULT_SEARCH_RADIUS_KM
+        );
+      });
+  }, [activities, selectedSportId, audienceFilter, search, aroundMe, location.coords]);
+
+  async function toggleAroundMe() {
+    if (aroundMe) {
+      setAroundMe(false);
+      return;
+    }
+    const coords = location.coords ?? (await location.locate());
+    if (coords) setAroundMe(true);
+  }
 
   if (isLoading)
     return <p className="explorer-state">Chargement des activités...</p>;
@@ -129,13 +142,38 @@ export default function Explorer() {
 
   return (
     <div className="container-explorer">
+      <span className="eyebrow">{brandName}</span>
       <h1 className="container-explorer__titre">
-        Les activités des {brandName}
+        Les activités {territoryOf}
       </h1>
       <p className="container-explorer__soustitre">
         Découvre les sorties sportives proposées par la communauté près de chez
         toi.
       </p>
+
+      <div className="container-explorer__around">
+        <button
+          type="button"
+          className={`around-toggle${aroundMe ? " around-toggle--active" : ""}`}
+          aria-pressed={aroundMe}
+          onClick={() => void toggleAroundMe()}
+          disabled={location.status === "locating"}
+        >
+          <Navigation size={16} />
+          {location.status === "locating"
+            ? "Localisation…"
+            : `Autour de moi · ${DEFAULT_SEARCH_RADIUS_KM} km`}
+        </button>
+        {nearby ? (
+          <span className="around-count">
+            <Users size={15} /> {nearbyLabel(nearby.count, nearby.radiusKm)}
+          </span>
+        ) : location.status === "denied" ? (
+          <span className="around-hint">
+            Autorise la localisation dans ton navigateur pour voir les sorties autour de toi.
+          </span>
+        ) : null}
+      </div>
 
       <Recherche
         value={search}
@@ -229,7 +267,7 @@ export default function Explorer() {
       )}
 
       {filteredActivities.length === 0 ? (
-        search.trim() || selectedSportId || audienceFilter !== "ALL" ? (
+        search.trim() || selectedSportId || audienceFilter !== "ALL" || aroundMe ? (
           <p className="explorer-state">
             Aucune activité ne correspond à ta recherche.
           </p>
@@ -255,100 +293,9 @@ export default function Explorer() {
         )
       ) : (
         <div className="container-explorer__grid">
-          {filteredActivities.map((activity) => {
-            const { icon: Icon, color } = getSportVisual(activity.sportName);
-            const startDate = new Date(activity.startDate);
-            const isFull = activity.participantsCount >= activity.maxParticipants;
-
-            return (
-              <NavLink
-                key={activity.id}
-                to={`/activities/${activity.id}`}
-                className="activity-card"
-              >
-                <div className="activity-card__photo-wrap">
-                  <img
-                    src={getSportPhoto(activity.sportName)}
-                    alt={activity.sportName}
-                    className="activity-card__photo"
-                    loading="lazy"
-                  />
-                  <div className="activity-card__photo-overlay" />
-
-                  <span
-                    className="activity-card__sport-badge"
-                    style={{ backgroundColor: color }}
-                  >
-                    <Icon size={16} color={getIconColor(color)} />
-                    {activity.sportName}
-                  </span>
-
-                  {activity.status !== "PENDING" && (
-                    <span
-                      className={`activity-card__status activity-card__status--${activity.status.toLowerCase()}`}
-                    >
-                      {STATUS_LABELS[activity.status]}
-                    </span>
-                  )}
-
-                  <div className="activity-card__date">
-                    <span className="activity-card__date-day">
-                      {formatWeekday(startDate)}
-                    </span>
-                    <span className="activity-card__date-number">
-                      {startDate.getDate()}
-                    </span>
-                    <span className="activity-card__date-month">
-                      {formatMonth(startDate)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="activity-card__body">
-                  <h2 className="activity-card__title">{activity.title}</h2>
-
-                  <div className="activity-card__meta">
-                    <span>
-                      <MapPin size={14} />
-                      {activity.city}
-                    </span>
-                    <span>
-                      <Clock size={14} />
-                      {timeFormatter.format(startDate)}
-                    </span>
-                  </div>
-
-                  <span className="activity-card__creator">
-                    <img
-                      src={activity.creatorAvatar || asset("avatarDefault")}
-                      alt={activity.creatorPseudo ?? "Compte supprimé"}
-                      className="activity-card__creator-avatar"
-                    />
-                    {activity.creatorPseudo
-                      ? `Organisée par ${activity.creatorPseudo}`
-                      : "Organisateur du compte supprimé"}
-                  </span>
-
-                  <div className="activity-card__footer">
-                    <span className="activity-card__level">
-                      {LEVEL_LABELS[activity.levelRequired]}
-                    </span>
-                    {activity.audience !== "ALL" && (
-                      <span className="activity-card__level activity-card__level--audience">
-                        {AUDIENCE_LABELS[activity.audience]}
-                      </span>
-                    )}
-                    <span
-                      className={`activity-card__participants${isFull ? " activity-card__participants--full" : ""}`}
-                    >
-                      <Users size={14} />
-                      {activity.participantsCount}/{activity.maxParticipants}
-                    </span>
-                  </div>
-                </div>
-              </NavLink>
-            );
-          })}
+          {filteredActivities.map((activity) => (
+            <ActivityCard key={activity.id} activity={activity} from={location.coords} />
+          ))}
         </div>
       )}
     </div>

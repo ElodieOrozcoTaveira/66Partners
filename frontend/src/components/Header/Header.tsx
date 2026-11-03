@@ -18,15 +18,14 @@ const PUBLIC_NAV_LINKS = [
   { to: "/contact", label: "Contact" },
 ];
 
+// Connecté : navigation courte (comme les onglets de l'app mobile). Le profil
+// passe par l'avatar à droite ; FAQ et Contact restent dans le pied de page.
 const APP_NAV_LINKS = [
   { to: "/dashboard", label: "Accueil" },
-  { to: "/sports", label: "Sports" },
   { to: "/explorer", label: "Activités" },
+  { to: "/sports", label: "Sports" },
   { to: "/messages", label: "Messages" },
   { to: "/mesactivités", label: "Mes activités" },
-  { to: "/profile", label: "Mon profil" },
-  { to: "/FAQ", label: "FAQ" },
-  { to: "/contact", label: "Contact" },
 ];
 
 interface HeaderProps {
@@ -94,6 +93,16 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
             (TerritoryPicker), jamais avant — aucun changement de territoire
             possible tant qu'on n'est pas connecté. */}
         {user && <TerritorySwitcher className="container-header__territoryBadge" />}
+        {user && (
+          <NavLink
+            to="/profile"
+            className="container-header__avatar"
+            aria-label="Mon profil"
+            title="Mon profil"
+          >
+            <img src={user.avatar || asset("avatarDefault")} alt="" width={38} height={38} />
+          </NavLink>
+        )}
         <Hamburger />
       </section>
     </header>

@@ -31,8 +31,9 @@
 
     &__h1{
         margin: 0;
-        font-size: 22px;
-        font-weight: bold;
+        font-size: clamp(1.6rem, 3vw, 2.1rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
         font-family: 'Manrope',sans-serif;
         color: variables.$nuit;
         overflow: hidden;

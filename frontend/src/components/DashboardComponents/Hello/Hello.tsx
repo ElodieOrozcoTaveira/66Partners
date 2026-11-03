@@ -9,10 +9,17 @@ import ImageCropModal from "../../ProfilPage/ImageCropModal/ImageCropModal";
 import "./Hello.scss";
 import { useBranding } from "../../../contexts/TerritoryContext";
 
+function greeting(now = new Date()): string {
+  const hour = now.getHours();
+  return hour >= 18 || hour < 5 ? "Bonsoir" : "Bonjour";
+}
+
 interface HelloProps {
   pseudo: string;
   avatar: string | null;
   coverPhoto: string | null;
+  /** Pastilles sous la salutation (territoire, sportifs autour de toi…). */
+  children?: React.ReactNode;
 }
 
 function notificationIcon(type: AppNotification["type"]) {
@@ -24,7 +31,7 @@ function notificationIcon(type: AppNotification["type"]) {
   return Bell;
 }
 
-export default function Hello({ pseudo, avatar, coverPhoto }: HelloProps) {
+export default function Hello({ pseudo, avatar, coverPhoto, children }: HelloProps) {
   const { asset } = useBranding();
   const { refreshUser } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -100,108 +107,111 @@ export default function Hello({ pseudo, avatar, coverPhoto }: HelloProps) {
     <div className="container-hello">
       <div
         className={`container-hello__cover${coverPhoto ? "" : " container-hello__cover--default"}`}
-        style={{ backgroundImage: `url(${coverPhoto || asset("cover")})` }}
+        style={{ backgroundImage: `url(${coverPhoto || asset("emblem")})` }}
       >
-        <div className="container-hello__bell-wrap" ref={panelRef}>
-          <button
-            type="button"
-            className={`container-hello__bell${unreadCount > 0 ? " container-hello__bell--unread" : ""}`}
-            aria-label={
-              unreadCount > 0 ? `${unreadCount} notification(s) non lue(s)` : "Notifications"
-            }
-            onClick={() => setIsOpen((prev) => !prev)}
-          >
-            <Bell size={19} strokeWidth={2} />
-            {unreadCount > 0 && (
-              <span className="container-hello__badge">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </button>
+        <div className="container-hello__tint" />
+        <div className="container-hello__inner">
+          <div className="container-hello__row">
+            <div className="container-hello__avatar-wrap">
+              <img
+                src={avatar || asset("avatarDefault")}
+                alt={`Photo de profil de ${pseudo}`}
+                className="container-hello__avatar"
+              />
+              <button
+                type="button"
+                className="container-hello__avatarEdit"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={isUploading}
+                aria-label="Modifier la photo de profil"
+              >
+                <Camera size={13} strokeWidth={2.2} />
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleAvatarChange}
+              />
+            </div>
 
-          {isOpen && (
-            <div className="notifications-panel">
-              <div className="notifications-panel__header">
-                <h2 className="notifications-panel__title">Notifications</h2>
+            <div className="container-hello__text">
+              <h1 className="container-hello__h1">{greeting()} {pseudo}</h1>
+              <p className="container-hello__p">Envie d'une nouvelle aventure ?</p>
+            </div>
+            <div className="container-hello__bell-wrap" ref={panelRef}>
+              <button
+                type="button"
+                className={`container-hello__bell${unreadCount > 0 ? " container-hello__bell--unread" : ""}`}
+                aria-label={
+                  unreadCount > 0 ? `${unreadCount} notification(s) non lue(s)` : "Notifications"
+                }
+                onClick={() => setIsOpen((prev) => !prev)}
+              >
+                <Bell size={19} strokeWidth={2} />
                 {unreadCount > 0 && (
-                  <button
-                    type="button"
-                    className="notifications-panel__markall"
-                    onClick={() => markAllAsRead()}
-                  >
-                    <CheckCheck size={13} /> Tout marquer comme lu
-                  </button>
+                  <span className="container-hello__badge">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
                 )}
-              </div>
+              </button>
 
-              {notifications.length === 0 ? (
-                <p className="notifications-panel__empty">
-                  Tu n'as pas encore de notification.
-                </p>
-              ) : (
-                <ul className="notifications-panel__list">
-                  {notifications.map((notification) => {
-                    const Icon = notificationIcon(notification.type);
-                    return (
-                      <li key={notification.id}>
-                        <button
-                          type="button"
-                          className={`notification-item${!notification.estLu ? " notification-item--unread" : ""}`}
-                          onClick={() => handleNotificationClick(notification)}
-                        >
-                          <span className="notification-item__icon">
-                            <Icon size={15} />
-                          </span>
-                          <span className="notification-item__body">
-                            <span className="notification-item__text">
-                              {notification.contenu}
-                            </span>
-                            <span className="notification-item__time">
-                              {formatRelativeTime(new Date(notification.createdAt))}
-                            </span>
-                          </span>
-                          {!notification.estLu && (
-                            <span className="notification-item__dot" aria-hidden="true" />
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
+              {isOpen && (
+                <div className="notifications-panel">
+                  <div className="notifications-panel__header">
+                    <h2 className="notifications-panel__title">Notifications</h2>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        className="notifications-panel__markall"
+                        onClick={() => markAllAsRead()}
+                      >
+                        <CheckCheck size={13} /> Tout marquer comme lu
+                      </button>
+                    )}
+                  </div>
+
+                  {notifications.length === 0 ? (
+                    <p className="notifications-panel__empty">
+                      Tu n'as pas encore de notification.
+                    </p>
+                  ) : (
+                    <ul className="notifications-panel__list">
+                      {notifications.map((notification) => {
+                        const Icon = notificationIcon(notification.type);
+                        return (
+                          <li key={notification.id}>
+                            <button
+                              type="button"
+                              className={`notification-item${!notification.estLu ? " notification-item--unread" : ""}`}
+                              onClick={() => handleNotificationClick(notification)}
+                            >
+                              <span className="notification-item__icon">
+                                <Icon size={15} />
+                              </span>
+                              <span className="notification-item__body">
+                                <span className="notification-item__text">
+                                  {notification.contenu}
+                                </span>
+                                <span className="notification-item__time">
+                                  {formatRelativeTime(new Date(notification.createdAt))}
+                                </span>
+                              </span>
+                              {!notification.estLu && (
+                                <span className="notification-item__dot" aria-hidden="true" />
+                              )}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
-      </div>
-
-      <div className="container-hello__row">
-        <div className="container-hello__avatar-wrap">
-          <img
-            src={avatar || asset("avatarDefault")}
-            alt={`Photo de profil de ${pseudo}`}
-            className="container-hello__avatar"
-          />
-          <button
-            type="button"
-            className="container-hello__avatarEdit"
-            onClick={() => avatarInputRef.current?.click()}
-            disabled={isUploading}
-            aria-label="Modifier la photo de profil"
-          >
-            <Camera size={13} strokeWidth={2.2} />
-          </button>
-          <input
-            ref={avatarInputRef}
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={handleAvatarChange}
-          />
-        </div>
-
-        <div className="container-hello__text">
-          <h1 className="container-hello__h1">Bonjour {pseudo} ! 👋</h1>
-          <p className="container-hello__p">Prêt pour de nouvelles aventures ?</p>
+          </div>
+          {children ? <div className="container-hello__chips">{children}</div> : null}
         </div>
       </div>
 

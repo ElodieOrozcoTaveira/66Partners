@@ -1,4 +1,5 @@
 @use "../variables/variables.scss";
+@use "../mixins/mixins.scss";
 
 *,
 *::before,
@@ -17,7 +18,7 @@
 
 @media (max-width: (variables.$tablet - 1px)) {
   :root {
-    --header-height: calc(78px + env(safe-area-inset-top));
+    --header-height: calc(66px + env(safe-area-inset-top));
   }
 
   // iOS Safari zoome automatiquement la page au focus de tout champ dont la
@@ -52,6 +53,112 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Inter", sans-serif;
+  background: variables.$fond;
+  color: variables.$texte;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: variables.alpha(variables.$rouge, 18%);
+}
+
+// ─── Briques de la refonte (réutilisées par les pages) ───────────────────
+
+// Sur-titre de section, style 66Partners : majuscules dans la couleur du
+// territoire, petit trait dégradé dessous.
+.eyebrow {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  color: variables.$rouge;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+
+  &::after {
+    content: "";
+    width: 40px;
+    height: 4px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, variables.$rouge, variables.$jaune);
+  }
+
+  &--center {
+    align-items: center;
+  }
+
+  &--light {
+    color: #ffffff;
+
+    &::after {
+      background: linear-gradient(90deg, #ffffff, variables.$jaune);
+    }
+  }
+}
+
+// Boutons pilule.
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.4rem;
+  border: none;
+  border-radius: 999px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &--primary {
+    @include mixins.gradient;
+    color: #ffffff;
+  }
+
+  &--dark {
+    background: variables.$rouge2;
+    color: #ffffff;
+    box-shadow: 0 8px 20px variables.alpha(variables.$rouge2, 30%);
+  }
+
+  // Bouton accent (jaune du territoire), pour les fonds colorés.
+  &--accent {
+    @include mixins.badge-accent;
+    box-shadow: 0 8px 20px variables.alpha(variables.$jaune, 35%);
+  }
+
+  &--light {
+    background: #ffffff;
+    color: variables.$encre;
+    border: 1px solid variables.$bordure;
+  }
+
+  &--ghost {
+    background: transparent;
+    color: variables.$encre;
+    border: 1.5px solid rgba(17, 19, 24, 0.14);
+  }
+}
+
+// Conteneur de largeur standard.
+.page-container {
+  width: min(1120px, 100% - 2.5rem);
+  margin-inline: auto;
 }
 
 #root {
@@ -65,6 +172,8 @@ h4,
 h5,
 h6 {
   font-family: "Manrope", sans-serif;
+  letter-spacing: -0.02em;
+  color: variables.$encre;
 }
 
 .reveal-on-scroll {

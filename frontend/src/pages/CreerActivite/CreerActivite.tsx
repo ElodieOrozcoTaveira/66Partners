@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Celebration from "../../components/Celebration/Celebration";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { isAxiosError } from "axios";
@@ -106,6 +107,9 @@ export default function CreerActivite() {
     setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
   }
 
+  // Célébration à la publication (comme l'app mobile).
+  const [showCelebration, setShowCelebration] = useState(true);
+
   async function handlePublish() {
     setSubmitError(null);
     setIsSubmitting(true);
@@ -158,7 +162,17 @@ export default function CreerActivite() {
   const selectedSport = sports.find((sport) => sport.id === form.sportId) ?? null;
 
   if (isSuccess) {
-    return <EtapeSucces title={form.title} />;
+    return (
+      <>
+        <EtapeSucces title={form.title} />
+        <Celebration
+          open={showCelebration}
+          title="Activité publiée !"
+          message="Les sportifs de ton territoire peuvent maintenant la voir et te rejoindre."
+          onClose={() => setShowCelebration(false)}
+        />
+      </>
+    );
   }
 
   const meta = STEP_META[step - 1];
