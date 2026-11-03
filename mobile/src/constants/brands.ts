@@ -229,17 +229,18 @@ const BRANDS: Record<string, Brand> = {
   "82": makeBrand(
     "82",
     {
-      // Bleu du Tarn et de la Garonne (logo 82Partners) et jaune tournesol :
-      // se distingue des voisins 31/32 (rouges) et 81 (brique), cf.
+      // Violet du raisin (chasselas de Moissac, logo 82Partners) et jaune
+      // tournesol : couleur propre au 82, distincte des voisins 31/32
+      // (rouges), 81 (brique) et du bleu du 65, cf.
       // frontend/public/82partners/theme.json.
-      primary: "#1C5FAF",
-      primaryDark: "#123F78",
-      primarySoft: "#E5EEF9",
+      primary: "#6A2C8E",
+      primaryDark: "#4A1D64",
+      primarySoft: "#F1E8F7",
       accent: "#F5B800",
       accentSoft: "#FEF5D6",
-      gradientTo: "#2E8FD8",
+      gradientTo: "#9B4FC0",
       badgeTo: "#FFD84D",
-      shadowRgb: "28, 95, 175",
+      shadowRgb: "106, 44, 142",
     },
     require("../../assets/images/territories/logo82.webp"),
     require("../../assets/images/territories/emblem82.webp"),
