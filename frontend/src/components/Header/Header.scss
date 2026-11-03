@@ -1,6 +1,8 @@
 @use "../../styles/variables/variables.scss";
 @use "../../styles/mixins/mixins.scss";
 
+// En-tête de la refonte : translucide sur le fond blanc cassé, filet fin,
+// navigation sobre (inspirée de Rovent), CTA en pilule.
 .container-header {
   position: fixed;
   top: 0;
@@ -18,7 +20,10 @@
   align-items: center;
   box-sizing: border-box;
   transition: transform 0.35s ease;
-  background-color: white;
+  background-color: color-mix(in srgb, #{variables.$fond} 86%, transparent);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid variables.$bordure;
 
   &--hidden {
     transform: translateY(-100%);
@@ -32,25 +37,21 @@
     }
   }
 
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 7px;
-    @include mixins.gradient;
-  }
-
   &__leftside {
-    padding: 1rem;
+    padding: 0 1rem 0 1.25rem;
+    display: flex;
+    align-items: center;
     transition:
       transform 0.25s ease,
       opacity 0.25s ease;
+
+    a {
+      display: flex;
+    }
   }
 
   &__rightside {
-    padding: 1.5rem;
+    padding: 0 1.25rem 0 0.5rem;
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -58,6 +59,35 @@
 
   &__nav {
     display: none;
+  }
+
+  // Avatar → Mon profil (connecté).
+  &__avatar {
+    display: none;
+    flex-shrink: 0;
+    border-radius: 50%;
+    padding: 2px;
+    background: #ffffff;
+    border: 1px solid variables.$bordure;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+
+    img {
+      display: block;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    &:hover,
+    &[aria-current="page"] {
+      border-color: variables.$rouge;
+      transform: translateY(-1px);
+    }
+
+    @media (min-width: variables.$tablet) {
+      display: flex;
+    }
   }
 }
 
@@ -74,9 +104,10 @@
   display: none;
   align-items: center;
   flex-shrink: 0;
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.8rem;
   border-radius: 999px;
-  background: variables.alpha(variables.$nuit, 6%);
+  background: #ffffff;
+  border: 1px solid variables.$bordure;
 
   @media (min-width: variables.$tablet) {
     display: flex;
@@ -88,8 +119,9 @@
   // largeur/hauteur (ex. 34Partners plus large que 66Partners) : contain
   // évite toute déformation dans la boîte fixe ci-dessous.
   object-fit: contain;
+  width: 112px;
+  height: 56px;
   transition: transform 0.25s ease;
-  margin-left: -0.5rem;
 }
 
 .navbar-list.show ~ .container-header .container-header__leftside {
@@ -100,16 +132,16 @@
 // Téléphone : header plus compact (cf. --header-height réduit en global.scss).
 @media (max-width: (variables.$tablet - 1px)) {
   .container-header__leftside {
-    padding: 0.5rem 1rem;
+    padding: 0 1rem;
   }
 
   .container-header__leftside img {
-    width: 92px;
-    height: auto;
+    width: 88px;
+    height: 46px;
   }
 
   .container-header__rightside {
-    padding: 0.75rem;
+    padding: 0 0.75rem;
   }
 }
 
@@ -119,48 +151,40 @@
     align-items: center;
     flex: 1;
     min-width: 0;
-    gap: 1rem;
-    margin: 0 0 0 1.5rem;
+    gap: 0.25rem;
+    margin: 0 0 0 1rem;
 
     a {
       position: relative;
-      color: variables.$nuit;
+      color: variables.$texte2;
       text-decoration: none;
-      font-family: "Inter";
-      font-size: 0.85rem;
+      font-family: "Inter", sans-serif;
+      font-size: 0.9rem;
       font-weight: 600;
       white-space: nowrap;
-      padding: 0.5rem 0;
-      transition: color 0.2s ease;
-
-      &::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -2px;
-        height: 3px;
-        border-radius: 3px;
-        background: variables.$rouge;
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.2s ease;
-      }
+      padding: 0.5rem 0.75rem;
+      border-radius: 999px;
+      transition: color 0.18s ease, background-color 0.18s ease;
 
       &:hover {
-        color: variables.$rouge;
-
-        &::after {
-          transform: scaleX(1);
-        }
+        color: variables.$encre;
+        background: rgba(17, 19, 24, 0.05);
       }
 
       &[aria-current="page"] {
         color: variables.$rouge;
         font-weight: 700;
 
+        // Petit point de la couleur du territoire sous le lien actif.
         &::after {
-          transform: scaleX(1);
+          content: "";
+          position: absolute;
+          left: 0.75rem;
+          right: 0.75rem;
+          bottom: 0;
+          height: 3px;
+          border-radius: 3px;
+          background: linear-gradient(90deg, variables.$rouge, variables.$jaune);
         }
       }
     }
@@ -174,7 +198,7 @@
       margin-left: 0.3rem;
       padding: 0 4px;
       border-radius: 999px;
-      background: variables.$rouge2;
+      background: variables.$rouge;
       color: #ffffff;
       font-family: "Inter", sans-serif;
       font-size: 0.62rem;
@@ -189,40 +213,68 @@
       align-items: center;
       margin-bottom: 0;
       margin-left: auto;
-      gap: 0.6rem;
+      gap: 0.5rem;
       padding-top: 0;
       border-top: none;
 
       &__links1,
       &__links2 {
         width: auto;
-        padding: 0.6rem 1rem;
-        font-size: 0.8rem;
+        min-height: 42px;
+        padding: 0 1.1rem;
+        font-size: 0.88rem;
+        font-weight: 700;
         white-space: nowrap;
         box-sizing: border-box;
-      }
-
-      &__links1 {
-        border-radius: 999px;
-        box-shadow: 0 8px 20px variables.alpha(variables.$rouge, 28%);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+        transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
 
         &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 24px variables.alpha(variables.$rouge, 36%);
+          transform: translateY(-1px);
         }
       }
 
-      &__links2 {
+      // « Se connecter » : bouton discret.
+      &__links1 {
         border-radius: 999px;
         background: transparent;
-        border: 1.5px solid rgba(variables.$nuit, 0.18);
-        color: variables.$nuit;
-        transition: border-color 0.2s ease, color 0.2s ease;
+        box-shadow: none;
+        color: variables.$encre;
+        border: 1.5px solid rgba(17, 19, 24, 0.14);
 
         &:hover {
-          border-color: variables.$rouge;
+          border-color: variables.$encre;
+        }
+      }
+
+      // « S'inscrire » : dégradé du territoire.
+      &__links2 {
+        border-radius: 999px;
+        @include mixins.gradient;
+        border: none;
+        color: #ffffff;
+        padding-right: 1.1rem;
+      }
+
+      // Déconnexion (connecté) : rond, icône seule.
+      &__logout {
+        width: 42px;
+        min-width: 42px;
+        padding: 0;
+        color: variables.$texte2;
+
+        .container-connexion__label {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          clip: rect(0 0 0 0);
+          white-space: nowrap;
+        }
+
+        &:hover {
           color: variables.$rouge;
+          border-color: variables.$rouge;
         }
       }
     }
@@ -233,12 +285,12 @@
 // on resserre pour que tout tienne entre 768 et 1023px.
 @media (min-width: variables.$tablet) and (max-width: 1023px) {
   .container-header__leftside img {
-    width: 110px;
-    height: auto;
+    width: 92px;
+    height: 48px;
   }
 
   .container-header__rightside {
-    padding: 1rem 0.75rem;
+    padding: 0 0.75rem 0 0.25rem;
     gap: 0.4rem;
   }
 
@@ -251,41 +303,19 @@
   }
 
   .container-header__nav {
-    gap: 0.4rem;
-    margin-left: 0.5rem;
+    gap: 0;
+    margin-left: 0.25rem;
 
     a {
-      font-size: 0.72rem;
+      font-size: 0.78rem;
+      padding: 0.45rem 0.5rem;
     }
 
     .container-connexion {
-      gap: 0.3rem;
-
       &__links1,
       &__links2 {
-        padding: 0.45rem 0.6rem;
-        font-size: 0.66rem;
-      }
-    }
-  }
-}
-
-@media (min-width: variables.$desktop){
-  .container-header__nav{
-    gap: 2rem;
-    margin-left: 25rem;
-
-    a{
-      font-size: 1rem;
-    }
-
-    .container-connexion {
-      gap: 0.75rem;
-
-      &__links1,
-      &__links2 {
-        padding: 0.75rem 1.4rem;
-        font-size: 0.85rem;
+        padding: 0 0.75rem;
+        font-size: 0.78rem;
       }
     }
   }

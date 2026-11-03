@@ -21,13 +21,15 @@ export default function Connexion({ activeModal, onOpenLogin, onOpenRegister, on
       {user && (
         <button
           type="button"
-          className="container-connexion__links1"
+          className="container-connexion__links1 container-connexion__logout"
+          title="Se déconnecter"
           onClick={() => {
             logout();
             navigate("/");
           }}
         >
-          <LogOut size={16} /> Se déconnecter
+          <LogOut size={16} />
+          <span className="container-connexion__label">Se déconnecter</span>
         </button>
       )}
       {/*

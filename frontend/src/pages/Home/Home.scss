@@ -4,7 +4,7 @@
 @keyframes home-fade-in {
   from {
     opacity: 0;
-    transform: translateY(1.5rem);
+    transform: translateY(1.25rem);
   }
   to {
     opacity: 1;
@@ -12,319 +12,230 @@
   }
 }
 
-@keyframes hero-photo-fade-in {
-  from {
-    opacity: 0;
+@keyframes home-float {
+  0%,
+  100% {
+    transform: translateY(0);
   }
-  to {
-    opacity: 1;
+  50% {
+    transform: translateY(-8px);
   }
 }
 
+// ─── Hero : grande photo du territoire, texte en surimpression ───────────
 .home-hero {
-  position: relative;
-  animation: home-fade-in 0.9s ease both;
+  padding: calc(var(--header-height) + 1rem) 0 1rem;
 
-  // Sur téléphone, le hero doit occuper tout l'écran pour que la section
-  // Principe ne soit pas visible avant d'avoir scrollé.
-  @media (max-width: (variables.$tablet - 1px)) {
-    min-height: 100dvh;
-    min-height: 100svh;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-
-    &__photo-wrap::before {
-      animation: none;
-    }
-  }
-
-  &__photo-wrap {
+  &__banner {
     position: relative;
+    display: grid;
+    align-items: end;
+    min-height: min(640px, 82vh);
+    padding: 2rem 1.5rem;
+    border-radius: 32px;
     overflow: hidden;
-    min-height: 580px;
-    background-color: variables.$nuit;
-
-    &::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      background-image: var(--brand-hero-image, url("/66partners/hero.webp"));
-      background-position: center 35%;
-      background-size: cover;
-      background-repeat: no-repeat;
-      animation: hero-photo-fade-in 0.5s ease both;
-    }
-
-    &::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      background: radial-gradient(
-        ellipse 95% 72% at 25% 16%,
-        rgba(255, 255, 255, 0.97) 0%,
-        rgba(255, 255, 255, 0.93) 38%,
-        rgba(255, 255, 255, 0.6) 62%,
-        rgba(255, 255, 255, 0) 85%
-      );
-    }
-
-    @media (min-width: variables.$tablet) {
-      min-height: 640px;
-    }
+    isolation: isolate;
+    box-shadow: 0 24px 60px variables.alpha(variables.$rouge, 18%);
 
     @media (min-width: variables.$laptop) {
-      min-height: 720px;
+      grid-template-columns: 1.2fr 0.8fr;
+      align-items: center;
+      padding: 3.5rem;
     }
 
-    @media (min-width: variables.$desktop) {
-      min-height: 780px;
+    @media (max-width: (variables.$tablet - 1px)) {
+      width: calc(100% - 1.5rem);
+      min-height: 560px;
+      border-radius: 26px;
     }
   }
 
-  &__flag {
+  &__bg {
     position: absolute;
-    z-index: 2;
-    inset: 30% 0 0 45%;
-    clip-path: polygon(100% 15%, 100% 100%, 30% 100%);
-    background: repeating-linear-gradient(
-      115deg,
-      variables.$rouge 0 5px,
-      color-mix(in srgb, variables.$rouge 50%, variables.$jaune 50%) 5px 10px,
-      variables.$jaune 10px 15px,
-      transparent 15px 20px
-    );
-    opacity: 0.8;
-    mask-image: linear-gradient(135deg, transparent 8%, black 55%);
-    -webkit-mask-image: linear-gradient(135deg, transparent 8%, black 55%);
-    pointer-events: none;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: hero-zoom 18s ease-out both;
+  }
+
+  // Voile : sombre à gauche pour la lisibilité, teinté de la couleur du territoire.
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgba(20, 16, 14, 0.72) 0%, rgba(20, 16, 14, 0.35) 55%, rgba(20, 16, 14, 0.05) 100%),
+      linear-gradient(0deg, variables.alpha(variables.$rouge2, 45%) 0%, transparent 45%);
+
+    @media (max-width: (variables.$laptop - 1px)) {
+      background:
+        linear-gradient(0deg, rgba(20, 16, 14, 0.82) 0%, rgba(20, 16, 14, 0.35) 60%, rgba(20, 16, 14, 0.1) 100%),
+        linear-gradient(0deg, variables.alpha(variables.$rouge2, 40%) 0%, transparent 50%);
+    }
   }
 
   &__intro {
-    position: relative;
-    z-index: 3;
-    max-width: 26rem;
-    padding: calc(var(--header-height) + 1.5rem) 1.25rem 0;
-    box-sizing: border-box;
-
-    @media (min-width: variables.$tablet) {
-      max-width: 32rem;
-      padding: calc(var(--header-height) + 2.5rem) 3rem 0;
-    }
-
-    @media (min-width: variables.$laptop) {
-      max-width: 36rem;
-      padding-left: 5rem;
-    }
-
-    @media (min-width: variables.$desktop) {
-      padding-left: 6rem;
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
+    color: #ffffff;
+    animation: home-fade-in 0.7s ease both;
   }
 
   &__titre {
+    @include mixins.display(clamp(2.6rem, 6vw, 4.6rem));
     margin: 0;
-    font-family: "Manrope", sans-serif;
-    font-weight: 800;
-    font-size: 1.85rem;
-    line-height: 1.2;
-    color: variables.$nuit;
-
-    @media (min-width: variables.$tablet) {
-      font-size: 2.2rem;
-    }
-
-    @media (min-width: variables.$laptop) {
-      font-size: 2.6rem;
-    }
-
-    @media (min-width: variables.$desktop) {
-      font-size: 3rem;
-    }
-  }
-
-  &__titre-ligne {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
   }
 
   &__titre-accent {
-    background: linear-gradient(
-      90deg,
-      variables.$jaune 0%,
-      variables.$rouge 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    color: variables.$jaune;
   }
 
   &__soustitre {
-    margin: 0.85rem 0 0;
-    font-family: "Inter", sans-serif;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: rgba(31, 41, 55, 0.7);
-
-    @media (min-width: variables.$tablet) {
-      font-size: 1.1rem;
-    }
-
-    @media (min-width: variables.$laptop) {
-      font-size: 1.2rem;
-      max-width: 30ch;
-    }
-  }
-
-  &__card {
-    position: relative;
-    z-index: 2;
-    margin: -3.5rem 1.25rem 0;
-    padding: 1.5rem 1.1rem 1.75rem;
-    border-radius: 1.5rem;
-    background-color: rgba(31, 41, 55, 0.95);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-
-    @media (min-width: variables.$tablet) {
-      margin: -4rem 3rem 0;
-      padding: 1.75rem 2rem 2.25rem;
-    }
-
-    @media (min-width: variables.$laptop) {
-      margin: -4.5rem 5rem 0;
-    }
-
-    @media (min-width: variables.$desktop) {
-      max-width: 1400px;
-      margin: -5rem auto 0;
-      padding: 2rem 3rem 2.5rem;
-    }
-  }
-
-  &__features {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.4rem;
-    list-style: none;
-    margin: 0 0 1.25rem;
-    padding: 0;
-
-    @media (min-width: variables.$tablet) {
-      gap: 1rem;
-      margin-bottom: 1.75rem;
-    }
-
-    @media (min-width: variables.$laptop) {
-      gap: 1.5rem;
-    }
-  }
-
-  &__feature {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-    text-align: center;
-
-    &:nth-child(1) &-icon,
-    &:nth-child(4) &-icon {
-      color: variables.$rouge;
-    }
-
-    &:nth-child(2) &-icon {
-      color: color-mix(in srgb, variables.$rouge 50%, variables.$jaune 50%);
-    }
-
-    &:nth-child(3) &-icon {
-      color: variables.$jaune;
-    }
-  }
-
-  &__feature-icon {
-    width: 22px;
-    height: 22px;
-
-    @media (min-width: variables.$laptop) {
-      width: 26px;
-      height: 26px;
-    }
-  }
-
-  &__feature-titre {
-    font-family: "Manrope", sans-serif;
-    font-weight: 700;
-    font-size: 0.72rem;
-    color: whitesmoke;
-
-    @media (min-width: variables.$tablet) {
-      font-size: 0.9rem;
-    }
-  }
-
-  &__feature-desc {
-    font-family: "Inter", sans-serif;
-    font-size: 0.6rem;
-    line-height: 1.25;
-    color: rgba(245, 245, 245, 0.6);
-
-    @media (min-width: variables.$tablet) {
-      font-size: 0.78rem;
-    }
+    margin: 0;
+    max-width: 32rem;
+    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
   }
 
   &__actions {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.65rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.4rem;
   }
 
-  &__btn {
-    display: flex;
+  // Notifications de l'app qui flottent sur la photo.
+  &__toasts {
+    display: none;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.9rem;
+
+    @media (min-width: variables.$laptop) {
+      display: flex;
+    }
+  }
+
+  &__toast {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.65rem 1rem 0.65rem 0.65rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: variables.$encre;
+    white-space: nowrap;
+    animation: home-float 6s ease-in-out infinite;
+
+    &:nth-child(2) {
+      margin-right: 2.5rem;
+      animation-delay: -2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: -4s;
+    }
+  }
+
+  &__toast-icon {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0.9rem 1.5rem;
-    border-radius: 999px;
-    text-decoration: none;
-    font-family: "Inter";
-    font-weight: bold;
-    font-size: 0.95rem;
-    color: whitesmoke;
-    @include mixins.gradient;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    background: variables.alpha(variables.$rouge, 12%);
+    color: variables.$rouge;
 
-    transition:
-      transform 0.2s ease,
-      box-shadow 0.2s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 24px variables.alpha(variables.$rouge, 40%);
+    &--ok {
+      background: #e8f5e9;
+      color: #2e7d32;
     }
 
-    @media (min-width: variables.$tablet) {
-      width: auto;
-      padding: 0.95rem 2.25rem;
+    &--accent {
+      background: variables.alpha(variables.$jaune, 35%);
+      color: variables.$texte;
     }
   }
 
-  &__more {
-    display: flex;
-    align-items: center;
-    gap: 0.2rem;
-    color: rgba(245, 245, 245, 0.85);
-    font-family: "Inter";
-    font-size: 0.85rem;
-    text-decoration: none;
-
-    &:hover {
-      color: whitesmoke;
-      text-decoration: underline;
+  @media (prefers-reduced-motion: reduce) {
+    &__bg,
+    &__intro,
+    &__toast {
+      animation: none;
     }
+  }
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+// ─── Appel final : couverture du territoire teintée ──────────────────────
+.home-final {
+  padding: 2rem 0 4rem;
+
+  &__inner {
+    position: relative;
+    border-radius: 32px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+
+  &__tint {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, variables.$rouge2 0%, variables.$rouge 50%, variables.alpha(variables.$rouge, 70%) 100%);
+    opacity: 0.92;
+  }
+
+  &__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 4rem 1.5rem;
+    text-align: center;
+    color: #ffffff;
+  }
+
+  &__titre {
+    @include mixins.display(clamp(2rem, 4.6vw, 3.2rem));
+    margin: 0;
+    color: #ffffff;
+  }
+
+  &__texte {
+    margin: 0;
+    max-width: 32rem;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.6;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
   }
 }

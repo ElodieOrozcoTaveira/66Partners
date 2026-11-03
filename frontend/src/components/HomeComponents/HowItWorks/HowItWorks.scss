@@ -1,0 +1,111 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.how {
+  padding: 2rem 0;
+
+  &__inner {
+    position: relative;
+    border-radius: 32px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+
+  &__tint {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, variables.$rouge2 0%, variables.$rouge 60%, variables.$marque-clair 100%);
+    opacity: 0.93;
+  }
+
+  &__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    padding: 4rem 1.25rem 3.5rem;
+    text-align: center;
+    color: #ffffff;
+
+    @media (min-width: variables.$tablet) {
+      padding: 4.5rem 3rem 4rem;
+    }
+  }
+
+  &__titre {
+    @include mixins.display(clamp(2rem, 4.4vw, 3.2rem));
+    margin: 0 0 1.25rem;
+    color: #ffffff;
+  }
+
+  &__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: grid;
+    gap: 1rem;
+    text-align: left;
+
+    @media (min-width: variables.$tablet) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &__step {
+    padding: 1.6rem;
+    border-radius: 24px;
+    background: #ffffff;
+    color: variables.$texte;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+
+    h3 {
+      margin: 1rem 0 0.45rem;
+      font-family: "Manrope", sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      color: variables.$texte2;
+    }
+  }
+
+  &__step-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    color: #ffffff;
+    @include mixins.gradient;
+  }
+
+  &__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    @include mixins.badge-accent;
+    font-family: "Manrope", sans-serif;
+    font-weight: 800;
+  }
+
+  &__link {
+    margin-top: 1.5rem;
+  }
+}

@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
-import { CalendarX } from "lucide-react";
+import { ArrowRight, CalendarX } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
+import ActivityCard from "../../ActivityCard/ActivityCard";
+import type { ActivityLevel } from "../../../lib/activityLabels";
+import type { ActivityAudience } from "../../../lib/audience";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getSportPhoto } from "../../../lib/sportPhotos";
-import { getSportVisual } from "../../../lib/sportVisuals";
-import { formatMonth, formatTime, formatWeekday } from "../../../lib/dateFormat";
-import "./ActivitésProche.scss";
+import "./NearbySection.scss";
 
 // Chargées à la demande : ces modales embarquent react-icons (cf. Home.tsx).
 const ModaleContent = lazy(() => import("../../ModaleConnexion/ModaleContent/ModaleContent"));
@@ -15,7 +15,7 @@ const ModaleRegisterContent = lazy(
   () => import("../../ModaleRegister/ModaleRegisteContent/ModaleRegisterContent"),
 );
 
-const UPCOMING_COUNT = 4;
+const UPCOMING_COUNT = 6;
 
 interface Activity {
   id: string;
@@ -29,6 +29,10 @@ interface Activity {
   participantsCount: number;
   creatorPseudo: string | null;
   creatorAvatar: string | null;
+  levelRequired?: ActivityLevel;
+  audience?: ActivityAudience;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface ActivitiesResponse {
@@ -37,10 +41,9 @@ interface ActivitiesResponse {
 }
 
 export default function ActivitésProche() {
-  const { asset } = useBranding();
+  const { territoryOf } = useBranding();
   const { activeTerritory } = useTerritory();
   const territoryCode = activeTerritory?.code;
-  const inseeDepartmentCode = activeTerritory?.inseeDepartmentCode;
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -84,112 +87,37 @@ export default function ActivitésProche() {
   }, [activities]);
 
   return (
-    <div className="container-activitesproche">
-      <div className="container-activitesproche__header">
-        <h2 className="container-activitesproche__h2">
-          Activités près de chez vous
-        </h2>
-        <NavLink
-          to="/explorer"
-          className="container-activitesproche__btn"
-          onClick={handleExplorerClick}
-        >
-          Voir tout
+    <section className="nearby page-container" aria-labelledby="nearby-titre">
+      <div className="nearby__head">
+        <div>
+          <span className="eyebrow">À venir</span>
+          <h2 id="nearby-titre" className="nearby__titre">
+            Les prochaines sorties {territoryOf}
+          </h2>
+        </div>
+        <NavLink to="/explorer" className="btn btn--ghost" onClick={handleExplorerClick}>
+          Voir toutes les activités <ArrowRight size={16} />
         </NavLink>
       </div>
 
       {upcoming.length === 0 ? (
-        <div className="container-activitesproche__empty">
-          <span className="container-activitesproche__empty-icon">
+        <div className="nearby__empty">
+          <span className="nearby__empty-icon">
             <CalendarX size={26} />
           </span>
-          <h3 className="container-activitesproche__empty-title">
-            Pas encore d'activité autour de toi
-          </h3>
-          <p className="container-activitesproche__empty-text">
-            Sois le premier à en créer une et lance le mouvement près de chez toi !
-          </p>
-          <NavLink
-            to="/mesactivités/nouvelle"
-            className="container-activitesproche__cta"
-            onClick={handleExplorerClick}
-          >
+          <h3>Pas encore d'activité autour de toi</h3>
+          <p>Sois le premier à en créer une et lance le mouvement près de chez toi !</p>
+          <NavLink to="/mesactivités/nouvelle" className="btn btn--primary" onClick={handleExplorerClick}>
             Créer une activité
           </NavLink>
         </div>
       ) : (
-        <div className="container-activitesproche__list">
-        {upcoming.map((activity) => {
-          const startDate = new Date(activity.startDate);
-          const { color } = getSportVisual(activity.sportName);
-
-          return (
-            <NavLink
-              key={activity.id}
-              to="/explorer"
-              className="activity-card"
-              onClick={handleExplorerClick}
-            >
-              <div className="activity-card__photo-wrap">
-                <img
-                  src={getSportPhoto(activity.sportName)}
-                  alt={activity.sportName}
-                  className="activity-card__photo"
-                  loading="lazy"
-                />
-                <div className="activity-card__date">
-                  <span className="activity-card__date-day">
-                    {formatWeekday(startDate)}
-                  </span>
-                  <div className="activity-card__date-body">
-                    <span className="activity-card__date-number">
-                      {startDate.getDate()}
-                    </span>
-                    <span className="activity-card__date-month">
-                      {formatMonth(startDate)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="activity-card__body">
-                <h3 className="activity-card__title">{activity.title}</h3>
-                <p className="activity-card__meta">{activity.city}{inseeDepartmentCode ? ` (${inseeDepartmentCode})` : ""}</p>
-                <p className="activity-card__meta">
-                  {formatTime(startDate)} ·{" "}
-                  {activity.participantsCount}/{activity.maxParticipants}{" "}
-                  participants
-                </p>
-                <span className="activity-card__creator">
-                  <img
-                    src={activity.creatorAvatar || asset("avatarDefault")}
-                    alt={activity.creatorPseudo ?? "Compte supprimé"}
-                    className="activity-card__creator-avatar"
-                  />
-                  {activity.creatorPseudo
-                    ? `Organisée par ${activity.creatorPseudo}`
-                    : "Organisateur du compte supprimé"}
-                </span>
-                <span
-                  className="activity-card__sport"
-                  style={{ background: `${color}1F`, color }}
-                >
-                  {activity.sportName}
-                </span>
-              </div>
-            </NavLink>
-          );
-        })}
+        <div className="nearby__grid">
+          {upcoming.map((activity) => (
+            <ActivityCard key={activity.id} activity={activity} onClick={handleExplorerClick} />
+          ))}
         </div>
       )}
-
-      <NavLink
-        to="/explorer"
-        className="container-activitesproche__cta"
-        onClick={handleExplorerClick}
-      >
-        Voir toutes les activités
-      </NavLink>
 
       <Suspense fallback={null}>
         <ModaleContent
@@ -203,6 +131,6 @@ export default function ActivitésProche() {
           onSwitchToLogin={() => setActiveModal("login")}
         />
       </Suspense>
-    </div>
+    </section>
   );
 }

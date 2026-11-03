@@ -88,3 +88,32 @@ export function formatRelativeTime(date: Date): string {
 
   return `${formatDayMonth(date)}`;
 }
+
+/**
+ * Compte à rebours court avant le début (comme l'app mobile) : "Dans 25 min",
+ * "Dans 3 h", "Demain", "Dans 4 jours", puis "Sam. 8 nov." ; "C'est parti !"
+ * une fois commencé.
+ */
+export function formatStartsIn(date: Date, now: Date = new Date()): string {
+  const minutes = Math.floor((date.getTime() - now.getTime()) / 60_000);
+  if (minutes <= 0) return "C'est parti !";
+  if (minutes < 60) return `Dans ${minutes} min`;
+  const startOfDay = (value: Date) =>
+    new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
+  const days = Math.round((startOfDay(date) - startOfDay(now)) / 86_400_000);
+  if (days === 0) return `Dans ${Math.floor(minutes / 60)} h`;
+  if (days === 1) return "Demain";
+  if (days < 7) return `Dans ${days} jours`;
+  return `${formatWeekdayShort(date)} ${formatDayMonth(date)}`;
+}
+
+/** Ex. "Aujourd'hui · 18:30", "Demain · 09:00", "Sam. 8 nov. · 10:00" */
+export function formatWhen(date: Date, now: Date = new Date()): string {
+  const startOfDay = (value: Date) =>
+    new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
+  const days = Math.round((startOfDay(date) - startOfDay(now)) / 86_400_000);
+  const time = formatTime(date);
+  if (days === 0) return `Aujourd'hui · ${time}`;
+  if (days === 1) return `Demain · ${time}`;
+  return `${formatWeekdayShort(date)} ${formatDayMonth(date)} · ${time}`;
+}

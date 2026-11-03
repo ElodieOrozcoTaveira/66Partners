@@ -1,120 +1,70 @@
 @use "../../../styles/variables/variables.scss";
 @use "../../../styles/mixins/mixins.scss";
 
+// En-tête du tableau de bord, comme l'accueil de l'app mobile : dégradé du
+// territoire sur la couverture (ou l'emblème), salutation, pastilles.
 .container-hello {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100vw;
-  flex-shrink: 0;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
 
   &__cover {
     position: relative;
-    width: 100%;
-    // PWA iOS (status bar "black-translucent") : sans cet ajout, la
-    // couverture démarre sous la barre de statut et son logo incrusté en
-    // haut s'y retrouve rogné/flouté par sa translucidité.
-    height: calc(180px + env(safe-area-inset-top));
-    @include mixins.background;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-
-    // Boîte mobile proportionnellement plus étroite que l'image par défaut
-    // (1829×860, ~2.1:1) : background-size:cover recadre les côtés, pas le
-    // haut/bas. Le logo "66 PARTNERS" occupe le quart supérieur gauche —
-    // ancré à gauche pour ne jamais le couper (même raisonnement que
-    // HeroProfile). Jamais appliqué à une photo de couverture perso (cf.
-    // le modificateur --default posé uniquement sans coverPhoto).
-    &--default {
-      @media (max-width: (variables.$tablet - 1px)) {
-        background-position: left top;
-      }
-    }
+    padding: calc(1.75rem + env(safe-area-inset-top)) 0 5.5rem;
+    background-size: cover;
+    background-position: center;
+    border-radius: 0 0 32px 32px;
+    overflow: hidden;
+    color: #ffffff;
 
     @media (min-width: variables.$tablet) {
-      height: 230px;
-      background-position: center 38%;
+      padding: calc(var(--header-height) + 2.25rem) 0 6rem;
     }
+  }
 
-    @media (min-width: variables.$laptop) {
-      height: 250px;
-      // Remonte le cadrage pour dégager le pic du Canigou et la mer/drapeau
-      // catalan, sans laisser dépasser le logo 66Partners incrusté en haut
-      // de la photo de couverture par défaut.
-      background-position: center 72%;
-    }
+  &__tint {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, variables.$rouge2 0%, variables.$rouge 55%, variables.$marque-clair 100%);
+    opacity: 0.9;
+  }
 
-    @media (min-width: variables.$desktop) {
-      height: 280px;
-      background-position: center 76%;
-    }
-
-    &::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.3) 100%);
-    }
+  &__inner {
+    position: relative;
+    width: min(1120px, 100% - 2.5rem);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
   }
 
   &__row {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0 1.5rem;
-
-    @media (min-width: variables.$tablet) {
-      padding: 0 2rem;
-    }
+    gap: 1rem;
   }
 
   &__avatar-wrap {
     position: relative;
     flex-shrink: 0;
-    width: 130px;
-    height: 130px;
-    // Chevauche le bas de la couverture (comme HeroProfile), sans entraîner
-    // le reste de la colonne (le texte) avec elle : seul cet élément remonte.
-    margin-top: -55px;
+    padding: 3px;
     border-radius: 50%;
-    border: 3px solid #ffffff;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    background: #f3f3f3;
-
-    @media (min-width: variables.$tablet) {
-      width: 150px;
-      height: 150px;
-      margin-top: -64px;
-    }
-
-    @media (min-width: variables.$laptop) {
-      width: 160px;
-      height: 160px;
-      margin-top: -68px;
-    }
-
-    @media (min-width: variables.$desktop) {
-      width: 180px;
-      height: 180px;
-      margin-top: -75px;
-    }
+    background: rgba(255, 255, 255, 0.85);
   }
 
   &__avatar {
     display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
+    object-fit: cover;
+
+    @media (min-width: variables.$tablet) {
+      width: 72px;
+      height: 72px;
+    }
   }
 
   &__avatarEdit {
     position: absolute;
-    z-index: 1;
     right: -2px;
     bottom: -2px;
     display: flex;
@@ -124,50 +74,48 @@
     height: 26px;
     border: 2px solid #ffffff;
     border-radius: 50%;
-    background: variables.$rouge2;
+    background: variables.$encre;
     color: #ffffff;
     cursor: pointer;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.15s ease;
-
-    &:hover {
-      transform: scale(1.06);
-    }
 
     &:disabled {
-      opacity: 0.7;
+      opacity: 0.6;
       cursor: wait;
     }
   }
 
   &__text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.15rem;
+    flex: 1;
     min-width: 0;
   }
 
   &__h1 {
     margin: 0;
     font-family: "Manrope", sans-serif;
-    font-size: 1.2rem;
+    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
     font-weight: 800;
-    color: variables.$nuit;
+    letter-spacing: -0.03em;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__p {
-    margin: 0;
+    margin: 0.15rem 0 0;
     font-family: "Inter", sans-serif;
-    font-size: 0.82rem;
-    color: #64748b;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   &__bell-wrap {
-    position: absolute;
-    top: calc(0.75rem + env(safe-area-inset-top));
-    right: 0.75rem;
+    position: relative;
     z-index: 2;
     flex-shrink: 0;
   }
@@ -177,26 +125,22 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    width: 38px;
-    height: 38px;
-    border: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    background: #ffffff;
-    color: variables.$nuit;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
     cursor: pointer;
-    transition: transform 0.15s ease;
+    transition: transform 0.15s ease, background-color 0.15s ease;
 
     &:hover {
       transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.28);
     }
 
-    &--unread {
-      color: variables.$rouge2;
-
-      svg {
-        animation: hello-bell-ring 0.6s ease;
-      }
+    &--unread svg {
+      animation: hello-bell-ring 0.6s ease;
     }
   }
 
@@ -207,17 +151,47 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 17px;
-    height: 17px;
+    min-width: 18px;
+    height: 18px;
     padding: 0 3px;
     border-radius: 999px;
-    background: variables.$rouge2;
+    background: variables.$jaune;
     border: 2px solid #ffffff;
-    color: white;
+    color: variables.$texte;
     font-family: "Inter", sans-serif;
-    font-size: 0.6rem;
+    font-size: 0.62rem;
     font-weight: 800;
     line-height: 1;
+  }
+}
+
+// Pastille translucide sur le dégradé (territoire, sportifs autour de toi).
+.hello-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  &--static {
+    cursor: default;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
   }
 }
 
@@ -230,6 +204,8 @@
 }
 
 .notifications-panel {
+  color: variables.$texte;
+  text-align: left;
   position: absolute;
   top: calc(100% + 0.6rem);
   right: 0;

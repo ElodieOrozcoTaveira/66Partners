@@ -1,9 +1,10 @@
 @use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
 
 .detailactivite-page {
   min-height: 100dvh;
   box-sizing: border-box;
-  background-color: #ffffff;
+  background-color: variables.$fond;
   padding-top: var(--header-height);
   padding-bottom: 84px;
 
@@ -21,11 +22,14 @@
 
 .detailactivite-page__cover {
   position: relative;
-  height: 220px;
+  height: 240px;
   overflow: hidden;
 
   @media (min-width: variables.$tablet) {
-    height: 300px;
+    width: min(1120px, 100% - 2.5rem);
+    margin: 1.25rem auto 0;
+    height: 320px;
+    border-radius: 28px;
   }
 
   @media (min-width: variables.$desktop) {
@@ -43,7 +47,99 @@
 .detailactivite-page__cover-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.55) 100%);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.55) 100%);
+}
+
+// Compte à rebours (jaune de l'accent), comme sur l'app mobile.
+.detailactivite-page__countdown {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  @include mixins.badge-accent;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.detailactivite-page__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.detailactivite-page__info {
+  @include mixins.carte;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 1rem;
+}
+
+.detailactivite-page__info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 0;
+
+  & + & {
+    border-top: 1px solid variables.$bordure;
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+}
+
+.detailactivite-page__info-grow {
+  flex: 1;
+}
+
+.detailactivite-page__info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: variables.alpha(variables.$rouge, 10%);
+  color: variables.$rouge;
+}
+
+.detailactivite-page__info-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: variables.$texte3;
+}
+
+.detailactivite-page__info-value {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: variables.$encre;
+}
+
+.detailactivite-page__gauge {
+  display: block;
+  height: 5px;
+  margin-top: 0.45rem;
+  border-radius: 3px;
+  background: variables.$fond2;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, variables.$rouge, variables.$marque-clair);
+  }
 }
 
 .detailactivite-page__back {
@@ -103,11 +199,8 @@
 }
 
 .detailactivite-page__title {
-  margin: 0;
-  font-family: "Manrope", sans-serif;
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: variables.$nuit;
+  @include mixins.display(clamp(1.7rem, 3.6vw, 2.5rem));
+  margin: 0.25rem 0 0;
 }
 
 .detailactivite-page__meta {
@@ -200,26 +293,34 @@
 }
 
 .join-button {
-  padding: 0.6rem 1.1rem;
+  min-height: 48px;
+  padding: 0 1.5rem;
   border: none;
   border-radius: 999px;
-  background: variables.$rouge2;
+  @include mixins.gradient;
   color: #ffffff;
   font-family: "Inter", sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.18s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
 
   &:disabled {
-    background: #cbd5e1;
+    background: #e5e7eb;
+    box-shadow: none;
     color: #64748b;
     cursor: not-allowed;
   }
 
   &--outline {
-    background: transparent;
-    border: 1px solid variables.alpha(variables.$rouge2, 35%);
-    color: variables.$rouge2;
+    background: #ffffff;
+    box-shadow: none;
+    border: 1.5px solid variables.$bordure;
+    color: variables.$encre;
   }
 }
 

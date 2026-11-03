@@ -1,0 +1,272 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.ac-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  border-radius: variables.$radius;
+  background: #ffffff;
+  border: 1px solid variables.$bordure;
+  box-shadow: variables.$ombre-carte;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: variables.$ombre-flottante;
+
+    .ac-card__photo img {
+      transform: scale(1.04);
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.99);
+  }
+
+  &:focus-visible {
+    outline: 3px solid variables.alpha(variables.$rouge, 45%);
+    outline-offset: 2px;
+  }
+
+  &--cancelled {
+    opacity: 0.7;
+  }
+
+  &__photo {
+    position: relative;
+    height: 168px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: variables.$fond2;
+    overflow: hidden;
+
+    img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+  }
+
+  &__shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.55) 100%);
+  }
+
+  &__top,
+  &__bottom {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem;
+  }
+
+  &__top {
+    justify-content: space-between;
+  }
+
+  &__badge {
+    @include mixins.badge-accent;
+    padding: 0.28rem 0.65rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  &__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    color: variables.$texte;
+    font-size: 0.72rem;
+    font-weight: 700;
+
+    &--cancelled {
+      background: #fdecea;
+      color: #c62828;
+    }
+
+    &--completed {
+      background: #eef0f3;
+      color: variables.$texte2;
+    }
+
+    &--confirmed {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+  }
+
+  &__sport {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+  }
+
+  &__sport-name {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__audience {
+    margin-left: auto;
+    padding: 0.22rem 0.55rem;
+    border-radius: 999px;
+    background: variables.$rouge;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  &__title {
+    margin: 0 0 0.15rem;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: variables.$encre;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.85rem;
+    color: variables.$texte2;
+
+    svg {
+      color: variables.$rouge;
+      flex-shrink: 0;
+    }
+  }
+
+  &__level {
+    margin-left: auto;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: variables.$fond2;
+    color: variables.$texte2;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.55rem;
+  }
+
+  &__organizer {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: variables.$texte;
+
+    img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__places {
+    flex-shrink: 0;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #2e7d32;
+
+    &--full {
+      color: #b45309;
+    }
+  }
+
+  &__gauge {
+    height: 4px;
+    margin-top: 0.4rem;
+    border-radius: 2px;
+    background: variables.$fond2;
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, variables.$rouge, variables.$marque-clair);
+
+      &.is-full {
+        background: #d97706;
+      }
+    }
+  }
+
+  // Vignette de carrousel.
+  &--compact {
+    width: 272px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+
+    .ac-card__photo {
+      height: 138px;
+    }
+
+    .ac-card__body {
+      padding: 0.8rem 0.9rem 0.9rem;
+    }
+
+    .ac-card__title {
+      font-size: 0.98rem;
+      min-height: 2.5em;
+    }
+  }
+}

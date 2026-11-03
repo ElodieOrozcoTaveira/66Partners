@@ -8,7 +8,7 @@ import {
 import "./PourquoiHome.scss";
 import { useBranding } from "../../../contexts/TerritoryContext";
 
-const ROUGE = "var(--brand-primary, #E6392E)";
+const ROUGE = "var(--brand-primary, #C4121A)";
 
 export default function PourquoiHome() {
   const { brandName, territoryOf, inseeDepartmentCode } = useBranding();
@@ -17,7 +17,7 @@ export default function PourquoiHome() {
       id: 1,
       icone: UsersRound,
       titre: "Communauté locale",
-      description: `Rejoins une communauté de sportifs passionés dans le ${inseeDepartmentCode}.`,
+      description: `Rejoins une communauté de sportifs passionnés dans le ${inseeDepartmentCode}.`,
     },
     {
       id: 2,
@@ -49,25 +49,32 @@ export default function PourquoiHome() {
   ];
 
   return (
-    <div className="container-pourquoiHome">
-      <h2 className="container-pourquoiHome__h2">Pourquoi choisir {brandName}</h2>
-      <p className="container-pourquoiHome__p">
-        Tout ce qu'il faut savoir pour pratiquer ton sport, en toute confiance.
-      </p>
+    <section className="pourquoi page-container" aria-labelledby="pourquoi-titre">
+      <div className="pourquoi__head">
+        <span className="eyebrow eyebrow--center">Pourquoi {brandName}</span>
+        <h2 id="pourquoi-titre" className="pourquoi__titre">
+          Une communauté locale,
+          <br />
+          bienveillante et gratuite.
+        </h2>
+        <p className="pourquoi__p">Tout ce qu'il faut pour pratiquer ton sport en toute confiance.</p>
+      </div>
 
-      <div className="container-pourquoiHome__grid">
+      <div className="pourquoi__grid">
         {choix.map((choice) => {
           const Icon = choice.icone;
 
           return (
-            <div key={choice.id} className="choice-item">
-              <Icon color={ROUGE} size={40} />
-              <h3 className="choice-item__titre">{choice.titre}</h3>
-              <p className="choice-item__p">{choice.description}</p>
-            </div>
+            <article key={choice.id} className="pourquoi__card">
+              <span className="pourquoi__icon">
+                <Icon color={ROUGE} size={22} />
+              </span>
+              <h3>{choice.titre}</h3>
+              <p>{choice.description}</p>
+            </article>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

@@ -6,30 +6,30 @@
 // --brand-primary(-dark)/--brand-accent(-dark) (cf. TerritoryContext,
 // theme.json par territoire), jamais de couleur 66 codée en dur. Les valeurs
 // hexadécimales ne sont que le repli si un territoire n'a pas de theme.json.
+// Dégradé dans la couleur du territoire uniquement (comme l'app mobile) : le
+// jaune/accent est réservé aux badges, pour ne jamais repasser par l'orange.
 @mixin gradient {
   background: linear-gradient(
     135deg,
     variables.$rouge2 0%,
-    variables.$rouge 45%,
-    variables.$jaune 80%,
-    variables.$jaune2 100%
+    variables.$rouge 55%,
+    variables.$marque-clair 100%
   );
   box-shadow:
-    0 12px 40px variables.alpha(variables.$rouge, 25%),
-    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+    0 10px 28px variables.alpha(variables.$rouge, 28%),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 @mixin gradient-important {
   background: linear-gradient(
     135deg,
     variables.$rouge2 0%,
-    variables.$rouge 45%,
-    variables.$jaune 80%,
-    variables.$jaune2 100%
+    variables.$rouge 55%,
+    variables.$marque-clair 100%
   ) !important;
   box-shadow:
-    0 12px 40px variables.alpha(variables.$rouge, 25%),
-    inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+    0 10px 28px variables.alpha(variables.$rouge, 28%),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
 }
 
 @mixin background {
@@ -38,4 +38,27 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: top 35% right 70%;
+}
+// Badge jaune (Aujourd'hui, compte à rebours…) : accent du territoire.
+@mixin badge-accent {
+  background: linear-gradient(90deg, variables.$jaune, color-mix(in srgb, var(--brand-accent, #FFCC00) 70%, white));
+  color: variables.$texte;
+}
+
+// Carte blanche de la refonte.
+@mixin carte {
+  background: #ffffff;
+  border: 1px solid variables.$bordure;
+  border-radius: variables.$radius;
+  box-shadow: variables.$ombre-carte;
+}
+
+// Titre « display » façon Rovent : très gras, lettres resserrées.
+@mixin display($size) {
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  font-size: $size;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  color: variables.$encre;
 }

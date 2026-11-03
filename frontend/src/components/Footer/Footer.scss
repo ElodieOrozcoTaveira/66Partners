@@ -2,143 +2,132 @@
 @use "../../styles/mixins/mixins.scss";
 
 .container-footer--laptop-only {
-  display: none;
+  display: none !important;
 
   @media (min-width: variables.$laptop) {
-    display: block;
+    display: block !important;
   }
 }
 
 .container-footer {
-  margin-top: 3.5rem;
   position: relative;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  isolation: isolate;
-  width: 100%;
-  min-height: 300px;
-  padding: 1.5rem 2rem 2rem;
-  @include mixins.background;
-  box-sizing: border-box;
+  margin-top: 2rem;
+  padding: 3rem 0 1.5rem;
+  border-top: 1px solid variables.$bordure;
+  background: variables.$fond;
 
-  @media (min-width: variables.$laptop) {
-    min-height: 0;
-    padding: 1.25rem 2rem 1.5rem;
+  &__inner {
+    width: min(1120px, 100% - 2.5rem);
+    margin: 0 auto;
+    display: grid;
+    gap: 2.5rem;
+
+    @media (min-width: variables.$tablet) {
+      grid-template-columns: 1.1fr 1.4fr;
+    }
   }
 
-  @media (min-width: variables.$desktop) {
-    padding: 1rem 2rem 1.25rem;
-  }
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 7px;
-    @include mixins.gradient;
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(15, 18, 26, 0.55) 95%,
-      rgba(15, 18, 26, 0.75) 99%,
-      rgba(15, 18, 26, 0.88) 100%
-    );
-  }
-
-  > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  &__h2 {
+  &__brand {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    color: whitesmoke;
-    text-align: center;
-    font-size: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
   }
-  &__span {
-    color: variables.$jaune;
-  }
+
   &__img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 1rem;
-    width: 100px;
-    height: 80px;
-    // object-fit: contain plutôt que le fill par défaut : les logos des
-    // territoires n'ont pas tous le même ratio (ex. 66 en 16:9, 34 plus
-    // large) et un fill les déforme/floute selon l'écart avec la boîte fixe.
+    width: 110px;
+    height: 64px;
     object-fit: contain;
-
-    @media (min-width: variables.$laptop) {
-      width: 76px;
-      height: 63px;
-      margin-top: 0.75rem;
-    }
+    object-position: left center;
   }
-  &__underline {
-    width: 3.5rem;
-    height: 2px;
-    border-radius: 2px;
-    margin: 0.75rem auto 0;
-    @include mixins.gradient;
 
-    @media (min-width: variables.$laptop) {
-      margin-top: 0.5rem;
-    }
+  &__tagline {
+    margin: 0;
+    max-width: 22rem;
+    color: variables.$texte2;
+    line-height: 1.55;
   }
-  &__h2bis {
-    font-size: 12px;
-    text-align: center;
 
-    color: whitesmoke;
-    font-weight: 200;
-    font-family: "Inter";
-  }
   &__lieux {
-    color: whitesmoke;
-    font-size: 12px;
-    text-align: center;
-  }
-
-  &__docs {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+    font-size: 0.85rem;
+    color: variables.$texte3;
+
+    svg {
+      color: variables.$rouge;
+    }
+  }
+
+  &__social {
+    display: flex;
     gap: 0.5rem;
-    margin-top: 1.25rem;
+    margin-top: 0.3rem;
 
-    @media (min-width: variables.$laptop) {
-      margin-top: 0.75rem;
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid variables.$bordure;
+      background: #ffffff;
+      color: variables.$encre;
+      transition: color 0.18s ease, border-color 0.18s ease;
+
+      &:hover {
+        color: variables.$rouge;
+        border-color: variables.$rouge;
+      }
     }
   }
 
-  &__doclink {
-    color: rgba(245, 245, 245, 0.75);
-    font-size: 11px;
-    text-decoration: none;
+  &__cols {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
 
-    &:hover {
-      color: whitesmoke;
-      text-decoration: underline;
+    @media (min-width: variables.$tablet) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    a {
+      color: variables.$texte2;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.18s ease;
+
+      &:hover {
+        color: variables.$encre;
+      }
     }
   }
 
-  &__docsep {
-    color: rgba(245, 245, 245, 0.4);
-    font-size: 11px;
+  &__coltitle {
+    margin: 0 0 0.2rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: variables.$encre;
+  }
+
+  &__copy {
+    width: min(1120px, 100% - 2.5rem);
+    margin: 2.5rem auto 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid variables.$bordure;
+    font-size: 0.8rem;
+    color: variables.$texte3;
   }
 }

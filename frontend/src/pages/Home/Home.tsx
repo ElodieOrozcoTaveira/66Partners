@@ -1,12 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import {
-  Compass,
-  ChevronRight,
-  Users,
-  Calendar,
-  MapPin,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowRight, BellRing, CheckCircle2, Compass, MapPin } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import "./Home.scss";
@@ -21,14 +14,16 @@ const ModaleContent = lazy(
 const ModaleRegisterContent = lazy(
   () => import("../../components/ModaleRegister/ModaleRegisteContent/ModaleRegisterContent"),
 );
-import Principe from "../../components/HomeComponents/Principe/Principe";
-import SportsPop from "../../components/HomeComponents/SportPopulaire/SportsPop";
+import SportsMarquee from "../../components/HomeComponents/SportsMarquee/SportsMarquee";
+import Bento from "../../components/HomeComponents/Bento/Bento";
 import ActivitésProche from "../../components/HomeComponents/ActivitésProche/AcitivtésProche";
+import HowItWorks from "../../components/HomeComponents/HowItWorks/HowItWorks";
 import PourquoiHome from "../../components/HomeComponents/Pourquoi/PourquoiHome";
+import AppAndroid from "../../components/HomeComponents/AppAndroid/AppAndroid";
 import { useBranding } from "../../contexts/TerritoryContext";
 
 export default function Home() {
-  const { taglineLeadLines, taglineAccent, territoryOf } = useBranding();
+  const { taglineLeadLines, taglineAccent, asset, brandName, territoryIn } = useBranding();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(null);
@@ -47,39 +42,14 @@ export default function Home() {
     }
   }
 
-  const heroFeatures = [
-    {
-      id: 1,
-      icon: Users,
-      titre: "Trouve",
-      description: "des sportifs près de toi",
-    },
-    {
-      id: 2,
-      icon: Calendar,
-      titre: "Rejoins",
-      description: "des activités facilement",
-    },
-    {
-      id: 3,
-      icon: MapPin,
-      titre: "Partage",
-      description: "tes passions sportives",
-    },
-    {
-      id: 4,
-      icon: ShieldCheck,
-      titre: "Évolue",
-      description: "en toute sécurité",
-    },
-  ];
+  const openRegister = () => (user ? navigate("/dashboard") : setActiveModal("register"));
 
   return (
     <>
       <section className="home-hero">
-        <div className="home-hero__photo-wrap">
-          <span className="home-hero__flag" aria-hidden="true" />
-
+        <div className="home-hero__banner page-container">
+          <img className="home-hero__bg" src={asset("hero")} alt="" />
+          <div className="home-hero__overlay" />
           <div className="home-hero__intro">
             <h1 className="home-hero__titre">
               {taglineLeadLines.map((line) => (
@@ -88,43 +58,43 @@ export default function Home() {
               <span className="home-hero__titre-ligne home-hero__titre-accent">{taglineAccent}</span>
             </h1>
             <p className="home-hero__soustitre">
-              La plateforme des sportifs {territoryOf}.
+              La plateforme qui regroupe tous les sportifs. <br></br> Trouve des partenaires, rejoins une
+              sortie en un clic et retrouve le groupe sur place.
             </p>
+            <div className="home-hero__actions">
+              <NavLink to="/explorer" className="btn btn--primary" onClick={handleExplorerClick}>
+                <Compass size={18} /> Découvrir les activités
+              </NavLink>
+              <button type="button" className="btn btn--light" onClick={openRegister}>
+                {user ? "Mon tableau de bord" : "Créer mon compte"} <ArrowRight size={17} />
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="home-hero__card">
-          <ul className="home-hero__features">
-            {heroFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <li key={feature.id} className="home-hero__feature">
-                  <Icon size={22} className="home-hero__feature-icon" />
-                  <span className="home-hero__feature-titre">
-                    {feature.titre}
-                  </span>
-                  <span className="home-hero__feature-desc">
-                    {feature.description}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-
-          <div className="home-hero__actions">
-            <NavLink
-              to="/explorer"
-              className="home-hero__btn"
-              onClick={handleExplorerClick}
-            >
-              <Compass size={18} /> Découvrir les activités
-            </NavLink>
-            <NavLink to="/fonctionnement" className="home-hero__more">
-              En savoir plus <ChevronRight size={14} />
-            </NavLink>
+          <div className="home-hero__toasts" aria-hidden="true">
+            <div className="home-hero__toast">
+              <span className="home-hero__toast-icon">
+                <MapPin size={16} />
+              </span>
+              Des sorties près de chez toi
+            </div>
+            <div className="home-hero__toast">
+              <span className="home-hero__toast-icon home-hero__toast-icon--accent">
+                <BellRing size={16} />
+              </span>
+              Rappel : c'est demain !
+            </div>
+            <div className="home-hero__toast">
+              <span className="home-hero__toast-icon home-hero__toast-icon--ok">
+                <CheckCircle2 size={16} />
+              </span>
+              Demande acceptée · Footing du dimanche
+            </div>
           </div>
         </div>
       </section>
+
+      <SportsMarquee />
 
       <Suspense fallback={null}>
         <ModaleContent
@@ -138,10 +108,35 @@ export default function Home() {
           onSwitchToLogin={() => setActiveModal("login")}
         />
       </Suspense>
-      <Principe/>
-      <SportsPop/>
-      <ActivitésProche/>
-      <PourquoiHome/>
+
+      <Bento />
+      <ActivitésProche />
+      <HowItWorks />
+      <PourquoiHome />
+      <AppAndroid />
+
+      <section className="home-final page-container">
+        <div className="home-final__inner" style={{ backgroundImage: `url(${asset("cover")})` }}>
+          <div className="home-final__tint" />
+          <div className="home-final__content">
+            <h2 className="home-final__titre">Prêt à bouger {territoryIn}&nbsp;?</h2>
+            <p className="home-final__texte">
+              Rejoins la communauté {brandName} : c'est gratuit, et ta prochaine sortie
+              est peut-être déjà en ligne.
+            </p>
+            <div className="home-final__actions">
+              <NavLink to="/explorer" className="btn btn--accent" onClick={handleExplorerClick}>
+                <Compass size={18} /> Voir les activités
+              </NavLink>
+              {!user ? (
+                <button type="button" className="btn btn--light" onClick={() => setActiveModal("register")}>
+                  Créer mon compte
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

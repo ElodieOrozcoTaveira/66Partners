@@ -1,0 +1,343 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.app-android {
+  padding: 4rem 0 2rem;
+
+  &__card {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    padding: 2.5rem 1.5rem 0;
+    border-radius: 32px;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--brand-accent, #FFCC00) 22%, white), variables.$fond2 55%);
+    border: 1px solid variables.$bordure;
+    overflow: hidden;
+
+    @media (min-width: variables.$laptop) {
+      grid-template-columns: 1.1fr 0.9fr;
+      padding: 3.5rem 3.5rem 0;
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
+    @media (min-width: variables.$laptop) {
+      padding-bottom: 3.5rem;
+    }
+
+    > p {
+      margin: 0;
+      max-width: 32rem;
+      line-height: 1.6;
+      color: variables.$texte2;
+    }
+  }
+
+  &__titre {
+    @include mixins.display(clamp(2rem, 4.4vw, 3.2rem));
+    margin: 0;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-weight: 700;
+      color: variables.$encre;
+    }
+
+    svg {
+      color: variables.$rouge;
+    }
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 0.5rem;
+    padding: 0.65rem 1.25rem 0.65rem 1rem;
+    border-radius: 14px;
+    @include mixins.gradient;
+    color: #ffffff;
+
+    svg {
+      color: #ffffff;
+    }
+
+    span {
+      display: flex;
+      flex-direction: column;
+      font-family: "Manrope", sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    small {
+      font-family: "Inter", sans-serif;
+      font-size: 0.68rem;
+      font-weight: 500;
+      opacity: 0.75;
+    }
+  }
+
+  &__hint {
+    font-size: 0.85rem;
+    color: variables.$texte3 !important;
+  }
+
+  &__visual {
+    display: flex;
+    justify-content: center;
+    align-self: end;
+  }
+}
+
+// ─── Téléphone (maquette de l'accueil mobile) ────────────────────────────
+.phone {
+  position: relative;
+  width: 280px;
+  height: 500px;
+  margin-bottom: -40px;
+  padding: 12px;
+  border-radius: 44px 44px 0 0;
+  background: #0b0c0f;
+  box-shadow: 0 30px 70px rgba(17, 19, 24, 0.28);
+
+  &__notch {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    z-index: 2;
+    width: 86px;
+    height: 24px;
+    border-radius: 999px;
+    background: #0b0c0f;
+    transform: translateX(-50%);
+  }
+
+  &__screen {
+    position: relative;
+    height: 100%;
+    border-radius: 34px 34px 0 0;
+    background: #ffffff;
+    overflow: hidden;
+    font-family: "Inter", sans-serif;
+  }
+
+  &__header {
+    position: relative;
+    padding: 46px 14px 34px;
+    border-radius: 0 0 22px 22px;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    color: #ffffff;
+  }
+
+  &__tint {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, variables.$rouge2, variables.$rouge 55%, variables.$marque-clair);
+    opacity: 0.9;
+  }
+
+  &__row,
+  &__chips {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+  }
+
+  &__hello {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    strong {
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    span {
+      font-size: 9px;
+      opacity: 0.9;
+    }
+  }
+
+  &__bell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &__chips {
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 8.5px;
+      font-weight: 600;
+    }
+  }
+
+  &__hero {
+    position: relative;
+    height: 118px;
+    margin: -22px 12px 0;
+    border-radius: 16px;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 30%, rgba(0, 0, 0, 0.6));
+    }
+  }
+
+  &__countdown {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 1;
+    padding: 3px 8px;
+    border-radius: 999px;
+    @include mixins.badge-accent;
+    font-size: 8.5px;
+    font-weight: 800;
+  }
+
+  &__hero-text {
+    position: absolute;
+    left: 10px;
+    bottom: 8px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+
+    small {
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      opacity: 0.85;
+    }
+
+    strong {
+      font-family: "Manrope", sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+    }
+  }
+
+  &__section {
+    margin: 12px 12px 6px;
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: variables.$encre;
+  }
+
+  &__tiles {
+    display: flex;
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  &__tile {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 6px;
+    border-radius: 12px;
+    border: 1px solid variables.$bordure;
+    overflow: hidden;
+
+    span {
+      height: 52px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    strong {
+      padding: 0 6px;
+      font-size: 9px;
+      color: variables.$encre;
+    }
+
+    em {
+      padding: 0 6px;
+      font-style: normal;
+      font-size: 8px;
+      font-weight: 800;
+      color: #2e7d32;
+    }
+  }
+
+  &__tabs {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 8px 6px;
+    border-top: 1px solid variables.$bordure;
+    background: #ffffff;
+    color: variables.$texte3;
+  }
+
+  &__plus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #ffffff;
+    @include mixins.gradient;
+  }
+}

@@ -80,7 +80,7 @@ export default function DashboardStats({
       <div className="container-dashboardstats__card">
         <span
           className="container-dashboardstats__icon"
-          style={{ background: "rgba(252, 2, 2, 0.21)", color: "var(--brand-primary-dark, #C62828)" }}
+          style={{ background: "color-mix(in srgb, var(--brand-primary, #C4121A) 12%, transparent)", color: "var(--brand-primary, #C4121A)" }}
         >
           <CalendarDays size={17} strokeWidth={2.2} />
         </span>
@@ -92,7 +92,7 @@ export default function DashboardStats({
       <div className="container-dashboardstats__card">
         <span
           className="container-dashboardstats__icon"
-          style={{ background: "rgba(255, 242, 0, 0.41)", color: "#f4bc08" }}
+          style={{ background: "color-mix(in srgb, var(--brand-accent, #FFCC00) 30%, transparent)", color: "#8a6100" }}
         >
           <Users size={17} strokeWidth={2.2} />
         </span>
@@ -104,7 +104,7 @@ export default function DashboardStats({
       <div className="container-dashboardstats__card">
         <span
           className="container-dashboardstats__icon"
-          style={{ background: "rgba(255, 111, 0, 0.11)", color: "#F08A3C" }}
+          style={{ background: "#eef2ff", color: "#4f46e5" }}
         >
           <Trophy size={17} strokeWidth={2.2} />
         </span>
@@ -116,7 +116,7 @@ export default function DashboardStats({
       <div className="container-dashboardstats__card">
         <span
           className="container-dashboardstats__icon"
-          style={{ background: "rgba(76, 175, 80, 0.15)", color: "#4CAF50" }}
+          style={{ background: "#e8f5e9", color: "#2e7d32" }}
         >
           <Flame size={17} strokeWidth={2.2} />
         </span>

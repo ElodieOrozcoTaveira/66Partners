@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { MapPin, Navigation, Users } from "lucide-react";
 import ActivitesAutourDeToi from "../../components/DashboardComponents/ActivitesAutourDeToi/ActivitesAutourDeToi";
 import DashboardStats from "../../components/DashboardComponents/DashboardStats/DashboardStats";
 import Hello from "../../components/DashboardComponents/Hello/Hello";
@@ -6,7 +8,9 @@ import MesSportsCard from "../../components/DashboardComponents/MesSportsCard/Me
 import ProchainesActivites from "../../components/DashboardComponents/ProchainesActivites/ProchainesActivites";
 import PushNotificationsPrompt from "../../components/DashboardComponents/PushNotificationsPrompt/PushNotificationsPrompt";
 import { useAuth } from "../../contexts/AuthContext";
-import { useTerritory } from "../../contexts/TerritoryContext";
+import { useBranding, useTerritory } from "../../contexts/TerritoryContext";
+import { useUserLocation } from "../../hooks/useUserLocation";
+import { useNearbyCount } from "../../hooks/useNearbyCount";
 import api from "../../lib/axios";
 import "./Dashboard.scss";
 
@@ -29,6 +33,8 @@ interface DashboardActivity {
   participantsCount: number;
   maxParticipants: number;
   createdAt: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface ActivitiesResponse {
@@ -40,6 +46,11 @@ export default function Dashboard() {
   const { activeTerritory } = useTerritory();
   const territoryCode = activeTerritory?.code;
   const { user } = useAuth();
+  const { territoryName } = useBranding();
+  // Position : seulement si déjà autorisée, ou au clic sur la pastille
+  // (jamais de demande d'autorisation à l'ouverture, comme l'app mobile).
+  const location = useUserLocation();
+  const nearby = useNearbyCount(location.coords);
   // DashboardStats a besoin de l'historique complet (ex. "ce mois-ci" compte
   // aussi les activités déjà passées) : jamais filtré par date.
   const [allActivities, setAllActivities] = useState<DashboardActivity[]>([]);
@@ -101,25 +112,47 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-page">
-      <Hello pseudo={user.pseudo} avatar={user.avatar} coverPhoto={user.coverPhoto} />
+      <Hello pseudo={user.pseudo} avatar={user.avatar} coverPhoto={user.coverPhoto}>
+        {territoryName ? (
+          <span className="hello-chip hello-chip--static">
+            <MapPin size={14} /> {territoryName}
+          </span>
+        ) : null}
+        {nearby ? (
+          <NavLink to="/explorer" className="hello-chip">
+            <Users size={14} /> {nearby.count} sportif{nearby.count > 1 ? "s" : ""} autour de toi
+          </NavLink>
+        ) : location.status === "idle" || location.status === "granted" ? (
+          <button type="button" className="hello-chip" onClick={() => void location.locate()}>
+            <Navigation size={14} /> Voir les sportifs autour de moi
+          </button>
+        ) : location.status === "locating" ? (
+          <span className="hello-chip hello-chip--static">
+            <Navigation size={14} /> Localisation…
+          </span>
+        ) : null}
+      </Hello>
       <div className="dashboard-page__body">
+        <div className="dashboard-page__hero">
+          <ProchainesActivites
+            activities={upcomingActivities}
+            myActivities={upcomingMyActivities}
+            isLoading={activitiesLoading}
+          />
+        </div>
         <PushNotificationsPrompt />
         <DashboardStats
           activities={allActivities}
           myActivities={myActivities}
           isLoading={activitiesLoading}
         />
-        <MesSportsCard userId={user.id} />
-        <ProchainesActivites
-          activities={upcomingActivities}
-          myActivities={upcomingMyActivities}
-          isLoading={activitiesLoading}
-        />
         <ActivitesAutourDeToi
           activities={upcomingActivities}
           myActivities={upcomingMyActivities}
           isLoading={activitiesLoading}
+          from={location.coords}
         />
+        <MesSportsCard userId={user.id} />
       </div>
     </div>
   );
