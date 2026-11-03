@@ -36,6 +36,7 @@ import {
 } from "../../src/services/messages.service";
 import type { ChatMessage } from "../../src/types/domain";
 import { haptics } from "../../src/lib/haptics";
+import { useModeration } from "../../src/hooks/useModeration";
 
 // Le serveur ne diffuse pas en direct les messages envoyés par l'API (ni ceux
 // du site) : on interroge la dernière page tant que la discussion est ouverte.
@@ -69,6 +70,20 @@ export default function ConversationScreen() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const { showMenu, reportModal } = useModeration();
+
+  // Appui long sur le message d'un autre membre : signaler ou bloquer son auteur.
+  const openMessageMenu = (message: ChatMessage) =>
+    showMenu({
+      title: message.authorPseudo,
+      report: { context: "MESSAGE", targetId: message.id, label: "Signaler ce message" },
+      block: { userId: message.usersId, pseudo: message.authorPseudo },
+      // Rechargement complet : ses messages disparaissent de la discussion.
+      onBlocked: () => {
+        setChat(null);
+        setReloadKey((key) => key + 1);
+      },
+    });
 
   // Chargement : discussion (créée si besoin) puis dernière page de messages.
   useEffect(() => {
@@ -285,6 +300,7 @@ export default function ConversationScreen() {
               <MessageBubble
                 message={item}
                 isMine={item.usersId === user?.id}
+                onLongPress={item.usersId === user?.id ? undefined : () => openMessageMenu(item)}
                 showAuthor={!older || older.usersId !== item.usersId || !isSameDay(older.createdAt, item.createdAt)}
                 isLastOfGroup={!newer || newer.usersId !== item.usersId}
                 daySeparator={!older || !isSameDay(older.createdAt, item.createdAt) ? formatDaySeparator(item.createdAt) : null}
@@ -329,6 +345,7 @@ export default function ConversationScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+      {reportModal}
     </SafeAreaView>
   );
 }
@@ -344,9 +361,11 @@ function MessageBubble({
   showAuthor,
   isLastOfGroup,
   daySeparator,
+  onLongPress,
 }: {
   message: ChatMessage;
   isMine: boolean;
+  onLongPress?: () => void;
   showAuthor: boolean;
   isLastOfGroup: boolean;
   daySeparator: string | null;
@@ -385,16 +404,20 @@ function MessageBubble({
               <Text style={styles.author}>{message.authorPseudo}</Text>
             </Pressable>
           ) : null}
-          <View
+          <Pressable
             style={[styles.bubble, isMine ? styles.bubbleMine : styles.bubbleOther]}
             accessible
             accessibilityLabel={`${isMine ? "Toi" : message.authorPseudo}, ${time} : ${message.contenu}`}
+            accessibilityHint={onLongPress ? "Appui long pour signaler ce message ou bloquer son auteur" : undefined}
+            accessibilityActions={onLongPress ? [{ name: "longpress", label: "Signaler ou bloquer" }] : undefined}
+            onAccessibilityAction={onLongPress}
+            onLongPress={onLongPress}
+            delayLongPress={350}
+            disabled={!onLongPress}
           >
-            <Text style={[styles.text, isMine && styles.textMine]} selectable>
-              {message.contenu}
-            </Text>
+            <Text style={[styles.text, isMine && styles.textMine]}>{message.contenu}</Text>
             <Text style={[styles.time, isMine && styles.timeMine]}>{time}</Text>
-          </View>
+          </Pressable>
         </View>
       </View>
     </View>

@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "../../src/components/ui/Text";
-import { Redirect, Stack, useLocalSearchParams } from "expo-router";
+import { Redirect, router, Stack, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -26,6 +26,7 @@ import {
   getUserSports,
 } from "../../src/services/user.service";
 import { SportBadgeRow } from "../../src/components/SportBadgeRow";
+import { useModeration } from "../../src/hooks/useModeration";
 
 const COVER_HEIGHT = 150;
 const AVATAR_SIZE = 104;
@@ -43,6 +44,7 @@ export default function MemberProfileScreen() {
   const { activeTerritory } = useTerritory();
   const territoryCode = activeTerritory?.code;
   const isMe = Boolean(me && id === me.id);
+  const { showMenu, reportModal } = useModeration();
 
   const profile = useAsync(
     async () => {
@@ -100,7 +102,29 @@ export default function MemberProfileScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: member.pseudo }} />
+      <Stack.Screen
+        options={{
+          title: member.pseudo,
+          headerRight: () => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Signaler ou bloquer ${member.pseudo}`}
+              hitSlop={10}
+              onPress={() =>
+                showMenu({
+                  title: member.pseudo,
+                  report: { context: "PROFILE", targetId: member.id, label: "Signaler ce membre" },
+                  block: { userId: member.id, pseudo: member.pseudo },
+                  onBlocked: () => (router.canGoBack() ? router.back() : router.replace("/(tabs)")),
+                })
+              }
+            >
+              <Ionicons name="ellipsis-horizontal" size={24} color={brand.primary} />
+            </Pressable>
+          ),
+        }}
+      />
+      {reportModal}
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={styles.screen}

@@ -89,6 +89,17 @@ export interface ParticipationWithUser extends Participation {
   userAvatar: string | null;
 }
 
+/** GET /activities/:id/photos (URL signée, à résoudre avec resolveMediaUrl). */
+export interface ActivityPhoto {
+  id: string;
+  activityId: string;
+  uploaderId: string;
+  url: string;
+  createdAt: string;
+  authorPseudo: string;
+  authorAvatar: string | null;
+}
+
 /** GET /users/me/sports, GET /users/:id/sports */
 export interface UserSport {
   sportId: string;

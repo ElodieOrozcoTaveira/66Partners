@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, Animated, Pressable, RefreshControl, StyleSheet, View, Platform, Share } from "react-native";
+import { Alert, Animated, Pressable, RefreshControl, StyleSheet, Switch, View, Platform, Share } from "react-native";
 import { Text } from "../../src/components/ui/Text";
 import { router, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,11 +28,15 @@ import {
   deleteActivity,
   getActivity,
   getMyParticipation,
+  cancelCarpool,
   getParticipations,
   joinActivity,
   refuseParticipation,
+  requestCarpool,
   updateActivity,
 } from "../../src/services/activities.service";
+import { ActivityPhotos } from "../../src/components/ActivityPhotos";
+import { useModeration } from "../../src/hooks/useModeration";
 import { getApiErrorCode, getApiErrorMessage } from "../../src/services/api";
 import { getMyProfile } from "../../src/services/user.service";
 import { Celebration } from "../../src/components/Celebration";
@@ -93,6 +97,7 @@ export default function ActivityDetailScreen() {
   const userId = user?.id ?? "";
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [genderPromptVisible, setGenderPromptVisible] = useState(false);
+  const { showMenu, reportModal } = useModeration();
 
   // Défilement : photo en parallaxe, barre du haut qui devient opaque.
   const [scrollY] = useState(() => new Animated.Value(0));
@@ -284,6 +289,13 @@ export default function ActivityDetailScreen() {
     if (memberId === userId) router.push("/(tabs)/profile");
     else router.push({ pathname: "/user/[id]", params: { id: memberId } });
   };
+
+  // Fil privé covoiturage : `carpool` = identifiant du participant concerné.
+  const openCarpoolChat = (participantId: string) =>
+    router.push({
+      pathname: "/conversation/[activityId]",
+      params: { activityId: activity.id, title: activity.title, carpool: participantId },
+    });
 
   const pendingRequests = participants?.filter((p) => p.status === "PENDING") ?? [];
   const accepted = participants?.filter((p) => p.status === "ACCEPTED") ?? [];
@@ -533,6 +545,49 @@ export default function ActivityDetailScreen() {
             </Pressable>
           ) : null}
 
+          {/* Covoiturage (même fonctionnement que le web) : un participant
+              accepté l'active, ce qui ouvre un fil privé avec l'organisateur. */}
+          {activity.carpoolEnabled ? (
+            <Section title="🚗 Covoiturage">
+              <Text style={styles.captionLeft}>
+                {isCreator
+                  ? "Tu proposes du covoiturage. Les participants intéressés apparaissent avec une voiture dans la liste ci-dessous."
+                  : "L’organisateur propose du covoiturage."}
+              </Text>
+              {!isCreator && myParticipation?.status === "ACCEPTED" ? (
+                <>
+                  <View style={styles.carpoolRow}>
+                    <Text style={[styles.personName, styles.flex]}>Je souhaite covoiturer</Text>
+                    <Switch
+                      accessibilityLabel="Je souhaite covoiturer"
+                      value={myParticipation.carpoolRequested}
+                      disabled={pendingAction !== null}
+                      onValueChange={(wanted) =>
+                        runAction(
+                          "carpool",
+                          () => (wanted ? requestCarpool(activity.id) : cancelCarpool(activity.id)),
+                          "Impossible de mettre à jour le covoiturage."
+                        )
+                      }
+                      trackColor={{ true: brand.primary }}
+                    />
+                  </View>
+                  {myParticipation.carpoolRequested ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => openCarpoolChat(userId)}
+                      style={({ pressed }) => [styles.carpoolLink, pressed && styles.personPressed]}
+                    >
+                      <Ionicons name="car-outline" size={20} color={brand.primary} />
+                      <Text style={[styles.carpoolLinkLabel, styles.flex]}>Discuter du trajet avec l’organisateur</Text>
+                      <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+                    </Pressable>
+                  ) : null}
+                </>
+              ) : null}
+            </Section>
+          ) : null}
+
           {/* Organisateur : demandes à traiter */}
           {isCreator && pendingRequests.length > 0 ? (
             <Section title={`Demandes en attente (${pendingRequests.length})`}>
@@ -605,11 +660,29 @@ export default function ActivityDetailScreen() {
                       {participant.userPseudo}
                       {participant.userId === userId ? " (toi)" : ""}
                     </Text>
+                    {/* Organisateur : fil privé avec chaque participant qui veut covoiturer. */}
+                    {isCreator && activity.carpoolEnabled && participant.carpoolRequested ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Covoiturage avec ${participant.userPseudo}`}
+                        onPress={() => openCarpoolChat(participant.userId)}
+                        hitSlop={8}
+                        style={({ pressed }) => [styles.carpoolBadge, pressed && styles.personPressed]}
+                      >
+                        <Ionicons name="car" size={16} color={brand.primary} />
+                        <Text style={styles.carpoolBadgeText}>Covoit.</Text>
+                      </Pressable>
+                    ) : null}
                     <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
                   </Pressable>
                 ))
               )}
             </Section>
+          ) : null}
+
+          {/* Photos souvenirs : organisateur et participants acceptés. */}
+          {isCreator || myParticipation?.status === "ACCEPTED" ? (
+            <ActivityPhotos activityId={activity.id} hasEnded={isPast} currentUserId={userId} />
           ) : null}
         </View>
       </Animated.ScrollView>
@@ -653,7 +726,29 @@ export default function ActivityDetailScreen() {
         >
           <Ionicons name={Platform.OS === "ios" ? "share-outline" : "share-social-outline"} size={21} color={Colors.text} />
         </Pressable>
+        {/* Signaler l'activité / bloquer l'organisateur (pas sur ses propres activités). */}
+        {!isCreator ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Signaler l'activité ou bloquer l'organisateur"
+            onPress={() =>
+              showMenu({
+                title: activity.title,
+                report: { context: "ACTIVITY", targetId: activity.id, label: "Signaler cette activité" },
+                block: activity.creatorId
+                  ? { userId: activity.creatorId, pseudo: activity.creatorPseudo ?? "l'organisateur" }
+                  : undefined,
+                onBlocked: () => (router.canGoBack() ? router.back() : router.replace("/(tabs)")),
+              })
+            }
+            style={styles.roundButton}
+            hitSlop={8}
+          >
+            <Ionicons name="ellipsis-horizontal" size={21} color={Colors.text} />
+          </Pressable>
+        ) : null}
       </SafeAreaView>
+      {reportModal}
 
       {activity.audience !== "ALL" ? (
         <GenderPrompt
@@ -998,6 +1093,40 @@ const makeStyles = (brand: Brand) =>
     fontWeight: "700",
     color: Colors.textOnPrimary,
   },
+  carpoolRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    minHeight: 48,
+  },
+  carpoolLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    minHeight: 48,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radius.md,
+    backgroundColor: brand.primarySoft,
+  },
+  carpoolLinkLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: brand.primary,
+  },
+  carpoolBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: brand.primarySoft,
+  },
+  carpoolBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: brand.primary,
+  },
   organizerActions: {
     flexDirection: "row",
     gap: Spacing.md,
@@ -1012,7 +1141,6 @@ const makeStyles = (brand: Brand) =>
     left: 0,
     right: 0,
     flexDirection: "row",
-    justifyContent: "space-between",
     gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.sm,

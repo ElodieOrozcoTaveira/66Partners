@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "../src/components/ui/Text";
 import { router } from "expo-router";
@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Button } from "../src/components/ui/Button";
 import { LEGAL_URLS } from "../src/config/env";
 import { Colors, Radius, Spacing, TOUCH_TARGET, Typography } from "../src/constants/theme";
+import { useAdmin } from "../src/context/AdminContext";
 import { useAuth } from "../src/context/AuthContext";
 import { getApiErrorMessage } from "../src/services/api";
 import { useBrand, useBrandStyles } from "../src/context/BrandContext";
@@ -18,6 +19,21 @@ export default function SettingsScreen() {
   const styles = useBrandStyles(makeStyles);
   const { user, logout, deleteAccount } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
+  const { entryUnlocked } = useAdmin();
+  const versionTaps = useRef({ count: 0, last: 0 });
+
+  const openAdmin = () => router.push("/admin");
+
+  const onVersionPress = () => {
+    const now = Date.now();
+    const taps = versionTaps.current;
+    taps.count = now - taps.last < 800 ? taps.count + 1 : 1;
+    taps.last = now;
+    if (taps.count >= 5) {
+      taps.count = 0;
+      openAdmin();
+    }
+  };
 
   const performDeletion = async () => {
     setIsDeleting(true);
@@ -81,6 +97,7 @@ export default function SettingsScreen() {
         <Row icon="location-outline" label="Mon territoire" onPress={() => router.push("/territory")} />
         <Row icon="heart-outline" label="Mes sports et disponibilités" onPress={() => router.push("/profile/sports")} />
         <Row icon="notifications-outline" label="Notifications" onPress={() => router.push("/notifications")} />
+        <Row icon="hand-left-outline" label="Membres bloqués" onPress={() => router.push("/blocked")} />
       </Group>
 
       <Group title="Informations">
@@ -122,9 +139,19 @@ export default function SettingsScreen() {
         />
       </Group>
 
-      <Text style={styles.version}>
-        66Partners · version {Constants.expoConfig?.version ?? "?"}
-      </Text>
+      {entryUnlocked ? (
+        <Group title="Administration">
+          <Row icon="stats-chart-outline" label="Espace administrateur" onPress={openAdmin} />
+        </Group>
+      ) : null}
+
+      {/* Accès discret à l'espace admin : 5 touchers sur la version. Une fois
+          ouvert sur ce téléphone, il apparaît dans "Administration". */}
+      <Pressable onPress={onVersionPress} accessible={false}>
+        <Text style={styles.version}>
+          66Partners · version {Constants.expoConfig?.version ?? "?"}
+        </Text>
+      </Pressable>
     </ScrollView>
   );
 }

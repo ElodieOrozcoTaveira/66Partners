@@ -1,10 +1,12 @@
 import type {
   Activity,
+  ActivityPhoto,
   ActivityStatus,
   Participation,
   ParticipationWithUser,
 } from "../types/domain";
 import type { ActivityChanges, CreateActivityPayload } from "../lib/activityForm";
+import type { AvatarFile } from "../lib/avatarFile";
 import { api } from "./api";
 
 export interface ActivityFilters {
@@ -105,4 +107,39 @@ export async function updateActivity(
 /** DELETE /activities/:id — suppression définitive (organisateur uniquement). */
 export async function deleteActivity(id: string): Promise<void> {
   await api.delete(`/activities/${id}`);
+}
+
+/**
+ * Covoiturage (participant accepté, activité qui le propose) : ouvre un fil
+ * privé avec l'organisateur, comme sur le web.
+ */
+export async function requestCarpool(activityId: string): Promise<void> {
+  await api.post(`/activities/${activityId}/carpool`);
+}
+
+export async function cancelCarpool(activityId: string): Promise<void> {
+  await api.delete(`/activities/${activityId}/carpool`);
+}
+
+/** Photos : organisateur et participants acceptés uniquement (403 sinon). */
+export async function getActivityPhotos(activityId: string): Promise<ActivityPhoto[]> {
+  const response = await api.get<{ success: boolean; photos: ActivityPhoto[] }>(
+    `/activities/${activityId}/photos`
+  );
+  return response.data.photos;
+}
+
+/** Ajout d'une photo, seulement une fois l'activité passée (règle serveur). */
+export async function uploadActivityPhoto(activityId: string, file: AvatarFile): Promise<void> {
+  const body = new FormData();
+  // Format attendu par React Native pour un fichier local dans un FormData.
+  body.append("file", file as unknown as Blob);
+  await api.post(`/activities/${activityId}/photos`, body, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+}
+
+/** Chacun ne peut supprimer que ses propres photos (vérifié côté serveur). */
+export async function deleteActivityPhoto(photoId: string): Promise<void> {
+  await api.delete(`/activity-photos/${photoId}`);
 }

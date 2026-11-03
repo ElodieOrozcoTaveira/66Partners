@@ -13,6 +13,7 @@ import { Manrope_700Bold, Manrope_800ExtraBold } from "@expo-google-fonts/manrop
 
 import SplashTransition from "../src/components/SplashTransition";
 import { Colors, Fonts } from "../src/constants/theme";
+import { AdminProvider } from "../src/context/AdminContext";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
 import { TerritoryProvider } from "../src/context/TerritoryContext";
 import { NotificationsProvider } from "../src/context/NotificationsContext";
@@ -72,6 +73,9 @@ function RootNavigator() {
         <Stack.Screen name="territory" options={{ title: "Mon territoire" }} />
         <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
         <Stack.Screen name="user/[id]" options={{ title: "Profil" }} />
+        <Stack.Screen name="blocked" options={{ title: "Membres bloqués" }} />
+        {/* Espace admin : son propre mot de passe, cf. app/admin/_layout.tsx. */}
+        <Stack.Screen name="admin" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
   );
@@ -80,6 +84,7 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
+      <AdminProvider>
       <NotificationsProvider>
       <TerritoryProvider>
         {/* Couleurs de marque du territoire actif (66, 34, 11…). */}
@@ -91,6 +96,7 @@ export default function RootLayout() {
         </TerritoryBrandProvider>
       </TerritoryProvider>
       </NotificationsProvider>
+      </AdminProvider>
     </AuthProvider>
   );
 }
