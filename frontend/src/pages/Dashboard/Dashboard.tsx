@@ -33,6 +33,7 @@ interface DashboardActivity {
   participantsCount: number;
   maxParticipants: number;
   createdAt: string;
+  sportId?: string;
   latitude?: number | null;
   longitude?: number | null;
 }
@@ -152,7 +153,7 @@ export default function Dashboard() {
           isLoading={activitiesLoading}
           from={location.coords}
         />
-        <MesSportsCard userId={user.id} />
+        <MesSportsCard userId={user.id} upcomingActivities={upcomingActivities} />
       </div>
     </div>
   );
