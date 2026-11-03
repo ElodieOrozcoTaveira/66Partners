@@ -226,6 +226,26 @@ const BRANDS: Record<string, Brand> = {
     // Tarn
     { latitude: 43.8, longitude: 2.2, latitudeDelta: 1.0, longitudeDelta: 1.6 }
   ),
+  "82": makeBrand(
+    "82",
+    {
+      // Bleu du Tarn et de la Garonne (logo 82Partners) et jaune tournesol :
+      // se distingue des voisins 31/32 (rouges) et 81 (brique), cf.
+      // frontend/public/82partners/theme.json.
+      primary: "#1C5FAF",
+      primaryDark: "#123F78",
+      primarySoft: "#E5EEF9",
+      accent: "#F5B800",
+      accentSoft: "#FEF5D6",
+      gradientTo: "#2E8FD8",
+      badgeTo: "#FFD84D",
+      shadowRgb: "28, 95, 175",
+    },
+    require("../../assets/images/territories/logo82.webp"),
+    require("../../assets/images/territories/emblem82.webp"),
+    // Tarn-et-Garonne
+    { latitude: 44.08, longitude: 1.3, latitudeDelta: 0.8, longitudeDelta: 1.5 }
+  ),
 };
 
 export function getBrand(code: string | null | undefined): Brand {
