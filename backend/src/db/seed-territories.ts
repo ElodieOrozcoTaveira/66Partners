@@ -104,6 +104,16 @@ export const TERRITORY_SEEDS = [
     assetsPath: "/82partners",
     isActive: true,
   },
+  {
+    code: "65",
+    name: "Hautes-Pyrénées",
+    slug: "hautes-pyrenees",
+    brandName: "65Partners",
+    inseeDepartmentCode: "65",
+    tagline: "Ton sport. Ton partenaire. Ton 65.",
+    assetsPath: "/65partners",
+    isActive: true,
+  },
 ] as const;
 
 /**
