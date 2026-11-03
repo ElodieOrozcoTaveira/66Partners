@@ -246,6 +246,26 @@ const BRANDS: Record<string, Brand> = {
     // Tarn-et-Garonne
     { latitude: 44.08, longitude: 1.3, latitudeDelta: 0.8, longitudeDelta: 1.5 }
   ),
+  "65": makeBrand(
+    "65",
+    {
+      // Bleu azur du ciel pyrénéen (logo 65Partners), plus clair que le 82 ;
+      // se distingue des voisins 31/32 (rouges), cf.
+      // frontend/public/65partners/theme.json.
+      primary: "#0A78C8",
+      primaryDark: "#075592",
+      primarySoft: "#E3F1FB",
+      accent: "#F7C21B",
+      accentSoft: "#FEF6D9",
+      gradientTo: "#2BB3E6",
+      badgeTo: "#FFE066",
+      shadowRgb: "10, 120, 200",
+    },
+    require("../../assets/images/territories/logo65.webp"),
+    require("../../assets/images/territories/emblem65.webp"),
+    // Hautes-Pyrénées
+    { latitude: 43.05, longitude: 0.15, latitudeDelta: 1.0, longitudeDelta: 1.0 }
+  ),
 };
 
 export function getBrand(code: string | null | undefined): Brand {
