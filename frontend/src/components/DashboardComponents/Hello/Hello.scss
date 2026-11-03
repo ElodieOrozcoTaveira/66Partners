@@ -8,7 +8,9 @@
 
   &__cover {
     position: relative;
-    padding: calc(1.75rem + env(safe-area-inset-top)) 0 5.5rem;
+    // Téléphone / PWA : assez de hauteur pour que salutation et pastilles
+    // restent entièrement visibles au-dessus de « Ta prochaine sortie ».
+    padding: calc(2rem + env(safe-area-inset-top)) 0 6.75rem;
     background-size: cover;
     background-position: center;
     border-radius: 0 0 32px 32px;
@@ -40,6 +42,10 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+
+    @media (max-width: (variables.$tablet - 1px)) {
+      align-items: flex-start;
+    }
   }
 
   &__avatar-wrap {
@@ -92,13 +98,13 @@
   &__h1 {
     margin: 0;
     font-family: "Manrope", sans-serif;
-    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+    font-size: clamp(1.5rem, 3.4vw, 2.4rem);
     font-weight: 800;
     letter-spacing: -0.03em;
+    line-height: 1.15;
     color: #ffffff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    // Le prénom complet reste lisible : retour à la ligne plutôt que « … ».
+    overflow-wrap: anywhere;
   }
 
   &__p {
