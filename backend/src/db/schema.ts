@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, varchar, text, timestamp, integer, smallint, boolean, pgEnum, unique, primaryKey, doublePrecision, index, uniqueIndex,
+  pgTable, uuid, varchar, text, timestamp, integer, smallint, boolean, pgEnum, unique, primaryKey, doublePrecision, index, uniqueIndex, bigint,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -397,4 +397,31 @@ export const userLocations = pgTable("user_locations", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => ({
   latitudeIdx: index("user_locations_latitude_idx").on(t.latitude),
+}));
+
+// Compte Strava relié à un membre (OAuth 2.0). Les jetons sont chiffrés
+// (AES-256-GCM, cf. utils/secretBox.ts) : jamais stockés en clair. Un seul
+// compte Strava par membre, et un compte Strava ne peut être relié qu'à un
+// seul membre. Supprimé avec le compte du membre.
+export const stravaAccounts = pgTable("strava_accounts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  stravaAthleteId: bigint("strava_athlete_id", { mode: "number" }).notNull().unique(),
+  accessTokenEncrypted: text("access_token_encrypted").notNull(),
+  refreshTokenEncrypted: text("refresh_token_encrypted").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  scope: varchar("scope", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// « Valider notre rencontre » : une activité 66Partners validée par un
+// membre, avec l'activité Strava qui a été renommée (une seule fois).
+export const stravaMeetingValidations = pgTable("strava_meeting_validations", {
+  activityId: uuid("activity_id").notNull().references(() => activities.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  stravaActivityId: bigint("strava_activity_id", { mode: "number" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.activityId, t.userId] }),
 }));

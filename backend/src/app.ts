@@ -21,6 +21,7 @@ import territoryRoutes from './routes/territory.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import reportRoutes from "./routes/report.routes.js";
 import nearbyRoutes from "./routes/nearby.routes.js";
+import stravaRoutes from "./routes/strava.routes.js";
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import { getAllowedOrigins, helmetOptions, verifyOrigin } from './middlewares/security.middleware.js';
 import { FileController } from './controllers/file.controller.js';
@@ -86,6 +87,7 @@ app.use('/api/territories', territoryRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/nearby', nearbyRoutes);
+app.use('/api/strava', stravaRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 // Route de santé
