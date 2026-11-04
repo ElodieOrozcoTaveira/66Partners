@@ -30,6 +30,16 @@ export class StravaController {
     }
   }
 
+  /** GET /api/strava/users/:id/status : seulement « relié ou non », jamais de donnée Strava. */
+  static async memberStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { linked } = await StravaService.getStatus(req.params.id as string);
+      res.status(200).json({ success: true, linked });
+    } catch (error) {
+      sendError(res, error, "member status");
+    }
+  }
+
   /** GET /api/strava/connect : renvoie l'URL d'autorisation Strava. */
   static connect(req: AuthenticatedRequest, res: Response): void {
     try {

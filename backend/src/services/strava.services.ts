@@ -11,6 +11,8 @@ import {
   users,
 } from "../db/schema.js";
 import { decryptSecret, encryptSecret } from "../utils/secretBox.js";
+import { sendStravaLinkedEmail } from "./mail.services.js";
+import { TerritoryService } from "./territory.services.js";
 import { createStravaState, readStravaState } from "../utils/stravaState.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -50,7 +52,7 @@ interface StravaTokenResponse {
   access_token: string;
   refresh_token: string;
   expires_at: number;
-  athlete?: { id: number; firstname?: string };
+  athlete?: { id: number; firstname?: string; lastname?: string };
 }
 
 interface StravaActivitySummary {
@@ -107,6 +109,22 @@ async function requestTokens(params: Record<string, string>): Promise<StravaToke
     throw new StravaError("STRAVA_TOKEN_FAILED", 502, "Réponse inattendue de Strava.");
   }
   return tokens;
+}
+
+/** Mail de confirmation, sans jamais bloquer ni faire échouer la liaison. */
+async function notifyLinked(userId: string, athleteName: string | null): Promise<void> {
+  try {
+    const [user] = await db
+      .select({ email: users.email, pseudo: users.pseudo })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    if (!user) return;
+    const brand = await TerritoryService.getBrandForUser(userId);
+    await sendStravaLinkedEmail(user, brand, athleteName);
+  } catch (error) {
+    console.error("Erreur envoi email de liaison Strava:", error);
+  }
 }
 
 /** « Léa », « Léa et Tom », « Léa, Tom et Max », « Léa, Tom et 3 autres ». */
@@ -181,12 +199,23 @@ export const StravaService = {
       scope: grantedScope.slice(0, 255),
       updatedAt: new Date(),
     };
+    const [previous] = await db
+      .select({ stravaAthleteId: stravaAccounts.stravaAthleteId })
+      .from(stravaAccounts)
+      .where(eq(stravaAccounts.userId, userId))
+      .limit(1);
     await db
       .insert(stravaAccounts)
       .values({ userId, ...values })
       .onConflictDoUpdate({ target: stravaAccounts.userId, set: values });
 
-    return { userId };
+    const isNewLink = previous?.stravaAthleteId !== athleteId;
+    if (isNewLink) {
+      const athleteName = [tokens.athlete?.firstname, tokens.athlete?.lastname].filter(Boolean).join(" ") || null;
+      void notifyLinked(userId, athleteName);
+    }
+
+    return { userId, isNewLink };
   },
 
   /**

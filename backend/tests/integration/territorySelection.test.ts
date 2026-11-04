@@ -6,6 +6,7 @@ const mockSendWelcomeEmail = jest
   .mockResolvedValue(undefined);
 
 jest.unstable_mockModule("../../src/services/mail.services.js", () => ({
+  sendStravaLinkedEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   sendWelcomeEmail: mockSendWelcomeEmail,
   sendResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   sendAdminResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),

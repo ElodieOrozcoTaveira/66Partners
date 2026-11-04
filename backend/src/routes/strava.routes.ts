@@ -2,10 +2,12 @@ import { Router } from "express";
 import { StravaController } from "../controllers/strava.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { createAuthRateLimiter } from "../middlewares/rateLimit.middleware.js";
+import { hideIfBlocked } from "../middlewares/block.middleware.js";
 import { idParamSchema, validateParams } from "../middlewares/validation.middleware.js";
 
 /*
 GET    /strava/status                   — compte Strava relié ou non
+GET    /strava/users/:id/status         — un autre membre a-t-il relié Strava (oui/non)
 GET    /strava/connect                  — URL d'autorisation Strava
 GET    /strava/callback                 — retour OAuth de Strava (public, state signé)
 DELETE /strava                          — délie le compte Strava
@@ -22,6 +24,13 @@ const stravaLimiter = createAuthRateLimiter({
 const router = Router();
 
 router.get("/status", requireAuth, StravaController.status);
+router.get(
+  "/users/:id/status",
+  requireAuth,
+  validateParams(idParamSchema),
+  hideIfBlocked("id"),
+  StravaController.memberStatus,
+);
 router.get("/connect", requireAuth, stravaLimiter, StravaController.connect);
 router.get("/callback", stravaLimiter, StravaController.callback);
 router.delete("/", requireAuth, StravaController.disconnect);
