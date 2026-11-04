@@ -1,0 +1,609 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+.nouveau-look {
+  padding: 3rem 0 2rem;
+  scroll-margin-top: 90px;
+
+  &__card {
+    position: relative;
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    padding: 2.5rem 1.5rem 0;
+    border-radius: 32px;
+    background:
+      radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--brand-accent, #FFCC00) 30%, transparent), transparent 45%),
+      radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--brand-primary, #C4121A) 16%, transparent), transparent 50%),
+      variables.$fond2;
+    border: 1px solid variables.$bordure;
+    overflow: hidden;
+
+    @media (min-width: variables.$laptop) {
+      grid-template-columns: 1.15fr 0.85fr;
+      padding: 3.5rem 3.5rem 0;
+    }
+  }
+
+  &__text {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
+    @media (min-width: variables.$laptop) {
+      padding-bottom: 3.5rem;
+    }
+
+    > p {
+      margin: 0;
+      max-width: 34rem;
+      line-height: 1.6;
+      color: variables.$texte2;
+    }
+  }
+
+  &__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    @include mixins.gradient;
+    color: #ffffff;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--brand-primary, #C4121A) 25%, transparent);
+  }
+
+  &__titre {
+    @include mixins.display(clamp(2.1rem, 4.6vw, 3.4rem));
+    margin: 0;
+    max-width: 14ch;
+    text-wrap: balance;
+  }
+
+  &__features {
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+
+    @media (min-width: variables.$tablet) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.9rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid variables.$bordure;
+      backdrop-filter: blur(6px);
+      font-size: 0.86rem;
+      line-height: 1.45;
+      color: variables.$texte2;
+
+      strong {
+        display: block;
+        margin-bottom: 0.15rem;
+        font-family: "Manrope", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: variables.$encre;
+      }
+    }
+  }
+
+  &__feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: variables.alpha(variables.$rouge, 10%);
+    color: variables.$rouge;
+  }
+
+  &__app {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px dashed variables.$bordure;
+  }
+
+  &__app-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-weight: 800;
+    color: variables.$encre;
+
+    svg {
+      color: variables.$rouge;
+    }
+  }
+
+  &__how,
+  &__installed {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: variables.$texte2;
+
+    svg {
+      vertical-align: -3px;
+      margin-right: 0.2rem;
+      color: variables.$rouge;
+    }
+  }
+
+  &__installed {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    color: #166534;
+
+    svg {
+      color: #16a34a;
+    }
+  }
+
+  &__visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-self: end;
+  }
+
+  // Étiquette posée au-dessus du coin du téléphone (grands écrans).
+  &__sticker {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 50%;
+    display: none;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: variables.$ombre-flottante;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: variables.$encre;
+    transform: translateX(-50%) rotate(-4deg);
+
+    svg {
+      color: var(--brand-accent-dark, #E0A800);
+    }
+
+    @media (min-width: variables.$laptop) {
+      display: inline-flex;
+    }
+  }
+}
+
+// ─── Téléphone (maquette de l'accueil mobile) ────────────────────────────
+.phone {
+  position: relative;
+  width: 280px;
+  height: 500px;
+  margin-bottom: -40px;
+  padding: 12px;
+  border-radius: 44px 44px 0 0;
+  background: #0b0c0f;
+  box-shadow: 0 30px 70px rgba(17, 19, 24, 0.28);
+
+  &__notch {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    z-index: 2;
+    width: 86px;
+    height: 24px;
+    border-radius: 999px;
+    background: #0b0c0f;
+    transform: translateX(-50%);
+  }
+
+  &__screen {
+    position: relative;
+    height: 100%;
+    border-radius: 34px 34px 0 0;
+    background: #ffffff;
+    overflow: hidden;
+    font-family: "Inter", sans-serif;
+  }
+
+  &__header {
+    position: relative;
+    padding: 46px 14px 34px;
+    border-radius: 0 0 22px 22px;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    color: #ffffff;
+  }
+
+  &__tint {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, variables.$rouge2, variables.$rouge 55%, variables.$marque-clair);
+    opacity: 0.9;
+  }
+
+  &__row,
+  &__chips {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+  }
+
+  &__hello {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    strong {
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    span {
+      font-size: 9px;
+      opacity: 0.9;
+    }
+  }
+
+  &__bell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &__chips {
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 8.5px;
+      font-weight: 600;
+    }
+  }
+
+  &__hero {
+    position: relative;
+    height: 118px;
+    margin: -22px 12px 0;
+    border-radius: 16px;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 30%, rgba(0, 0, 0, 0.6));
+    }
+  }
+
+  &__countdown {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 1;
+    padding: 3px 8px;
+    border-radius: 999px;
+    @include mixins.badge-accent;
+    font-size: 8.5px;
+    font-weight: 800;
+  }
+
+  &__hero-text {
+    position: absolute;
+    left: 10px;
+    bottom: 8px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+
+    small {
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      opacity: 0.85;
+    }
+
+    strong {
+      font-family: "Manrope", sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+    }
+  }
+
+  &__section {
+    margin: 12px 12px 6px;
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: variables.$encre;
+  }
+
+  &__tiles {
+    display: flex;
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  &__tile {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 6px;
+    border-radius: 12px;
+    border: 1px solid variables.$bordure;
+    overflow: hidden;
+
+    span {
+      height: 52px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    strong {
+      padding: 0 6px;
+      font-size: 9px;
+      color: variables.$encre;
+    }
+
+    em {
+      padding: 0 6px;
+      font-style: normal;
+      font-size: 8px;
+      font-weight: 800;
+      color: #2e7d32;
+    }
+  }
+
+  &__tabs {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 8px 6px;
+    border-top: 1px solid variables.$bordure;
+    background: #ffffff;
+    color: variables.$texte3;
+  }
+
+  &__plus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #ffffff;
+    @include mixins.gradient;
+  }
+}
+
+// ─── Trois téléphones en éventail ─────────────────────────────────────────
+.phone-fan {
+  position: relative;
+  width: 100%;
+  height: 470px;
+
+  @media (max-width: variables.$mobile) {
+    height: 400px;
+  }
+
+  .phone {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    margin-bottom: -40px;
+    transform-origin: 50% 100%;
+    transition: transform 0.4s ease;
+
+    &--center {
+      z-index: 3;
+      transform: translateX(-50%) scale(0.86);
+    }
+
+    &--left {
+      z-index: 2;
+      transform: translateX(-96%) rotate(-10deg) scale(0.7);
+      filter: saturate(0.95);
+    }
+
+    &--right {
+      z-index: 1;
+      transform: translateX(-4%) rotate(10deg) scale(0.7);
+      filter: saturate(0.95);
+    }
+
+    @media (max-width: variables.$mobile) {
+      &--center {
+        transform: translateX(-50%) scale(0.78);
+      }
+
+      &--left {
+        transform: translateX(-96%) rotate(-11deg) scale(0.64);
+      }
+
+      &--right {
+        transform: translateX(-4%) rotate(11deg) scale(0.64);
+      }
+    }
+  }
+
+  &:hover .phone {
+    &--left {
+      transform: translateX(-102%) rotate(-13deg) scale(0.7);
+    }
+
+    &--right {
+      transform: translateX(2%) rotate(13deg) scale(0.7);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-fan .phone {
+    transition: none;
+  }
+}
+
+// ─── Guide « Ajouter à l'écran d'accueil » ─────────────────────────────────
+.install-guide {
+  width: 100%;
+  max-width: 34rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid variables.$bordure;
+  box-sizing: border-box;
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+  }
+
+  &__title {
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: variables.$encre;
+  }
+
+  &__tabs {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 999px;
+    background: variables.$fond2;
+  }
+
+  &__tab {
+    padding: 0.35rem 0.8rem;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    font-family: "Inter", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: variables.$texte2;
+    cursor: pointer;
+
+    &--active {
+      background: #ffffff;
+      color: variables.$encre;
+      box-shadow: 0 2px 6px rgba(17, 19, 24, 0.1);
+    }
+  }
+
+  &__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+  }
+
+  &__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    @include mixins.gradient;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: variables.alpha(variables.$rouge, 9%);
+    color: variables.$rouge;
+  }
+
+  &__text {
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: variables.$texte2;
+
+    strong {
+      color: variables.$encre;
+    }
+  }
+}
