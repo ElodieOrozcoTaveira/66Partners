@@ -205,3 +205,50 @@
     font-size: 0.85rem;
     color: variables.$texte2;
 }
+
+// Bascule Liste / Carte.
+.explorer-view {
+  scroll-margin-top: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.25rem 0 1rem;
+
+  &__count {
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: variables.$encre;
+  }
+
+  &__switch {
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid variables.$bordure;
+    box-shadow: 0 2px 8px rgba(17, 19, 24, 0.05);
+  }
+
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.95rem;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: variables.$texte2;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &--active {
+      background: variables.$rouge;
+      color: #ffffff;
+    }
+  }
+}
