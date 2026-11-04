@@ -226,6 +226,11 @@ describe("Valider notre rencontre", () => {
       description: "Belle sortie\n\nRencontre réussie grâce à 66Partners ! 🤝",
     });
 
+    const state = await request(app)
+      .get(`/api/strava/activities/${activityId}/validation`)
+      .set("Authorization", `Bearer ${creator.token}`);
+    expect(state.body).toMatchObject({ validated: true, stravaUrl: "https://www.strava.com/activities/222" });
+
     const again = await validate(creator.token, activityId);
     expect(again.status).toBe(409);
     expect(again.body.code).toBe("ALREADY_VALIDATED");

@@ -9,6 +9,7 @@ GET    /strava/status                   — compte Strava relié ou non
 GET    /strava/connect                  — URL d'autorisation Strava
 GET    /strava/callback                 — retour OAuth de Strava (public, state signé)
 DELETE /strava                          — délie le compte Strava
+GET    /strava/activities/:id/validation — rencontre déjà validée ou non
 POST   /strava/activities/:id/validate  — « Valider notre rencontre »
 */
 
@@ -24,6 +25,12 @@ router.get("/status", requireAuth, StravaController.status);
 router.get("/connect", requireAuth, stravaLimiter, StravaController.connect);
 router.get("/callback", stravaLimiter, StravaController.callback);
 router.delete("/", requireAuth, StravaController.disconnect);
+router.get(
+  "/activities/:id/validation",
+  requireAuth,
+  validateParams(idParamSchema),
+  StravaController.meetingValidation,
+);
 router.post(
   "/activities/:id/validate",
   requireAuth,

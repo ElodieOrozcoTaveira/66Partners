@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { ArrowLeft, Calendar, Car, Check, Clock, Flag, MapPin, Plus, Trash2, Users, X } from "lucide-react";
@@ -17,6 +17,11 @@ import type { ReportTarget } from "../../api/moderation";
 import "./DetailActivite.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
 import ModaleGenre from "../../components/ModaleGenre/ModaleGenre";
+import { STRAVA_ENABLED } from "../../lib/features";
+
+const StravaMeeting = STRAVA_ENABLED
+  ? lazy(() => import("../../components/StravaMeeting/StravaMeeting"))
+  : null;
 import {
   AUDIENCE_LABELS,
   AUDIENCE_RESERVED_LABELS,
@@ -492,6 +497,18 @@ export default function DetailActivite() {
             ? `Organisée par ${activity.creatorPseudo}`
             : "Organisateur du compte supprimé"}
         </NavLink>
+
+        {StravaMeeting &&
+          id &&
+          hasEnded &&
+          activity.status !== "CANCELLED" &&
+          (isCreator
+            ? requests.some((request) => request.status === "ACCEPTED")
+            : myParticipation?.status === "ACCEPTED") && (
+            <Suspense fallback={null}>
+              <StravaMeeting activityId={id} />
+            </Suspense>
+          )}
 
         {isCreator ? (
           <section className="detailactivite-page__requests">

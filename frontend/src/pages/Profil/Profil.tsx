@@ -7,8 +7,14 @@ import MembresBloques from "../../components/ProfilPage/MembresBloques/MembresBl
 import MesSports from "../../components/ProfilPage/MesSports/MesSports";
 import StatsProfil from "../../components/ProfilPage/StatsProfil/StatsProfil";
 import TopProfile from "../../components/ProfilPage/TopProfil/TopProfil";
+import { lazy, Suspense } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { STRAVA_ENABLED } from "../../lib/features";
 import "./Profil.scss";
+
+const StravaCard = STRAVA_ENABLED
+  ? lazy(() => import("../../components/ProfilPage/StravaCard/StravaCard"))
+  : null;
 
 export default function Profil() {
   const { user } = useAuth();
@@ -26,6 +32,11 @@ export default function Profil() {
         <MesSports userId={user?.id ?? null} />
         <Dispo userId={user?.id ?? null} />
         <DernieresActivites userId={user?.id ?? null} />
+        {StravaCard && (
+          <Suspense fallback={null}>
+            <StravaCard />
+          </Suspense>
+        )}
         <MembresBloques />
         <CompteDanger />
       </div>

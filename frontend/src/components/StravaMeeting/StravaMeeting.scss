@@ -1,0 +1,105 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+$strava: #FC5200;
+
+.strava-meeting {
+  @include mixins.carte;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin: 1.25rem 0;
+  padding: 1.1rem 1.15rem;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, #{$strava} 22%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, #{$strava} 7%, white), #ffffff 70%);
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    h2 {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: variables.$encre;
+    }
+
+    p {
+      margin: 0.2rem 0 0;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      color: variables.$texte2;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: color-mix(in srgb, #{$strava} 13%, transparent);
+    color: $strava;
+  }
+
+  &__error {
+    margin: 0;
+    padding: 0.65rem 0.85rem;
+    border-radius: 12px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  &__button,
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    align-self: stretch;
+    padding: 0.85rem 1.2rem;
+    border-radius: 999px;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+
+    @media (min-width: variables.$tablet) {
+      align-self: flex-start;
+    }
+  }
+
+  &__button {
+    border: none;
+    background: $strava;
+    color: #ffffff;
+    box-shadow: 0 8px 20px color-mix(in srgb, #{$strava} 28%, transparent);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+
+  &__link {
+    border: 1px solid color-mix(in srgb, #{$strava} 40%, transparent);
+    background: #ffffff;
+    color: $strava;
+  }
+}
