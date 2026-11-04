@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { ArrowRight, BellRing, CheckCircle2, Compass, MapPin } from "lucide-react";
+import { ArrowRight, BellRing, CheckCircle2, Compass, MapPin, Sparkles } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import "./Home.scss";
@@ -19,7 +19,7 @@ import Bento from "../../components/HomeComponents/Bento/Bento";
 import ActivitésProche from "../../components/HomeComponents/ActivitésProche/AcitivtésProche";
 import HowItWorks from "../../components/HomeComponents/HowItWorks/HowItWorks";
 import PourquoiHome from "../../components/HomeComponents/Pourquoi/PourquoiHome";
-import AppAndroid from "../../components/HomeComponents/AppAndroid/AppAndroid";
+import NouveauLook, { NOUVEAU_LOOK_ID } from "../../components/HomeComponents/NouveauLook/NouveauLook";
 import { useBranding } from "../../contexts/TerritoryContext";
 
 export default function Home() {
@@ -51,6 +51,20 @@ export default function Home() {
           <img className="home-hero__bg" src={asset("hero")} alt="" />
           <div className="home-hero__overlay" />
           <div className="home-hero__intro">
+            <a
+              href={`#${NOUVEAU_LOOK_ID}`}
+              className="home-hero__new"
+              onClick={(event) => {
+                event.preventDefault();
+                document.getElementById(NOUVEAU_LOOK_ID)?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              <span className="home-hero__new-tag">
+                <Sparkles size={12} strokeWidth={2.6} /> Nouveau
+              </span>
+              {brandName} s'est refait une beauté
+              <ArrowRight size={14} />
+            </a>
             <h1 className="home-hero__titre">
               {taglineLeadLines.map((line) => (
                 <span key={line} className="home-hero__titre-ligne">{line}</span>
@@ -96,6 +110,8 @@ export default function Home() {
 
       <SportsMarquee />
 
+      <NouveauLook />
+
       <Suspense fallback={null}>
         <ModaleContent
           isOpen={activeModal === "login"}
@@ -113,7 +129,6 @@ export default function Home() {
       <HowItWorks />
       <Bento />
       <PourquoiHome />
-      <AppAndroid />
 
       <section className="home-final page-container">
         <div className="home-final__inner" style={{ backgroundImage: `url(${asset("cover")})` }}>
