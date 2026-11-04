@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NavLink } from "react-router-dom";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import maplibregl, { type GeoJSONSource, type LngLatBoundsLike } from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { CalendarDays, ChevronRight, LocateFixed, MapPin, Users, X } from "lucide-react";
 import { useBranding } from "../../contexts/TerritoryContext";
 import { formatWhen } from "../../lib/dateFormat";
@@ -33,37 +33,59 @@ interface ActivitiesMapProps {
   locating: boolean;
 }
 
-// Fonds de carte : configurable (fournisseur avec clé en prod), OpenStreetMap par défaut.
-const TILE_URL =
-  (import.meta.env.VITE_MAP_TILE_URL as string | undefined) || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-const TILE_ATTRIBUTION =
-  (import.meta.env.VITE_MAP_TILE_ATTRIBUTION as string | undefined) ||
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+// Fonds de carte vectoriels OpenFreeMap : gratuits, sans clé ni cookies.
+const MAP_STYLE =
+  (import.meta.env.VITE_MAP_STYLE_URL as string | undefined) || "https://tiles.openfreemap.org/styles/liberty";
 
-function regionBounds(region: MapRegion): L.LatLngBoundsExpression {
+const USER_SOURCE = "user-radius";
+
+function regionBounds(region: MapRegion): LngLatBoundsLike {
   return [
-    [region.latitude - region.latitudeDelta / 2, region.longitude - region.longitudeDelta / 2],
-    [region.latitude + region.latitudeDelta / 2, region.longitude + region.longitudeDelta / 2],
+    [region.longitude - region.longitudeDelta / 2, region.latitude - region.latitudeDelta / 2],
+    [region.longitude + region.longitudeDelta / 2, region.latitude + region.latitudeDelta / 2],
   ];
 }
 
-const iconCache = new Map<string, L.DivIcon>();
+/** Carré englobant un cercle de `radiusKm` autour d'un point. */
+function radiusBounds(center: Coordinates, radiusKm: number): LngLatBoundsLike {
+  const dLat = radiusKm / 111;
+  const dLng = radiusKm / (111 * Math.cos((center.latitude * Math.PI) / 180));
+  return [
+    [center.longitude - dLng, center.latitude - dLat],
+    [center.longitude + dLng, center.latitude + dLat],
+  ];
+}
 
-function sportIcon(sportName: string, selected: boolean): L.DivIcon {
+/** Cercle (polygone GeoJSON) du rayon de recherche. */
+function radiusPolygon(center: Coordinates, radiusKm: number): GeoJSON.Feature<GeoJSON.Polygon> {
+  const steps = 64;
+  const coordinates: [number, number][] = [];
+  for (let i = 0; i <= steps; i++) {
+    const angle = (2 * Math.PI * i) / steps;
+    const dLat = (radiusKm / 111) * Math.sin(angle);
+    const dLng = (radiusKm / (111 * Math.cos((center.latitude * Math.PI) / 180))) * Math.cos(angle);
+    coordinates.push([center.longitude + dLng, center.latitude + dLat]);
+  }
+  return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [coordinates] } };
+}
+
+const iconMarkup = new Map<string, string>();
+
+function pinElement(sportName: string, selected: boolean, title: string): HTMLElement {
   const key = `${sportName}|${selected}`;
-  const cached = iconCache.get(key);
-  if (cached) return cached;
+  let svg = iconMarkup.get(key);
   const { icon: Icon, color } = getSportVisual(sportName);
-  const svg = renderToStaticMarkup(<Icon size={selected ? 20 : 17} strokeWidth={2.4} color={getIconColor(color)} />);
-  const size = selected ? 46 : 38;
-  const icon = L.divIcon({
-    className: "activities-map__pin-wrapper",
-    html: `<span class="activities-map__pin${selected ? " activities-map__pin--selected" : ""}" style="--pin:${color}">${svg}</span>`,
-    iconSize: [size, size + 8],
-    iconAnchor: [size / 2, size + 8],
-  });
-  iconCache.set(key, icon);
-  return icon;
+  if (!svg) {
+    svg = renderToStaticMarkup(<Icon size={selected ? 20 : 17} strokeWidth={2.4} color={getIconColor(color)} />);
+    iconMarkup.set(key, svg);
+  }
+  const element = document.createElement("button");
+  element.type = "button";
+  element.className = "activities-map__pin-wrapper";
+  element.setAttribute("aria-label", title);
+  element.title = title;
+  element.innerHTML = `<span class="activities-map__pin${selected ? " activities-map__pin--selected" : ""}" style="--pin:${color}">${svg}</span>`;
+  return element;
 }
 
 /** Carte des activités de l'Explorer : un repère par activité, fiche en bas au clic. */
@@ -76,9 +98,9 @@ export default function ActivitiesMap({
 }: ActivitiesMapProps) {
   const { brandName } = useBranding();
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.LayerGroup | null>(null);
-  const userLayerRef = useRef<L.LayerGroup | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
+  const [styleReady, setStyleReady] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { points, missing } = useMemo(() => toMapPoints(activities), [activities]);
@@ -88,85 +110,115 @@ export default function ActivitiesMap({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    const map = L.map(container, { zoomControl: false, attributionControl: true });
-    L.control.zoom({ position: "topright" }).addTo(map);
-    L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 18, subdomains: "abc" }).addTo(map);
-    map.attributionControl.setPrefix(false);
+    const map = new maplibregl.Map({
+      container,
+      style: MAP_STYLE,
+      bounds: regionBounds(region),
+      fitBoundsOptions: { padding: 20 },
+      attributionControl: { compact: true },
+      dragRotate: false,
+      pitchWithRotate: false,
+      touchPitch: false,
+    });
+    map.touchZoomRotate.disableRotation();
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     map.on("click", () => setSelectedId(null));
-    markersRef.current = L.layerGroup().addTo(map);
-    userLayerRef.current = L.layerGroup().addTo(map);
+    map.on("load", () => setStyleReady(true));
     mapRef.current = map;
-
-    // La carte peut être montée dans un conteneur qui change de taille.
-    const observer = new ResizeObserver(() => map.invalidateSize());
-    observer.observe(container);
     return () => {
-      observer.disconnect();
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current = [];
       map.remove();
       mapRef.current = null;
+      setStyleReady(false);
     };
+    // Carte créée une seule fois ; le cadrage suit dans l'effet suivant.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Cadrage : autour du membre s'il est dans le département, sinon le département.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    if (userLocation && isInRegion(userLocation, region)) {
-      map.fitBounds(
-        L.latLng(userLocation.latitude, userLocation.longitude).toBounds(DEFAULT_SEARCH_RADIUS_KM * 2000),
-      );
-    } else {
-      map.fitBounds(regionBounds(region));
-    }
+    const target =
+      userLocation && isInRegion(userLocation, region)
+        ? radiusBounds(userLocation, DEFAULT_SEARCH_RADIUS_KM)
+        : regionBounds(region);
+    map.fitBounds(target, { padding: 20, animate: false });
     // Recadrage seulement quand le territoire change ou que la position arrive.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [territoryCode, userLocation?.latitude, userLocation?.longitude]);
 
   useEffect(() => {
-    const layer = markersRef.current;
-    if (!layer) return;
-    layer.clearLayers();
-    for (const { item, coordinate } of points) {
+    const map = mapRef.current;
+    if (!map) return;
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = points.map(({ item, coordinate }) => {
       const isSelected = item.id === selectedId;
-      L.marker([coordinate.latitude, coordinate.longitude], {
-        icon: sportIcon(item.sportName, isSelected),
-        title: item.title,
-        keyboard: true,
-        zIndexOffset: isSelected ? 1000 : 0,
-      })
-        .on("click", (event) => {
-          L.DomEvent.stopPropagation(event);
-          setSelectedId(item.id);
-        })
-        .addTo(layer);
-    }
+      const element = pinElement(item.sportName, isSelected, item.title);
+      element.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setSelectedId(item.id);
+      });
+      if (isSelected) element.style.zIndex = "2";
+      return new maplibregl.Marker({ element, anchor: "bottom" })
+        .setLngLat([coordinate.longitude, coordinate.latitude])
+        .addTo(map);
+    });
   }, [points, selectedId]);
 
+  // Position du membre et cercle de 25 km.
   useEffect(() => {
-    const layer = userLayerRef.current;
-    if (!layer) return;
-    layer.clearLayers();
-    if (!userLocation) return;
-    const center: L.LatLngExpression = [userLocation.latitude, userLocation.longitude];
-    // Les attributs SVG n'acceptent pas var(...) : couleur du territoire lue ici.
+    const map = mapRef.current;
+    if (!map || !styleReady) return;
+    const data: GeoJSON.FeatureCollection = {
+      type: "FeatureCollection",
+      features: userLocation
+        ? [
+            radiusPolygon(userLocation, DEFAULT_SEARCH_RADIUS_KM),
+            {
+              type: "Feature",
+              properties: {},
+              geometry: { type: "Point", coordinates: [userLocation.longitude, userLocation.latitude] },
+            },
+          ]
+        : [],
+    };
+    const source = map.getSource(USER_SOURCE) as GeoJSONSource | undefined;
+    if (source) {
+      source.setData(data);
+      return;
+    }
     const brandColor =
       getComputedStyle(document.documentElement).getPropertyValue("--brand-primary").trim() || "#C4121A";
-    L.circle(center, {
-      radius: DEFAULT_SEARCH_RADIUS_KM * 1000,
-      color: brandColor,
-      weight: 1.5,
-      fillOpacity: 0.05,
-      interactive: false,
-    }).addTo(layer);
-    L.circleMarker(center, {
-      radius: 8,
-      color: "#ffffff",
-      weight: 3,
-      fillColor: "#2563EB",
-      fillOpacity: 1,
-      interactive: false,
-    }).addTo(layer);
-  }, [userLocation]);
+    map.addSource(USER_SOURCE, { type: "geojson", data });
+    map.addLayer({
+      id: "user-radius-fill",
+      type: "fill",
+      source: USER_SOURCE,
+      filter: ["==", ["geometry-type"], "Polygon"],
+      paint: { "fill-color": brandColor, "fill-opacity": 0.06 },
+    });
+    map.addLayer({
+      id: "user-radius-line",
+      type: "line",
+      source: USER_SOURCE,
+      filter: ["==", ["geometry-type"], "Polygon"],
+      paint: { "line-color": brandColor, "line-width": 1.5, "line-opacity": 0.7 },
+    });
+    map.addLayer({
+      id: "user-position",
+      type: "circle",
+      source: USER_SOURCE,
+      filter: ["==", ["geometry-type"], "Point"],
+      paint: {
+        "circle-radius": 7,
+        "circle-color": "#2563EB",
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 3,
+      },
+    });
+  }, [userLocation, styleReady]);
 
   useEffect(() => {
     if (selectedId && !activities.some((activity) => activity.id === selectedId)) setSelectedId(null);
@@ -175,10 +227,7 @@ export default function ActivitiesMap({
   async function locate() {
     const coords = userLocation ?? (await onLocate());
     if (coords && mapRef.current) {
-      mapRef.current.flyToBounds(
-        L.latLng(coords.latitude, coords.longitude).toBounds(DEFAULT_SEARCH_RADIUS_KM * 2000),
-        { duration: 0.8 },
-      );
+      mapRef.current.fitBounds(radiusBounds(coords, DEFAULT_SEARCH_RADIUS_KM), { padding: 20, duration: 800 });
     }
   }
 

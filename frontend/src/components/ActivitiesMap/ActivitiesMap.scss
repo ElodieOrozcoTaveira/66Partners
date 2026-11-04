@@ -25,31 +25,26 @@
     inset: 0;
     font-family: "Inter", sans-serif;
 
-    .leaflet-control-zoom {
-      border: none;
-      border-radius: 14px;
+    .maplibregl-ctrl-group {
+      border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 14px rgba(17, 19, 24, 0.12);
 
-      a {
+      button {
         width: 38px;
         height: 38px;
-        line-height: 38px;
-        color: variables.$encre;
       }
     }
 
-    .leaflet-control-attribution {
+    .maplibregl-ctrl-attrib {
       font-size: 10px;
-      background: rgba(255, 255, 255, 0.8);
-      border-top-left-radius: 8px;
     }
   }
 
   &__locate {
     position: absolute;
     z-index: 1000;
-    top: 100px;
+    top: 96px;
     right: 10px;
     display: inline-flex;
     align-items: center;
@@ -195,8 +190,11 @@
 
 // Repère d'activité : goutte aux couleurs du sport, pointe vers le lieu.
 .activities-map__pin-wrapper {
+  padding: 0 0 6px;
+  margin: 0;
   background: none;
   border: none;
+  cursor: pointer;
 }
 
 .activities-map__pin {
