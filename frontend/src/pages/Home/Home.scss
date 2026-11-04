@@ -85,6 +85,46 @@
     animation: home-fade-in 0.7s ease both;
   }
 
+  // Pastille « Nouveau » menant à la section NouveauLook.
+  &__new {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 100%;
+    padding: 0.3rem 0.85rem 0.3rem 0.3rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(8px);
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.26);
+    }
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+
+  &__new-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    background: variables.$jaune;
+    color: variables.$encre;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
   &__titre {
     @include mixins.display(clamp(2.6rem, 6vw, 4.6rem));
     margin: 0;
