@@ -84,11 +84,6 @@
 // précédé d'une pastille colorée. Règles regroupées ici pour ne pas
 // toucher à la logique des composants.
 .profil-page {
-  .container-aproposProfile {
-    @include mixins.carte;
-    padding: 1rem 1.25rem;
-  }
-
   .container-dispo,
   .container-dernieresActivites,
   .container-membresBloques,
