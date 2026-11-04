@@ -39,8 +39,6 @@ export default function ModaleEditProfil({
   const [pseudo, setPseudo] = useState("");
   const [city, setCity] = useState("");
   const [headline, setHeadline] = useState("");
-  const [lookingFor, setLookingFor] = useState("");
-  const [openTo, setOpenTo] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,8 +102,6 @@ export default function ModaleEditProfil({
     setPseudo(user?.pseudo ?? "");
     setCity(user?.city ?? "");
     setHeadline(user?.headline ?? "");
-    setLookingFor(user?.lookingFor ?? "");
-    setOpenTo(user?.openTo ?? "");
     setGender(user?.gender ?? null);
   }, [isOpen, user]);
 
@@ -126,8 +122,6 @@ export default function ModaleEditProfil({
         pseudo: pseudo.trim(),
         city: city.trim() || null,
         headline: headline.trim() || null,
-        lookingFor: lookingFor.trim() || null,
-        openTo: openTo.trim() || null,
         gender,
       });
       await refreshUser();
@@ -202,7 +196,7 @@ export default function ModaleEditProfil({
               className="container-modaleEditProfil__label"
               htmlFor="edit-headline"
             >
-              Ta présentation
+              Présente-toi en quelques mots
             </label>
             <input
               id="edit-headline"
@@ -211,38 +205,6 @@ export default function ModaleEditProfil({
               onChange={(event) => setHeadline(event.target.value)}
               className="container-modaleEditProfil__input"
               placeholder="Ex. Passionné de sport et de nouvelles rencontres."
-              maxLength={200}
-            />
-
-            <label
-              className="container-modaleEditProfil__label"
-              htmlFor="edit-lookingFor"
-            >
-              Ce que tu recherches
-            </label>
-            <input
-              id="edit-lookingFor"
-              type="text"
-              value={lookingFor}
-              onChange={(event) => setLookingFor(event.target.value)}
-              className="container-modaleEditProfil__input"
-              placeholder="Ex. Recherche des partenaires motivés et respectueux."
-              maxLength={200}
-            />
-
-            <label
-              className="container-modaleEditProfil__label"
-              htmlFor="edit-openTo"
-            >
-              Ton ouverture d'esprit
-            </label>
-            <input
-              id="edit-openTo"
-              type="text"
-              value={openTo}
-              onChange={(event) => setOpenTo(event.target.value)}
-              className="container-modaleEditProfil__input"
-              placeholder="Ex. Ouvert à de nouveaux sports et défis."
               maxLength={200}
             />
 

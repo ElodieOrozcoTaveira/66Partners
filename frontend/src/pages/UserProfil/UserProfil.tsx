@@ -82,8 +82,6 @@ export default function UserProfil() {
         <TopProfile user={profileUser} isOwnProfile={false} />
         <AproposProfile
           headline={profileUser.headline}
-          lookingFor={profileUser.lookingFor}
-          openTo={profileUser.openTo}
           createdAt={profileUser.createdAt}
           isOwnProfile={false}
           territory={profileUser.territory}

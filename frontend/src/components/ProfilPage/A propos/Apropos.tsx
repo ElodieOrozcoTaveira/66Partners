@@ -1,4 +1,4 @@
-import { CalendarDays, Flame, MapPin, Smile, Target, UserRound } from "lucide-react";
+import { CalendarDays, Flame, MapPin, UserRound } from "lucide-react";
 import { formatMonthYear } from "../../../lib/dateFormat";
 import './Apropos.scss';
 
@@ -10,8 +10,6 @@ interface AproposProfileTerritory {
 
 interface AproposProfileProps {
     headline: string | null;
-    lookingFor: string | null;
-    openTo: string | null;
     createdAt: string | null;
     isOwnProfile?: boolean;
     // Territoire d'inscription (isDefault) de la personne dont on affiche le
@@ -23,16 +21,12 @@ interface AproposProfileProps {
 
 export default function AproposProfile({
     headline,
-    lookingFor,
-    openTo,
     createdAt,
     isOwnProfile = true,
     territory,
 }: AproposProfileProps) {
     const lines = [
         { key: "headline", icon: Flame, label: "Présentation", text: headline },
-        { key: "lookingFor", icon: Target, label: isOwnProfile ? "Je recherche" : "Recherche", text: lookingFor },
-        { key: "openTo", icon: Smile, label: "Ouvert à", text: openTo },
     ].filter((line) => line.text);
 
     return (
@@ -59,7 +53,7 @@ export default function AproposProfile({
             ) : (
                 <p className="container-aproposProfile__empty">
                     {isOwnProfile
-                        ? "Présente-toi en quelques mots : ce que tu pratiques, ce que tu recherches… Tout se remplit depuis « Modifier le profil »."
+                        ? "Présente-toi en quelques mots depuis « Modifier le profil »."
                         : "Aucune information renseignée pour l'instant."}
                 </p>
             )}
