@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
-import { CalendarPlus, Navigation, Users } from "lucide-react";
+import { CalendarPlus, LayoutGrid, Map as MapIcon, Navigation, Users } from "lucide-react";
 import api from "../../lib/axios";
 import { useTerritory } from "../../contexts/TerritoryContext";
 import Recherche from "../../components/SportsComponents/Recherche/Recheche";
@@ -14,6 +14,9 @@ import { DATE_PRESET_LABELS, presetToRange, type DatePreset } from "../../lib/pa
 import "./Explorer.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
 import { AUDIENCE_LABELS, AUDIENCE_OPTIONS, type ActivityAudience } from "../../lib/audience";
+
+// Leaflet n'est chargé qu'à l'ouverture de la carte.
+const ActivitiesMap = lazy(() => import("../../components/ActivitiesMap/ActivitiesMap"));
 
 const DATE_PRESETS: DatePreset[] = ["all", "today", "tomorrow", "week", "weekend", "month"];
 
@@ -72,6 +75,7 @@ export default function Explorer() {
   const datePreset: DatePreset = (DATE_PRESETS as string[]).includes(rawPreset ?? "")
     ? (rawPreset as DatePreset)
     : "all";
+  const view: "list" | "map" = searchParams.get("vue") === "carte" ? "map" : "list";
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -266,7 +270,54 @@ export default function Explorer() {
         </div>
       )}
 
-      {filteredActivities.length === 0 ? (
+      <div className="explorer-view" role="tablist" aria-label="Affichage">
+        <span className="explorer-view__count">
+          {filteredActivities.length} activité{filteredActivities.length > 1 ? "s" : ""}
+        </span>
+        <div className="explorer-view__switch">
+          {(["list", "map"] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              role="tab"
+              aria-selected={view === mode}
+              className={`explorer-view__button${view === mode ? " explorer-view__button--active" : ""}`}
+              onClick={() =>
+                setSearchParams(
+                  (prev) => {
+                    const next = new URLSearchParams(prev);
+                    if (mode === "map") next.set("vue", "carte");
+                    else next.delete("vue");
+                    return next;
+                  },
+                  { replace: true },
+                )
+              }
+              onPointerUp={(event) => {
+                // Sur téléphone, la carte est sous les filtres : on l'amène à l'écran.
+                if (mode !== "map") return;
+                const bar = event.currentTarget.closest(".explorer-view");
+                window.setTimeout(() => bar?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+              }}
+            >
+              {mode === "list" ? <LayoutGrid size={15} strokeWidth={2.4} /> : <MapIcon size={15} strokeWidth={2.4} />}
+              {mode === "list" ? "Liste" : "Carte"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view === "map" ? (
+        <Suspense fallback={<p className="explorer-state">Chargement de la carte...</p>}>
+          <ActivitiesMap
+            activities={filteredActivities}
+            territoryCode={activeTerritory?.code}
+            userLocation={location.coords}
+            onLocate={location.locate}
+            locating={location.status === "locating"}
+          />
+        </Suspense>
+      ) : filteredActivities.length === 0 ? (
         search.trim() || selectedSportId || audienceFilter !== "ALL" || aroundMe ? (
           <p className="explorer-state">
             Aucune activité ne correspond à ta recherche.
