@@ -104,13 +104,29 @@
   display: none;
   align-items: center;
   flex-shrink: 0;
-  padding: 0.45rem 0.8rem;
+  padding: 0.25rem 0.65rem 0.25rem 0.25rem;
   border-radius: 999px;
   background: #ffffff;
   border: 1px solid variables.$bordure;
+  box-shadow: 0 2px 8px rgba(17, 19, 24, 0.05);
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, variables.$rouge 30%, white);
+    box-shadow: 0 6px 16px rgba(17, 19, 24, 0.09);
+  }
 
   @media (min-width: variables.$tablet) {
     display: flex;
+  }
+
+  // Nom du territoire seulement quand la barre a la place.
+  .territory-switcher__brand {
+    display: none;
+
+    @media (min-width: variables.$desktop) {
+      display: inline;
+    }
   }
 }
 
@@ -295,11 +311,7 @@
   }
 
   .territory-switcher.container-header__territoryBadge {
-    padding: 0.35rem 0.55rem;
-  }
-
-  .territory-switcher__code {
-    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem 0.2rem 0.2rem;
   }
 
   .container-header__nav {

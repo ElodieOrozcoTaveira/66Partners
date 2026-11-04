@@ -23,97 +23,199 @@
   }
 
   &__control {
-    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.45rem;
+    min-width: 0;
     background: none;
     border: none;
     padding: 0;
     margin: 0;
     font: inherit;
+    color: variables.$encre;
     cursor: pointer;
 
     &--static {
       cursor: default;
     }
-  }
 
-  &__pin {
-    color: variables.$rouge2;
-    flex-shrink: 0;
-    pointer-events: none;
-  }
-
-  &__code {
-    font-family: "Inter", sans-serif;
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: variables.$rouge2;
-
-    &--static {
-      cursor: default;
+    &:focus-visible {
+      outline: 2px solid var(--t-primary, #C4121A);
+      outline-offset: 3px;
+      border-radius: 10px;
     }
   }
 
-  &__chevron {
-    color: variables.$rouge2;
-    flex-shrink: 0;
-    pointer-events: none;
-    transition: transform 0.15s ease;
+  &__brand {
+    font-family: "Manrope", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-    &--open {
+  &__chevron {
+    flex-shrink: 0;
+    color: var(--t-primary, #C4121A);
+    transition: transform 0.2s ease;
+
+    .territory-switcher__control--open & {
       transform: rotate(180deg);
     }
   }
 }
 
-// Menu déroulant "maison", rendu en portail sur <body> (cf. commentaire dans
-// TerritorySwitcher.tsx) : positionné en JS via `top`/`left` inline,
-// toujours ancré sous le badge quel que soit le navigateur ou le conteneur
-// (y compris scrollable, ex. panneau burger) dans lequel le badge est monté.
+// Menu en portail sur <body>, positionné en JS (cf. composant).
 .territory-switcher__menu {
   position: fixed;
   z-index: 1500;
   display: flex;
   flex-direction: column;
-  padding: 0.35rem;
-  border-radius: 12px;
+  width: min(300px, calc(100vw - 16px));
+  box-sizing: border-box;
+  padding: 0.5rem;
+  border-radius: 20px;
   background: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  border: 1px solid variables.alpha(variables.$nuit, 8%);
+  border: 1px solid variables.$bordure;
+  box-shadow: variables.$ombre-flottante;
+  animation: territory-switcher-in 0.18s ease;
+}
+
+.territory-switcher__menuTitle {
+  margin: 0;
+  padding: 0.45rem 0.6rem 0.55rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: variables.$texte3;
+}
+
+.territory-switcher__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .territory-switcher__option {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.5rem 0.7rem;
-  border: none;
-  border-radius: 8px;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.45rem 0.55rem 0.45rem 0.45rem;
+  border: 1.5px solid transparent;
+  border-radius: 14px;
   background: none;
-  font-family: "Inter", sans-serif;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: variables.$nuit;
+  font: inherit;
   text-align: left;
-  white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.12s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 
   &:hover,
   &:focus-visible {
-    background: variables.alpha(variables.$rouge2, 8%);
+    outline: none;
+    background: color-mix(in srgb, var(--t-primary, #C4121A) 7%, white);
   }
 
   &--active {
-    color: variables.$rouge2;
-    font-weight: 800;
+    border-color: color-mix(in srgb, var(--t-primary, #C4121A) 55%, white);
+    background: color-mix(in srgb, var(--t-primary, #C4121A) 9%, white);
+
+    .territory-switcher__optionBrand {
+      color: var(--t-primary-dark, #930D13);
+    }
   }
 }
 
+.territory-switcher__texts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.territory-switcher__optionBrand {
+  font-family: "Manrope", sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: variables.$encre;
+}
+
+.territory-switcher__optionName {
+  font-family: "Inter", sans-serif;
+  font-size: 0.75rem;
+  color: variables.$texte2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .territory-switcher__check {
-  color: variables.$rouge2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--t-primary, #C4121A);
+  color: #ffffff;
+}
+
+.territory-switcher__join {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: variables.$fond2;
+  font-family: "Inter", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: variables.$texte2;
+}
+
+@keyframes territory-switcher-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .territory-switcher__menu {
+    animation: none;
+  }
+}
+
+.territory-switcher__wheel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.territory-switcher__confirm {
+  min-height: 46px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--t-primary, #C4121A), var(--t-primary-dark, #930D13));
+  color: #ffffff;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--t-primary, #C4121A) 25%, transparent);
 }

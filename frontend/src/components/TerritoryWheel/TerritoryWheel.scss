@@ -1,0 +1,104 @@
+@use "../../styles/variables/variables.scss";
+
+.territory-wheel {
+  position: relative;
+  height: var(--wheel-height);
+  border-radius: 16px;
+  background: variables.$fond2;
+  overflow: hidden;
+
+  &__band {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: calc((var(--wheel-height) - var(--wheel-item)) / 2);
+    height: var(--wheel-item);
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1.5px solid color-mix(in srgb, var(--t-primary, #C4121A) 45%, white);
+    box-shadow: 0 4px 14px rgba(17, 19, 24, 0.08);
+    transition: border-color 0.2s ease;
+    pointer-events: none;
+  }
+
+  &__scroller {
+    position: relative;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+    padding-block: calc((var(--wheel-height) - var(--wheel-item)) / 2);
+    box-sizing: border-box;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    // Fondu en haut et en bas, comme une roulette.
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    height: var(--wheel-item);
+    padding: 0 1rem;
+    box-sizing: border-box;
+    scroll-snap-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    &[data-distance="0"] {
+      opacity: 1;
+    }
+
+    &[data-distance="1"] {
+      opacity: 0.6;
+      transform: scale(0.94);
+    }
+
+    &[data-distance="2"],
+    &[data-distance="3"] {
+      opacity: 0.3;
+      transform: scale(0.88);
+    }
+  }
+
+  &__texts {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__brand {
+    font-family: "Manrope", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: variables.$encre;
+    white-space: nowrap;
+  }
+
+  &__name {
+    font-family: "Inter", sans-serif;
+    font-size: 0.72rem;
+    color: variables.$texte2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .territory-wheel__item {
+    transition: none;
+  }
+}
