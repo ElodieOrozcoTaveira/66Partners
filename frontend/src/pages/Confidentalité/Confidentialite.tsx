@@ -154,7 +154,7 @@ export function PolitiqueConfidentialite() {
           moi », si vous autorisez l'accès à votre localisation, les activités
           proches sont mises en avant et une position arrondie à environ 1 km
           est enregistrée. Elle sert uniquement à afficher le
-          nombre de sportifs présents dans un rayon de 15 km : aucune position
+          nombre de sportifs présents dans un rayon de 25 km : aucune position
           n'est jamais affichée ni communiquée aux autres membres, qui ne
           voient qu'un nombre. La localisation n'est utilisée que lorsque
           l'application ou le site est ouvert, jamais en arrière-plan. Vous

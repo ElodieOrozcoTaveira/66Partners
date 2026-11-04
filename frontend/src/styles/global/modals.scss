@@ -1,0 +1,305 @@
+@use "../variables/variables.scss";
+@use "../mixins/mixins.scss";
+
+// ─── Modales de la refonte ───────────────────────────────────────────────
+// Un seul style pour toutes les modales du site (connexion, inscription,
+// bienvenue, genre, confirmation, signalement, blocage, profil,
+// disponibilités, recadrage photo). Sélecteurs préfixés « html body » pour
+// l'emporter sur les feuilles des composants sans toucher à leur logique.
+
+$overlays: ".modale-overlay, .modale-register-overlay, .modale-bienvenue-overlay, .modale-genre-overlay, .confirm-dialog-overlay, .modale-editprofil-overlay, .modale-dispo-overlay, .image-crop-overlay";
+$panels: ".modale-content, .modale-register-content, .modale-bienvenue-content, .modale-genre, .confirm-dialog, .modale-editprofil-content, .modale-dispo-content, .image-crop-content";
+$closes: ".modale-content__close, .modale-register-content__close, .modale-bienvenue-content__close, .modale-genre__close, .confirm-dialog__close, .modale-editprofil-content__close, .modale-dispo-content__close, .image-crop-content__close";
+$titles: ".container-modaleConnexion__h3, .container-modaleRegister__h3, .container-modaleBienvenue__h3, .modale-genre__title, .confirm-dialog__title, .container-modaleEditProfil__h3, .container-gererDispo__h3, .image-crop-content__title";
+$subtitles: ".container-modaleConnexion__h4, .container-modaleRegister__h4, .container-modaleBienvenue__h4, .modale-genre__text, .confirm-dialog__description";
+$labels: ".container-modaleConnexion__label, .container-modaleRegister__label, .container-modaleBienvenue__label, .confirm-dialog__label, .container-modaleEditProfil__label";
+$inputs: ".container-modaleConnexion__input, .container-modaleRegister__input, .container-modaleBienvenue__input, .confirm-dialog__input, .container-modaleEditProfil__input, .container-gererDispo__form input, .container-gererDispo__form select";
+$primaries: ".container-modaleConnexion__submit, .container-modaleRegister__submit, .container-modaleBienvenue__submit, .container-modaleEditProfil__submit, .container-gererDispo__submit, .modale-genre__submit, .confirm-dialog__confirm, .image-crop-content__submit";
+$secondaries: ".confirm-dialog__cancel, .image-crop-content__cancel, .container-modaleBienvenue__later";
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+}
+
+@keyframes modal-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+html body {
+  #{$overlays} {
+    background-color: rgba(31, 41, 55, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    // Téléphone : la modale s'ouvre depuis le bas, comme une feuille d'app.
+    @media (max-width: (variables.$tablet - 1px)) {
+      align-items: flex-end;
+      padding: env(safe-area-inset-top) 0 0;
+    }
+  }
+
+  #{$panels} {
+    position: relative;
+    box-sizing: border-box;
+    width: min(460px, calc(100vw - 2rem));
+    min-width: 0;
+    max-width: none;
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    padding: 2rem 1.75rem 1.75rem;
+    border: 1px solid variables.$bordure;
+    border-radius: 28px;
+    background: #ffffff;
+    background-image: none;
+    filter: none;
+    box-shadow: 0 30px 70px rgba(31, 41, 55, 0.25);
+    color: variables.$texte;
+    font-family: "Inter", sans-serif;
+    animation: modal-in 0.28s ease both;
+
+    @media (max-width: (variables.$tablet - 1px)) {
+      width: 100%;
+      max-height: calc(100dvh - 1.5rem - env(safe-area-inset-top));
+      padding: 1.75rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
+      border-radius: 28px 28px 0 0;
+      border-bottom: none;
+      animation: modal-sheet-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+      // Poignée de feuille.
+      &::before {
+        content: "";
+        display: block;
+        width: 40px;
+        height: 5px;
+        margin: -0.75rem auto 1rem;
+        border-radius: 999px;
+        background: variables.$bordure;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  // Modales plus riches : un peu plus larges sur ordinateur.
+  .modale-register-content,
+  .modale-editprofil-content,
+  .modale-dispo-content,
+  .image-crop-content {
+    @media (min-width: variables.$tablet) {
+      width: min(540px, calc(100vw - 2rem));
+    }
+  }
+
+  #{$closes} {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: variables.$fond2;
+    color: variables.$texte2;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background: variables.alpha(variables.$rouge, 12%);
+      color: variables.$rouge;
+    }
+  }
+
+  // Logo du territoire (connexion, inscription, bienvenue).
+  .modal-brand {
+    display: block;
+    width: 92px;
+    height: 56px;
+    margin: 0 auto 0.5rem;
+    object-fit: contain;
+  }
+
+  #{$titles} {
+    margin: 0 0 0.35rem;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    color: variables.$encre;
+  }
+
+  #{$subtitles} {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: variables.$texte2;
+  }
+
+  #{$labels} {
+    margin-top: 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: variables.$encre;
+  }
+
+  #{$inputs} {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.7rem 0.95rem;
+    border: 1.5px solid variables.$bordure;
+    border-radius: 14px;
+    background: variables.$fond;
+    color: variables.$encre;
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: variables.$rouge;
+      background: #ffffff;
+      box-shadow: 0 0 0 4px variables.alpha(variables.$rouge, 12%);
+    }
+  }
+
+  textarea.confirm-dialog__input,
+  .container-modaleEditProfil textarea {
+    min-height: 96px;
+  }
+
+  #{$primaries} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 50px;
+    padding: 0 1.4rem;
+    border: none;
+    border-radius: 999px;
+    @include mixins.gradient;
+    color: #ffffff;
+    font-family: "Inter", sans-serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+
+  #{$secondaries} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 0 1.4rem;
+    border: 1.5px solid variables.$bordure;
+    border-radius: 999px;
+    background: #ffffff;
+    color: variables.$encre;
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover {
+      border-color: variables.$encre;
+    }
+  }
+
+  // Séparateur « ou continuer avec ».
+  .container-modaleConnexion__divider,
+  .container-modaleRegister__divider {
+    color: variables.$texte3;
+
+    &::before,
+    &::after {
+      background-color: variables.$bordure;
+    }
+  }
+
+  // Liens de bascule (connexion ↔ inscription, mot de passe oublié).
+  .container-modaleConnexion__switch,
+  .container-modaleRegister__switch,
+  .container-modaleConnexion__forgot {
+    color: variables.$rouge;
+  }
+
+  .container-modaleConnexion__register,
+  .container-modaleRegister__register {
+    color: variables.$texte2;
+    text-align: center;
+  }
+
+  // Champs à pleine largeur dans les formulaires d'authentification.
+  .container-modaleConnexion,
+  .container-modaleRegister,
+  .container-modaleBienvenue {
+    text-align: center;
+
+    form,
+    [class$="__section"] {
+      text-align: left;
+    }
+  }
+
+  // Case « J'ai lu et j'accepte… » : texte en un seul paragraphe (les
+  // liens étaient des éléments flex séparés, d'où un texte en colonnes).
+  .container-modaleConnexion__checkboxLabel,
+  .container-modaleRegister__checkboxLabel {
+    position: relative;
+    display: block;
+    padding-left: 1.75rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: variables.$texte2;
+    text-align: left;
+
+    input {
+      position: absolute;
+      top: 0.15rem;
+      left: 0;
+      margin: 0;
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: variables.$rouge;
+    }
+
+    a {
+      color: variables.$rouge;
+      font-weight: 700;
+    }
+  }
+
+  // Icône des dialogues de confirmation.
+  .confirm-dialog__icon {
+    background: variables.alpha(variables.$rouge, 10%);
+    color: variables.$rouge;
+  }
+
+  .confirm-dialog__actions {
+    gap: 0.6rem;
+  }
+}

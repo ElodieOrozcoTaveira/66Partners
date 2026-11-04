@@ -6,7 +6,7 @@ import { userLocations } from "../db/schema.js";
 const db = drizzle(process.env.DATABASE_URL!);
 
 /** Rayon fixe (non choisi par l'appelant, pour limiter la triangulation). */
-export const NEARBY_RADIUS_KM = 15;
+export const NEARBY_RADIUS_KM = 25;
 /** Au-delà, un membre qui n'a plus ouvert la carte n'est plus compté. */
 export const NEARBY_FRESHNESS_DAYS = 30;
 

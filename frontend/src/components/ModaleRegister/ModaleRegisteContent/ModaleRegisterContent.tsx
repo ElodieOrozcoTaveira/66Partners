@@ -37,7 +37,7 @@ export default function ModaleRegisterContent({
   onClose,
   onSwitchToLogin,
 }: ModaleContentProps) {
-  const { brandName } = useBranding();
+  const { brandName, asset } = useBranding();
   const { publicTerritories, testTerritories } = useTerritory();
   const { login, getLastLoginFailureReason } = useAuth();
   const [pseudo, setPseudo] = useState("");
@@ -104,20 +104,11 @@ export default function ModaleRegisterContent({
     };
   }, [signupTerritory, publicTerritories, testTerritories]);
 
-  // Un territoire à la couleur de marque foncée (ex. le navy du 34) devient
-  // illisible en texte/lien sur son propre emblème, lui aussi sombre — le
-  // rouge/jaune par défaut du 66 reste assez clair/chaud pour ne jamais en
-  // avoir besoin. Calculé depuis la couleur réelle du territoire (jamais une
-  // exception "if territoire === 34"), donc valable pour tout futur
-  // territoire à dominante sombre.
-  function isDarkHex(hex: string): boolean {
-    const clean = hex.replace("#", "");
-    if (clean.length !== 6) return false;
-    const r = parseInt(clean.slice(0, 2), 16) / 255;
-    const g = parseInt(clean.slice(2, 4), 16) / 255;
-    const b = parseInt(clean.slice(4, 6), 16) / 255;
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.4;
-  }
+  // Logo du territoire choisi à l'inscription (repli : territoire actif).
+  const signupAssetsPath =
+    (publicTerritories.find((t) => t.code === signupTerritory) ??
+      testTerritories.find((t) => t.code === signupTerritory))?.assetsPath;
+  const previewLogo = signupAssetsPath ? resolveTerritoryAsset(signupAssetsPath, "logo") : asset("logo");
 
   const previewStyle = {
     ...Object.fromEntries(
@@ -128,7 +119,6 @@ export default function ModaleRegisterContent({
     ...(previewEmblem && ASSET_CSS_VARS.emblem
       ? { [ASSET_CSS_VARS.emblem]: `url("${previewEmblem}")` }
       : {}),
-    ...(previewTheme.primary && isDarkHex(previewTheme.primary) ? { "--brand-on-surface": "#ffffff" } : {}),
   } as React.CSSProperties;
 
   useEffect(() => {
@@ -250,6 +240,7 @@ export default function ModaleRegisterContent({
         </button>
         {googleAuth.state.step === "newAccount" ? (
           <div className="container-modaleRegister">
+            <img className="modal-brand" src={previewLogo} alt="" />
             <h3 className="container-modaleRegister__h3">Finalise ton inscription</h3>
             <h4 className="container-modaleRegister__h4">
               Connecté·e avec {googleAuth.state.email}
@@ -301,6 +292,7 @@ export default function ModaleRegisterContent({
           </div>
         ) : googleAuth.state.step === "linkPending" ? (
           <div className="container-modaleRegister">
+            <img className="modal-brand" src={previewLogo} alt="" />
             <h3 className="container-modaleRegister__h3">Compte déjà existant</h3>
 
             <section className="container-modaleRegister__section">
@@ -323,6 +315,7 @@ export default function ModaleRegisterContent({
           </div>
         ) : (
           <div className="container-modaleRegister">
+            <img className="modal-brand" src={previewLogo} alt="" />
             <h3 className="container-modaleRegister__h3">Créer un compte</h3>
             <h4 className="container-modaleRegister__h4">
               Rejoignez la communauté {brandName} et vivez l'aventure avec nous !

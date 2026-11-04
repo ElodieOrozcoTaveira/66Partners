@@ -7,8 +7,9 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 4rem 1rem 1.1rem;
+  gap: 0.9rem;
+  min-height: 150px;
+  padding: 4.25rem 1rem 1.25rem;
   border-radius: 22px;
   overflow: hidden;
   background-image: var(--brand-emblem-image, url("/66partners/emblem.webp"));
@@ -37,8 +38,8 @@
 
   &__img {
     display: block;
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid rgba(255, 255, 255, 0.9);
@@ -58,18 +59,19 @@
   &__h3 {
     margin: 0;
     font-family: "Manrope", sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 800;
     letter-spacing: -0.02em;
+    line-height: 1.2;
     color: #ffffff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    // Nom complet visible : retour à la ligne plutôt que « … ».
+    overflow-wrap: anywhere;
   }
 
   &__p {
-    margin: 0.1rem 0 0;
-    font-size: 0.85rem;
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.35;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.88);
   }

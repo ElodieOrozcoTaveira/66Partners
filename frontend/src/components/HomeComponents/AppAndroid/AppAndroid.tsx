@@ -86,7 +86,7 @@ export default function AppAndroid() {
           <ul className="app-android__list">
             <li><Check size={16} strokeWidth={3} /> Carte des activités autour de toi</li>
             <li><Check size={16} strokeWidth={3} /> Notifications et rappels avant chaque sortie</li>
-            <li><Check size={16} strokeWidth={3} /> Sportifs dans un rayon de 15 km</li>
+            <li><Check size={16} strokeWidth={3} /> Sportifs dans un rayon de 25 km</li>
           </ul>
           <div className="app-android__badge">
             <FaAndroid size={26} />
