@@ -266,6 +266,62 @@ const BRANDS: Record<string, Brand> = {
     require("../../assets/images/territories/emblem65.webp"),
     // Hautes-Pyrénées
     { latitude: 43.05, longitude: 0.15, latitudeDelta: 1.0, longitudeDelta: 1.0 }
+  ),  "46": makeBrand(
+    "46",
+    {
+      // Ocre doré (pierre et soleil du Quercy, logo 46Partners), accent bleu rivière :
+      // teinte propre au 46, distincte de tous les autres territoires.
+      primary: "#9C6B0E",
+      primaryDark: "#6E4A07",
+      primarySoft: "#F7EEDC",
+      accent: "#2E9BD6",
+      accentSoft: "#E1F1FA",
+      gradientTo: "#C98F1F",
+      badgeTo: "#7CC4EC",
+      shadowRgb: "156, 107, 14",
+    },
+    require("../../assets/images/territories/logo46.webp"),
+    require("../../assets/images/territories/emblem46.webp"),
+    // Lot
+    { latitude: 44.62, longitude: 1.6, latitudeDelta: 0.9, longitudeDelta: 1.4 }
+  ),
+  "12": makeBrand(
+    "12",
+    {
+      // Rose bruyère (logo 12Partners), accent vert : teinte propre au 12,
+      // distincte de tous les autres territoires.
+      primary: "#A3245F",
+      primaryDark: "#6E1840",
+      primarySoft: "#F8E6EE",
+      accent: "#8BC34A",
+      accentSoft: "#EEF7E3",
+      gradientTo: "#C9447F",
+      badgeTo: "#B5DC85",
+      shadowRgb: "163, 36, 95",
+    },
+    require("../../assets/images/territories/logo12.webp"),
+    require("../../assets/images/territories/emblem12.webp"),
+    // Aveyron
+    { latitude: 44.28, longitude: 2.65, latitudeDelta: 1.2, longitudeDelta: 1.6 }
+  ),
+  "48": makeBrand(
+    "48",
+    {
+      // Bleu ardoise (granite et causses, logo 48Partners), accent jaune genêt :
+      // teinte propre au 48, distincte de tous les autres territoires.
+      primary: "#3D5A73",
+      primaryDark: "#27394A",
+      primarySoft: "#E7EDF2",
+      accent: "#F2C230",
+      accentSoft: "#FDF5D6",
+      gradientTo: "#5A7F9C",
+      badgeTo: "#F7D96B",
+      shadowRgb: "61, 90, 115",
+    },
+    require("../../assets/images/territories/logo48.webp"),
+    require("../../assets/images/territories/emblem48.webp"),
+    // Lozère
+    { latitude: 44.52, longitude: 3.5, latitudeDelta: 0.9, longitudeDelta: 1.3 }
   ),
 };
 
