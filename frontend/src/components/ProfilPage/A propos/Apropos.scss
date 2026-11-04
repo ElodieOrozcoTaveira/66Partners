@@ -1,58 +1,128 @@
 @use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
 
+// « À propos » du profil : carte avec trois lignes titrées et, en bas, les
+// pastilles « Membre depuis » et territoire.
 .container-aproposProfile {
-  display: flex;
-  align-items: stretch;
-  gap: 0.75rem;
-  padding: 0.9rem 0.95rem;
-  border-radius: 16px;
-  background: variables.alpha(variables.$rouge2, 4%);
-  border: 1px solid rgba(31, 41, 55, 0.06);
-  box-sizing: border-box;
-
-}
-
-.container-aproposProfile__col {
+  @include mixins.carte;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.55rem;
-  min-width: 0;
-  flex: 1;
+  gap: 1rem;
+  padding: 1.25rem;
+  box-sizing: border-box;
 
-  &--meta {
-    flex: 0 1 auto;
-    max-width: 40%;
+  @media (min-width: variables.$tablet) {
+    padding: 1.5rem;
   }
-}
 
-.container-aproposProfile__line {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  font-size: 0.82rem;
-  line-height: 1.35;
-  color: variables.$nuit;
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: variables.$encre;
 
-  svg {
+    svg {
+      box-sizing: content-box;
+      flex-shrink: 0;
+      padding: 11px;
+      border-radius: 12px;
+      background: variables.alpha(variables.$rouge, 10%);
+      color: variables.$rouge;
+    }
+  }
+
+  &__lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+
+    @media (min-width: variables.$laptop) {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+  }
+
+  &__line {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 0.9rem;
+    border-radius: 16px;
+    background: variables.$fond2;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    margin-top: 0.1rem;
-    color: variables.$rouge2;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: #ffffff;
+    color: variables.$rouge;
+    box-shadow: 0 2px 6px rgba(31, 41, 55, 0.06);
   }
-}
 
-.container-aproposProfile__empty {
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  font-size: 0.82rem;
-  font-style: italic;
-  color: #94a3b8;
-}
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
 
-.container-aproposProfile__divider {
-  flex-shrink: 0;
-  width: 1px;
-  background: rgba(31, 41, 55, 0.1);
+  &__label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: variables.$rouge;
+  }
+
+  &__text {
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: variables.$encre;
+    overflow-wrap: anywhere;
+  }
+
+  &__empty {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    background: variables.$fond2;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: variables.$texte2;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid variables.$bordure;
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    background: variables.alpha(variables.$rouge, 8%);
+    color: variables.$encre;
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    svg {
+      color: variables.$rouge;
+    }
+  }
 }

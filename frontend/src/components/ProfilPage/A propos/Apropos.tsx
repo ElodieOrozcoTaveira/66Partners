@@ -1,4 +1,4 @@
-import { CalendarDays, Flame, MapPin, Smile, Target } from "lucide-react";
+import { CalendarDays, Flame, MapPin, Smile, Target, UserRound } from "lucide-react";
 import { formatMonthYear } from "../../../lib/dateFormat";
 import './Apropos.scss';
 
@@ -29,57 +29,57 @@ export default function AproposProfile({
     isOwnProfile = true,
     territory,
 }: AproposProfileProps) {
-    const hasContent = Boolean(headline || lookingFor || openTo);
+    const lines = [
+        { key: "headline", icon: Flame, label: "Présentation", text: headline },
+        { key: "lookingFor", icon: Target, label: isOwnProfile ? "Je recherche" : "Recherche", text: lookingFor },
+        { key: "openTo", icon: Smile, label: "Ouvert à", text: openTo },
+    ].filter((line) => line.text);
 
     return (
-        <div className="container-aproposProfile">
-            <div className="container-aproposProfile__col">
-                {headline && (
-                    <p className="container-aproposProfile__line">
-                        <Flame size={16} strokeWidth={2.2} />
-                        {headline}
-                    </p>
-                )}
-                {lookingFor && (
-                    <p className="container-aproposProfile__line">
-                        <Target size={16} strokeWidth={2.2} />
-                        {lookingFor}
-                    </p>
-                )}
-                {openTo && (
-                    <p className="container-aproposProfile__line">
-                        <Smile size={16} strokeWidth={2.2} />
-                        {openTo}
-                    </p>
-                )}
-                {!hasContent && (
-                    <p className="container-aproposProfile__empty">
-                        {isOwnProfile
-                            ? "Ajoute quelques infos depuis « Modifier le profil »."
-                            : "Aucune information renseignée."}
-                    </p>
-                )}
-            </div>
+        <section className="container-aproposProfile" aria-labelledby="apropos-titre">
+            <h2 id="apropos-titre" className="container-aproposProfile__title">
+                <UserRound size={18} strokeWidth={2.2} />
+                À propos
+            </h2>
+
+            {lines.length > 0 ? (
+                <ul className="container-aproposProfile__lines">
+                    {lines.map(({ key, icon: Icon, label, text }) => (
+                        <li key={key} className="container-aproposProfile__line">
+                            <span className="container-aproposProfile__icon">
+                                <Icon size={17} strokeWidth={2.2} />
+                            </span>
+                            <span className="container-aproposProfile__body">
+                                <span className="container-aproposProfile__label">{label}</span>
+                                <span className="container-aproposProfile__text">{text}</span>
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p className="container-aproposProfile__empty">
+                    {isOwnProfile
+                        ? "Présente-toi en quelques mots : ce que tu pratiques, ce que tu recherches… Tout se remplit depuis « Modifier le profil »."
+                        : "Aucune information renseignée pour l'instant."}
+                </p>
+            )}
 
             {(createdAt || territory) && (
-                <>
-                    <div className="container-aproposProfile__divider" />
-                    <div className="container-aproposProfile__col container-aproposProfile__col--meta">
-                        {createdAt && (
-                            <p className="container-aproposProfile__line">
-                                <CalendarDays size={16} strokeWidth={2.2} />
-                                Membre depuis {formatMonthYear(new Date(createdAt))}
-                            </p>
-                        )}
-                        {territory && (
-                            <p className="container-aproposProfile__line">
-                                <MapPin size={16} strokeWidth={2.2} />
-                                {territory.brandName}
-                            </p>
-                        )}
-                    </div>
-                </>
+                <div className="container-aproposProfile__meta">
+                    {createdAt && (
+                        <span className="container-aproposProfile__chip">
+                            <CalendarDays size={15} strokeWidth={2.2} />
+                            Membre depuis {formatMonthYear(new Date(createdAt)).toLowerCase()}
+                        </span>
+                    )}
+                    {territory && (
+                        <span className="container-aproposProfile__chip">
+                            <MapPin size={15} strokeWidth={2.2} />
+                            {territory.brandName}
+                        </span>
+                    )}
+                </div>
             )}
-        </div>
+        </section>
     );
 }
