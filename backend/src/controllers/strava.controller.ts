@@ -71,6 +71,16 @@ export class StravaController {
     }
   }
 
+  /** GET /api/strava/activities/:id/validation */
+  static async meetingValidation(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const result = await StravaService.getMeetingValidation(req.userId!, req.params.id as string);
+      res.status(200).json({ success: true, ...result });
+    } catch (error) {
+      sendError(res, error, "validation");
+    }
+  }
+
   /** POST /api/strava/activities/:id/validate : « Valider notre rencontre ». */
   static async validateMeeting(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {

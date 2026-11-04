@@ -81,7 +81,7 @@ async function stravaFetch<T>(url: string, init: RequestInit, failureCode: strin
     throw new StravaError("STRAVA_UNAVAILABLE", 502, "Strava est injoignable pour le moment. Réessaie plus tard.");
   }
   if (response.status === 401) {
-    throw new StravaError("STRAVA_UNAUTHORIZED", 401, "L'accès à ton compte Strava a expiré. Reconnecte Strava.");
+    throw new StravaError("STRAVA_UNAUTHORIZED", 409,"L'accès à ton compte Strava a expiré. Reconnecte Strava.");
   }
   if (response.status === 429) {
     throw new StravaError("STRAVA_RATE_LIMITED", 429, "Trop de demandes vers Strava. Réessaie dans quelques minutes.");
@@ -225,6 +225,17 @@ export const StravaService = {
       .where(eq(stravaAccounts.userId, userId))
       .limit(1);
     return { linked: Boolean(account), linkedAt: account?.createdAt ?? null };
+  },
+
+  async getMeetingValidation(userId: string, activityId: string) {
+    const [row] = await db
+      .select({ stravaActivityId: stravaMeetingValidations.stravaActivityId })
+      .from(stravaMeetingValidations)
+      .where(and(eq(stravaMeetingValidations.activityId, activityId), eq(stravaMeetingValidations.userId, userId)))
+      .limit(1);
+    return row
+      ? { validated: true, stravaUrl: `https://www.strava.com/activities/${row.stravaActivityId}` }
+      : { validated: false, stravaUrl: null };
   },
 
   /** Révoque l'accès chez Strava (au mieux) puis oublie les jetons. */
