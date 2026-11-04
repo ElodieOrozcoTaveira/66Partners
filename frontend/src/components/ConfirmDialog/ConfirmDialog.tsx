@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { TriangleAlert, X } from "lucide-react";
 import "./ConfirmDialog.scss";
@@ -7,9 +7,13 @@ interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
   description: string;
-  /** Mot exact que l'utilisateur doit saisir pour activer le bouton de confirmation. */
-  confirmWord?: string;
+  /** Mot exact à saisir pour activer la confirmation ; null : simple confirmation. */
+  confirmWord?: string | null;
   confirmLabel?: string;
+  /** Texte du bouton pendant l'action (par défaut « Suppression... »). */
+  submittingLabel?: string;
+  /** Icône en tête de la modale (par défaut, un triangle d'alerte). */
+  icon?: ReactNode;
   isSubmitting?: boolean;
   errorMessage?: string | null;
   onConfirm: () => void;
@@ -27,6 +31,8 @@ export default function ConfirmDialog({
   description,
   confirmWord = "SUPPRIMER",
   confirmLabel = "Supprimer définitivement",
+  submittingLabel = "Suppression...",
+  icon,
   isSubmitting = false,
   errorMessage = null,
   onConfirm,
@@ -53,7 +59,7 @@ export default function ConfirmDialog({
 
   if (!isOpen) return null;
 
-  const canConfirm = typedWord === confirmWord && !isSubmitting;
+  const canConfirm = (confirmWord === null || typedWord === confirmWord) && !isSubmitting;
 
   return createPortal(
     <div className="confirm-dialog-overlay" onClick={onCancel}>
@@ -73,26 +79,30 @@ export default function ConfirmDialog({
         </button>
 
         <span className="confirm-dialog__icon">
-          <TriangleAlert size={22} strokeWidth={2.2} />
+          {icon ?? <TriangleAlert size={22} strokeWidth={2.2} />}
         </span>
 
         <h3 className="confirm-dialog__title">{title}</h3>
         <p className="confirm-dialog__description">{description}</p>
 
-        <label className="confirm-dialog__label" htmlFor="confirm-dialog-input">
-          Pour confirmer, saisis <strong>{confirmWord}</strong> ci-dessous :
-        </label>
-        <input
-          id="confirm-dialog-input"
-          type="text"
-          className="confirm-dialog__input"
-          value={typedWord}
-          onChange={(event) => setTypedWord(event.target.value)}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-        />
+        {confirmWord !== null && (
+          <>
+            <label className="confirm-dialog__label" htmlFor="confirm-dialog-input">
+              Pour confirmer, saisis <strong>{confirmWord}</strong> ci-dessous :
+            </label>
+            <input
+              id="confirm-dialog-input"
+              type="text"
+              className="confirm-dialog__input"
+              value={typedWord}
+              onChange={(event) => setTypedWord(event.target.value)}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+            />
+          </>
+        )}
 
         {errorMessage && <p className="confirm-dialog__error">{errorMessage}</p>}
 
@@ -111,7 +121,7 @@ export default function ConfirmDialog({
             onClick={onConfirm}
             disabled={!canConfirm}
           >
-            {isSubmitting ? "Suppression..." : confirmLabel}
+            {isSubmitting ? submittingLabel : confirmLabel}
           </button>
         </div>
       </div>

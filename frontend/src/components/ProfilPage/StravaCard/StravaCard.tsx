@@ -10,6 +10,7 @@ import {
   type StravaStatus,
 } from "../../../api/strava";
 import { formatMonthYear } from "../../../lib/dateFormat";
+import ConfirmDialog from "../../ConfirmDialog/ConfirmDialog";
 import "./StravaCard.scss";
 
 type Notice = { tone: "success" | "error"; text: string };
@@ -20,6 +21,8 @@ export default function StravaCard() {
   const [status, setStatus] = useState<StravaStatus | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [disconnectError, setDisconnectError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStravaStatus()
@@ -57,24 +60,20 @@ export default function StravaCard() {
   }
 
   async function disconnect() {
-    if (
-      !window.confirm(
-        "Déconnecter Strava de ton profil ? 66Partners n'aura plus accès à tes activités. Tu pourras le reconnecter à tout moment.",
-      )
-    )
-      return;
     setBusy(true);
-    setNotice(null);
+    setDisconnectError(null);
     try {
       await disconnectStrava();
       setStatus({ linked: false, linkedAt: null, athleteName: null, athleteAvatarUrl: null });
+      setConfirmOpen(false);
       setNotice({ tone: "success", text: "Strava est déconnecté de ton profil." });
     } catch (error) {
-      setNotice({ tone: "error", text: stravaErrorMessage(error, "Impossible de délier Strava.") });
+      setDisconnectError(stravaErrorMessage(error, "Impossible de déconnecter Strava. Réessaie."));
     } finally {
       setBusy(false);
     }
   }
+
 
   return (
     <section className="strava-card" aria-labelledby="strava-card-titre">
@@ -121,7 +120,7 @@ export default function StravaCard() {
               <small className="strava-card__notyou">Ce n'est pas toi ? Déconnecte Strava puis relie ton propre compte.</small>
             </span>
           </span>
-          <button type="button" className="strava-card__unlink" onClick={() => void disconnect()} disabled={busy}>
+          <button type="button" className="strava-card__unlink" onClick={() => setConfirmOpen(true)} disabled={busy}>
             <LogOut size={16} strokeWidth={2.4} />
             {busy ? "Déconnexion..." : "Déconnecter Strava"}
           </button>
@@ -138,6 +137,25 @@ export default function StravaCard() {
           </p>
         </>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Déconnecter Strava ?"
+        description={`${
+          status?.athleteName ? `Le compte Strava de ${status.athleteName} ne sera plus relié à ton profil. ` : ""
+        }66Partners n'aura plus accès à tes activités Strava. Tu pourras le reconnecter à tout moment.`}
+        confirmWord={null}
+        confirmLabel="Déconnecter Strava"
+        submittingLabel="Déconnexion..."
+        icon={<LogOut size={22} strokeWidth={2.2} />}
+        isSubmitting={busy}
+        errorMessage={disconnectError}
+        onConfirm={() => void disconnect()}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setDisconnectError(null);
+        }}
+      />
     </section>
   );
 }
