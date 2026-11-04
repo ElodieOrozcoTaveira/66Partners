@@ -135,14 +135,18 @@ $strava: #FC5200;
   }
 
   &__unlink {
-    padding: 0.5rem 0.95rem;
-    border: 1px solid variables.$bordure;
+    padding: 0.65rem 1.1rem;
+    border: 1.5px solid color-mix(in srgb, #{$strava} 55%, white);
     background: #ffffff;
-    color: variables.$texte2;
-    font-size: 0.82rem;
+    color: #C2410C;
+    font-size: 0.88rem;
 
     &:hover:not(:disabled) {
-      color: variables.$encre;
+      background: color-mix(in srgb, #{$strava} 8%, white);
+    }
+
+    @media (max-width: variables.$mobile) {
+      width: 100%;
     }
   }
 

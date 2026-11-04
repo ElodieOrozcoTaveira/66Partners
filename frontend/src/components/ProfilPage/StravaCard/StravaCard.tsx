@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Activity, CheckCircle2, Link2, Unlink } from "lucide-react";
+import { Activity, CheckCircle2, Link2, LogOut } from "lucide-react";
 import {
   disconnectStrava,
   fetchStravaStatus,
@@ -57,12 +57,18 @@ export default function StravaCard() {
   }
 
   async function disconnect() {
-    if (!window.confirm("Délier ton compte Strava ? Tu pourras le relier à nouveau à tout moment.")) return;
+    if (
+      !window.confirm(
+        "Déconnecter Strava de ton profil ? 66Partners n'aura plus accès à tes activités. Tu pourras le reconnecter à tout moment.",
+      )
+    )
+      return;
     setBusy(true);
     setNotice(null);
     try {
       await disconnectStrava();
       setStatus({ linked: false, linkedAt: null, athleteName: null, athleteAvatarUrl: null });
+      setNotice({ tone: "success", text: "Strava est déconnecté de ton profil." });
     } catch (error) {
       setNotice({ tone: "error", text: stravaErrorMessage(error, "Impossible de délier Strava.") });
     } finally {
@@ -112,12 +118,12 @@ export default function StravaCard() {
                 "Relié"
               )}
               {status.linkedAt ? ` depuis ${formatMonthYear(new Date(status.linkedAt)).toLowerCase()}` : ""}
-              <small className="strava-card__notyou">Ce n'est pas toi ? Délie puis relie ton propre compte.</small>
+              <small className="strava-card__notyou">Ce n'est pas toi ? Déconnecte Strava puis relie ton propre compte.</small>
             </span>
           </span>
           <button type="button" className="strava-card__unlink" onClick={() => void disconnect()} disabled={busy}>
-            <Unlink size={15} strokeWidth={2.2} />
-            Délier
+            <LogOut size={16} strokeWidth={2.4} />
+            {busy ? "Déconnexion..." : "Déconnecter Strava"}
           </button>
         </div>
       ) : (
