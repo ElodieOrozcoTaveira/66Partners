@@ -23,6 +23,11 @@ ENV VITE_API_URL=$VITE_API_URL
 ARG VITE_GOOGLE_CLIENT_ID=
 ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
+# Intégration Strava (profil, « Valider notre rencontre ») : désactivée sauf
+# si le build reçoit explicitement "true".
+ARG VITE_STRAVA_ENABLED=
+ENV VITE_STRAVA_ENABLED=$VITE_STRAVA_ENABLED
+
 
 # Codes de territoires de test proposés dans TerritorySwitcher même s'ils ne
 # sont pas encore isActive=true (cf. TerritoryContext.tsx) — vide par défaut

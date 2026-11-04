@@ -23,6 +23,10 @@ services:
       - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
       - VAPID_SUBJECT=${VAPID_SUBJECT}
+      - STRAVA_CLIENT_ID=${STRAVA_CLIENT_ID}
+      - STRAVA_CLIENT_SECRET=${STRAVA_CLIENT_SECRET}
+      - STRAVA_REDIRECT_URI=${STRAVA_REDIRECT_URI}
+      - STRAVA_TOKEN_ENCRYPTION_KEY=${STRAVA_TOKEN_ENCRYPTION_KEY}
       # Jamais STAGING_TEST_TERRITORIES ici : ce mécanisme (territoire pas
       # encore isActive mais inscriptible/switchable quand même) est
       # réservé au staging, cf. docker-compose.staging.yml — son absence
@@ -43,6 +47,7 @@ services:
       args:
         VITE_API_URL: https://api.66partners.fr
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        VITE_STRAVA_ENABLED: "true"
     image: 66partners-frontend
     restart: unless-stopped
     ports:
