@@ -7,6 +7,9 @@ export const STRAVA_VALIDATED_EVENT = "strava:meeting-validated";
 export interface StravaStatus {
   linked: boolean;
   linkedAt: string | null;
+  /** Nom du compte Strava relié (pour vérifier que c'est bien le sien). */
+  athleteName: string | null;
+  athleteAvatarUrl: string | null;
 }
 
 export interface MeetingValidation {
@@ -16,7 +19,7 @@ export interface MeetingValidation {
 
 export async function fetchStravaStatus(): Promise<StravaStatus> {
   const { data } = await api.get<StravaStatus>("/api/strava/status");
-  return { linked: data.linked, linkedAt: data.linkedAt };
+  return { linked: data.linked, linkedAt: data.linkedAt, athleteName: data.athleteName ?? null, athleteAvatarUrl: data.athleteAvatarUrl ?? null };
 }
 
 /** Redirige le navigateur vers la page d'autorisation Strava. */
@@ -27,7 +30,11 @@ export async function fetchMemberStravaLinked(userId: string): Promise<boolean> 
 
 /** Redirige le navigateur vers la page d'autorisation Strava. */
 export async function startStravaConnect(): Promise<void> {
-  const { data } = await api.get<{ url: string }>("/api/strava/connect");
+  // Sur téléphone, Strava ouvre son app : c'est le compte de la personne qui tient le téléphone.
+  const mobile = /android|iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  const { data } = await api.get<{ url: string }>("/api/strava/connect", {
+    params: mobile ? { mobile: 1 } : undefined,
+  });
   window.location.assign(data.url);
 }
 

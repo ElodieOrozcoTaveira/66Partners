@@ -43,7 +43,8 @@ export class StravaController {
   /** GET /api/strava/connect : renvoie l'URL d'autorisation Strava. */
   static connect(req: AuthenticatedRequest, res: Response): void {
     try {
-      res.status(200).json({ success: true, url: StravaService.getAuthorizeUrl(req.userId!) });
+      const mobile = req.query.mobile === "1";
+      res.status(200).json({ success: true, url: StravaService.getAuthorizeUrl(req.userId!, { mobile }) });
     } catch (error) {
       sendError(res, error, "connect");
     }
