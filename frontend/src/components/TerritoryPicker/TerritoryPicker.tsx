@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, ChevronDown, Search } from "lucide-react";
 import { useTerritory } from "../../contexts/TerritoryContext";
-import { loadTerritoryTheme } from "../../lib/territoryAssets";
+import TerritoryBadge, { territoryStyle, useTerritoryThemes } from "../TerritoryBadge/TerritoryBadge";
+import TerritoryWheel, { byDepartment } from "../TerritoryWheel/TerritoryWheel";
+import { PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import "./TerritoryPicker.scss";
 
 /**
@@ -23,81 +25,72 @@ interface TerritoryPickerProps {
   id: string;
 }
 
-// Repli identique à celui de variables.$rouge (couleur 66 par défaut) :
-// un territoire sans theme.json (ex. le 66, assetsPath=null) n'a pas de
-// couleur propre à afficher, donc on retombe sur la même teinte que le
-// dégradé de marque par défaut.
-const FALLBACK_SWATCH = "#E6392E";
+/** Au-delà, un champ de recherche apparaît en tête de liste. */
+const SEARCH_THRESHOLD = 6;
+
+function normalize(text: string): string {
+  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
 
 /**
- * Un seul onglet affichant le territoire actuellement choisi, qui ouvre une
- * liste déroulante au clic (jamais plusieurs chips affichées côte à côte en
- * permanence) — même logique de choix que TerritorySwitcher, mais sans son
- * portail sur <body> : ce composant n'est utilisé que dans des modales
- * (inscription), jamais dans un contexte où un ancêtre transformé casserait
- * un position:fixed, donc une liste positionnée simplement en absolute dans
- * le flux de la modale (qui scrolle déjà elle-même, overflow-y: auto) suffit.
+ * Bouton affichant le territoire choisi, qui déplie la liste dans le flux de
+ * la modale (une liste en surimpression était coupée par le bas de la
+ * modale qui défile).
  */
 export default function TerritoryPicker({ value, onChange, id }: TerritoryPickerProps) {
   const { publicTerritories, testTerritories } = useTerritory();
-  const [swatches, setSwatches] = useState<Record<string, string>>({});
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const isPhone = useMediaQuery(PHONE_QUERY);
 
-  // Territoires de test staging (cf. TerritoryContext) ajoutés à la liste
-  // proposée à l'inscription — jamais dupliqués si déjà publics, jamais
-  // prioritaires. Vide en dev/prod (VITE_STAGING_TEST_TERRITORIES absente),
-  // donc sans aucun effet hors staging.
-  const publicCodes = new Set(publicTerritories.map((territory) => territory.code));
-  const visibleTerritories = [
-    ...publicTerritories,
-    ...testTerritories.filter((territory) => !publicCodes.has(territory.code)),
-  ];
-  const territoryCodes = visibleTerritories.map((territory) => territory.code).join(",");
+  // Territoires de test staging (cf. TerritoryContext) ajoutés en dernier,
+  // jamais dupliqués ; vide hors staging.
+  const visibleTerritories = useMemo(() => {
+    const publicCodes = new Set(publicTerritories.map((territory) => territory.code));
+    return [...publicTerritories, ...testTerritories.filter((territory) => !publicCodes.has(territory.code))].sort(
+      byDepartment,
+    );
+  }, [publicTerritories, testTerritories]);
+  const themes = useTerritoryThemes(visibleTerritories);
 
-  // Couleur de chaque territoire (fetch unique par territoire, mis en cache
-  // par le navigateur) : purement décoratif (petit point de couleur sur
-  // l'onglet et chaque option de la liste), n'affecte jamais le thème
-  // global de l'app.
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all(
-      visibleTerritories.map(async (territory) => {
-        const theme = await loadTerritoryTheme(territory.assetsPath);
-        return [territory.code, theme.primary ?? FALLBACK_SWATCH] as const;
-      }),
-    ).then((entries) => {
-      if (cancelled) return;
-      setSwatches(Object.fromEntries(entries));
-    });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [territoryCodes]);
+  const filtered = useMemo(() => {
+    const needle = normalize(query.trim());
+    if (!needle) return visibleTerritories;
+    return visibleTerritories.filter((territory) =>
+      [territory.code, territory.name, territory.brandName].some((text) => normalize(text).includes(needle)),
+    );
+  }, [query, visibleTerritories]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setQuery("");
+      return;
+    }
+    if (!isPhone && visibleTerritories.length > SEARCH_THRESHOLD) searchRef.current?.focus({ preventScroll: true });
 
     function handlePointerDown(event: MouseEvent) {
       if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
     }
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        setOpen(false);
+      }
     }
 
     document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown, true);
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown, true);
     };
-  }, [open]);
+  }, [open, visibleTerritories.length, isPhone]);
 
   if (visibleTerritories.length < 2) return null;
 
   const selected = visibleTerritories.find((territory) => territory.code === value) ?? visibleTerritories[0]!;
-  const selectedSwatch = swatches[selected.code] ?? FALLBACK_SWATCH;
 
   return (
     <div className="territory-picker" ref={containerRef}>
@@ -108,48 +101,92 @@ export default function TerritoryPicker({ value, onChange, id }: TerritoryPicker
       <button
         type="button"
         id={id}
-        className="territory-picker__control"
+        className={`territory-picker__control${open ? " territory-picker__control--open" : ""}`}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-labelledby={`${id}-label`}
-        style={{ "--territory-swatch": selectedSwatch } as React.CSSProperties}
+        aria-labelledby={`${id}-label ${id}`}
+        style={territoryStyle(themes[selected.code])}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <span className="territory-picker__dot" aria-hidden="true" />
-        <span className="territory-picker__controlText">{selected.brandName}</span>
-        <ChevronDown
-          size={15}
-          strokeWidth={2.5}
-          className={`territory-picker__chevron${open ? " territory-picker__chevron--open" : ""}`}
-          aria-hidden="true"
-        />
+        <TerritoryBadge code={selected.code} theme={themes[selected.code]} />
+        <span className="territory-picker__texts">
+          <span className="territory-picker__brand">{selected.brandName}</span>
+          <span className="territory-picker__name">{selected.name}</span>
+        </span>
+        <span className="territory-picker__chevron" aria-hidden="true">
+          <ChevronDown size={16} strokeWidth={2.6} />
+        </span>
       </button>
 
-      {open && (
-        <div className="territory-picker__list" role="listbox" aria-labelledby={`${id}-label`}>
-          {visibleTerritories.map((territory) => {
-            const isActive = territory.code === value;
-            return (
-              <button
-                key={territory.id}
-                type="button"
-                role="option"
-                aria-selected={isActive}
-                className={`territory-picker__option${isActive ? " territory-picker__option--active" : ""}`}
-                style={{ "--territory-swatch": swatches[territory.code] ?? FALLBACK_SWATCH } as React.CSSProperties}
-                onClick={() => {
-                  onChange(territory.code);
-                  setOpen(false);
-                }}
-              >
-                <span className="territory-picker__dot" aria-hidden="true" />
-                <span>{territory.brandName}</span>
-                {isActive && (
-                  <Check size={14} strokeWidth={2.5} className="territory-picker__check" aria-hidden="true" />
-                )}
-              </button>
-            );
-          })}
+      {open && isPhone && (
+        <div className="territory-picker__panel">
+          <TerritoryWheel
+            territories={visibleTerritories}
+            themes={themes}
+            value={selected.code}
+            onChange={onChange}
+            label="Territoires disponibles"
+          />
+          <button
+            type="button"
+            className="territory-picker__confirm"
+            style={territoryStyle(themes[selected.code])}
+            onClick={() => setOpen(false)}
+          >
+            Choisir {selected.brandName}
+          </button>
+        </div>
+      )}
+
+      {open && !isPhone && (
+        <div className="territory-picker__panel">
+          {visibleTerritories.length > SEARCH_THRESHOLD && (
+            <label className="territory-picker__search">
+              <Search size={15} strokeWidth={2.4} aria-hidden="true" />
+              <input
+                ref={searchRef}
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Département ou numéro…"
+                aria-label="Rechercher un territoire"
+                autoComplete="off"
+              />
+            </label>
+          )}
+
+          <div className="territory-picker__list" role="listbox" aria-labelledby={`${id}-label`}>
+            {filtered.length === 0 ? (
+              <p className="territory-picker__empty">Aucun territoire ne correspond.</p>
+            ) : (
+              filtered.map((territory) => {
+                const isActive = territory.code === value;
+                return (
+                  <button
+                    key={territory.id}
+                    type="button"
+                    role="option"
+                    aria-selected={isActive}
+                    className={`territory-picker__option${isActive ? " territory-picker__option--active" : ""}`}
+                    style={territoryStyle(themes[territory.code])}
+                    onClick={() => {
+                      onChange(territory.code);
+                      setOpen(false);
+                    }}
+                  >
+                    <TerritoryBadge code={territory.code} theme={themes[territory.code]} />
+                    <span className="territory-picker__texts">
+                      <span className="territory-picker__brand">{territory.brandName}</span>
+                      <span className="territory-picker__name">{territory.name}</span>
+                    </span>
+                    <span className="territory-picker__check" aria-hidden="true">
+                      {isActive && <Check size={13} strokeWidth={3} />}
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
     </div>
