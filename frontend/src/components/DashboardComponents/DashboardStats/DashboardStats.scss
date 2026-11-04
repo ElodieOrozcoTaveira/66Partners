@@ -1,83 +1,126 @@
 @use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
 
-.container-dashboardstats {
+// « Mon activité » du tableau de bord : 4 cartes colorées (2 × 2 sur
+// téléphone, 4 de front sur ordinateur).
+.dash-stats {
   display: grid;
-  // minmax(0, 1fr) : un enfant de grid a un min-width auto par défaut, donc
-  // un libellé comme « Activités organisées » pousse sinon la piste au-delà
-  // de sa part de 1fr et déborde silencieusement de la carte sur mobile.
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
-}
 
-.container-dashboardstats__card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.25rem;
-  min-width: 0;
-  padding: 0.9rem 0.4rem;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(17, 19, 24, 0.04), 0 8px 24px rgba(17, 19, 24, 0.06);
-  border: 1px solid #ECE9E3;
-  box-sizing: border-box;
-}
-
-.container-dashboardstats__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-}
-
-.container-dashboardstats__value {
-  margin: 0.15rem 0 0;
-  font-family: "Manrope", sans-serif;
-  font-size: 1.2rem;
-  font-weight: 800;
-  line-height: 1;
-  color: variables.$nuit;
-}
-
-.container-dashboardstats__card h4 {
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  font-size: 0.64rem;
-  font-weight: 700;
-  line-height: 1.25;
-  color: variables.$nuit;
-}
-
-.container-dashboardstats__sub {
-  font-family: "Inter", sans-serif;
-  font-size: 0.58rem;
-  font-weight: 500;
-  color: #94a3b8;
-}
-
-@media (min-width: variables.$tablet) {
-  .container-dashboardstats__card {
-    padding: 0.85rem 0.5rem;
+  @media (min-width: variables.$laptop) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
   }
 
-  .container-dashboardstats__icon {
+  &__card {
+    --tone: var(--brand-primary, #C4121A);
+    --tone-soft: color-mix(in srgb, var(--tone) 12%, white);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    min-width: 0;
+    padding: 1rem 1rem 1.1rem;
+    border-radius: 22px;
+    overflow: hidden;
+    background: linear-gradient(160deg, var(--tone-soft) 0%, #ffffff 70%);
+    border: 1px solid color-mix(in srgb, var(--tone) 18%, white);
+    box-shadow: variables.$ombre-carte;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: variables.$ombre-flottante;
+    }
+
+    &--accent {
+      --tone: color-mix(in srgb, var(--brand-accent, #FFCC00) 75%, #7a5200);
+    }
+
+    &--violet {
+      --tone: #6d4fd8;
+    }
+
+    &--green {
+      --tone: #2e8b57;
+    }
+  }
+
+  // Grande icône pâle en fond de carte.
+  &__watermark {
+    position: absolute;
+    right: -14px;
+    bottom: -18px;
+    color: var(--tone);
+    opacity: 0.08;
+    pointer-events: none;
+
+    svg {
+      width: 96px;
+      height: 96px;
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 40px;
     height: 40px;
+    margin-bottom: 0.5rem;
+    border-radius: 13px;
+    background: var(--tone);
+    color: #ffffff;
+    box-shadow: 0 6px 14px color-mix(in srgb, var(--tone) 35%, transparent);
   }
 
-  .container-dashboardstats__value {
-    font-size: 1.4rem;
+  &__value {
+    font-family: "Manrope", sans-serif;
+    font-size: clamp(1.9rem, 4vw, 2.3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: variables.$encre;
   }
 
-  .container-dashboardstats__card h4 {
-    font-size: 0.72rem;
+  &__label {
+    margin-top: 0.2rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: variables.$encre;
   }
 
-  .container-dashboardstats__sub {
-    font-size: 0.65rem;
+  &__sub {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: variables.$texte3;
+  }
+
+  // Les 7 derniers jours (jours actifs en couleur).
+  &__week {
+    display: flex;
+    gap: 3px;
+    margin-top: 0.55rem;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--tone) 10%, white);
+      color: color-mix(in srgb, var(--tone) 55%, white);
+      font-size: 0.58rem;
+      font-weight: 800;
+
+      &.is-active {
+        background: var(--tone);
+        color: #ffffff;
+      }
+    }
   }
 }
