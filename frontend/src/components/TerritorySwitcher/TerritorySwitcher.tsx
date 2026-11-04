@@ -1,8 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown, MapPin } from "lucide-react";
+import { Check, ChevronDown, Plus } from "lucide-react";
 import { useTerritory } from "../../contexts/TerritoryContext";
 import { useAuth } from "../../contexts/AuthContext";
+import TerritoryBadge, { territoryStyle, useTerritoryThemes } from "../TerritoryBadge/TerritoryBadge";
+import TerritoryWheel, { byDepartment } from "../TerritoryWheel/TerritoryWheel";
+import { PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import "./TerritorySwitcher.scss";
 
 interface TerritorySwitcherProps {
@@ -34,15 +37,22 @@ interface TerritorySwitcherProps {
  * garantit que le menu reste toujours visuellement ancré sous le même badge,
  * quel que soit le navigateur ou l'endroit où le composant est monté.
  */
+/** Hauteur disponible sous le badge, pour que le menu ne sorte jamais de l'écran. */
+function menuMaxHeight(top: number): number {
+  return Math.max(220, Math.min(460, window.innerHeight - top - 12));
+}
+
 export default function TerritorySwitcher({ prefix, className }: TerritorySwitcherProps) {
   const { publicTerritories, territories, testTerritories, activeTerritory, setActiveTerritory, joinTerritory } =
     useTerritory();
   const { token } = useAuth();
   const [open, setOpen] = useState(false);
+  const [pendingCode, setPendingCode] = useState<string | null>(null);
+  const isPhone = useMediaQuery(PHONE_QUERY);
   const [menuPosition, setMenuPosition] = useState<{
     top: number;
     left: number;
-    minWidth: number;
+    maxHeight: number;
     ready: boolean;
   } | null>(null);
   const controlRef = useRef<HTMLButtonElement>(null);
@@ -64,18 +74,26 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
   const extraTestTerritories = testTerritories.filter(
     (territory) => !memberCodes.has(territory.code) && !publicCodes.has(territory.code),
   );
-  const visibleTerritories = token
-    ? [
-        ...territories,
-        ...publicTerritories.filter((territory) => !memberCodes.has(territory.code)),
-        ...extraTestTerritories,
-      ]
-    : [...publicTerritories, ...extraTestTerritories];
+  const visibleTerritories = (
+    token
+      ? [
+          ...territories,
+          ...publicTerritories.filter((territory) => !memberCodes.has(territory.code)),
+          ...extraTestTerritories,
+        ]
+      : [...publicTerritories, ...extraTestTerritories]
+  ).sort(byDepartment);
   const canSwitch = visibleTerritories.length > 1;
+  const visibleThemes = useTerritoryThemes(
+    activeTerritory && !visibleTerritories.some((territory) => territory.code === activeTerritory.code)
+      ? [activeTerritory, ...visibleTerritories]
+      : visibleTerritories,
+  );
 
   useEffect(() => {
     if (!open) {
       setMenuPosition(null);
+      setPendingCode(null);
       return;
     }
 
@@ -86,10 +104,12 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
       // `ready: false` le temps de mesurer la largeur réelle du menu (cf.
       // useLayoutEffect ci-dessous) pour le recaler si besoin, sans flash
       // visible grâce au layout effect qui s'exécute avant le paint.
-      setMenuPosition({ top: rect.bottom + 6, left: rect.left, minWidth: rect.width, ready: false });
+      setMenuPosition({ top: rect.bottom + 8, left: rect.left, maxHeight: menuMaxHeight(rect.bottom + 8), ready: false });
     }
 
-    function closeMenu() {
+    function closeMenu(event: Event) {
+      // Défiler dans la liste elle-même ne ferme pas le menu.
+      if (menuRef.current?.contains(event.target as Node)) return;
       setOpen(false);
     }
 
@@ -133,7 +153,7 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
       left = rect.right - menuWidth;
     }
     left = Math.max(margin, left);
-    setMenuPosition({ top: rect.bottom + 6, left, minWidth: rect.width, ready: true });
+    setMenuPosition({ top: rect.bottom + 8, left, maxHeight: menuMaxHeight(rect.bottom + 8), ready: true });
   }, [open, menuPosition]);
 
   if (!activeTerritory) return null;
@@ -160,6 +180,8 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
     setActiveTerritory(code);
   }
 
+  const themes = visibleThemes;
+
   return (
     <div className={`territory-switcher${className ? ` ${className}` : ""}`}>
       {prefix && (
@@ -173,56 +195,97 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
           <button
             type="button"
             ref={controlRef}
-            className="territory-switcher__control"
+            className={`territory-switcher__control${open ? " territory-switcher__control--open" : ""}`}
             aria-haspopup="listbox"
             aria-expanded={open}
-            aria-label="Changer de territoire actif"
+            aria-label={`Territoire actif : ${activeTerritory.brandName}. Changer de territoire`}
+            style={territoryStyle(themes[activeTerritory.code])}
             onClick={() => setOpen((value) => !value)}
           >
-            <MapPin size={13} strokeWidth={2.2} className="territory-switcher__pin" aria-hidden="true" />
-            <span className="territory-switcher__code" aria-hidden="true">
-              {activeTerritory.code}
-            </span>
-            <ChevronDown
-              size={13}
-              strokeWidth={2.5}
-              className={`territory-switcher__chevron${open ? " territory-switcher__chevron--open" : ""}`}
-              aria-hidden="true"
-            />
+            <TerritoryBadge code={activeTerritory.code} theme={themes[activeTerritory.code]} size="sm" />
+            <span className="territory-switcher__brand">{activeTerritory.brandName}</span>
+            <ChevronDown size={14} strokeWidth={2.6} className="territory-switcher__chevron" aria-hidden="true" />
           </button>
           {open &&
             menuPosition &&
             createPortal(
               <div
                 ref={menuRef}
-                role="listbox"
-                aria-label="Territoires disponibles"
                 className="territory-switcher__menu"
                 style={{
                   top: menuPosition.top,
                   left: menuPosition.left,
-                  minWidth: menuPosition.minWidth,
+                  maxHeight: menuPosition.maxHeight,
                   visibility: menuPosition.ready ? "visible" : "hidden",
                 }}
               >
-                {visibleTerritories.map((territory) => {
-                  const isActive = territory.code === activeTerritory.code;
-                  return (
-                    <button
-                      key={territory.id}
-                      type="button"
-                      role="option"
-                      aria-selected={isActive}
-                      className={`territory-switcher__option${isActive ? " territory-switcher__option--active" : ""}`}
-                      onClick={() => handleSelect(territory.code)}
-                    >
-                      <span>{territory.brandName}</span>
-                      {isActive && (
-                        <Check size={14} strokeWidth={2.5} className="territory-switcher__check" aria-hidden="true" />
-                      )}
-                    </button>
-                  );
-                })}
+                <p className="territory-switcher__menuTitle">Changer de territoire</p>
+                {isPhone ? (
+                  (() => {
+                    const pending =
+                      visibleTerritories.find((territory) => territory.code === (pendingCode ?? activeTerritory.code)) ??
+                      activeTerritory;
+                    const isCurrent = pending.code === activeTerritory.code;
+                    const needsJoin = Boolean(token) && !memberCodes.has(pending.code);
+                    return (
+                      <div className="territory-switcher__wheel">
+                        <TerritoryWheel
+                          territories={visibleTerritories}
+                          themes={themes}
+                          value={pending.code}
+                          onChange={setPendingCode}
+                          label="Territoires disponibles"
+                        />
+                        <button
+                          type="button"
+                          className="territory-switcher__confirm"
+                          style={territoryStyle(themes[pending.code])}
+                          onClick={() => (isCurrent ? setOpen(false) : void handleSelect(pending.code))}
+                        >
+                          {isCurrent
+                            ? `Rester sur ${pending.brandName}`
+                            : needsJoin
+                              ? `Rejoindre ${pending.brandName}`
+                              : `Passer sur ${pending.brandName}`}
+                        </button>
+                      </div>
+                    );
+                  })()
+                ) : (
+                <div className="territory-switcher__list" role="listbox" aria-label="Territoires disponibles">
+                  {visibleTerritories.map((territory) => {
+                    const isActive = territory.code === activeTerritory.code;
+                    const isMember = !token || memberCodes.has(territory.code);
+                    return (
+                      <button
+                        key={territory.id}
+                        type="button"
+                        role="option"
+                        aria-selected={isActive}
+                        className={`territory-switcher__option${isActive ? " territory-switcher__option--active" : ""}`}
+                        style={territoryStyle(themes[territory.code])}
+                        onClick={() => handleSelect(territory.code)}
+                      >
+                        <TerritoryBadge code={territory.code} theme={themes[territory.code]} />
+                        <span className="territory-switcher__texts">
+                          <span className="territory-switcher__optionBrand">{territory.brandName}</span>
+                          <span className="territory-switcher__optionName">{territory.name}</span>
+                        </span>
+                        {isActive ? (
+                          <span className="territory-switcher__check" aria-hidden="true">
+                            <Check size={13} strokeWidth={3} />
+                          </span>
+                        ) : !isMember ? (
+                          <span className="territory-switcher__join">
+                            <Plus size={12} strokeWidth={2.8} aria-hidden="true" />
+                            Rejoindre
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+                )}
               </div>,
               document.body
             )}
@@ -231,10 +294,8 @@ export default function TerritorySwitcher({ prefix, className }: TerritorySwitch
         // Un seul territoire disponible : texte statique, jamais l'apparence
         // d'un choix possible (pas de chevron, pas de contrôle interactif).
         <span className="territory-switcher__control territory-switcher__control--static">
-          <MapPin size={13} strokeWidth={2.2} className="territory-switcher__pin" aria-hidden="true" />
-          <span className="territory-switcher__code territory-switcher__code--static">
-            {activeTerritory.code}
-          </span>
+          <TerritoryBadge code={activeTerritory.code} theme={themes[activeTerritory.code]} size="sm" />
+          <span className="territory-switcher__brand">{activeTerritory.brandName}</span>
         </span>
       )}
     </div>
