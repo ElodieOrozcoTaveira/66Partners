@@ -60,17 +60,20 @@
     flex-shrink: 0;
   }
 
+  // Liste dans le flux (et non en surimpression) : dans une modale qui
+  // défile, une liste « absolute » était coupée par le bas de la modale et
+  // seuls les premiers territoires (66, 34, 11) restaient visibles.
   &__list {
-    position: absolute;
-    top: calc(100% + 0.35rem);
-    left: 0;
-    right: 0;
-    z-index: 20;
+    position: static;
+    margin-top: 0.35rem;
+    max-height: 300px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
     padding: 0.35rem;
-    border-radius: 0.6rem;
+    border-radius: 14px;
     background: #ffffff;
     border: 1px solid rgba(31, 41, 55, 0.12);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
