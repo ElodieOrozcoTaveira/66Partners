@@ -106,6 +106,12 @@ describe("Connexion Strava", () => {
     expect(url.origin + url.pathname).toBe("https://www.strava.com/oauth/authorize");
     expect(url.searchParams.get("scope")).toContain("activity:write");
     expect(url.searchParams.get("state")).toBeTruthy();
+    expect(url.searchParams.get("approval_prompt")).toBe("force");
+
+    const mobile = await request(app)
+      .get("/api/strava/connect?mobile=1")
+      .set("Authorization", `Bearer ${user.token}`);
+    expect(new URL(mobile.body.url).pathname).toBe("/oauth/mobile/authorize");
   });
 
   it("renvoie 503 si Strava n'est pas configuré", async () => {
@@ -125,7 +131,7 @@ describe("Connexion Strava", () => {
         access_token: "acc-1",
         refresh_token: "ref-1",
         expires_at: 2_000_000_000,
-        athlete: { id: 42, firstname: "Léa", lastname: "Martin" },
+        athlete: { id: 42, firstname: "Léa", lastname: "Martin", profile_medium: "https://cdn.test/lea.jpg" },
       }),
     );
     const callback = (code: string) =>
@@ -155,6 +161,8 @@ describe("Connexion Strava", () => {
     const rows = await testDb.select().from(stravaAccounts).where(eq(stravaAccounts.userId, user.userId));
     expect(rows).toHaveLength(1);
     expect(rows[0]!.stravaAthleteId).toBe(42);
+    expect(rows[0]!.athleteName).toBe("Léa Martin");
+    expect(rows[0]!.athleteAvatarUrl).toBe("https://cdn.test/lea.jpg");
     expect(rows[0]!.accessTokenEncrypted).not.toContain("acc-1");
     expect(decryptSecret(rows[0]!.accessTokenEncrypted)).toBe("acc-1");
   });

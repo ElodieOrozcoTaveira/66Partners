@@ -411,6 +411,9 @@ export const stravaAccounts = pgTable("strava_accounts", {
   refreshTokenEncrypted: text("refresh_token_encrypted").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   scope: varchar("scope", { length: 255 }).notNull(),
+  // Nom affiché sur Strava, pour montrer au membre quel compte est relié.
+  athleteName: varchar("athlete_name", { length: 120 }),
+  athleteAvatarUrl: varchar("athlete_avatar_url", { length: 500 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

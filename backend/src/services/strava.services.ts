@@ -18,6 +18,8 @@ import { createStravaState, readStravaState } from "../utils/stravaState.js";
 const db = drizzle(process.env.DATABASE_URL!);
 
 const STRAVA_AUTHORIZE_URL = "https://www.strava.com/oauth/authorize";
+// Sur téléphone : ouvre l'app Strava (compte de la personne qui tient le téléphone).
+const STRAVA_MOBILE_AUTHORIZE_URL = "https://www.strava.com/oauth/mobile/authorize";
 const STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token";
 const STRAVA_DEAUTHORIZE_URL = "https://www.strava.com/oauth/deauthorize";
 const STRAVA_API = "https://www.strava.com/api/v3";
@@ -52,7 +54,7 @@ interface StravaTokenResponse {
   access_token: string;
   refresh_token: string;
   expires_at: number;
-  athlete?: { id: number; firstname?: string; lastname?: string };
+  athlete?: { id: number; firstname?: string; lastname?: string; profile?: string; profile_medium?: string };
 }
 
 interface StravaActivitySummary {
@@ -136,13 +138,14 @@ export function formatPartners(names: string[]): string {
 
 export const StravaService = {
   /** URL vers laquelle rediriger le membre pour autoriser 66Partners sur Strava. */
-  getAuthorizeUrl(userId: string): string {
+  getAuthorizeUrl(userId: string, options: { mobile?: boolean } = {}): string {
     const { clientId, redirectUri } = getConfig();
-    const url = new URL(STRAVA_AUTHORIZE_URL);
+    const url = new URL(options.mobile ? STRAVA_MOBILE_AUTHORIZE_URL : STRAVA_AUTHORIZE_URL);
     url.searchParams.set("client_id", clientId);
     url.searchParams.set("redirect_uri", redirectUri);
     url.searchParams.set("response_type", "code");
-    url.searchParams.set("approval_prompt", "auto");
+    // « force » : l'écran Strava montre toujours quel compte va être relié.
+    url.searchParams.set("approval_prompt", "force");
     url.searchParams.set("scope", STRAVA_SCOPE);
     url.searchParams.set("state", createStravaState(userId));
     return url.toString();
@@ -191,8 +194,15 @@ export const StravaService = {
       );
     }
 
+    const athleteName =
+      [tokens.athlete?.firstname, tokens.athlete?.lastname].filter(Boolean).join(" ").slice(0, 120) || null;
+    // Strava renvoie un chemin relatif (« avatar/athlete/large.png ») quand il n'y a pas de photo.
+    const avatar = tokens.athlete?.profile_medium ?? tokens.athlete?.profile ?? "";
+    const athleteAvatarUrl = avatar.startsWith("https://") ? avatar.slice(0, 500) : null;
     const values = {
       stravaAthleteId: athleteId,
+      athleteName,
+      athleteAvatarUrl,
       accessTokenEncrypted: encryptSecret(tokens.access_token),
       refreshTokenEncrypted: encryptSecret(tokens.refresh_token),
       expiresAt: new Date(tokens.expires_at * 1000),
@@ -210,10 +220,7 @@ export const StravaService = {
       .onConflictDoUpdate({ target: stravaAccounts.userId, set: values });
 
     const isNewLink = previous?.stravaAthleteId !== athleteId;
-    if (isNewLink) {
-      const athleteName = [tokens.athlete?.firstname, tokens.athlete?.lastname].filter(Boolean).join(" ") || null;
-      void notifyLinked(userId, athleteName);
-    }
+    if (isNewLink) void notifyLinked(userId, athleteName);
 
     return { userId, isNewLink };
   },
@@ -249,11 +256,20 @@ export const StravaService = {
 
   async getStatus(userId: string) {
     const [account] = await db
-      .select({ createdAt: stravaAccounts.createdAt })
+      .select({
+        createdAt: stravaAccounts.createdAt,
+        athleteName: stravaAccounts.athleteName,
+        athleteAvatarUrl: stravaAccounts.athleteAvatarUrl,
+      })
       .from(stravaAccounts)
       .where(eq(stravaAccounts.userId, userId))
       .limit(1);
-    return { linked: Boolean(account), linkedAt: account?.createdAt ?? null };
+    return {
+      linked: Boolean(account),
+      linkedAt: account?.createdAt ?? null,
+      athleteName: account?.athleteName ?? null,
+      athleteAvatarUrl: account?.athleteAvatarUrl ?? null,
+    };
   },
 
   async getMeetingValidation(userId: string, activityId: string) {

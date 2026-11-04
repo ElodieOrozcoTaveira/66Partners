@@ -62,7 +62,7 @@ export default function StravaCard() {
     setNotice(null);
     try {
       await disconnectStrava();
-      setStatus({ linked: false, linkedAt: null });
+      setStatus({ linked: false, linkedAt: null, athleteName: null, athleteAvatarUrl: null });
     } catch (error) {
       setNotice({ tone: "error", text: stravaErrorMessage(error, "Impossible de délier Strava.") });
     } finally {
@@ -95,9 +95,25 @@ export default function StravaCard() {
       {status === null ? null : status.linked ? (
         <div className="strava-card__row">
           <span className="strava-card__linked">
-            <CheckCircle2 size={16} strokeWidth={2.4} />
-            Relié
-            {status.linkedAt ? ` depuis ${formatMonthYear(new Date(status.linkedAt)).toLowerCase()}` : ""}
+            {status.athleteAvatarUrl ? (
+              <span className="strava-card__avatar">
+                <img src={status.athleteAvatarUrl} alt="" referrerPolicy="no-referrer" />
+                <CheckCircle2 size={14} strokeWidth={2.8} />
+              </span>
+            ) : (
+              <CheckCircle2 size={16} strokeWidth={2.4} />
+            )}
+            <span>
+              {status.athleteName ? (
+                <>
+                  Relié au compte Strava de <strong>{status.athleteName}</strong>
+                </>
+              ) : (
+                "Relié"
+              )}
+              {status.linkedAt ? ` depuis ${formatMonthYear(new Date(status.linkedAt)).toLowerCase()}` : ""}
+              <small className="strava-card__notyou">Ce n'est pas toi ? Délie puis relie ton propre compte.</small>
+            </span>
           </span>
           <button type="button" className="strava-card__unlink" onClick={() => void disconnect()} disabled={busy}>
             <Unlink size={15} strokeWidth={2.2} />
@@ -105,10 +121,16 @@ export default function StravaCard() {
           </button>
         </div>
       ) : (
-        <button type="button" className="strava-card__connect" onClick={() => void connect()} disabled={busy}>
-          <Link2 size={17} strokeWidth={2.4} />
-          {busy ? "Redirection..." : "Relier mon compte Strava"}
-        </button>
+        <>
+          <button type="button" className="strava-card__connect" onClick={() => void connect()} disabled={busy}>
+            <Link2 size={17} strokeWidth={2.4} />
+            {busy ? "Redirection..." : "Relier mon compte Strava"}
+          </button>
+          <p className="strava-card__hint">
+            Strava relie le compte connecté sur cet appareil. Sur ordinateur, si quelqu'un d'autre est connecté
+            sur strava.com, déconnecte-le d'abord. Sur téléphone, c'est le compte de ton app Strava.
+          </p>
+        </>
       )}
     </section>
   );
