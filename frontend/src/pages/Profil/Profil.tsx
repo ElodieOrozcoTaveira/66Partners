@@ -20,8 +20,6 @@ export default function Profil() {
         <TopProfile user={user} />
         <AproposProfile
           headline={user?.headline ?? null}
-          lookingFor={user?.lookingFor ?? null}
-          openTo={user?.openTo ?? null}
           createdAt={user?.createdAt ?? null}
         />
         <StatsProfil userId={user?.id ?? null} />
