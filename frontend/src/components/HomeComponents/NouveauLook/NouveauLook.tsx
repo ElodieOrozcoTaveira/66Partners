@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import {
   Bell,
   CheckCircle2,
   Compass,
   Download,
+  EllipsisVertical,
   Home,
   Map as MapIcon,
   MapPin,
@@ -12,11 +13,14 @@ import {
   Share,
   Smartphone,
   Sparkles,
+  SquarePlus,
   User,
   Users,
 } from "lucide-react";
 import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
 import { getSportPhoto } from "../../../lib/sportPhotos";
+import { resolveTerritoryAsset } from "../../../lib/territoryAssets";
+import { useTerritoryThemes } from "../../TerritoryBadge/TerritoryBadge";
 import {
   PWA_INSTALL_AVAILABLE,
   clearDeferredInstallPrompt,
@@ -27,19 +31,43 @@ import "./NouveauLook.scss";
 
 export const NOUVEAU_LOOK_ID = "nouveau-look";
 
-/** Téléphone affichant l'accueil de l'app, aux couleurs du territoire. */
-function PhoneMockup() {
-  const { asset, territoryName } = useBranding();
+interface PhoneTerritory {
+  id: string;
+  code: string;
+  name: string;
+  assetsPath: string | null;
+}
+
+interface PhoneMockupProps {
+  territory: PhoneTerritory;
+  firstName: string;
+  sport: string;
+  outing: string;
+  position: "left" | "center" | "right";
+  colors: Record<string, string> | undefined;
+}
+
+/** Téléphone affichant l'accueil de l'app, aux couleurs d'un territoire. */
+function PhoneMockup({ territory, firstName, sport, outing, position, colors }: PhoneMockupProps) {
+  const style = {
+    ...(colors?.primary && { "--brand-primary": colors.primary }),
+    ...(colors?.primaryDark && { "--brand-primary-dark": colors.primaryDark }),
+    ...(colors?.accent && { "--brand-accent": colors.accent }),
+    ...(colors?.accentDark && { "--brand-accent-dark": colors.accentDark }),
+  } as CSSProperties;
   return (
-    <div className="phone" aria-hidden="true">
+    <div className={`phone phone--${position}`} style={style} aria-hidden="true">
       <div className="phone__notch" />
       <div className="phone__screen">
-        <div className="phone__header" style={{ backgroundImage: `url(${asset("emblem")})` }}>
+        <div
+          className="phone__header"
+          style={{ backgroundImage: `url(${resolveTerritoryAsset(territory.assetsPath, "emblem")})` }}
+        >
           <div className="phone__tint" />
           <div className="phone__row">
             <span className="phone__avatar" />
             <div className="phone__hello">
-              <strong>Bonjour Léa</strong>
+              <strong>Bonjour {firstName}</strong>
               <span>Envie d'une nouvelle aventure ?</span>
             </div>
             <span className="phone__bell">
@@ -48,7 +76,7 @@ function PhoneMockup() {
           </div>
           <div className="phone__chips">
             <span>
-              <MapPin size={10} /> {territoryName || "Mon territoire"}
+              <MapPin size={10} /> {territory.name}
             </span>
             <span>
               <Users size={10} /> Sportifs autour de toi
@@ -56,20 +84,20 @@ function PhoneMockup() {
           </div>
         </div>
 
-        <div className="phone__hero" style={{ backgroundImage: `url(${getSportPhoto("Running")})` }}>
+        <div className="phone__hero" style={{ backgroundImage: `url(${getSportPhoto(sport)})` }}>
           <span className="phone__countdown">Demain</span>
           <div className="phone__hero-text">
             <small>TA PROCHAINE SORTIE</small>
-            <strong>Footing au bord de l'eau</strong>
+            <strong>{outing}</strong>
           </div>
         </div>
 
         <p className="phone__section">À venir autour de toi</p>
         <div className="phone__tiles">
-          {["Randonnée", "Cyclisme"].map((sport) => (
-            <div key={sport} className="phone__tile">
-              <span style={{ backgroundImage: `url(${getSportPhoto(sport)})` }} />
-              <strong>{sport}</strong>
+          {["Randonnée", "Cyclisme"].map((tile) => (
+            <div key={tile} className="phone__tile">
+              <span style={{ backgroundImage: `url(${getSportPhoto(tile)})` }} />
+              <strong>{tile}</strong>
               <em>2 places</em>
             </div>
           ))}
@@ -89,6 +117,42 @@ function PhoneMockup() {
   );
 }
 
+// Territoires des téléphones de côté : couleurs bien différentes et visuels légers.
+const SIDE_PREFERENCE = ["65", "09", "82", "32", "12", "66"];
+
+const PHONE_CONTENT = [
+  { firstName: "Tom", sport: "Randonnée", outing: "Rando au lever du soleil" },
+  { firstName: "Léa", sport: "Running", outing: "Footing au bord de l'eau" },
+  { firstName: "Inès", sport: "Cyclisme", outing: "Sortie vélo du dimanche" },
+];
+
+/** Trois téléphones en éventail : le territoire affiché au centre, deux autres de côté. */
+function PhoneFan() {
+  const { activeTerritory, publicTerritories } = useTerritory();
+  const others = SIDE_PREFERENCE.map((code) => publicTerritories.find((territory) => territory.code === code))
+    .filter((territory): territory is NonNullable<typeof territory> => Boolean(territory))
+    .filter((territory) => territory.code !== activeTerritory?.code);
+  const center = activeTerritory ?? publicTerritories[0];
+  const trio = center ? [others[0] ?? center, center, others[1] ?? center] : [];
+  const themes = useTerritoryThemes(trio);
+  if (trio.length === 0) return null;
+
+  const positions = ["left", "center", "right"] as const;
+  return (
+    <div className="phone-fan">
+      {trio.map((territory, index) => (
+        <PhoneMockup
+          key={`${positions[index]}-${territory.code}`}
+          territory={territory}
+          position={positions[index]!}
+          colors={themes[territory.code]}
+          {...PHONE_CONTENT[index]!}
+        />
+      ))}
+    </div>
+  );
+}
+
 function isStandalone(): boolean {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -100,11 +164,32 @@ function isIos(): boolean {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
-/** Installer l'app web : bouton natif si possible, sinon la marche à suivre. */
+type Platform = "ios" | "android";
+
+const INSTALL_STEPS: Record<Platform, { icon: typeof Share; text: ReactNode }[]> = {
+  ios: [
+    { icon: Compass, text: <>Ouvre le site dans <strong>Safari</strong>.</> },
+    { icon: Share, text: <>Touche le bouton <strong>Partager</strong>, en bas de l'écran.</> },
+    { icon: SquarePlus, text: <>Choisis <strong>« Sur l'écran d'accueil »</strong>.</> },
+    { icon: CheckCircle2, text: <>Touche <strong>« Ajouter »</strong> : l'app apparaît avec son logo.</> },
+  ],
+  android: [
+    { icon: Compass, text: <>Ouvre le site dans <strong>Chrome</strong>.</> },
+    { icon: EllipsisVertical, text: <>Touche le menu <strong>⋮</strong>, en haut à droite.</> },
+    {
+      icon: SquarePlus,
+      text: <>Choisis <strong>« Installer l'application »</strong> ou <strong>« Ajouter à l'écran d'accueil »</strong>.</>,
+    },
+    { icon: CheckCircle2, text: <>Confirme : l'app apparaît avec son logo.</> },
+  ],
+};
+
+/** Installer l'app web : bouton natif si possible, et le pas-à-pas iPhone / Android. */
 function InstallCta() {
   const { brandName } = useBranding();
   const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(getDeferredInstallPrompt);
   const [installed, setInstalled] = useState(isStandalone);
+  const [platform, setPlatform] = useState<Platform>(() => (isIos() ? "ios" : "android"));
 
   useEffect(() => {
     const handleAvailable = () => setPrompt(getDeferredInstallPrompt());
@@ -134,28 +219,45 @@ function InstallCta() {
     );
   }
 
-  if (prompt) {
-    return (
-      <button type="button" className="btn btn--primary nouveau-look__install" onClick={() => void install()}>
-        <Download size={18} /> Installer l'application
-      </button>
-    );
-  }
-
   return (
-    <p className="nouveau-look__how">
-      {isIos() ? (
-        <>
-          <Share size={16} /> Sur iPhone : touche <strong>Partager</strong>, puis{" "}
-          <strong>« Sur l'écran d'accueil »</strong>.
-        </>
-      ) : (
-        <>
-          <Smartphone size={16} /> Depuis le menu de ton navigateur, choisis{" "}
-          <strong>« Installer l'application »</strong> ou <strong>« Ajouter à l'écran d'accueil »</strong>.
-        </>
+    <>
+      {prompt && (
+        <button type="button" className="btn btn--primary nouveau-look__install" onClick={() => void install()}>
+          <Download size={18} /> Installer l'application
+        </button>
       )}
-    </p>
+
+      <div className="install-guide">
+        <div className="install-guide__head">
+          <span className="install-guide__title">Ajouter {brandName} à ton écran d'accueil</span>
+          <div className="install-guide__tabs" role="tablist" aria-label="Type de téléphone">
+            {(["ios", "android"] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={platform === value}
+                className={`install-guide__tab${platform === value ? " install-guide__tab--active" : ""}`}
+                onClick={() => setPlatform(value)}
+              >
+                {value === "ios" ? "iPhone" : "Android"}
+              </button>
+            ))}
+          </div>
+        </div>
+        <ol className="install-guide__steps">
+          {INSTALL_STEPS[platform].map(({ icon: Icon, text }, index) => (
+            <li key={index}>
+              <span className="install-guide__number">{index + 1}</span>
+              <span className="install-guide__icon">
+                <Icon size={16} strokeWidth={2.4} />
+              </span>
+              <span className="install-guide__text">{text}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </>
   );
 }
 
@@ -228,7 +330,7 @@ export default function NouveauLook() {
           <span className="nouveau-look__sticker" aria-hidden="true">
             <Sparkles size={16} /> Nouveau look
           </span>
-          <PhoneMockup />
+          <PhoneFan />
         </div>
       </div>
     </section>
