@@ -136,6 +136,12 @@
   }
 }
 
+// Le panneau défile quand son contenu dépasse l'écran : aucun bloc ne doit
+// être écrasé (la carte de bienvenue était rognée sur les petits écrans).
+.navbar-panel > * {
+  flex-shrink: 0;
+}
+
 .navbar-panel.show {
   opacity: 1;
   visibility: visible;

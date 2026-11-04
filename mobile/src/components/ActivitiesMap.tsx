@@ -37,7 +37,7 @@ const CARD_HEIGHT = 100;
  * centre de sa commune, et la fiche de l'activité touchée en bas de l'écran.
  *
  * Avec la position de l'utilisateur : la carte s'ouvre sur un rayon de
- * 15 km autour de lui, s'il se trouve dans le département du territoire
+ * 25 km autour de lui, s'il se trouve dans le département du territoire
  * affiché (sinon elle reste sur le département, où sont les activités).
  * Le bouton « Me localiser » recentre dans tous les cas.
  */

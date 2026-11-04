@@ -4,10 +4,10 @@ import { sql } from "drizzle-orm";
 import { closeTestDb, createUser, resetAll, testDb } from "../helpers/db.js";
 
 const perpignan = { latitude: 42.6986, longitude: 2.8956 };
-// ~10 km de Perpignan : dans le rayon de 15 km.
+// ~10 km de Perpignan : dans le rayon de 25 km.
 const canet = { latitude: 42.7053, longitude: 3.0079 };
-// ~25 km : hors du rayon.
-const ceret = { latitude: 42.4855, longitude: 2.7480 };
+// ~39 km : hors du rayon.
+const prades = { latitude: 42.6175, longitude: 2.4220 };
 
 function share(token: string, position: { latitude: number; longitude: number }) {
   return request(app).post("/api/nearby").set("Authorization", `Bearer ${token}`).send(position);
@@ -33,16 +33,16 @@ describe("Sportifs autour de soi", () => {
     expect(res.status).toBe(400);
   });
 
-  it("compte les autres membres dans un rayon de 15 km, sans soi-même", async () => {
+  it("compte les autres membres dans un rayon de 25 km, sans soi-même", async () => {
     const me = await createUser({ email: "moi@test.com" });
     const near = await createUser({ email: "proche@test.com" });
     const far = await createUser({ email: "loin@test.com" });
     await share(near.token, canet);
-    await share(far.token, ceret);
+    await share(far.token, prades);
 
     const res = await share(me.token, perpignan);
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ count: 1, radiusKm: 15 });
+    expect(res.body).toMatchObject({ count: 1, radiusKm: 25 });
     // Jamais de position ni d'identité renvoyée.
     expect(Object.keys(res.body).sort()).toEqual(["count", "radiusKm", "success"]);
   });

@@ -17,7 +17,7 @@ export default function ModaleBienvenue({
   isOpen,
   onClose,
 }: ModaleBienvenueProps) {
-  const { brandName } = useBranding();
+  const { brandName, asset } = useBranding();
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   const [step, setStep] = useState<"welcome" | "profile">("welcome");
@@ -123,6 +123,7 @@ export default function ModaleBienvenue({
 
         {step === "welcome" ? (
           <div className="container-modaleBienvenue">
+            <img className="modal-brand" src={asset("logo")} alt="" />
             <h3 className="container-modaleBienvenue__h3">
               Bienvenue sur {brandName} <PartyPopper size={18} color="var(--brand-accent-dark, #F4B400)" />
             </h3>
@@ -150,6 +151,7 @@ export default function ModaleBienvenue({
           </div>
         ) : (
           <div className="container-modaleBienvenue container-modaleBienvenue--form">
+            <img className="modal-brand" src={asset("logo")} alt="" />
             <h3 className="container-modaleBienvenue__h3">
               Complétons ton profil
             </h3>
