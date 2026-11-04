@@ -1,6 +1,9 @@
 import { isAxiosError } from "axios";
 import api from "../lib/axios";
 
+/** Émis quand une rencontre vient d'être validée (detail : { activityId, stravaUrl }). */
+export const STRAVA_VALIDATED_EVENT = "strava:meeting-validated";
+
 export interface StravaStatus {
   linked: boolean;
   linkedAt: string | null;
@@ -14,6 +17,12 @@ export interface MeetingValidation {
 export async function fetchStravaStatus(): Promise<StravaStatus> {
   const { data } = await api.get<StravaStatus>("/api/strava/status");
   return { linked: data.linked, linkedAt: data.linkedAt };
+}
+
+/** Redirige le navigateur vers la page d'autorisation Strava. */
+export async function fetchMemberStravaLinked(userId: string): Promise<boolean> {
+  const { data } = await api.get<{ linked: boolean }>(`/api/strava/users/${userId}/status`);
+  return data.linked;
 }
 
 /** Redirige le navigateur vers la page d'autorisation Strava. */

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Activity, CheckCircle2, ExternalLink, Handshake, Link2 } from "lucide-react";
+import { CheckCircle2, ExternalLink, Handshake, Link2 } from "lucide-react";
+import { StravaLogo } from "./StravaRouteLink";
 import {
   fetchMeetingValidation,
   fetchStravaStatus,
   startStravaConnect,
   stravaErrorCode,
   stravaErrorMessage,
+  STRAVA_VALIDATED_EVENT,
   validateMeeting,
 } from "../../api/strava";
 import "./StravaMeeting.scss";
@@ -61,6 +63,9 @@ export default function StravaMeeting({ activityId }: { activityId: string }) {
     try {
       const result = await validateMeeting(activityId);
       setState({ kind: "validated", stravaUrl: result.stravaUrl, name: result.name });
+      window.dispatchEvent(
+        new CustomEvent(STRAVA_VALIDATED_EVENT, { detail: { activityId, stravaUrl: result.stravaUrl } }),
+      );
     } catch (err) {
       const code = stravaErrorCode(err);
       if (code === "STRAVA_NOT_LINKED") {
@@ -110,7 +115,7 @@ export default function StravaMeeting({ activityId }: { activityId: string }) {
 
       {state.kind === "validated" ? (
         <a className="strava-meeting__link" href={state.stravaUrl} target="_blank" rel="noopener noreferrer">
-          <Activity size={16} strokeWidth={2.4} />
+          <StravaLogo size={16} />
           Voir sur Strava
           <ExternalLink size={14} strokeWidth={2.2} />
         </a>

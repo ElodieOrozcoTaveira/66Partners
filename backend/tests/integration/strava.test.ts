@@ -1,17 +1,41 @@
 import { jest } from "@jest/globals";
-import request from "supertest";
-import { eq } from "drizzle-orm";
-import app from "../../src/app.js";
-import { activities, participations, sports, stravaAccounts, stravaMeetingValidations } from "../../src/db/schema.js";
-import { encryptSecret, decryptSecret } from "../../src/utils/secretBox.js";
-import { createStravaState } from "../../src/utils/stravaState.js";
-import { closeTestDb, createSport, createTerritory, createUser, resetAll, testDb } from "../helpers/db.js";
+
+const mockSendStravaLinkedEmail = jest
+  .fn<(user: { email: string; pseudo: string }, brand: unknown, athleteName: string | null) => Promise<void>>()
+  .mockResolvedValue(undefined);
+
+// Aucun envoi SMTP réel en test (même pattern que accountDeletion.test.ts).
+jest.unstable_mockModule("../../src/services/mail.services.js", () => ({
+  sendStravaLinkedEmail: mockSendStravaLinkedEmail,
+  sendAccountDeletedEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  sendWelcomeEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  sendResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  sendAdminResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  sendContactEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  sendReportAlertEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+}));
+
+const request = (await import("supertest")).default;
+const { eq } = await import("drizzle-orm");
+const { default: app } = await import("../../src/app.js");
+const { activities, participations, sports, stravaAccounts, stravaMeetingValidations } = await import(
+  "../../src/db/schema.js"
+);
+const { encryptSecret, decryptSecret } = await import("../../src/utils/secretBox.js");
+const { createStravaState } = await import("../../src/utils/stravaState.js");
+const { stravaLinkedEmailTemplate } = await import("../../src/services/emailTemplates/stravaLinked.template.js");
+const { closeTestDb, createSport, createTerritory, createUser, resetAll, testDb } = await import("../helpers/db.js");
 
 process.env.STRAVA_CLIENT_ID = "12345";
 process.env.STRAVA_CLIENT_SECRET = "secret";
 process.env.STRAVA_REDIRECT_URI = "http://localhost:3000/api/strava/callback";
 process.env.STRAVA_TOKEN_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString("base64");
 process.env.FRONTEND_URL = "http://front.test";
+
+async function waitFor(condition: () => boolean, timeoutMs = 2000) {
+  const end = Date.now() + timeoutMs;
+  while (!condition() && Date.now() < end) await new Promise((resolve) => setTimeout(resolve, 20));
+}
 
 type FetchCall = { url: string; init: RequestInit | undefined };
 let calls: FetchCall[] = [];
@@ -97,7 +121,12 @@ describe("Connexion Strava", () => {
   it("échange le code, chiffre les jetons et met à jour le compte existant", async () => {
     const user = await createUser();
     mockFetch(() =>
-      json({ access_token: "acc-1", refresh_token: "ref-1", expires_at: 2_000_000_000, athlete: { id: 42 } }),
+      json({
+        access_token: "acc-1",
+        refresh_token: "ref-1",
+        expires_at: 2_000_000_000,
+        athlete: { id: 42, firstname: "Léa", lastname: "Martin" },
+      }),
     );
     const callback = (code: string) =>
       request(app).get("/api/strava/callback").query({
@@ -115,7 +144,14 @@ describe("Connexion Strava", () => {
       grant_type: "authorization_code",
     });
 
+    await waitFor(() => mockSendStravaLinkedEmail.mock.calls.length > 0);
+    expect(mockSendStravaLinkedEmail).toHaveBeenCalledTimes(1);
+    expect(mockSendStravaLinkedEmail.mock.calls[0]![0]).toMatchObject({ email: expect.any(String) });
+    expect(mockSendStravaLinkedEmail.mock.calls[0]![2]).toBe("Léa Martin");
+
     await callback("code-2");
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    expect(mockSendStravaLinkedEmail).toHaveBeenCalledTimes(1);
     const rows = await testDb.select().from(stravaAccounts).where(eq(stravaAccounts.userId, user.userId));
     expect(rows).toHaveLength(1);
     expect(rows[0]!.stravaAthleteId).toBe(42);
@@ -164,9 +200,28 @@ describe("Connexion Strava", () => {
     const auth = { Authorization: `Bearer ${user.token}` };
 
     expect((await request(app).get("/api/strava/status").set(auth)).body.linked).toBe(true);
+    const visitor = await createUser();
+    const seen = await request(app)
+      .get(`/api/strava/users/${user.userId}/status`)
+      .set("Authorization", `Bearer ${visitor.token}`);
+    expect(seen.body).toEqual({ success: true, linked: true });
     expect((await request(app).delete("/api/strava").set(auth)).status).toBe(204);
     expect(calls[0]!.url).toBe("https://www.strava.com/oauth/deauthorize");
     expect((await request(app).get("/api/strava/status").set(auth)).body.linked).toBe(false);
+  });
+});
+
+describe("Mail de liaison Strava", () => {
+  it("échappe le pseudo et pointe vers le profil", () => {
+    const html = stravaLinkedEmailTemplate(
+      "<b>Léa</b>",
+      { brandName: "34Partners", territoryName: "Hérault" },
+      { profileUrl: "http://front.test/profile", athleteName: "Léa Martin" },
+    );
+    expect(html).toContain("&lt;b&gt;Léa&lt;/b&gt;");
+    expect(html).not.toContain("<b>Léa</b>");
+    expect(html).toContain('href="http://front.test/profile"');
+    expect(html).toContain("Rencontre réussie grâce à 34Partners");
   });
 });
 

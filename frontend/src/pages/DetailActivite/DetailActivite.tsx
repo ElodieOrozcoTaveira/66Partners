@@ -22,6 +22,9 @@ import { STRAVA_ENABLED } from "../../lib/features";
 const StravaMeeting = STRAVA_ENABLED
   ? lazy(() => import("../../components/StravaMeeting/StravaMeeting"))
   : null;
+const StravaRouteLink = STRAVA_ENABLED
+  ? lazy(() => import("../../components/StravaMeeting/StravaRouteLink"))
+  : null;
 import {
   AUDIENCE_LABELS,
   AUDIENCE_RESERVED_LABELS,
@@ -431,6 +434,11 @@ export default function DetailActivite() {
             <span className="detailactivite-page__level detailactivite-page__level--audience">
               {AUDIENCE_LABELS[activity.audience]}
             </span>
+          )}
+          {StravaRouteLink && id && hasEnded && (isCreator || myParticipation?.status === "ACCEPTED") && (
+            <Suspense fallback={null}>
+              <StravaRouteLink activityId={id} />
+            </Suspense>
           )}
         </div>
 

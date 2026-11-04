@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import { welcomeEmailTemplate } from "./emailTemplates/welcome.template.js";
 import { resetPasswordEmailTemplate } from "./emailTemplates/resetPassword.template.js";
 import { accountDeletedEmailTemplate } from "./emailTemplates/accountDeleted.template.js";
+import { stravaLinkedEmailTemplate } from "./emailTemplates/stravaLinked.template.js";
 import type { TerritoryBrand } from "./territory.services.js";
 
 // Port 587 + STARTTLS obligatoire plutôt que 465 (SSL implicite) : Hetzner
@@ -124,6 +125,21 @@ export async function sendAccountDeletedEmail(
     to: user.email,
     subject: `Votre compte ${brand.brandName} a été supprimé`,
     html: accountDeletedEmailTemplate(user.pseudo, brand),
+  });
+}
+
+export async function sendStravaLinkedEmail(
+  user: { email: string; pseudo: string },
+  brand: TerritoryBrand,
+  athleteName: string | null,
+) {
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  await transporter.sendMail({
+    from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
+    replyTo: "contact@66partners.fr",
+    to: user.email,
+    subject: `Ton compte Strava est relié à ${brand.brandName}`,
+    html: stravaLinkedEmailTemplate(user.pseudo, brand, { profileUrl: `${frontendUrl}/profile`, athleteName }),
   });
 }
 

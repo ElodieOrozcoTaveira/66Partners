@@ -11,6 +11,7 @@ const mockSendAccountDeletedEmail =
 // admin.services.ts.
 jest.unstable_mockModule("../../src/services/mail.services.js", () => ({
   sendAccountDeletedEmail: mockSendAccountDeletedEmail,
+  sendStravaLinkedEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   sendWelcomeEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   sendResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   sendAdminResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
