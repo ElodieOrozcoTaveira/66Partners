@@ -60,7 +60,14 @@ export interface AdminReport {
   createdAt: Date;
   resolvedAt: Date | null;
   reporter: { id: string; pseudo: string } | null;
-  reportedUser: { id: string; pseudo: string; avatar: string | null; openReports: number } | null;
+  reportedUser: {
+    id: string;
+    pseudo: string;
+    avatar: string | null;
+    /** Territoire principal (avatar par défaut). */
+    defaultTerritory: string | null;
+    openReports: number;
+  } | null;
 }
 
 const EXCERPT_MAX = 2000;
@@ -230,6 +237,10 @@ export class ReportService {
         reportedId: reported.id,
         reportedPseudo: reported.pseudo,
         reportedAvatar: reported.avatar,
+        reportedTerritory: sql<string | null>`(
+          select t.code from user_territories ut join territories t on t.id = ut.territory_id
+          where ut.user_id = ${reported.id} and ut.is_default limit 1
+        )`,
         openReports: sql<number>`(
           select count(*) from ${userReports} as open_reports
           where open_reports.reported_user_id = ${userReports.reportedUserId}
@@ -262,7 +273,13 @@ export class ReportService {
       reporter: row.reporterId && row.reporterPseudo ? { id: row.reporterId, pseudo: row.reporterPseudo } : null,
       reportedUser:
         row.reportedId && row.reportedPseudo
-          ? { id: row.reportedId, pseudo: row.reportedPseudo, avatar: row.reportedAvatar, openReports: Number(row.openReports) }
+          ? {
+              id: row.reportedId,
+              pseudo: row.reportedPseudo,
+              avatar: row.reportedAvatar,
+              defaultTerritory: row.reportedTerritory ?? null,
+              openReports: Number(row.openReports),
+            }
           : null,
     }));
   }

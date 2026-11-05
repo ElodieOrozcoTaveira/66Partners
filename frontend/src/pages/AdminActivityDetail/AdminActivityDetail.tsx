@@ -7,7 +7,6 @@ import AdminBottomNav from "../../components/AdminComponents/AdminBottomNav/Admi
 import { MiniStat, Panel, StatusBadge } from "../../components/AdminComponents/AdminPanel/AdminPanel";
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import Skeleton from "../../components/AdminComponents/Skeleton/Skeleton";
-import { useBranding } from "../../contexts/TerritoryContext";
 import {
   ACTIVITY_STATUS_COLORS,
   ACTIVITY_STATUS_LABELS,
@@ -20,6 +19,7 @@ import {
 import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
 import "../../components/AdminComponents/AdminPanel/AdminPanel.scss";
 import "./AdminActivityDetail.scss";
+import { useTerritoryAvatar } from "../../hooks/useTerritoryAvatar";
 
 type State =
   | { status: "loading" }
@@ -34,7 +34,7 @@ type State =
 export default function AdminActivityDetail() {
   const { activityId = "" } = useParams();
   const navigate = useNavigate();
-  const { asset } = useBranding();
+  const territoryAvatar = useTerritoryAvatar();
   const [state, setState] = useState<State>({ status: "loading" });
 
   const load = useCallback(() => {
@@ -198,7 +198,7 @@ export default function AdminActivityDetail() {
                   {activity.participants.map((participant) => (
                     <li key={participant.userId}>
                       <Link to={`/admin/utilisateurs/${participant.userId}`} className="admin-rows__item">
-                        <img src={participant.avatar || asset("avatarDefault")} alt="" className="admin-rows__avatar" />
+                        <img src={participant.avatar || territoryAvatar(participant.defaultTerritory)} alt="" className="admin-rows__avatar" />
                         <div className="admin-rows__text">
                           <strong>{participant.pseudo}</strong>
                           <span>

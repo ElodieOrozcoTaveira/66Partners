@@ -100,7 +100,13 @@ export interface AdminReport {
   createdAt: string;
   resolvedAt: string | null;
   reporter: { id: string; pseudo: string } | null;
-  reportedUser: { id: string; pseudo: string; avatar: string | null; openReports: number } | null;
+  reportedUser: {
+    id: string;
+    pseudo: string;
+    avatar: string | null;
+    defaultTerritory: string | null;
+    openReports: number;
+  } | null;
 }
 
 export async function fetchAdminReports(status?: AdminReportStatus): Promise<AdminReport[]> {

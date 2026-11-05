@@ -1028,6 +1028,8 @@ export interface AdminActivityDetail {
     userId: string;
     pseudo: string;
     avatar: string | null;
+    /** Territoire principal du participant (avatar par défaut). */
+    defaultTerritory: string | null;
     status: string;
     carpoolRequested: boolean;
     createdAt: string;
@@ -1060,7 +1062,9 @@ export class AdminActivityDetailService {
 
     const [participantRows, countRows_] = await Promise.all([
       rowsOf(sql`
-        select u.id as user_id, u.pseudo, u.avatar, p.status, p.carpool_requested, p.created_at
+        select u.id as user_id, u.pseudo, u.avatar, p.status, p.carpool_requested, p.created_at,
+          (select t.code from user_territories ut join territories t on t.id = ut.territory_id
+            where ut.user_id = u.id and ut.is_default limit 1) as default_territory
         from participations p join users u on u.id = p.user_id
         where p.activity_id = ${activityId}
         order by case p.status when 'ACCEPTED' then 0 when 'PENDING' then 1 else 2 end, p.created_at
@@ -1104,6 +1108,7 @@ export class AdminActivityDetailService {
         userId: String(row.user_id),
         pseudo: String(row.pseudo),
         avatar: (row.avatar as string | null) ?? null,
+        defaultTerritory: (row.default_territory as string | null) ?? null,
         status: String(row.status),
         carpoolRequested: Boolean(row.carpool_requested),
         createdAt: iso(row.created_at),
