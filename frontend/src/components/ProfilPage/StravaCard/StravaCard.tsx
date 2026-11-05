@@ -132,8 +132,8 @@ export default function StravaCard() {
             {busy ? "Redirection..." : "Relier mon compte Strava"}
           </button>
           <p className="strava-card__hint">
-            Strava relie le compte connecté sur cet appareil. Sur ordinateur, si quelqu'un d'autre est connecté
-            sur strava.com, déconnecte-le d'abord. Sur téléphone, c'est le compte de ton app Strava.
+            Strava relie le compte connecté sur strava.com dans ce navigateur. Si quelqu'un d'autre y est
+            connecté, déconnecte-le d'abord : l'écran Strava t'indique le compte avant d'accepter.
           </p>
         </>
       )}
