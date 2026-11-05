@@ -18,6 +18,7 @@ import "./DetailActivite.scss";
 import { useBranding } from "../../contexts/TerritoryContext";
 import ModaleGenre from "../../components/ModaleGenre/ModaleGenre";
 import { STRAVA_ENABLED } from "../../lib/features";
+import { compressImage } from "../../lib/compressImage";
 
 const StravaMeeting = STRAVA_ENABLED
   ? lazy(() => import("../../components/StravaMeeting/StravaMeeting"))
@@ -327,11 +328,10 @@ export default function DetailActivite() {
     event.target.value = "";
     if (!file || !id) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     setIsUploading(true);
     try {
+      const formData = new FormData();
+      formData.append("file", await compressImage(file));
       await api.post(`/api/activities/${id}/photos`, formData, {
         headers: { "Content-Type": undefined },
       });

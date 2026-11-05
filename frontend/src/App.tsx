@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminAccessGate from "./components/AdminAccessGate";
 import UpdateBanner from "./components/UpdateBanner/UpdateBanner";
+import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
 import Home from "./pages/Home/Home";
 
 // Code splitting par route (cf. audit performance — P1) : toutes les pages
@@ -76,6 +77,7 @@ export default function App() {
         <TerritoryProvider>
         <NotificationsProvider>
         <UpdateBanner />
+        <ErrorBoundary>
         <Routes>
           <Route element={<Layout />}>
             {/* Routes publiques */}
@@ -128,6 +130,7 @@ export default function App() {
             <Route path="/admin/settings" element={<Suspense fallback={<RouteFallback />}><AdminSettings /></Suspense>} />
           </Route>
         </Routes>
+        </ErrorBoundary>
         </NotificationsProvider>
         </TerritoryProvider>
       </AuthProvider>
