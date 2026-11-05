@@ -6,6 +6,7 @@ import { TerritoryProvider } from "./contexts/TerritoryContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminAccessGate from "./components/AdminAccessGate";
+import UpdateBanner from "./components/UpdateBanner/UpdateBanner";
 import Home from "./pages/Home/Home";
 
 // Code splitting par route (cf. audit performance — P1) : toutes les pages
@@ -74,6 +75,7 @@ export default function App() {
       <AuthProvider>
         <TerritoryProvider>
         <NotificationsProvider>
+        <UpdateBanner />
         <Routes>
           <Route element={<Layout />}>
             {/* Routes publiques */}
