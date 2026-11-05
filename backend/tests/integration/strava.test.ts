@@ -107,11 +107,6 @@ describe("Connexion Strava", () => {
     expect(url.searchParams.get("scope")).toContain("activity:write");
     expect(url.searchParams.get("state")).toBeTruthy();
     expect(url.searchParams.get("approval_prompt")).toBe("force");
-
-    const mobile = await request(app)
-      .get("/api/strava/connect?mobile=1")
-      .set("Authorization", `Bearer ${user.token}`);
-    expect(new URL(mobile.body.url).pathname).toBe("/oauth/mobile/authorize");
   });
 
   it("renvoie 503 si Strava n'est pas configuré", async () => {
@@ -208,13 +203,13 @@ describe("Connexion Strava", () => {
     const auth = { Authorization: `Bearer ${user.token}` };
 
     expect((await request(app).get("/api/strava/status").set(auth)).body.linked).toBe(true);
-    const visitor = await createUser();
-    const seen = await request(app)
-      .get(`/api/strava/users/${user.userId}/status`)
-      .set("Authorization", `Bearer ${visitor.token}`);
-    expect(seen.body).toEqual({ success: true, linked: true });
+
     expect((await request(app).delete("/api/strava").set(auth)).status).toBe(204);
-    expect(calls[0]!.url).toBe("https://www.strava.com/oauth/deauthorize");
+    expect(calls[0]!.url).toBe("https://www.strava.com/oauth/revoke");
+    expect(calls[0]!.init!.headers).toMatchObject({
+      Authorization: `Basic ${Buffer.from("12345:secret").toString("base64")}`,
+    });
+    expect(String(calls[0]!.init!.body)).toBe("token=old-refresh&token_type_hint=refresh_token");
     expect((await request(app).get("/api/strava/status").set(auth)).body.linked).toBe(false);
   });
 });

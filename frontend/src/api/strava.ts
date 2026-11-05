@@ -23,11 +23,6 @@ export async function fetchStravaStatus(): Promise<StravaStatus> {
 }
 
 /** Redirige le navigateur vers la page d'autorisation Strava. */
-export async function fetchMemberStravaLinked(userId: string): Promise<boolean> {
-  const { data } = await api.get<{ linked: boolean }>(`/api/strava/users/${userId}/status`);
-  return data.linked;
-}
-
 /** Redirige le navigateur vers la page d'autorisation Strava. */
 export async function startStravaConnect(): Promise<void> {
   // Même page Strava sur téléphone et sur ordinateur : le passage par l'app
