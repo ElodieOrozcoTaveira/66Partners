@@ -130,7 +130,8 @@ export default function DashboardStats({
   );
 }
 
-function StatCard({
+/** Carte de statistique (tableau de bord, profil). */
+export function StatCard({
   tone,
   icon,
   value,
