@@ -26,7 +26,7 @@ import TerritoryDonutChart from "../../components/AdminComponents/TerritoryDonut
 import AdminInsights from "./AdminInsights";
 import "./AdminStats.scss";
 import AdminTerritoryFilter, { useAdminTerritoryFilter } from "../../components/AdminComponents/AdminTerritoryFilter/AdminTerritoryFilter";
-import { useBranding } from "../../contexts/TerritoryContext";
+import MainLogo from "../../components/MainLogo/MainLogo";
 
 const RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
   { value: "7d", label: "7 derniers jours" },
@@ -41,7 +41,6 @@ type BlockState<T> =
 
 export default function AdminStats() {
   const navigate = useNavigate();
-  const { asset, brandName } = useBranding();
   const { unreadCount } = useNotifications();
   const [range, setRange] = useState<TimeRange>("30d");
   const {
@@ -89,9 +88,9 @@ export default function AdminStats() {
   return (
     <div className="admin-stats-page">
       <div className="admin-stats-page__body">
-        <header className="admin-stats-page__header">
+        <header className="admin-stats-page__header main-logo-header">
           <div className="admin-stats-page__brand">
-            <img src={asset("logo")} alt={`logo ${brandName}`} />
+            <MainLogo height={34} bare />
             <span>Admin</span>
           </div>
           <span className="admin-stats-page__bell">
