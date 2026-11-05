@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
-import { UserPlus, Users, Award } from "lucide-react";
+import { CalendarDays, Trophy, Users } from "lucide-react";
 import { useTerritory } from "../../../contexts/TerritoryContext";
 import api from "../../../lib/axios";
-import { getIconColor } from "../../../lib/sportVisuals";
+import { StatCard } from "../../DashboardComponents/DashboardStats/DashboardStats";
+import "../../DashboardComponents/DashboardStats/DashboardStats.scss";
 import "./StatsProfil.scss";
 
 interface StatsProfilProps {
   userId: string | null;
 }
-
-const JOINED_COLOR = "var(--brand-primary-dark, #C62828)";
-const PARTNERS_COLOR = "var(--brand-accent-dark, #F4B400)";
-const ORGANIZED_COLOR = "var(--brand-primary-dark, #C62828)";
 
 interface Activity {
   id: string;
@@ -89,44 +86,32 @@ export default function StatsProfil({ userId }: StatsProfilProps) {
 
   if (!userId) return null;
 
+  const value = (n: number | null) => (loading ? "…" : n ?? "—");
+  const plural = (n: number | null) => (n ?? 0) > 1;
+
   return (
-    <div className="container-statprofil">
-      <section className="container-statprofil__card">
-        <span
-          className="container-statprofil__icon"
-          style={{ backgroundColor: JOINED_COLOR, color: getIconColor(JOINED_COLOR) }}
-        >
-          <Users size={18} strokeWidth={2.2} />
-        </span>
-        <p className="stat-value">{loading ? "…" : joinedCount ?? "—"}</p>
-        <h4>Activités rejointes</h4>
-      </section>
-      <section className="container-statprofil__card">
-        <span
-          className="container-statprofil__icon"
-          style={{
-            backgroundColor: PARTNERS_COLOR,
-            color: getIconColor(PARTNERS_COLOR),
-          }}
-        >
-          <UserPlus size={18} strokeWidth={2.2} />
-        </span>
-        <p className="stat-value">{loading ? "…" : partnersAccumulated ?? "—"}</p>
-        <h4>Rencontres</h4>
-      </section>
-      <section className="container-statprofil__card">
-        <span
-          className="container-statprofil__icon"
-          style={{
-            backgroundColor: ORGANIZED_COLOR,
-            color: getIconColor(ORGANIZED_COLOR),
-          }}
-        >
-          <Award size={18} strokeWidth={2.2} />
-        </span>
-        <p className="stat-value">{loading ? "…" : organizedCount ?? "—"}</p>
-        <h4>Activités organisées</h4>
-      </section>
-    </div>
+    <section className="dash-stats dash-stats--trio container-statprofil" aria-label="Statistiques">
+      <StatCard
+        tone="brand"
+        icon={<CalendarDays size={20} strokeWidth={2.2} />}
+        value={value(joinedCount)}
+        label={plural(joinedCount) ? "Activités rejointes" : "Activité rejointe"}
+        sub="Au total"
+      />
+      <StatCard
+        tone="accent"
+        icon={<Users size={20} strokeWidth={2.2} />}
+        value={value(partnersAccumulated)}
+        label={plural(partnersAccumulated) ? "Rencontres" : "Rencontre"}
+        sub="Sportifs réunis"
+      />
+      <StatCard
+        tone="violet"
+        icon={<Trophy size={20} strokeWidth={2.2} />}
+        value={value(organizedCount)}
+        label={plural(organizedCount) ? "Activités organisées" : "Activité organisée"}
+        sub="Au total"
+      />
+    </section>
   );
 }

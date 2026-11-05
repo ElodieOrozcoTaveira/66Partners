@@ -1,117 +1,53 @@
 @use "../../../styles/variables/variables.scss";
 
-.container-statprofil {
-  display: grid;
-  // minmax(0, 1fr) plutôt que 1fr : un enfant de grid a un min-width auto
-  // par défaut, donc du texte trop long (ex. « Activités organisées » dans
-  // une colonne étroite) pousse sinon la piste au-delà de sa part de 1fr et
-  // déborde silencieusement de la carte (visible seulement à l'écran, pas
-  // dans les DevTools sans y penser).
+// Statistiques du profil : les cartes du tableau de bord (DashboardStats),
+// sur trois colonnes, resserrées sur téléphone.
+.dash-stats.dash-stats--trio {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  margin-top: 2rem;
-  box-sizing: border-box;
-}
+  gap: 0.6rem;
 
-.container-statprofil__card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.3rem;
-  min-width: 0;
-  padding: 0.6rem 0.4rem;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(31, 41, 55, 0.06);
-  box-sizing: border-box;
-}
-
-.container-statprofil__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
-}
-
-.stat-value {
-  margin: 0;
-  font-family: "Manrope", sans-serif;
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1;
-  color: variables.$nuit;
-}
-
-.container-statprofil__card h4 {
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #64748b;
-  line-height: 1.2;
-}
-
-@media (min-width: variables.$tablet) {
-  .container-statprofil__card {
-    padding: 0.85rem 0.6rem;
+  @media (min-width: variables.$tablet) {
+    gap: 1rem;
   }
 
-  .container-statprofil__icon {
-    width: 34px;
-    height: 34px;
+  @media (max-width: variables.$mobile) {
+    .dash-stats__card {
+      padding: 0.8rem 0.7rem 0.9rem;
+      border-radius: 18px;
+    }
 
-    svg {
-      width: 16px;
-      height: 16px;
+    .dash-stats__icon {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 0.4rem;
+      border-radius: 11px;
+
+      svg {
+        width: 17px;
+        height: 17px;
+      }
+    }
+
+    .dash-stats__value {
+      font-size: 1.7rem;
+    }
+
+    .dash-stats__label {
+      font-size: 0.76rem;
+      overflow-wrap: anywhere;
+    }
+
+    .dash-stats__sub {
+      font-size: 0.68rem;
+    }
+
+    .dash-stats__watermark svg {
+      width: 72px;
+      height: 72px;
     }
   }
-
-  .stat-value {
-    font-size: 1.35rem;
-  }
-
-  .container-statprofil__card h4 {
-    font-size: 0.75rem;
-  }
 }
 
-@media (min-width: variables.$laptop) {
-  .container-statprofil {
-    gap: 1.1rem;
-  }
-
-  .container-statprofil__card {
-    gap: 0.5rem;
-    padding: 1.35rem 1rem;
-    border-radius: 20px;
-  }
-
-  .container-statprofil__icon {
-    width: 42px;
-    height: 42px;
-
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  .stat-value {
-    font-size: 1.85rem;
-  }
-
-  .container-statprofil__card h4 {
-    font-size: 0.85rem;
-  }
+.container-statprofil {
+  margin: 0;
 }

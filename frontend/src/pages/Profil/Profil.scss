@@ -84,7 +84,6 @@
 // précédé d'une pastille colorée. Règles regroupées ici pour ne pas
 // toucher à la logique des composants.
 .profil-page {
-  .container-dispo,
   .container-dernieresActivites,
   .container-membresBloques,
   .container-compteDanger {
@@ -122,7 +121,6 @@
   }
 
   // Titres déjà dans un en-tête avec lien (« Gérer », « Voir tout »).
-  .container-dispo__header,
   .container-dernieresActivites__header {
     align-items: center;
     margin-bottom: 1rem;
@@ -132,7 +130,6 @@
     }
   }
 
-  .container-dispo__manage,
   .container-dernieresActivites__link {
     display: inline-flex;
     align-items: center;
@@ -165,9 +162,5 @@
     border: 1px solid variables.$bordure;
     box-shadow: variables.$ombre-carte;
     overflow: hidden;
-  }
-
-  .dispo-chip--add {
-    border-radius: 14px;
   }
 }
