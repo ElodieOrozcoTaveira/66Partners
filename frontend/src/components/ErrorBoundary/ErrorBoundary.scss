@@ -1,0 +1,76 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  background: variables.$fond;
+
+  &__card {
+    @include mixins.carte;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 26rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+
+    h1 {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: variables.$encre;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.5;
+      color: variables.$texte2;
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    @include mixins.gradient;
+    color: #ffffff;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+
+  &__reload {
+    padding: 0.75rem 1.3rem;
+    border: none;
+    border-radius: 999px;
+    @include mixins.gradient;
+    color: #ffffff;
+    font-family: "Manrope", sans-serif;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  &__home {
+    padding: 0.75rem 1.3rem;
+    border-radius: 999px;
+    border: 1.5px solid variables.$bordure;
+    color: variables.$encre;
+    font-weight: 700;
+    text-decoration: none;
+  }
+}
