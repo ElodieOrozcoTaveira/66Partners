@@ -3,7 +3,7 @@ import '../../styles/legal/legal.scss';
 // Déclinaisons territoriales couvertes par cette politique (même service,
 // même base de données, même responsable de traitement).
 const TERRITORY_BRANDS =
-  '66Partners, 34Partners, 11Partners, 31Partners, 32Partners, 09Partners, 30Partners et 81Partners';
+  '66Partners, 34Partners, 11Partners, 31Partners, 32Partners, 09Partners, 30Partners, 81Partners, 82Partners, 65Partners, 46Partners, 12Partners et 48Partners';
 
 function Table({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
@@ -99,6 +99,34 @@ export function PolitiqueConfidentialite() {
           échéant, votre photo de profil, afin de créer votre compte ou de
           vous reconnaître. Votre mot de passe Google ne nous est jamais
           transmis, et nous ne publions rien en votre nom.
+        </p>
+
+        <h3 className="legal-subtitle-sm">Connexion à Strava (facultative)</h3>
+        <p className="legal-text">
+          Si vous choisissez de relier votre compte Strava depuis votre profil
+          (« Connect with Strava »), Strava vous demande d'autoriser
+          66Partners à lire vos activités, y compris privées, et à modifier
+          leur titre et leur description. Nous recevons et conservons alors :
+        </p>
+        <ul className="legal-list">
+          <li>l'identifiant de votre compte Strava, votre prénom et nom, et l'adresse de votre photo de profil Strava ;</li>
+          <li>les autorisations accordées et les jetons d'accès fournis par Strava, conservés chiffrés ;</li>
+          <li>
+            pour chaque rencontre validée, le numéro de l'activité Strava
+            concernée (pour afficher le lien « View on Strava »).
+          </li>
+        </ul>
+        <p className="legal-text">
+          Nous n'accédons à vos activités Strava qu'au moment où vous appuyez
+          sur « Valider notre rencontre » sur une sortie passée : nous
+          consultons alors la liste de vos activités enregistrées autour de
+          l'heure de la sortie, pour retrouver la bonne, puis nous modifions
+          son titre (« Sortie … avec » suivi du pseudo de vos partenaires) et
+          ajoutons une phrase à sa description. Ces données d'activité ne
+          sont pas conservées. Nous n'enregistrons ni vos parcours GPS, ni vos
+          performances, ni vos données de santé, et nous n'utilisons jamais
+          vos données Strava à d'autres fins (publicité, revente, profilage,
+          entraînement d'intelligence artificielle).
         </p>
 
         <h3 className="legal-subtitle-sm">
@@ -205,7 +233,8 @@ export function PolitiqueConfidentialite() {
             ['Activités, participations, covoiturage', 'Créer, gérer et rejoindre des activités sportives, organiser un trajet commun', 'Exécution du contrat'],
             ['Messages et photos d\'activité', 'Permettre aux participants d\'une activité d\'échanger et de partager leurs souvenirs', 'Exécution du contrat'],
             ['Notifications dans l\'application et rappels', 'Prévenir des demandes, réponses, messages et rappeler une activité la veille et 1 h avant', 'Exécution du contrat'],
-            ['Emails de service', 'Bienvenue, réinitialisation du mot de passe, confirmation de suppression du compte', 'Exécution du contrat'],
+            ['Emails de service', 'Bienvenue, réinitialisation du mot de passe, confirmation de liaison Strava, confirmation de suppression du compte', 'Exécution du contrat'],
+            ['Connexion à Strava', 'Relier votre compte Strava et, à votre demande, renommer l\'activité Strava d\'une sortie avec vos partenaires', 'Consentement'],
             ['Genre déclaré', 'Accès aux activités réservées « entre femmes » / « entre hommes »', 'Consentement'],
             ['Position approximative', 'Afficher le nombre de sportifs à proximité', 'Consentement'],
             ['Notifications push', 'Envoyer des notifications sur l\'appareil lorsque vous les activez', 'Consentement'],
@@ -277,6 +306,7 @@ export function PolitiqueConfidentialite() {
             ['Messages, participations, photos que vous avez ajoutées, notifications, disponibilités, sports, blocages', 'Pendant la durée de vie du compte, puis supprimés avec lui.'],
             ['Activités que vous avez créées', 'Elles restent visibles pour leurs participants après la suppression de votre compte, sans aucun lien avec vous (organisateur affiché comme « compte supprimé »).'],
             ['Position approximative', '30 jours sans mise à jour au maximum, et supprimée avec le compte.'],
+            ['Données Strava (identifiant, nom, photo, jetons, numéros des activités validées)', 'Jusqu\'à ce que vous déconnectiez Strava, que vous retiriez l\'accès depuis Strava ou que vous supprimiez votre compte. Elles sont alors effacées et l\'accès est révoqué auprès de Strava.'],
             ['Signalements', 'Le temps nécessaire à leur traitement et à la gestion d\'un éventuel litige. Si un compte concerné est supprimé, le signalement est conservé sans lien avec ce compte.'],
             ['Messages du formulaire de contact', 'Le temps nécessaire au traitement de la demande.'],
             ['Abonnement aux notifications push', 'Jusqu\'à sa désactivation, la suppression du compte ou le retrait de l\'autorisation dans le navigateur ou le téléphone.'],
@@ -329,6 +359,21 @@ export function PolitiqueConfidentialite() {
             carte sur l'application iPhone (Plans).
           </li>
           <li>
+            <span className="legal-label">OpenFreeMap :</span> fonds de la
+            carte des activités sur le site. Votre navigateur charge les
+            images de la carte depuis leurs serveurs, qui reçoivent donc votre
+            adresse IP ; aucun cookie n'est déposé et aucune information de
+            compte n'est transmise.
+          </li>
+          <li>
+            <span className="legal-label">Strava, Inc. (États-Unis) :</span>{' '}
+            uniquement si vous reliez votre compte Strava. Nous transmettons à
+            Strava les demandes d'autorisation, de lecture et de modification
+            décrites ci-dessus, et votre navigateur affiche votre photo de
+            profil Strava depuis les serveurs de Strava. Strava traite vos
+            données selon sa propre politique de confidentialité.
+          </li>
+          <li>
             <span className="legal-label">API Géo de l'État (geo.api.gouv.fr) :</span>{' '}
             suggestion des communes lorsque vous saisissez une ville ; seul
             le texte saisi est transmis.
@@ -341,7 +386,7 @@ export function PolitiqueConfidentialite() {
         </ul>
 
         <p className="legal-text">
-          Certains de ces prestataires (Google, Apple) peuvent traiter
+          Certains de ces prestataires (Google, Apple, Strava) peuvent traiter
           des données aux États-Unis. Ces transferts sont encadrés par la
           décision d'adéquation de la Commission européenne
           (Data Privacy Framework) ou par des clauses contractuelles types.
@@ -369,8 +414,16 @@ export function PolitiqueConfidentialite() {
         </p>
         <p className="legal-text">
           Ne sont jamais affichés aux autres membres : votre adresse email,
-          votre genre, votre position et les membres que vous avez bloqués
-          ou signalés.
+          votre genre, votre position, les membres que vous avez bloqués
+          ou signalés, et le fait que vous ayez relié Strava (votre nom et
+          votre photo Strava ne sont visibles que par vous).
+        </p>
+        <p className="legal-text">
+          <strong className="legal-bold">Rencontres validées sur Strava.</strong>{' '}
+          Si un participant d'une sortie à laquelle vous avez pris part
+          valide la rencontre, votre pseudo 66Partners apparaît dans le titre
+          de son activité Strava, visible selon les réglages de
+          confidentialité de son compte Strava.
         </p>
       </section>
 
@@ -417,8 +470,10 @@ export function PolitiqueConfidentialite() {
             <span className="legal-label">Retrait du consentement :</span>{' '}
             à tout moment, pour le genre (« Modifier mon profil »), la
             localisation et les notifications (réglages du téléphone ou du
-            navigateur) et la mesure d'audience (en effaçant les cookies du
-            site, la bannière vous est de nouveau proposée).
+            navigateur), la mesure d'audience (en effaçant les cookies du
+            site, la bannière vous est de nouveau proposée) et Strava
+            (« Déconnecter Strava » sur votre profil, ou depuis vos réglages
+            Strava, rubrique « Mes applications »).
           </li>
         </ul>
 
@@ -452,6 +507,7 @@ export function PolitiqueConfidentialite() {
           <li>Mots de passe protégés par une fonction de hachage cryptographique adaptée.</li>
           <li>Communications chiffrées en HTTPS/TLS.</li>
           <li>Jeton de session conservé dans le stockage chiffré du téléphone sur l'application.</li>
+          <li>Jetons d'accès Strava chiffrés (AES-256) en base de données, jamais transmis aux navigateurs.</li>
           <li>Photos d'activité accessibles uniquement par des liens protégés et limités dans le temps.</li>
           <li>Accès aux données limité aux personnes et systèmes qui en ont besoin.</li>
           <li>Sauvegardes et protection de l'infrastructure technique.</li>
@@ -518,7 +574,7 @@ export function PolitiqueConfidentialite() {
 
       <hr className="legal-divider" />
 
-      <p className="legal-update">Dernière mise à jour : novembre 2026</p>
+      <p className="legal-update">Dernière mise à jour : 5 novembre 2026</p>
     </div>
   );
 }

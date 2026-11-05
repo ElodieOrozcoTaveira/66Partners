@@ -43,6 +43,8 @@ export class StravaError extends Error {
     public readonly code: string,
     public readonly status: number,
     message: string,
+    /** Statut HTTP renvoyé par Strava, quand l'erreur vient de Strava. */
+    public readonly upstreamStatus?: number,
   ) {
     super(message);
     this.name = "StravaError";
@@ -84,13 +86,13 @@ async function stravaFetch<T>(url: string, init: RequestInit, failureCode: strin
     throw new StravaError("STRAVA_UNAVAILABLE", 502, "Strava est injoignable pour le moment. Réessaie plus tard.");
   }
   if (response.status === 401) {
-    throw new StravaError("STRAVA_UNAUTHORIZED", 409,"L'accès à ton compte Strava a expiré. Reconnecte Strava.");
+    throw new StravaError("STRAVA_UNAUTHORIZED", 409, "L'accès à ton compte Strava a expiré. Reconnecte Strava.", 401);
   }
   if (response.status === 429) {
     throw new StravaError("STRAVA_RATE_LIMITED", 429, "Trop de demandes vers Strava. Réessaie dans quelques minutes.");
   }
   if (!response.ok) {
-    throw new StravaError(failureCode, 502, "Strava a refusé la demande. Réessaie plus tard.");
+    throw new StravaError(failureCode, 502, "Strava a refusé la demande. Réessaie plus tard.", response.status);
   }
   return (await response.json()) as T;
 }
@@ -110,6 +112,28 @@ async function requestTokens(params: Record<string, string>): Promise<StravaToke
     throw new StravaError("STRAVA_TOKEN_FAILED", 502, "Réponse inattendue de Strava.");
   }
   return tokens;
+}
+
+/**
+ * Efface toutes les données Strava du membre (jetons, nom, photo, et les
+ * numéros d'activités Strava des rencontres validées) : à la déconnexion, ou
+ * quand le membre a retiré l'accès depuis Strava.
+ */
+async function forgetStravaData(userId: string): Promise<void> {
+  await db.delete(stravaMeetingValidations).where(eq(stravaMeetingValidations.userId, userId));
+  await db.delete(stravaAccounts).where(eq(stravaAccounts.userId, userId));
+}
+
+const ACCESS_REVOKED = () =>
+  new StravaError(
+    "STRAVA_NOT_LINKED",
+    404,
+    "L'accès à Strava a été retiré depuis Strava. Relie de nouveau ton compte pour continuer.",
+  );
+
+/** Strava refuse le jeton (400/401) : l'accès a été retiré côté Strava. */
+function isRevoked(error: unknown): boolean {
+  return error instanceof StravaError && (error.upstreamStatus === 400 || error.upstreamStatus === 401);
 }
 
 /** Mail de confirmation, sans jamais bloquer ni faire échouer la liaison. */
@@ -237,10 +261,19 @@ export const StravaService = {
       return decryptSecret(account.accessTokenEncrypted);
     }
 
-    const tokens = await requestTokens({
-      grant_type: "refresh_token",
-      refresh_token: decryptSecret(account.refreshTokenEncrypted),
-    });
+    let tokens: StravaTokenResponse;
+    try {
+      tokens = await requestTokens({
+        grant_type: "refresh_token",
+        refresh_token: decryptSecret(account.refreshTokenEncrypted),
+      });
+    } catch (error) {
+      if (isRevoked(error)) {
+        await forgetStravaData(userId);
+        throw ACCESS_REVOKED();
+      }
+      throw error;
+    }
     await db
       .update(stravaAccounts)
       .set({
@@ -283,7 +316,11 @@ export const StravaService = {
   },
 
   /** Révoque l'accès chez Strava (au mieux) puis oublie les jetons. */
-  async disconnect(userId: string): Promise<void> {
+  /**
+   * Révoque l'accès 66Partners chez Strava (au mieux, jamais bloquant) :
+   * à la déconnexion et à la suppression du compte 66Partners.
+   */
+  async revokeAtStrava(userId: string): Promise<void> {
     try {
       const { clientId, clientSecret } = getConfig();
       const [account] = await db
@@ -308,7 +345,12 @@ export const StravaService = {
     } catch {
       // Jetons illisibles ou Strava injoignable : on supprime quand même.
     }
-    await db.delete(stravaAccounts).where(eq(stravaAccounts.userId, userId));
+  },
+
+  /** « Déconnecter Strava » : révoque l'accès puis efface les données Strava. */
+  async disconnect(userId: string): Promise<void> {
+    await StravaService.revokeAtStrava(userId);
+    await forgetStravaData(userId);
   },
 
   /**
@@ -376,51 +418,63 @@ export const StravaService = {
       throw new StravaError("ALREADY_VALIDATED", 409, "Tu as déjà validé cette rencontre.");
     }
 
-    const token = await StravaService.getValidStravaToken(userId);
-    const headers = { Authorization: `Bearer ${token}` };
+    let match: StravaActivitySummary;
+    let name: string;
+    try {
+      const token = await StravaService.getValidStravaToken(userId);
+      const headers = { Authorization: `Bearer ${token}` };
 
-    const searchUrl = new URL(`${STRAVA_API}/athlete/activities`);
-    searchUrl.searchParams.set("after", String(Math.floor((start - SEARCH_BEFORE_MS) / 1000)));
-    searchUrl.searchParams.set("before", String(Math.floor((start + SEARCH_AFTER_MS) / 1000)));
-    searchUrl.searchParams.set("per_page", "30");
-    const candidates = await stravaFetch<StravaActivitySummary[]>(
-      searchUrl.toString(),
-      { headers },
-      "STRAVA_LIST_FAILED",
-    );
-    if (!Array.isArray(candidates) || candidates.length === 0) {
-      throw new StravaError(
-        "STRAVA_ACTIVITY_NOT_FOUND",
-        404,
-        "Aucune activité Strava trouvée autour de l'heure de la sortie. Synchronise ta montre puis réessaie.",
+      const searchUrl = new URL(`${STRAVA_API}/athlete/activities`);
+      searchUrl.searchParams.set("after", String(Math.floor((start - SEARCH_BEFORE_MS) / 1000)));
+      searchUrl.searchParams.set("before", String(Math.floor((start + SEARCH_AFTER_MS) / 1000)));
+      searchUrl.searchParams.set("per_page", "30");
+      const candidates = await stravaFetch<StravaActivitySummary[]>(
+        searchUrl.toString(),
+        { headers },
+        "STRAVA_LIST_FAILED",
       );
+      if (!Array.isArray(candidates) || candidates.length === 0) {
+        throw new StravaError(
+          "STRAVA_ACTIVITY_NOT_FOUND",
+          404,
+          "Aucune activité Strava trouvée autour de l'heure de la sortie. Synchronise ta montre puis réessaie.",
+        );
+      }
+      match = candidates.reduce((best, candidate) =>
+        Math.abs(new Date(candidate.start_date).getTime() - start) <
+        Math.abs(new Date(best.start_date).getTime() - start)
+          ? candidate
+          : best,
+      );
+
+      const detail = await stravaFetch<StravaActivityDetail>(
+        `${STRAVA_API}/activities/${match.id}`,
+        { headers },
+        "STRAVA_READ_FAILED",
+      );
+      const signature = `Rencontre réussie grâce à ${activity.brandName} ! 🤝`;
+      const existing = (detail.description ?? "").trim();
+      const description = existing.includes(signature) ? existing : [existing, signature].filter(Boolean).join("\n\n");
+      name = `Sortie ${activity.sportName.toLowerCase()} avec ${formatPartners(partners)}`.slice(0, 255);
+
+      await stravaFetch<StravaActivityDetail>(
+        `${STRAVA_API}/activities/${match.id}`,
+        {
+          method: "PUT",
+          headers: { ...headers, "Content-Type": "application/json" },
+          body: JSON.stringify({ name, description }),
+        },
+        "STRAVA_UPDATE_FAILED",
+      );
+
+    } catch (error) {
+      // Accès retiré depuis Strava pendant que le jeton était encore valide.
+      if (error instanceof StravaError && error.upstreamStatus === 401) {
+        await forgetStravaData(userId);
+        throw ACCESS_REVOKED();
+      }
+      throw error;
     }
-    const match = candidates.reduce((best, candidate) =>
-      Math.abs(new Date(candidate.start_date).getTime() - start) <
-      Math.abs(new Date(best.start_date).getTime() - start)
-        ? candidate
-        : best,
-    );
-
-    const detail = await stravaFetch<StravaActivityDetail>(
-      `${STRAVA_API}/activities/${match.id}`,
-      { headers },
-      "STRAVA_READ_FAILED",
-    );
-    const signature = `Rencontre réussie grâce à ${activity.brandName} ! 🤝`;
-    const existing = (detail.description ?? "").trim();
-    const description = existing.includes(signature) ? existing : [existing, signature].filter(Boolean).join("\n\n");
-    const name = `Sortie ${activity.sportName.toLowerCase()} avec ${formatPartners(partners)}`.slice(0, 255);
-
-    await stravaFetch<StravaActivityDetail>(
-      `${STRAVA_API}/activities/${match.id}`,
-      {
-        method: "PUT",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description }),
-      },
-      "STRAVA_UPDATE_FAILED",
-    );
 
     await db.insert(stravaMeetingValidations).values({ activityId, userId, stravaActivityId: match.id });
 

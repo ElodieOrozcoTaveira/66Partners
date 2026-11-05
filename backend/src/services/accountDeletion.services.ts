@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { activityPhotos, users } from "../db/schema.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
+import { StravaService } from "./strava.services.js";
 import { sendAccountDeletedEmail } from "./mail.services.js";
 import { TerritoryService } from "./territory.services.js";
 import { UserError } from "./user.services.js";
@@ -62,6 +63,10 @@ export class AccountDeletionService {
     // Marque du territoire de l'utilisateur, à capturer AVANT suppression
     // (user_territories disparaît en cascade) pour l'email de confirmation.
     const brand = await TerritoryService.getBrandForUser(userId);
+
+    // Strava : l'accès est révoqué chez Strava avant que les jetons
+    // disparaissent en cascade avec le compte (au mieux, jamais bloquant).
+    await StravaService.revokeAtStrava(userId);
 
     await db.delete(users).where(eq(users.id, userId));
 

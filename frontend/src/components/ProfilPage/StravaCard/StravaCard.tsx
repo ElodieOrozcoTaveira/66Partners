@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Activity, CheckCircle2, LogOut } from "lucide-react";
 import {
   disconnectStrava,
@@ -132,6 +132,12 @@ export default function StravaCard() {
           <p className="strava-card__hint">
             Strava relie le compte connecté sur strava.com dans ce navigateur. Si quelqu'un d'autre y est
             connecté, déconnecte-le d'abord : l'écran Strava t'indique le compte avant d'accepter.
+          </p>
+          <p className="strava-card__privacy">
+            En reliant Strava, tu autorises 66Partners à lire tes activités et à renommer celle d'une
+            sortie, uniquement quand tu appuies sur « Valider notre rencontre ». Tes parcours et
+            performances ne sont pas enregistrés, et tu peux déconnecter Strava à tout moment.{" "}
+            <Link to="/confidentialite">En savoir plus</Link>
           </p>
         </>
       )}

@@ -339,6 +339,53 @@ describe("Valider notre rencontre", () => {
     expect(await testDb.select().from(stravaMeetingValidations)).toHaveLength(0);
   });
 
+  it("efface tout quand l'accès a été retiré depuis Strava (refresh refusé)", async () => {
+    const { creator, activityId } = await setupOuting();
+    await linkStrava(creator.userId, 60 * 1000);
+    // Une ancienne rencontre validée, sur une autre sortie : effacée elle aussi.
+    const older = await createOuting(creator.userId, new Date(Date.now() - 2 * 24 * 3_600_000));
+    await testDb.insert(stravaMeetingValidations).values({ activityId: older, userId: creator.userId, stravaActivityId: 9 });
+    mockFetch(() => json({ message: "Bad Request", errors: [{ field: "refresh_token", code: "invalid" }] }, 400));
+
+    const res = await validate(creator.token, activityId);
+    expect(res.status).toBe(404);
+    expect(res.body.code).toBe("STRAVA_NOT_LINKED");
+    expect(await testDb.select().from(stravaAccounts)).toHaveLength(0);
+    expect(await testDb.select().from(stravaMeetingValidations)).toHaveLength(0);
+  });
+
+  it("efface tout quand Strava refuse un jeton encore valide (401)", async () => {
+    const { creator, activityId } = await setupOuting();
+    await linkStrava(creator.userId);
+    mockFetch(() => json({ message: "Authorization Error" }, 401));
+
+    const res = await validate(creator.token, activityId);
+    expect(res.body.code).toBe("STRAVA_NOT_LINKED");
+    expect(await testDb.select().from(stravaAccounts)).toHaveLength(0);
+  });
+
+  it("la déconnexion efface aussi l'historique des rencontres validées", async () => {
+    const { creator, activityId } = await setupOuting();
+    await linkStrava(creator.userId);
+    await testDb.insert(stravaMeetingValidations).values({ activityId, userId: creator.userId, stravaActivityId: 9 });
+    mockFetch(() => new Response(null, { status: 200 }));
+
+    const res = await request(app).delete("/api/strava").set("Authorization", `Bearer ${creator.token}`);
+    expect(res.status).toBe(204);
+    expect(await testDb.select().from(stravaMeetingValidations)).toHaveLength(0);
+  });
+
+  it("révoque l'accès Strava quand le membre supprime son compte", async () => {
+    const { creator } = await setupOuting();
+    await linkStrava(creator.userId);
+    mockFetch(() => new Response(null, { status: 200 }));
+
+    const res = await request(app).delete("/api/users/me").set("Authorization", `Bearer ${creator.token}`);
+    expect(res.status).toBeLessThan(300);
+    expect(calls.some((call) => call.url === "https://www.strava.com/oauth/revoke")).toBe(true);
+    expect(await testDb.select().from(stravaAccounts)).toHaveLength(0);
+  });
+
   it("transmet une erreur claire si Strava refuse la modification", async () => {
     const { creator, activityId } = await setupOuting();
     await linkStrava(creator.userId);

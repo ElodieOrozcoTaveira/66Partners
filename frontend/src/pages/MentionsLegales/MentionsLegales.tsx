@@ -176,6 +176,20 @@ export function MentionsLegales() {
           éventuel est convenu directement entre les membres concernés.
         </p>
 
+        <h3 className="legal-subtitle-sm">Services tiers (Strava)</h3>
+        <p className="legal-text">
+          La connexion à Strava est facultative. En reliant votre compte
+          Strava, vous acceptez aussi les conditions d'utilisation de Strava,
+          et vous autorisez 66Partners à modifier le titre et la description
+          d'une de vos activités Strava, uniquement lorsque vous appuyez sur
+          « Valider notre rencontre ». Vous pouvez retirer cet accès à tout
+          moment (« Déconnecter Strava » sur votre profil, ou depuis vos
+          réglages Strava). 66Partners n'est ni édité, ni sponsorisé, ni
+          approuvé par Strava, Inc. ; « Strava » est une marque de Strava,
+          Inc. Cette fonctionnalité dépend du service de Strava et peut être
+          modifiée ou interrompue si Strava fait évoluer ses conditions.
+        </p>
+
         <h3 className="legal-subtitle-sm">Contenus publiés</h3>
         <p className="legal-text">
           Vous restez responsable des contenus que vous publiez (profil,
