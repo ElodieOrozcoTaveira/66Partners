@@ -1,0 +1,35 @@
+// Fond chaud du logo principal : orange → rouge, liseré jaune (couleurs du
+// soleil catalan). Le jaune reste en liseré : en fond, le logo blanc et son
+// soleil jaune ne ressortiraient pas.
+$main-logo-gradient: linear-gradient(120deg, #e8641a 0%, #d9381e 55%, #b71c1c 100%);
+$main-logo-yellow: #ffc107;
+
+.main-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.85rem 0.4rem;
+  border-radius: 14px;
+  background: $main-logo-gradient;
+  box-shadow: inset 0 -3px 0 $main-logo-yellow;
+
+  img {
+    display: block;
+    width: auto;
+  }
+
+  &--bare {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+}
+
+// En-tête aux couleurs du logo principal (espace admin).
+.main-logo-header {
+  background: $main-logo-gradient;
+  box-shadow:
+    inset 0 -4px 0 $main-logo-yellow,
+    0 8px 20px rgba(183, 28, 28, 0.22);
+}

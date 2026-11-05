@@ -1,8 +1,9 @@
 @use "../../styles/variables/variables.scss";
-@use "../../styles/mixins/mixins.scss";
 
-// En-tête de la refonte : translucide sur le fond blanc cassé, filet fin,
-// navigation sobre (inspirée de Rovent), CTA en pilule.
+// En-tête : dégradé orange → rouge avec liseré jaune (couleurs du logo
+// principal, blanc), navigation en blanc, CTA en pilule.
+$header-gradient: linear-gradient(120deg, #e8641a 0%, #d9381e 55%, #b71c1c 100%);
+$header-yellow: #ffc107;
 .container-header {
   position: fixed;
   top: 0;
@@ -20,10 +21,10 @@
   align-items: center;
   box-sizing: border-box;
   transition: transform 0.35s ease;
-  background-color: color-mix(in srgb, #{variables.$fond} 86%, transparent);
-  backdrop-filter: saturate(160%) blur(14px);
-  -webkit-backdrop-filter: saturate(160%) blur(14px);
-  border-bottom: 1px solid variables.$bordure;
+  background: $header-gradient;
+  box-shadow:
+    inset 0 -3px 0 $header-yellow,
+    0 6px 18px rgba(183, 28, 28, 0.18);
 
   &--hidden {
     transform: translateY(-100%);
@@ -172,7 +173,7 @@
 
     a {
       position: relative;
-      color: variables.$texte2;
+      color: rgba(255, 255, 255, 0.9);
       text-decoration: none;
       font-family: "Inter", sans-serif;
       font-size: 0.9rem;
@@ -183,12 +184,12 @@
       transition: color 0.18s ease, background-color 0.18s ease;
 
       &:hover {
-        color: variables.$encre;
-        background: rgba(17, 19, 24, 0.05);
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.16);
       }
 
       &[aria-current="page"] {
-        color: variables.$rouge;
+        color: #ffffff;
         font-weight: 700;
 
         // Petit point de la couleur du territoire sous le lien actif.
@@ -200,7 +201,7 @@
           bottom: 0;
           height: 3px;
           border-radius: 3px;
-          background: linear-gradient(90deg, variables.$rouge, variables.$jaune);
+          background: $header-yellow;
         }
       }
     }
@@ -214,8 +215,8 @@
       margin-left: 0.3rem;
       padding: 0 4px;
       border-radius: 999px;
-      background: variables.$rouge;
-      color: #ffffff;
+      background: $header-yellow;
+      color: variables.$encre;
       font-family: "Inter", sans-serif;
       font-size: 0.62rem;
       font-weight: 800;
@@ -255,20 +256,21 @@
         border-radius: 999px;
         background: transparent;
         box-shadow: none;
-        color: variables.$encre;
-        border: 1.5px solid rgba(17, 19, 24, 0.14);
+        color: #ffffff;
+        border: 1.5px solid rgba(255, 255, 255, 0.6);
 
         &:hover {
-          border-color: variables.$encre;
+          border-color: #ffffff;
+          background: rgba(255, 255, 255, 0.12);
         }
       }
 
-      // « S'inscrire » : dégradé du territoire.
+      // « S'inscrire » : pilule blanche (le dégradé est déjà celui de l'en-tête).
       &__links2 {
         border-radius: 999px;
-        @include mixins.gradient;
+        background: #ffffff;
         border: none;
-        color: #ffffff;
+        color: #b71c1c;
         padding-right: 1.1rem;
       }
 
@@ -277,7 +279,7 @@
         width: 42px;
         min-width: 42px;
         padding: 0;
-        color: variables.$texte2;
+        color: #ffffff;
 
         .container-connexion__label {
           position: absolute;
@@ -289,8 +291,8 @@
         }
 
         &:hover {
-          color: variables.$rouge;
-          border-color: variables.$rouge;
+          color: #ffffff;
+          border-color: #ffffff;
         }
       }
     }

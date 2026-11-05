@@ -34,10 +34,14 @@
   }
 }
 
+// Bandeau dégradé orange → rouge, liseré jaune (cf. .main-logo-header) :
+// fait ressortir le logo principal blanc.
 .admin-stats-page__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0.85rem 1rem 1rem;
+  border-radius: 18px;
 }
 
 .admin-stats-page__brand {
@@ -54,7 +58,7 @@
     font-family: "Manrope", sans-serif;
     font-size: 0.85rem;
     font-weight: 800;
-    color: #64748b;
+    color: rgba(255, 255, 255, 0.85);
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }

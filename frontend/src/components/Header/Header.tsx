@@ -55,15 +55,16 @@ export default function Header({ hideOnMobile = false }: HeaderProps) {
     >
       <section className="container-header__leftside">
         <NavLink to={"/"}>
+          {/* Logo principal de la plateforme (blanc), mis en valeur par le
+              fond dégradé de l'en-tête ; chaque territoire garde son logo
+              ailleurs (pied de page, fenêtres de connexion…). */}
           <img
-            src={asset("logo")}
-            alt={`logo ${brandName}`}
+            src="/newLogo.webp"
+            alt={brandName}
             className="left-side__img"
             width={153}
-            height={100}
-            loading="lazy"
-          
-                      />
+            height={78}
+          />
         </NavLink>
       </section>
       <nav className="container-header__nav">
