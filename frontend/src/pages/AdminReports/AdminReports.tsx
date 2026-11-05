@@ -11,10 +11,10 @@ import AdminBottomNav from "../../components/AdminComponents/AdminBottomNav/Admi
 import { StatusBadge } from "../../components/AdminComponents/AdminPanel/AdminPanel";
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import Skeleton from "../../components/AdminComponents/Skeleton/Skeleton";
-import { useBranding } from "../../contexts/TerritoryContext";
 import { REPORT_CONTEXT_LABELS, REPORT_REASON_LABELS, dateTimeFormatter } from "../../lib/adminLabels";
 import "../../components/AdminComponents/AdminPanel/AdminPanel.scss";
 import "./AdminReports.scss";
+import { useTerritoryAvatar } from "../../hooks/useTerritoryAvatar";
 
 type State = { status: "loading" } | { status: "error" } | { status: "ready"; data: AdminReport[] };
 
@@ -29,7 +29,7 @@ const STATUS_OPTIONS: { value: AdminReportStatus; label: string }[] = [
  * depuis sa fiche membre.
  */
 export default function AdminReports() {
-  const { asset } = useBranding();
+  const territoryAvatar = useTerritoryAvatar();
   const [filter, setFilter] = useState<AdminReportStatus>("OPEN");
   const [state, setState] = useState<State>({ status: "loading" });
   const [pending, setPending] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export default function AdminReports() {
 
               {report.reportedUser ? (
                 <Link to={`/admin/utilisateurs/${report.reportedUser.id}`} className="admin-rows__item">
-                  <img src={report.reportedUser.avatar || asset("avatarDefault")} alt="" className="admin-rows__avatar" />
+                  <img src={report.reportedUser.avatar || territoryAvatar(report.reportedUser.defaultTerritory)} alt="" className="admin-rows__avatar" />
                   <div className="admin-rows__text">
                     <strong>{report.reportedUser.pseudo}</strong>
                     <span>

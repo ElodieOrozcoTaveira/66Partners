@@ -43,6 +43,7 @@ export interface AdminActivityDetail {
     userId: string;
     pseudo: string;
     avatar: string | null;
+    defaultTerritory: string | null;
     status: string;
     carpoolRequested: boolean;
     createdAt: string;

@@ -8,10 +8,10 @@ import AdminTerritoryFilter, { useAdminTerritoryFilter } from "../../components/
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import Skeleton from "../../components/AdminComponents/Skeleton/Skeleton";
-import { useBranding } from "../../contexts/TerritoryContext";
 import { PROVIDER_LABELS, normalizeSearch } from "../../lib/adminLabels";
 import "../../components/AdminComponents/AdminPanel/AdminPanel.scss";
 import "./AdminUsers.scss";
+import { useTerritoryAvatar } from "../../hooks/useTerritoryAvatar";
 
 type SortKey = "recent" | "oldest" | "organizers" | "participants" | "pseudo";
 
@@ -31,7 +31,7 @@ type ListState =
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 
 export default function AdminUsers() {
-  const { asset } = useBranding();
+  const territoryAvatar = useTerritoryAvatar();
   const { territory, territoryValue, setTerritory, territories: adminTerritories } = useAdminTerritoryFilter();
   const [state, setState] = useState<ListState>({ status: "loading" });
   const [deleteTarget, setDeleteTarget] = useState<AdminUserListItem | null>(null);
@@ -172,7 +172,7 @@ export default function AdminUsers() {
                   aria-label={`Voir la fiche de ${user.pseudo}`}
                 >
                   <img
-                    src={user.avatar || asset("avatarDefault")}
+                    src={user.avatar || territoryAvatar(user.defaultTerritory)}
                     alt=""
                     className="admin-users-page__avatar"
                   />

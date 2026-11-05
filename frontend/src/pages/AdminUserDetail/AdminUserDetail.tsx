@@ -16,7 +16,6 @@ import { MiniStat, Panel, StatusBadge } from "../../components/AdminComponents/A
 import ErrorBlock from "../../components/AdminComponents/ErrorBlock/ErrorBlock";
 import Skeleton from "../../components/AdminComponents/Skeleton/Skeleton";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
-import { useBranding } from "../../contexts/TerritoryContext";
 import {
   ACTIVITY_STATUS_COLORS,
   ACTIVITY_STATUS_LABELS,
@@ -29,6 +28,7 @@ import {
 } from "../../lib/adminLabels";
 import "../../components/AdminComponents/AdminPanel/AdminPanel.scss";
 import "./AdminUserDetail.scss";
+import { useTerritoryAvatar } from "../../hooks/useTerritoryAvatar";
 
 type State =
   | { status: "loading" }
@@ -39,7 +39,7 @@ type State =
 export default function AdminUserDetail() {
   const { userId = "" } = useParams();
   const navigate = useNavigate();
-  const { asset } = useBranding();
+  const territoryAvatar = useTerritoryAvatar();
   const [state, setState] = useState<State>({ status: "loading" });
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -116,7 +116,7 @@ export default function AdminUserDetail() {
         {user && (
           <>
             <div className="admin-panel admin-user-detail__identity">
-              <img src={user.avatar || asset("avatarDefault")} alt="" className="admin-user-detail__avatar" />
+              <img src={user.avatar || territoryAvatar(user.territories.find((territory) => territory.isDefault)?.code)} alt="" className="admin-user-detail__avatar" />
               <div className="admin-user-detail__identity-text">
                 <strong>{user.pseudo}</strong>
                 <a href={`mailto:${user.email}`}>{user.email}</a>
