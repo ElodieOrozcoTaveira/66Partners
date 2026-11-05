@@ -30,11 +30,9 @@ export async function fetchMemberStravaLinked(userId: string): Promise<boolean> 
 
 /** Redirige le navigateur vers la page d'autorisation Strava. */
 export async function startStravaConnect(): Promise<void> {
-  // Sur téléphone, Strava ouvre son app : c'est le compte de la personne qui tient le téléphone.
-  const mobile = /android|iphone|ipad|ipod/i.test(window.navigator.userAgent);
-  const { data } = await api.get<{ url: string }>("/api/strava/connect", {
-    params: mobile ? { mobile: 1 } : undefined,
-  });
+  // Même page Strava sur téléphone et sur ordinateur : le passage par l'app
+  // Strava (oauth/mobile/authorize) ne revient jamais vers un site web sur iPhone.
+  const { data } = await api.get<{ url: string }>("/api/strava/connect");
   window.location.assign(data.url);
 }
 
