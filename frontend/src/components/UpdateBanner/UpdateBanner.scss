@@ -1,0 +1,93 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.update-banner {
+  position: fixed;
+  z-index: 3000;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  padding: 0.45rem 0.45rem 0.45rem 0.55rem;
+  border-radius: 999px;
+  background: variables.$encre;
+  color: #ffffff;
+  box-shadow: variables.$ombre-flottante;
+  transform: translateX(-50%);
+  animation: update-banner-in 0.3s ease;
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    @include mixins.gradient;
+  }
+
+  &__text {
+    font-family: "Inter", sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__long {
+    @media (max-width: 420px) {
+      display: none;
+    }
+  }
+
+  &__reload {
+    flex-shrink: 0;
+    padding: 0.45rem 0.95rem;
+    border: none;
+    border-radius: 999px;
+    background: #ffffff;
+    color: variables.$encre;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  &__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    cursor: pointer;
+  }
+}
+
+@keyframes update-banner-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .update-banner {
+    animation: none;
+  }
+}
