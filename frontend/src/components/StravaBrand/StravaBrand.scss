@@ -1,0 +1,33 @@
+.strava-connect-button {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  transition: opacity 0.15s ease;
+
+  img {
+    display: block;
+    width: 237px;
+    height: 48px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: progress;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #FC5200;
+    outline-offset: 3px;
+  }
+}
+
+.powered-by-strava {
+  display: block;
+  width: 146px;
+  height: auto;
+}

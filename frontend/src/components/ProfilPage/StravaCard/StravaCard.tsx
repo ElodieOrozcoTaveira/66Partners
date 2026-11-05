@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Activity, CheckCircle2, Link2, LogOut } from "lucide-react";
+import { Activity, CheckCircle2, LogOut } from "lucide-react";
 import {
   disconnectStrava,
   fetchStravaStatus,
@@ -11,6 +11,7 @@ import {
 } from "../../../api/strava";
 import { formatMonthYear } from "../../../lib/dateFormat";
 import ConfirmDialog from "../../ConfirmDialog/ConfirmDialog";
+import { ConnectWithStrava, PoweredByStrava } from "../../StravaBrand/StravaBrand";
 import "./StravaCard.scss";
 
 type Notice = { tone: "success" | "error"; text: string };
@@ -127,16 +128,17 @@ export default function StravaCard() {
         </div>
       ) : (
         <>
-          <button type="button" className="strava-card__connect" onClick={() => void connect()} disabled={busy}>
-            <Link2 size={17} strokeWidth={2.4} />
-            {busy ? "Redirection..." : "Relier mon compte Strava"}
-          </button>
+          <ConnectWithStrava onClick={() => void connect()} disabled={busy} />
           <p className="strava-card__hint">
             Strava relie le compte connecté sur strava.com dans ce navigateur. Si quelqu'un d'autre y est
             connecté, déconnecte-le d'abord : l'écran Strava t'indique le compte avant d'accepter.
           </p>
         </>
       )}
+
+      <div className="strava-card__powered">
+        <PoweredByStrava />
+      </div>
 
       <ConfirmDialog
         isOpen={confirmOpen}

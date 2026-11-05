@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, ExternalLink, Handshake, Link2 } from "lucide-react";
-import { StravaLogo } from "./StravaRouteLink";
+import { CheckCircle2, ExternalLink, Handshake } from "lucide-react";
+import { ConnectWithStrava } from "../StravaBrand/StravaBrand";
 import {
   fetchMeetingValidation,
   fetchStravaStatus,
@@ -115,15 +115,11 @@ export default function StravaMeeting({ activityId }: { activityId: string }) {
 
       {state.kind === "validated" ? (
         <a className="strava-meeting__link" href={state.stravaUrl} target="_blank" rel="noopener noreferrer">
-          <StravaLogo size={16} />
-          Voir sur Strava
+          View on Strava
           <ExternalLink size={14} strokeWidth={2.2} />
         </a>
       ) : state.kind === "unlinked" || needsReconnect ? (
-        <button type="button" className="strava-meeting__button" onClick={() => void connect()} disabled={busy}>
-          <Link2 size={17} strokeWidth={2.4} />
-          {busy ? "Redirection..." : needsReconnect ? "Reconnecter Strava" : "Relier mon compte Strava"}
-        </button>
+        <ConnectWithStrava onClick={() => void connect()} disabled={busy} />
       ) : (
         <button type="button" className="strava-meeting__button" onClick={() => void validate()} disabled={busy}>
           <Handshake size={17} strokeWidth={2.4} />

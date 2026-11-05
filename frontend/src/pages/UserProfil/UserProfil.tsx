@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import AproposProfile from "../../components/ProfilPage/A propos/Apropos";
 import Dispo from "../../components/ProfilPage/Dispo/Dispo";
@@ -10,11 +10,6 @@ import { useAuth, type User } from "../../contexts/AuthContext";
 import api from "../../lib/axios";
 import ModerationCard from "../../components/Moderation/ModerationCard";
 import "../Profil/Profil.scss";
-import { STRAVA_ENABLED } from "../../lib/features";
-
-const StravaMemberBadge = STRAVA_ENABLED
-  ? lazy(() => import("../../components/ProfilPage/StravaCard/StravaMemberBadge"))
-  : null;
 
 // Réponse du profil PUBLIC (GET /api/users/:id) : superset local de `User`
 // plutôt qu'une modification de ce type partagé (qui sert aussi à /me, hors
@@ -84,17 +79,7 @@ export default function UserProfil() {
     <div className="profil-page">
       <HeroProfile user={profileUser} isOwnProfile={false} />
       <div className="profil-page__body">
-        <TopProfile
-          user={profileUser}
-          isOwnProfile={false}
-          badges={
-            StravaMemberBadge && (
-              <Suspense fallback={null}>
-                <StravaMemberBadge userId={profileUser.id} />
-              </Suspense>
-            )
-          }
-        />
+        <TopProfile user={profileUser} isOwnProfile={false} />
         <AproposProfile
           headline={profileUser.headline}
           createdAt={profileUser.createdAt}

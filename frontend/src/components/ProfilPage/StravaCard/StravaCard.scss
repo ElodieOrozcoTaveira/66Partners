@@ -193,3 +193,9 @@ $strava: #FC5200;
     }
   }
 }
+
+.strava-card__powered {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.25rem;
+}

@@ -18,10 +18,9 @@ import { createStravaState, readStravaState } from "../utils/stravaState.js";
 const db = drizzle(process.env.DATABASE_URL!);
 
 const STRAVA_AUTHORIZE_URL = "https://www.strava.com/oauth/authorize";
-// Sur téléphone : ouvre l'app Strava (compte de la personne qui tient le téléphone).
-const STRAVA_MOBILE_AUTHORIZE_URL = "https://www.strava.com/oauth/mobile/authorize";
 const STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token";
-const STRAVA_DEAUTHORIZE_URL = "https://www.strava.com/oauth/deauthorize";
+// Remplace oauth/deauthorize (retiré par Strava le 1er juin 2027).
+const STRAVA_REVOKE_URL = "https://www.strava.com/oauth/revoke";
 const STRAVA_API = "https://www.strava.com/api/v3";
 
 /**
@@ -138,9 +137,9 @@ export function formatPartners(names: string[]): string {
 
 export const StravaService = {
   /** URL vers laquelle rediriger le membre pour autoriser 66Partners sur Strava. */
-  getAuthorizeUrl(userId: string, options: { mobile?: boolean } = {}): string {
+  getAuthorizeUrl(userId: string): string {
     const { clientId, redirectUri } = getConfig();
-    const url = new URL(options.mobile ? STRAVA_MOBILE_AUTHORIZE_URL : STRAVA_AUTHORIZE_URL);
+    const url = new URL(STRAVA_AUTHORIZE_URL);
     url.searchParams.set("client_id", clientId);
     url.searchParams.set("redirect_uri", redirectUri);
     url.searchParams.set("response_type", "code");
@@ -286,13 +285,28 @@ export const StravaService = {
   /** Révoque l'accès chez Strava (au mieux) puis oublie les jetons. */
   async disconnect(userId: string): Promise<void> {
     try {
-      const token = await StravaService.getValidStravaToken(userId);
-      await fetch(STRAVA_DEAUTHORIZE_URL, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { clientId, clientSecret } = getConfig();
+      const [account] = await db
+        .select({ refreshTokenEncrypted: stravaAccounts.refreshTokenEncrypted })
+        .from(stravaAccounts)
+        .where(eq(stravaAccounts.userId, userId))
+        .limit(1);
+      if (account) {
+        // Révoquer le refresh token révoque aussi les access tokens associés.
+        await fetch(STRAVA_REVOKE_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            token: decryptSecret(account.refreshTokenEncrypted),
+            token_type_hint: "refresh_token",
+          }).toString(),
+        });
+      }
     } catch {
-      // Jetons déjà invalides ou Strava injoignable : on supprime quand même.
+      // Jetons illisibles ou Strava injoignable : on supprime quand même.
     }
     await db.delete(stravaAccounts).where(eq(stravaAccounts.userId, userId));
   },
