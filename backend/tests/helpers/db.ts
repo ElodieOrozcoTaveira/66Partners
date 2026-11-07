@@ -35,6 +35,8 @@ export async function createUser(overrides: {
   email?: string;
   pseudo?: string;
   territoryCode?: string;
+  /** false : adresse email non confirmée (vérifiée par défaut). */
+  emailVerified?: boolean;
 } = {}): Promise<{ userId: string; token: string }> {
   userCounter++;
   const [user] = await testDb
@@ -42,6 +44,7 @@ export async function createUser(overrides: {
     .values({
       email: overrides.email ?? `user${userCounter}@test.com`,
       password: "placeholder_hash",
+      emailVerifiedAt: overrides.emailVerified === false ? null : new Date(),
       pseudo: overrides.pseudo ?? `user${userCounter}`,
     })
     .returning({ id: users.id });

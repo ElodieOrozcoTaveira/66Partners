@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import argon2 from "argon2";
 import { users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
-import { sendWelcomeEmail, sendResetPasswordEmail } from "./mail.services.js";
+import { sendWelcomeEmail, sendResetPasswordEmail, sendVerifyEmail } from "./mail.services.js";
 import { TerritoryService } from "./territory.services.js";
 import { SocialAccountService, type SocialProvider } from "./socialAccount.services.js";
 import type { GoogleProfile } from "./google.services.js";
@@ -50,6 +50,7 @@ export interface UserData {
 
 const PASSWORD_MIN_LENGTH = 8;
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 heure
+const VERIFY_TOKEN_TTL_MS = 48 * 60 * 60 * 1000; // 48 heures
 
 function isPasswordStrong(password: string): boolean {
   return password.length >= PASSWORD_MIN_LENGTH;
@@ -141,6 +142,8 @@ export class AuthService {
 
     // 3. Hachage sécurisé du mot de passe
     const hashedPassword = await argon2.hash(password);
+    // Lien de confirmation de l'adresse email (seul son hash est conservé).
+    const verifyToken = crypto.randomBytes(32).toString("hex");
 
     // 4. Création de l'utilisateur
     let newUser: typeof users.$inferSelect | undefined;
@@ -156,6 +159,8 @@ export class AuthService {
           // La validation Zod (registerSchema) a déjà refusé toute valeur
           // autre que `true` avant d'arriver ici — cf. P1 audit RGPD.
           termsAcceptedAt: new Date(),
+          emailVerificationTokenHash: hashResetToken(verifyToken),
+          emailVerificationExpiresAt: new Date(Date.now() + VERIFY_TOKEN_TTL_MS),
         })
         .returning();
     } catch (error) {
@@ -181,12 +186,13 @@ export class AuthService {
     // territoires actifs, jamais rétroactif pour les comptes existants.
     await TerritoryService.attachUserToTerritory(newUser.id, signupTerritory.id);
 
-    // 6. Email de bienvenue (non bloquant), aux couleurs du territoire choisi
-    sendWelcomeEmail(newUser, {
+    // 6. Email de bienvenue avec le lien de confirmation (non bloquant),
+    // aux couleurs du territoire choisi.
+    sendVerifyEmail(newUser, AuthService.verifyUrl(verifyToken), {
       brandName: signupTerritory.brandName,
       territoryName: signupTerritory.name,
     }).catch((err) =>
-      console.error("Erreur envoi email de bienvenue:", err),
+      console.error("Erreur envoi email de bienvenue / confirmation:", err),
     );
 
     // 7. Retour des données utilisateur (sans le mot de passe)
@@ -337,6 +343,67 @@ export class AuthService {
    * Ne révèle jamais si l'email correspond à un compte existant (anti-énumération) :
    * on retourne toujours normalement, l'email n'est envoyé que si un compte existe.
    */
+  static verifyUrl(token: string): string {
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    return `${frontendUrl}/verifier-email?token=${token}`;
+  }
+
+  /** Confirme l'adresse email à partir du lien reçu. */
+  static async verifyEmail(token: string): Promise<void> {
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(
+          eq(users.emailVerificationTokenHash, hashResetToken(token)),
+          gt(users.emailVerificationExpiresAt, new Date())
+        )
+      )
+      .limit(1);
+
+    if (!user) {
+      throw new AuthError(
+        "Ce lien de confirmation est invalide ou a expiré. Demande un nouveau lien depuis ton compte.",
+        "INVALID_OR_EXPIRED_TOKEN",
+        400
+      );
+    }
+
+    await db
+      .update(users)
+      .set({
+        emailVerifiedAt: new Date(),
+        emailVerificationTokenHash: null,
+        emailVerificationExpiresAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, user.id));
+  }
+
+  /** Renvoie un lien de confirmation (le précédent n'est plus valable). */
+  static async resendVerification(userId: string): Promise<{ alreadyVerified: boolean }> {
+    const [user] = await db
+      .select({ id: users.id, email: users.email, pseudo: users.pseudo, emailVerifiedAt: users.emailVerifiedAt })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    if (!user) throw new AuthError("Utilisateur non trouvé", "USER_NOT_FOUND", 404);
+    if (user.emailVerifiedAt) return { alreadyVerified: true };
+
+    const token = crypto.randomBytes(32).toString("hex");
+    await db
+      .update(users)
+      .set({
+        emailVerificationTokenHash: hashResetToken(token),
+        emailVerificationExpiresAt: new Date(Date.now() + VERIFY_TOKEN_TTL_MS),
+      })
+      .where(eq(users.id, user.id));
+
+    const brand = await TerritoryService.getBrandForUser(user.id);
+    await sendVerifyEmail(user, AuthService.verifyUrl(token), brand);
+    return { alreadyVerified: false };
+  }
+
   static async requestPasswordReset(email: string): Promise<void> {
     const [user] = await db
       .select({ id: users.id, email: users.email, pseudo: users.pseudo })
@@ -487,6 +554,8 @@ export class AuthService {
           password: null,
           avatar: identity.avatar,
           termsAcceptedAt: new Date(),
+          // Adresse déjà vérifiée par le fournisseur (Google).
+          emailVerifiedAt: new Date(),
         })
         .returning();
     } catch (error) {

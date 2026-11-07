@@ -19,6 +19,7 @@ import { useBranding } from "../../contexts/TerritoryContext";
 import ModaleGenre from "../../components/ModaleGenre/ModaleGenre";
 import { STRAVA_ENABLED } from "../../lib/features";
 import { compressImage } from "../../lib/compressImage";
+import { toast } from "../../lib/toast";
 
 const StravaMeeting = STRAVA_ENABLED
   ? lazy(() => import("../../components/StravaMeeting/StravaMeeting"))
@@ -234,7 +235,7 @@ export default function DetailActivite() {
         "DetailActivite: failed to join activity",
         err instanceof Error ? err.message : "Erreur inconnue",
       );
-      window.alert(
+      toast.error(
         data?.code === "AUDIENCE_RESTRICTED" && data.message
           ? data.message
           : "Impossible d'envoyer la demande de participation."
@@ -276,7 +277,7 @@ export default function DetailActivite() {
         "DetailActivite: failed to toggle carpool",
         err instanceof Error ? err.message : "Erreur inconnue",
       );
-      window.alert("Impossible de mettre à jour le covoiturage.");
+      toast.error("Impossible de mettre à jour le covoiturage.");
     } finally {
       setIsTogglingCarpool(false);
     }
@@ -300,7 +301,7 @@ export default function DetailActivite() {
         "DetailActivite: failed to accept request",
         err instanceof Error ? err.message : "Erreur inconnue",
       );
-      window.alert("Impossible d'accepter cette demande.");
+      toast.error("Impossible d'accepter cette demande.");
     }
   }
 
@@ -319,7 +320,7 @@ export default function DetailActivite() {
         "DetailActivite: failed to refuse request",
         err instanceof Error ? err.message : "Erreur inconnue",
       );
-      window.alert("Impossible de refuser cette demande.");
+      toast.error("Impossible de refuser cette demande.");
     }
   }
 
@@ -341,7 +342,7 @@ export default function DetailActivite() {
         "DetailActivite: failed to upload photo",
         err instanceof Error ? err.message : "Erreur inconnue",
       );
-      window.alert("La photo n'a pas pu être envoyée.");
+      toast.error("La photo n'a pas pu être envoyée.");
     } finally {
       setIsUploading(false);
     }

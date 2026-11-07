@@ -36,6 +36,8 @@ export interface UserProfile {
   coverPhoto: string | null;
   /** Genre déclaré (facultatif) — uniquement dans son PROPRE profil, jamais public. */
   gender: Gender | null;
+  /** Adresse email confirmée (lien reçu à l'inscription, ou compte Google). */
+  emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -107,6 +109,7 @@ function toProfile(user: typeof users.$inferSelect): UserProfile {
     avatar: user.avatar,
     coverPhoto: user.coverPhoto,
     gender: user.gender,
+    emailVerified: user.emailVerifiedAt !== null,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

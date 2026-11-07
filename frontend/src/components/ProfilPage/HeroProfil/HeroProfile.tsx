@@ -7,6 +7,7 @@ import ModaleEditProfil from "../ModaleEditProfil/ModaleEditProfil";
 import Hamburger from "../../BurgerComponent/Hamburger/Hamburger";
 import "./HeroProfile.scss";
 import { useBranding } from "../../../contexts/TerritoryContext";
+import { toast } from "../../../lib/toast";
 
 interface HeroProfileProps {
   user: Pick<User, "avatar" | "pseudo" | "coverPhoto"> | null;
@@ -91,7 +92,7 @@ export default function HeroProfile({ user, isOwnProfile = true }: HeroProfilePr
         `Impossible d'envoyer la photo (${target})`,
         error instanceof Error ? error.message : "Erreur inconnue",
       );
-      window.alert("La photo n'a pas pu être envoyée.");
+      toast.error("La photo n'a pas pu être envoyée.");
     } finally {
       setIsUploading(null);
     }

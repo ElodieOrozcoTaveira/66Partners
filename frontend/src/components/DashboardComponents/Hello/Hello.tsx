@@ -8,6 +8,7 @@ import { formatRelativeTime } from "../../../lib/dateFormat";
 import ImageCropModal from "../../ProfilPage/ImageCropModal/ImageCropModal";
 import "./Hello.scss";
 import { useBranding } from "../../../contexts/TerritoryContext";
+import { toast } from "../../../lib/toast";
 
 function greeting(now = new Date()): string {
   const hour = now.getHours();
@@ -97,7 +98,7 @@ export default function Hello({ pseudo, avatar, coverPhoto, children }: HelloPro
         "Impossible d'envoyer la photo",
         error instanceof Error ? error.message : "Erreur inconnue",
       );
-      window.alert("La photo n'a pas pu être envoyée.");
+      toast.error("La photo n'a pas pu être envoyée.");
     } finally {
       setIsUploading(false);
     }

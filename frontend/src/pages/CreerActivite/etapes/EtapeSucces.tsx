@@ -1,6 +1,7 @@
 import { PartyPopper, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useBranding } from "../../../contexts/TerritoryContext";
+import { toast } from "../../../lib/toast";
 
 interface EtapeSuccesProps {
   title: string;
@@ -27,9 +28,9 @@ export default function EtapeSucces({ title }: EtapeSuccesProps) {
 
     try {
       await navigator.clipboard.writeText(shareData.text);
-      window.alert("Le message a été copié dans le presse-papiers.");
+      toast.success("Le message a été copié dans le presse-papiers.");
     } catch {
-      window.alert("Impossible de partager l'activité pour le moment.");
+      toast.error("Impossible de partager l'activité pour le moment.");
     }
   }
 

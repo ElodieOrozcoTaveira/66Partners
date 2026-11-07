@@ -72,6 +72,10 @@ export const resetPasswordSchema = z.object({
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
+export const verifyEmailSchema = z.object({
+  token: z.string().min(32, "Lien de confirmation invalide").max(128, "Lien de confirmation invalide"),
+});
+
 /**
  * POST /auth/google
  */

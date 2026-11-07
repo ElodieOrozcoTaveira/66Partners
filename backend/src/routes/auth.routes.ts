@@ -8,6 +8,8 @@ import {
   loginLimiter,
   registerLimiter,
   resetPasswordLimiter,
+  verifyEmailLimiter,
+  resendVerificationLimiter,
 } from "../middlewares/rateLimit.middleware.js";
 import {
   forgotPasswordSchema,
@@ -17,6 +19,7 @@ import {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
 } from "../validations/auth.validations.js";
 
 /*
@@ -51,6 +54,13 @@ router.post(
   resetPasswordLimiter,
   validateBody(resetPasswordSchema),
   AuthController.resetPassword
+);
+router.post("/verify-email", verifyEmailLimiter, validateBody(verifyEmailSchema), AuthController.verifyEmail);
+router.post(
+  "/resend-verification",
+  requireAuth,
+  resendVerificationLimiter,
+  AuthController.resendVerification
 );
 router.post(
   "/google",

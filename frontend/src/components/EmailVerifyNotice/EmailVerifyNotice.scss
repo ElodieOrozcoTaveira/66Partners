@@ -1,0 +1,120 @@
+@use "../../styles/variables/variables.scss";
+@use "../../styles/mixins/mixins.scss";
+
+.email-verify {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  box-sizing: border-box;
+
+  &--banner {
+    margin: 0;
+    padding: 0.85rem 2.6rem 0.85rem 0.9rem;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--brand-accent, #FFCC00) 16%, white);
+    border: 1px solid color-mix(in srgb, var(--brand-accent, #FFCC00) 45%, white);
+
+  }
+
+  &--gate {
+    @include mixins.carte;
+    flex-direction: column;
+    align-items: center;
+    max-width: 30rem;
+    margin: 2rem auto;
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: #ffffff;
+    color: variables.$rouge;
+
+    .email-verify--gate & {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      @include mixins.gradient;
+      color: #ffffff;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    min-width: 0;
+
+    .email-verify--gate & {
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    strong {
+      font-family: "Manrope", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: variables.$encre;
+
+      .email-verify--gate & {
+        font-size: 1.25rem;
+      }
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: variables.$texte2;
+    }
+  }
+
+  &__email {
+    font-weight: 700;
+    color: variables.$encre;
+    overflow-wrap: anywhere;
+  }
+
+  &__resend {
+    margin-top: 0.35rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 999px;
+    @include mixins.gradient;
+    color: #ffffff;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+  }
+
+  &__close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    color: variables.$texte2;
+    cursor: pointer;
+  }
+}
