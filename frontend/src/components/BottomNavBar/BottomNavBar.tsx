@@ -31,7 +31,7 @@ export default function BottomNavBar() {
     return (
       <NavLink key={to} to={to} className="container-bottomNavbar__link">
         <span className="container-bottomNavbar__icon-wrap">
-          <Icon size={20} strokeWidth={2} />
+          <Icon size={21} strokeWidth={2.1} />
           {badgeCount > 0 && (
             <span className="container-bottomNavbar__badge">
               {badgeCount > 9 ? "9+" : badgeCount}
@@ -45,14 +45,14 @@ export default function BottomNavBar() {
 
   return createPortal(
     <div className="container-bottomNavbar">
-      <nav className="container-bottomNavbar__nav">
+      <nav className="container-bottomNavbar__nav" aria-label="Navigation principale">
         {NAV_ITEMS_LEFT.map(renderItem)}
         <NavLink
           to="/mesactivités/nouvelle"
           className="container-bottomNavbar__create"
           aria-label="Créer une activité"
         >
-          <Plus size={22} strokeWidth={2.4} />
+          <Plus size={24} strokeWidth={2.6} />
         </NavLink>
         {NAV_ITEMS_RIGHT.map(renderItem)}
       </nav>

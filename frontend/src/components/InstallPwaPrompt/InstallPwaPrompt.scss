@@ -22,7 +22,7 @@
   animation: install-pwa-in 0.35s ease both;
 
   &--with-bottom-nav {
-    bottom: calc(env(safe-area-inset-bottom) + 76px);
+    bottom: calc(env(safe-area-inset-bottom) + 112px);
 
     @media (min-width: variables.$tablet) {
       // La bottom nav n'existe qu'en mobile (cf. BottomNavBar.scss).
