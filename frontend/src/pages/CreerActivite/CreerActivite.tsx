@@ -5,6 +5,8 @@ import { ArrowLeft } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "../../lib/axios";
 import { useTerritory } from "../../contexts/TerritoryContext";
+import { useAuth } from "../../contexts/AuthContext";
+import EmailVerifyNotice from "../../components/EmailVerifyNotice/EmailVerifyNotice";
 import type { ActivityLevel } from "../../lib/activityLabels";
 import EtapeInfos from "./etapes/EtapeInfos";
 import EtapeLieuDate from "./etapes/EtapeLieuDate";
@@ -61,6 +63,7 @@ const TOTAL_STEPS = STEP_META.length;
 
 export default function CreerActivite() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { activeTerritory } = useTerritory();
   const [step, setStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -176,6 +179,21 @@ export default function CreerActivite() {
   }
 
   const meta = STEP_META[step - 1];
+
+  // Organiser une sortie demande une adresse email confirmée (contrôlé aussi
+  // côté serveur) : on le dit avant le formulaire, pas au dernier clic.
+  if (user?.emailVerified === false) {
+    return (
+      <div className="creer-activite">
+        <header className="creer-activite__header">
+          <button type="button" className="creer-activite__back" onClick={() => navigate(-1)} aria-label="Retour">
+            <ArrowLeft size={20} />
+          </button>
+        </header>
+        <EmailVerifyNotice variant="gate" />
+      </div>
+    );
+  }
 
   return (
     <div className="creer-activite">

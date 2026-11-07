@@ -1,2 +1,14 @@
+# Pages publiques ouvertes aux moteurs de recherche ; espace membre et
+# administration exclus (contenu privé, réservé aux comptes connectés).
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /messages
+Disallow: /mesactivit
+Disallow: /explorer
+Disallow: /activities/
+Disallow: /reinitialiser-mot-de-passe
+
+Sitemap: https://66partners.fr/sitemap.xml

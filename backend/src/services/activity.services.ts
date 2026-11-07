@@ -123,6 +123,21 @@ export class ActivityService {
   ): Promise<Activity> {
     await assertSportExists(data.sportId);
 
+    // Organiser une sortie demande une adresse email confirmée (limite les
+    // faux comptes) ; rejoindre une sortie reste possible sans.
+    const [creator] = await db
+      .select({ emailVerifiedAt: users.emailVerifiedAt })
+      .from(users)
+      .where(eq(users.id, creatorId))
+      .limit(1);
+    if (creator && !creator.emailVerifiedAt) {
+      throw new ActivityError(
+        "Confirme ton adresse email pour organiser une sortie : clique sur le lien reçu à l'inscription.",
+        "EMAIL_NOT_VERIFIED",
+        403
+      );
+    }
+
     // Activité réservée : l'organisateur doit lui-même en faire partie
     // (une sortie "entre femmes" est organisée par une femme).
     if (data.audience && data.audience !== "ALL") {

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Ban } from "lucide-react";
+import { Ban, Unlock } from "lucide-react";
 import { fetchMyBlocks, moderationErrorMessage, unblockUser, type BlockedMember } from "../../../api/moderation";
 import { useBranding } from "../../../contexts/TerritoryContext";
+import ConfirmDialog from "../../ConfirmDialog/ConfirmDialog";
 import "./MembresBloques.scss";
 
 /** Membres bloqués (mon profil) : même liste que dans l'app mobile, avec déblocage. */
@@ -10,6 +11,7 @@ export default function MembresBloques() {
   const [blocks, setBlocks] = useState<BlockedMember[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  const [toUnblock, setToUnblock] = useState<BlockedMember | null>(null);
 
   const load = useCallback(() => {
     fetchMyBlocks()
@@ -25,13 +27,11 @@ export default function MembresBloques() {
   }, [load]);
 
   async function unblock(member: BlockedMember) {
-    if (!window.confirm(`Débloquer ${member.pseudo} ? Vous pourrez de nouveau voir vos profils, activités et messages respectifs.`)) {
-      return;
-    }
     setPending(member.userId);
     try {
       await unblockUser(member.userId);
       setBlocks((current) => current?.filter((item) => item.userId !== member.userId) ?? null);
+      setToUnblock(null);
     } catch (err) {
       setError(moderationErrorMessage(err, "Le déblocage n'a pas pu aboutir."));
     } finally {
@@ -57,13 +57,26 @@ export default function MembresBloques() {
             <li key={member.userId}>
               <img src={member.avatar || asset("avatarDefault")} alt="" />
               <span>{member.pseudo}</span>
-              <button type="button" onClick={() => void unblock(member)} disabled={pending !== null}>
+              <button type="button" onClick={() => setToUnblock(member)} disabled={pending !== null}>
                 {pending === member.userId ? "..." : "Débloquer"}
               </button>
             </li>
           ))}
         </ul>
       </div>
+      <ConfirmDialog
+        isOpen={toUnblock !== null}
+        title={toUnblock ? `Débloquer ${toUnblock.pseudo} ?` : ""}
+        description="Vous pourrez de nouveau voir vos profils, activités et messages respectifs."
+        confirmWord={null}
+        confirmLabel="Débloquer"
+        submittingLabel="Déblocage..."
+        icon={<Unlock size={22} strokeWidth={2.2} />}
+        isSubmitting={pending !== null}
+        errorMessage={null}
+        onConfirm={() => toUnblock && void unblock(toUnblock)}
+        onCancel={() => setToUnblock(null)}
+      />
     </div>
   );
 }

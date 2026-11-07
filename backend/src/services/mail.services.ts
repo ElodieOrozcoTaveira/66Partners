@@ -1,6 +1,7 @@
 import "dotenv/config";
 import nodemailer from "nodemailer";
 import { welcomeEmailTemplate } from "./emailTemplates/welcome.template.js";
+import { verifyEmailTemplate } from "./emailTemplates/verifyEmail.template.js";
 import { resetPasswordEmailTemplate } from "./emailTemplates/resetPassword.template.js";
 import { accountDeletedEmailTemplate } from "./emailTemplates/accountDeleted.template.js";
 import { stravaLinkedEmailTemplate } from "./emailTemplates/stravaLinked.template.js";
@@ -30,6 +31,20 @@ export async function sendWelcomeEmail(
     to: user.email,
     subject: `Bienvenue sur ${brand.brandName} 🎉`,
     html: welcomeEmailTemplate(user.pseudo, brand),
+  });
+}
+
+export async function sendVerifyEmail(
+  user: { email: string; pseudo: string },
+  verifyUrl: string,
+  brand: TerritoryBrand,
+) {
+  await transporter.sendMail({
+    from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
+    replyTo: "contact@66partners.fr",
+    to: user.email,
+    subject: `Bienvenue sur ${brand.brandName} : confirme ton adresse email`,
+    html: verifyEmailTemplate(user.pseudo, verifyUrl, brand),
   });
 }
 

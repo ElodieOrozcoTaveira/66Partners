@@ -95,6 +95,19 @@ export const resetPasswordLimiter = createAuthRateLimiter({
   message: "Trop de tentatives. Réessaie dans quelques minutes.",
 });
 
+export const verifyEmailLimiter = createAuthRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  message: "Trop de tentatives. Réessaie dans quelques minutes.",
+});
+
+// Renvoi du lien de confirmation : 3 emails par heure au plus.
+export const resendVerificationLimiter = createAuthRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 3,
+  message: "Trop de demandes d'envoi. Réessaie dans une heure.",
+});
+
 // Pas de keyGenerator email : le credential Google est un jeton opaque, pas
 // un email en clair dans le corps de la requête — limite par IP seule,
 // comme resetPasswordLimiter.

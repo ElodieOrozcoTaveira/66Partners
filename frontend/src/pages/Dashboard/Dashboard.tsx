@@ -8,6 +8,7 @@ import MesSportsCard from "../../components/DashboardComponents/MesSportsCard/Me
 import ProchainesActivites from "../../components/DashboardComponents/ProchainesActivites/ProchainesActivites";
 import PushNotificationsPrompt from "../../components/DashboardComponents/PushNotificationsPrompt/PushNotificationsPrompt";
 import { useAuth } from "../../contexts/AuthContext";
+import EmailVerifyNotice from "../../components/EmailVerifyNotice/EmailVerifyNotice";
 import { useBranding, useTerritory } from "../../contexts/TerritoryContext";
 import { useUserLocation } from "../../hooks/useUserLocation";
 import { useNearbyCount } from "../../hooks/useNearbyCount";
@@ -141,6 +142,7 @@ export default function Dashboard() {
             isLoading={activitiesLoading}
           />
         </div>
+        <EmailVerifyNotice />
         <PushNotificationsPrompt />
         <DashboardStats
           activities={allActivities}

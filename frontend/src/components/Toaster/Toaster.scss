@@ -1,0 +1,88 @@
+@use "../../styles/variables/variables.scss";
+
+.toaster {
+  position: fixed;
+  z-index: 3000;
+  left: 50%;
+  bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(420px, calc(100vw - 24px));
+  transform: translateX(-50%);
+  pointer-events: none;
+
+  @media (min-width: variables.$tablet) {
+    bottom: 28px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 0.6rem 0.75rem 0.9rem;
+    border-radius: 16px;
+    background: variables.$encre;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+    box-shadow: variables.$ombre-flottante;
+    pointer-events: auto;
+    animation: toaster-in 0.25s ease;
+
+    span {
+      flex: 1;
+    }
+
+    > svg {
+      flex-shrink: 0;
+    }
+
+    &--success > svg {
+      color: #4ade80;
+    }
+
+    &--error > svg {
+      color: #fca5a5;
+    }
+
+    &--info > svg {
+      color: #93c5fd;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      cursor: pointer;
+    }
+  }
+}
+
+@keyframes toaster-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toaster__item {
+    animation: none;
+  }
+}

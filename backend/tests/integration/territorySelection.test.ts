@@ -1,12 +1,16 @@
 import { jest } from "@jest/globals";
 
 // mail.services.ts mocké AVANT tout import de src/app.js (aucun SMTP réel).
+const mockSendVerifyEmail = jest
+  .fn<(user: unknown, verifyUrl: string, brand: unknown) => Promise<void>>()
+  .mockResolvedValue(undefined);
 const mockSendWelcomeEmail = jest
   .fn<(user: { email: string; pseudo: string }, brand: { brandName: string; territoryName: string }) => Promise<void>>()
   .mockResolvedValue(undefined);
 
 jest.unstable_mockModule("../../src/services/mail.services.js", () => ({
   sendStravaLinkedEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  sendVerifyEmail: mockSendVerifyEmail,
   sendWelcomeEmail: mockSendWelcomeEmail,
   sendResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   sendAdminResetPasswordEmail: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
@@ -64,6 +68,7 @@ async function resetTerritory34(isActive: boolean) {
 beforeEach(async () => {
   await resetAll();
   mockSendWelcomeEmail.mockClear();
+  mockSendVerifyEmail.mockClear();
   await resetTerritory34(true);
 });
 
@@ -114,12 +119,12 @@ describe("Inscription et territoire principal choisi", () => {
     expect(rows).toHaveLength(0);
   });
 
-  it("l'email de bienvenue utilise le branding du territoire choisi", async () => {
+  it("l'email de bienvenue (avec lien de confirmation) utilise le branding du territoire choisi", async () => {
     await request(app).post("/api/auth/register").send(registerBody("tbrand@test.com", { territoryCode: "34" }));
     await new Promise((resolve) => setTimeout(resolve, 50));
 
-    expect(mockSendWelcomeEmail).toHaveBeenCalledTimes(1);
-    expect(mockSendWelcomeEmail.mock.calls[0]![1]).toEqual({
+    expect(mockSendVerifyEmail).toHaveBeenCalledTimes(1);
+    expect(mockSendVerifyEmail.mock.calls[0]![2]).toEqual({
       brandName: "34Partners",
       territoryName: "Hérault",
     });

@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminAccessGate from "./components/AdminAccessGate";
 import UpdateBanner from "./components/UpdateBanner/UpdateBanner";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
+import Toaster from "./components/Toaster/Toaster";
 import Home from "./pages/Home/Home";
 
 // Code splitting par route (cf. audit performance — P1) : toutes les pages
@@ -41,6 +42,7 @@ const MesActivités = lazy(() => import("./pages/MesActivités/MesActivités"));
 const CreerActivite = lazy(() => import("./pages/CreerActivite/CreerActivite"));
 const DetailActivite = lazy(() => import("./pages/DetailActivite/DetailActivite"));
 const MotDePasseOublie = lazy(() => import("./pages/MotDePasseOublie/MotDePasseOublie"));
+const VerifierEmail = lazy(() => import("./pages/VerifierEmail/VerifierEmail"));
 const ReinitialiserMotDePasse = lazy(
   () => import("./pages/ReinitialiserMotDePasse/ReinitialiserMotDePasse"),
 );
@@ -77,6 +79,7 @@ export default function App() {
         <TerritoryProvider>
         <NotificationsProvider>
         <UpdateBanner />
+        <Toaster />
         <ErrorBoundary>
         <Routes>
           <Route element={<Layout />}>
@@ -90,6 +93,7 @@ export default function App() {
             <Route path="/mentionslegales" element={<Suspense fallback={<RouteFallback />}><MentionsLegales/></Suspense>} />
             <Route path="/mot-de-passe-oublie" element={<Suspense fallback={<RouteFallback />}><MotDePasseOublie/></Suspense>} />
             <Route path="/reinitialiser-mot-de-passe" element={<Suspense fallback={<RouteFallback />}><ReinitialiserMotDePasse/></Suspense>} />
+            <Route path="/verifier-email" element={<Suspense fallback={<RouteFallback />}><VerifierEmail/></Suspense>} />
 
            <Route path="/fonctionnement" element={<Suspense fallback={<RouteFallback />}><Fonctionnement /></Suspense>} />                        {/*<Route path="/about" element= {<About />}*/}
 

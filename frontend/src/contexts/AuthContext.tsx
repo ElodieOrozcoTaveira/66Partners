@@ -22,6 +22,8 @@ export type User = {
   /** Genre déclaré (facultatif, jamais public) — renvoyé uniquement par
    *  GET /api/users/me ; null = « je préfère ne pas préciser ». */
   gender?: Gender | null;
+  /** Adresse email confirmée (absent si l'API ne le renvoie pas encore). */
+  emailVerified?: boolean;
   createdAt: string;
 };
 

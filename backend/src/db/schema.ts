@@ -44,6 +44,11 @@ export const users = pgTable("users", {
   coverPhoto: varchar("cover_photo", { length: 255 }),
   resetPasswordTokenHash: varchar("reset_password_token_hash", { length: 64 }),
   resetPasswordExpiresAt: timestamp("reset_password_expires_at"),
+  // Adresse email confirmée (lien reçu à l'inscription) ; null tant qu'elle
+  // ne l'est pas. Comptes Google : confirmée d'office (email vérifié par Google).
+  emailVerifiedAt: timestamp("email_verified_at"),
+  emailVerificationTokenHash: varchar("email_verification_token_hash", { length: 64 }),
+  emailVerificationExpiresAt: timestamp("email_verification_expires_at"),
   // Preuve d'acceptation explicite des CGU/Mentions légales/Politique de
   // confidentialité à l'inscription (cf. P1 audit RGPD). Nullable : les
   // comptes créés avant l'introduction de cette exigence n'ont pas cette

@@ -132,6 +132,42 @@ export class AuthController {
     }
   }
 
+  /** POST /api/auth/verify-email : confirme l'adresse email. */
+  static async verifyEmail(req: Request, res: Response): Promise<void> {
+    try {
+      await AuthService.verifyEmail(req.body.token);
+      res.status(200).json({ success: true, message: "Ton adresse email est confirmée." });
+    } catch (error) {
+      if (error instanceof AuthError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+      console.error("Erreur lors de la confirmation de l'email:", error);
+      res.status(500).json({ success: false, message: "Erreur interne lors de la confirmation de l'email" });
+    }
+  }
+
+  /** POST /api/auth/resend-verification : renvoie le lien de confirmation. */
+  static async resendVerification(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { alreadyVerified } = await AuthService.resendVerification(req.userId!);
+      res.status(200).json({
+        success: true,
+        alreadyVerified,
+        message: alreadyVerified
+          ? "Ton adresse email est déjà confirmée."
+          : "Un nouveau lien de confirmation vient de t'être envoyé.",
+      });
+    } catch (error) {
+      if (error instanceof AuthError) {
+        res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });
+        return;
+      }
+      console.error("Erreur lors du renvoi du lien de confirmation:", error);
+      res.status(500).json({ success: false, message: "Impossible d'envoyer l'email pour le moment." });
+    }
+  }
+
   /**
    * GET /api/auth/me
    * Récupérer le profil de l'utilisateur authentifié (via le token JWT)
