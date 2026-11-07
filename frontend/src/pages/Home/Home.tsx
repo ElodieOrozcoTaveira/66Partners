@@ -20,6 +20,7 @@ import ActivitésProche from "../../components/HomeComponents/ActivitésProche/A
 import HowItWorks from "../../components/HomeComponents/HowItWorks/HowItWorks";
 import PourquoiHome from "../../components/HomeComponents/Pourquoi/PourquoiHome";
 import NouveauLook, { NOUVEAU_LOOK_ID } from "../../components/HomeComponents/NouveauLook/NouveauLook";
+import SuisNous from "../../components/HomeComponents/Facebook/SuisNous";
 import { useBranding } from "../../contexts/TerritoryContext";
 
 export default function Home() {
@@ -126,6 +127,7 @@ export default function Home() {
       </Suspense>
 
       <ActivitésProche />
+      <SuisNous />
       <HowItWorks />
       <Bento />
       <PourquoiHome />
