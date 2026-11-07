@@ -1,0 +1,355 @@
+@use "../../../styles/variables/variables.scss";
+@use "../../../styles/mixins/mixins.scss";
+
+$facebook: #1877F2;
+
+.suis-nous {
+  padding: 1.5rem 0 2.5rem;
+
+  &__card {
+    position: relative;
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+    padding: 2rem 1.5rem 0;
+    border-radius: 32px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 100% 0%, color-mix(in srgb, #{$facebook} 16%, transparent), transparent 55%),
+      radial-gradient(circle at 0% 100%, variables.alpha(variables.$rouge, 8%), transparent 50%),
+      #ffffff;
+    border: 1px solid variables.$bordure;
+    box-shadow: variables.$ombre-carte;
+
+    @media (min-width: variables.$laptop) {
+      grid-template-columns: 1.15fr 0.85fr;
+      padding: 3rem 3.5rem 0;
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
+
+    @media (min-width: variables.$laptop) {
+      padding-bottom: 3rem;
+    }
+
+    > p {
+      margin: 0;
+      max-width: 34rem;
+      line-height: 1.6;
+      color: variables.$texte2;
+    }
+  }
+
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, #{$facebook} 10%, white);
+    color: $facebook;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__titre {
+    @include mixins.display(clamp(1.9rem, 4vw, 2.8rem));
+    margin: 0;
+  }
+
+  &__prompts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__prompt {
+    --tone: #{$facebook};
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px 999px 999px 6px;
+    background: #ffffff;
+    border: 1px solid variables.$bordure;
+    box-shadow: 0 4px 12px rgba(17, 19, 24, 0.05);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: variables.$encre;
+
+    svg {
+      color: var(--tone);
+    }
+
+    &--love {
+      --tone: #e0245e;
+    }
+
+    &--fix {
+      --tone: #f08a00;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    margin-top: 0.3rem;
+  }
+
+  &__facebook {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.85rem 1.4rem;
+    border-radius: 999px;
+    background: $facebook;
+    color: #ffffff;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.98rem;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 10px 24px color-mix(in srgb, #{$facebook} 30%, transparent);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px color-mix(in srgb, #{$facebook} 36%, transparent);
+    }
+  }
+
+  &__contact {
+    color: variables.$texte2;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+
+    &:hover {
+      color: variables.$encre;
+    }
+  }
+
+  &__visual {
+    display: flex;
+    justify-content: center;
+    align-self: end;
+    text-decoration: none;
+  }
+}
+
+// ─── Téléphone avec la page Facebook (illustration) ──────────────────────
+.fb-phone {
+  position: relative;
+  width: 270px;
+  height: 470px;
+  margin-bottom: -60px;
+  padding: 11px;
+  border-radius: 42px 42px 0 0;
+  background: #0b0c0f;
+  box-shadow: 0 30px 70px rgba(17, 19, 24, 0.25);
+  transform: rotate(-3deg);
+  transform-origin: 50% 100%;
+  transition: transform 0.3s ease;
+
+  .suis-nous__visual:hover & {
+    transform: rotate(0deg) translateY(-6px);
+  }
+
+  &__notch {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    z-index: 2;
+    width: 80px;
+    height: 22px;
+    border-radius: 999px;
+    background: #0b0c0f;
+    transform: translateX(-50%);
+  }
+
+  &__screen {
+    height: 100%;
+    border-radius: 32px 32px 0 0;
+    background: #f0f2f5;
+    overflow: hidden;
+    font-family: "Inter", sans-serif;
+    color: #1c1e21;
+  }
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 2.4rem 0.75rem 0.55rem;
+    background: #ffffff;
+    color: $facebook;
+
+    svg:last-child {
+      color: #65676b;
+    }
+  }
+
+  &__search {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: 999px;
+    background: #f0f2f5;
+    color: #65676b;
+    font-size: 0.62rem;
+  }
+
+  &__cover {
+    height: 104px;
+    background-size: cover;
+    background-position: center 30%;
+  }
+
+  &__identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0 0.75rem 0.7rem;
+    background: #ffffff;
+    text-align: center;
+
+    strong {
+      margin-top: 0.3rem;
+      font-family: "Manrope", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    small {
+      font-size: 0.6rem;
+      color: #65676b;
+    }
+  }
+
+  &__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 62px;
+    margin-top: -31px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    background: linear-gradient(135deg, #f5832a, #c4121a);
+    overflow: hidden;
+
+    img {
+      width: 86%;
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.45rem;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 7px;
+    background: #e4e6eb;
+    font-size: 0.62rem;
+    font-weight: 700;
+
+    &--primary {
+      background: $facebook;
+      color: #ffffff;
+    }
+  }
+
+  &__post {
+    margin-top: 0.45rem;
+    padding: 0.6rem 0.7rem 0.4rem;
+    background: #ffffff;
+
+    p {
+      margin: 0.4rem 0;
+      font-size: 0.66rem;
+      line-height: 1.4;
+    }
+  }
+
+  &__post-head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    strong {
+      display: block;
+      font-size: 0.66rem;
+    }
+
+    small {
+      font-size: 0.55rem;
+      color: #65676b;
+    }
+  }
+
+  &__mini-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f5832a, #c4121a);
+    overflow: hidden;
+
+    img {
+      width: 86%;
+    }
+  }
+
+  &__photo {
+    height: 96px;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 0.4rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid #e4e6eb;
+    color: #65676b;
+    font-size: 0.58rem;
+    font-weight: 700;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fb-phone {
+    transition: none;
+  }
+}
