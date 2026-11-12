@@ -64,7 +64,8 @@
 
   @media (min-width: variables.$tablet) {
     max-width: 620px;
-    padding: 1.5rem 2rem 0;
+    // Dégage la barre du bas (tablette en vertical, cf. BottomNavBar.scss).
+    padding: 1.5rem 2rem calc(120px + env(safe-area-inset-bottom));
     gap: 1.1rem;
   }
 

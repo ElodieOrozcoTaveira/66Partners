@@ -21,20 +21,25 @@
   color: variables.$texte;
   animation: install-pwa-in 0.35s ease both;
 
-  &--with-bottom-nav {
-    bottom: calc(env(safe-area-inset-bottom) + 112px);
-
-    @media (min-width: variables.$tablet) {
-      // La bottom nav n'existe qu'en mobile (cf. BottomNavBar.scss).
-      bottom: 1.5rem;
-    }
-  }
-
   @media (min-width: variables.$tablet) {
     left: auto;
     right: 1.5rem;
     bottom: 1.5rem;
     width: 380px;
+  }
+
+  // Placé après la règle ci-dessus pour la remplacer : au-dessus de la barre
+  // du bas (téléphone et tablette en vertical, cf. BottomNavBar.scss).
+  &--with-bottom-nav {
+    bottom: calc(env(safe-area-inset-bottom) + 112px);
+
+    @media (min-width: variables.$tablet) {
+      bottom: calc(env(safe-area-inset-bottom) + 124px);
+    }
+
+    @media (min-width: variables.$laptop) {
+      bottom: 1.5rem;
+    }
   }
 
   &__close {

@@ -11,8 +11,8 @@
   z-index: 1000;
   pointer-events: none;
 
-  // À partir de la tablette, la navigation passe par le Header (cf. Header.scss).
-  @media (min-width: variables.$tablet) {
+  // À partir du laptop, la navigation passe par le Header (cf. Header.scss).
+  @media (min-width: variables.$laptop) {
     display: none;
   }
 }
@@ -158,5 +158,48 @@
 @media (prefers-reduced-motion: reduce) {
   .container-bottomNavbar__link.active .container-bottomNavbar__icon-wrap {
     animation: none;
+  }
+}
+
+// ─── Tablette en vertical (iPad) : barre plus large et plus grande ───────
+@media (min-width: variables.$tablet) {
+  .container-bottomNavbar {
+    bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .container-bottomNavbar__nav {
+    max-width: 600px;
+    height: 76px;
+    padding: 0 0.75rem;
+    border-radius: 30px;
+  }
+
+  .container-bottomNavbar__link {
+    gap: 0.25rem;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .container-bottomNavbar__icon-wrap {
+    width: 58px;
+    height: 34px;
+  }
+
+  .container-bottomNavbar__label {
+    font-size: 0.74rem;
+  }
+
+  .container-bottomNavbar__create {
+    width: 64px;
+    height: 64px;
+    margin-top: -30px;
+
+    svg {
+      width: 28px;
+      height: 28px;
+    }
   }
 }

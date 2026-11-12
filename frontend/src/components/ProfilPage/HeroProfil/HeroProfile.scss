@@ -27,15 +27,23 @@
   position: relative;
   border-radius: 0 0 28px 28px;
 
+  // Tablette en vertical : comme sur téléphone, la couverture prend toute
+  // la largeur, collée sous l'en-tête.
   @media (min-width: variables.$tablet) {
+    min-height: 300px;
+    padding-top: 1rem;
+  }
+
+  // Ordinateur : couverture en carte arrondie, centrée.
+  @media (min-width: variables.$laptop) {
     width: min(1120px, 100% - 2.5rem);
     margin: 1.25rem auto 0;
-    min-height: 260px;
     border-radius: 28px;
   }
 
   @media (min-width: variables.$laptop) {
     min-height: 280px;
+    padding-top: calc(1rem + env(safe-area-inset-top));
   }
 
   @media (min-width: variables.$desktop) {
@@ -61,6 +69,12 @@
     // droite (mer/paysage, sans perte de contenu important).
     @media (max-width: (variables.$tablet - 1px)) {
       background-position: left top;
+    }
+
+    // Tablette : boîte pleine largeur bien plus large que haute, recadrage
+    // vertical comme sur laptop.
+    @media (min-width: variables.$tablet) {
+      background-position: center 20%;
     }
 
     @media (min-width: variables.$laptop) {
