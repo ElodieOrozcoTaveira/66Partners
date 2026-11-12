@@ -134,6 +134,12 @@
     background-color: transparent;
     color: #ffffff;
   }
+
+  // À partir de la tablette, l'en-tête (avec son propre menu) est visible :
+  // pas de second bouton de menu sur la couverture.
+  @media (min-width: variables.$tablet) {
+    display: none;
+  }
 }
 
 .hero-profile__coverEdit {

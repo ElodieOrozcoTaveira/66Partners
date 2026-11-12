@@ -282,10 +282,10 @@
   }
 }
 
-// À partir de la tablette, la navigation passe par le Header (liens visibles,
-// cf. Header.scss) plutôt que par le burger — cohérent avec la bottom nav qui
-// disparaît elle aussi à ce même seuil (cf. BottomNavBar.scss).
-@media (min-width: variables.$tablet) {
+// À partir du laptop (1024 px), la navigation passe par le Header (liens
+// visibles, cf. Header.scss) plutôt que par le burger. En dessous (téléphone,
+// iPad en vertical), c'est le burger.
+@media (min-width: variables.$laptop) {
   .navbar {
     display: none;
   }
