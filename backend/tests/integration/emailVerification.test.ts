@@ -29,7 +29,7 @@ async function register(email: string) {
     pseudo: "Nouvelle",
     email,
     password: PASSWORD,
-    termsAccepted: true,
+    termsAccepted: true, birthDate: "1990-05-15",
     territoryCode: "66",
   });
 }

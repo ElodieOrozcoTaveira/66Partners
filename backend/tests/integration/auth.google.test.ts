@@ -157,7 +157,7 @@ describe("POST /api/auth/google/complete", () => {
 
     const res = await request(app)
       .post("/api/auth/google/complete")
-      .send({ credential: "tok", termsAccepted: true });
+      .send({ credential: "tok", termsAccepted: true, birthDate: "1990-05-15" });
 
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
@@ -208,6 +208,7 @@ describe("POST /api/auth/google/complete", () => {
       const created = await AuthService.completeGoogleSignup(
         { sub: `sub-${randomUUID()}`, email, emailVerified: true },
         true,
+        "1990-05-15",
         "34",
       );
 
@@ -229,6 +230,7 @@ describe("POST /api/auth/google/complete", () => {
         AuthService.completeGoogleSignup(
           { sub: `sub-${randomUUID()}`, email, emailVerified: true },
           true,
+          "1990-05-15",
           "34",
         ),
       ).rejects.toMatchObject({ code: "TERRITORY_NOT_ACTIVE", statusCode: 400 });
@@ -245,7 +247,7 @@ describe("POST /api/auth/google/complete", () => {
     mockGoogleSuccess(googlePayload({ email }));
     const res = await request(app)
       .post("/api/auth/google/complete")
-      .send({ credential: "tok", termsAccepted: true });
+      .send({ credential: "tok", termsAccepted: true, birthDate: "1990-05-15" });
 
     expect(res.status).toBe(409);
     expect(res.body.code).toBe("EMAIL_ALREADY_REGISTERED");
@@ -279,7 +281,7 @@ describe("POST /api/auth/google/link", () => {
     const password = "Password123";
     await request(app)
       .post("/api/auth/register")
-      .send({ pseudo: "linkuser", email, password, termsAccepted: true });
+      .send({ pseudo: "linkuser", email, password, termsAccepted: true, birthDate: "1990-05-15" });
     const loginRes = await request(app).post("/api/auth/login").send({ email, password });
     const token = loginRes.body.token as string;
     const userId = loginRes.body.user.id as string;
@@ -316,7 +318,7 @@ describe("POST /api/auth/google/link", () => {
     const password = "Password123";
     await request(app)
       .post("/api/auth/register")
-      .send({ pseudo: "attacker", email: attackerEmail, password, termsAccepted: true });
+      .send({ pseudo: "attacker", email: attackerEmail, password, termsAccepted: true, birthDate: "1990-05-15" });
     const loginRes = await request(app)
       .post("/api/auth/login")
       .send({ email: attackerEmail, password });
@@ -407,7 +409,7 @@ describe("Avatar Google", () => {
 
     const res = await request(app)
       .post("/api/auth/google/complete")
-      .send({ credential: "tok", termsAccepted: true });
+      .send({ credential: "tok", termsAccepted: true, birthDate: "1990-05-15" });
 
     expect(res.status).toBe(201);
     expect(res.body.user.avatar).toBe("https://lh3.googleusercontent.com/a/ACg8ocExample=s400-c");
@@ -422,7 +424,7 @@ describe("Avatar Google", () => {
 
     const res = await request(app)
       .post("/api/auth/google/complete")
-      .send({ credential: "tok", termsAccepted: true });
+      .send({ credential: "tok", termsAccepted: true, birthDate: "1990-05-15" });
 
     expect(res.status).toBe(201);
     expect(res.body.user.avatar).toBe("https://example.com/some/other/photo.jpg");
@@ -435,7 +437,7 @@ describe("Avatar Google", () => {
 
     const res = await request(app)
       .post("/api/auth/google/complete")
-      .send({ credential: "tok", termsAccepted: true });
+      .send({ credential: "tok", termsAccepted: true, birthDate: "1990-05-15" });
 
     expect(res.status).toBe(201);
     expect(res.body.user.avatar).toBeNull();
@@ -504,7 +506,7 @@ describe("Non-régression — login classique", () => {
     const password = "Password123";
     await request(app)
       .post("/api/auth/register")
-      .send({ pseudo: "regression", email, password, termsAccepted: true });
+      .send({ pseudo: "regression", email, password, termsAccepted: true, birthDate: "1990-05-15" });
 
     const res = await request(app).post("/api/auth/login").send({ email, password });
 

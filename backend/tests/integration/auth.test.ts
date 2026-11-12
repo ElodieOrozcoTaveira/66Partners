@@ -5,13 +5,14 @@ import app from "../../src/app.js";
 import { signToken } from "../../src/utils/jwt.js";
 import { resetUsers, closeTestDb } from "../helpers/db.js";
 import { createAuthRateLimiter } from "../../src/middlewares/rateLimit.middleware.js";
+import { ageOn, isRealDate } from "../../src/utils/age.js";
 
 
 const validRegisterBody = {
   pseudo: "testuser",
   email: "test@example.com",
   password: "Password123",
-  termsAccepted: true,
+  termsAccepted: true, birthDate: "1990-05-15",
 };
 
 beforeEach(async () => {
@@ -20,6 +21,58 @@ beforeEach(async () => {
 
 afterAll(async () => {
   await closeTestDb();
+});
+
+/** Date AAAA-MM-JJ d'il y a `years` ans (+ `days` jours), au calendrier de Paris. */
+function yearsAgo(years: number, days = 0): string {
+  const [y, m, d] = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" })
+    .format(new Date())
+    .split("-")
+    .map(Number);
+  const date = new Date(Date.UTC(y! - years, m! - 1, d! + days));
+  return date.toISOString().slice(0, 10);
+}
+
+describe("Inscription réservée aux 18 ans et plus", () => {
+  it("calcule l'âge au jour près", () => {
+    expect(ageOn(yearsAgo(18))).toBe(18);
+    expect(ageOn(yearsAgo(18, 1))).toBe(17);
+    expect(isRealDate("2001-02-30")).toBe(false);
+    expect(isRealDate("2000-02-29")).toBe(true);
+  });
+
+  it("refuse une inscription sans date de naissance", async () => {
+    const { birthDate: _omit, ...withoutBirthDate } = validRegisterBody;
+    const res = await request(app).post("/api/auth/register").send(withoutBirthDate);
+    expect(res.status).toBe(400);
+  });
+
+  it("refuse les moins de 18 ans, y compris la veille des 18 ans", async () => {
+    for (const birthDate of [yearsAgo(16), yearsAgo(18, 1)]) {
+      const res = await request(app)
+        .post("/api/auth/register")
+        .send({ ...validRegisterBody, birthDate });
+      expect(res.status).toBe(400);
+      expect(JSON.stringify(res.body)).toContain("18 ans");
+    }
+  });
+
+  it("refuse une date impossible ou dans le futur", async () => {
+    for (const birthDate of ["2001-02-30", "1800-01-01", yearsAgo(-1), "15/05/1990"]) {
+      const res = await request(app)
+        .post("/api/auth/register")
+        .send({ ...validRegisterBody, birthDate });
+      expect(res.status).toBe(400);
+    }
+  });
+
+  it("accepte le jour des 18 ans et enregistre la date", async () => {
+    const birthDate = yearsAgo(18);
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({ ...validRegisterBody, birthDate });
+    expect(res.status).toBe(201);
+  });
 });
 
 describe("POST /api/auth/register", () => {
@@ -225,7 +278,7 @@ describe("Rate limiting — login (P0-1)", () => {
     const email = `ratelimit_login_${randomUUID()}@example.com`;
     await request(app)
       .post("/api/auth/register")
-      .send({ pseudo: "rlLogin", email, password: "Password123", termsAccepted: true });
+      .send({ pseudo: "rlLogin", email, password: "Password123", termsAccepted: true, birthDate: "1990-05-15" });
 
     for (let i = 0; i < 10; i++) {
       const res = await request(app)

@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { isAxiosError } from "axios";
 import api from "../lib/axios";
 import { useAuth } from "../contexts/AuthContext";
+import { birthDateError } from "../lib/age";
 
 const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 
@@ -162,8 +163,13 @@ export function useGoogleAuth({ onSuccess }: UseGoogleAuthOptions) {
   );
 
   const completeSignup = useCallback(
-    async (termsAccepted: boolean, territoryCode?: string) => {
+    async (termsAccepted: boolean, territoryCode: string | undefined, birthDate: string) => {
       if (state.step !== "newAccount") return;
+      const birthDateProblem = birthDateError(birthDate);
+      if (birthDateProblem) {
+        setError(birthDateProblem);
+        return;
+      }
       if (!termsAccepted) {
         setError(
           "Tu dois accepter les Mentions Légales et la Politique de confidentialité pour créer un compte.",
@@ -176,6 +182,7 @@ export function useGoogleAuth({ onSuccess }: UseGoogleAuthOptions) {
         const res = await api.post<GoogleAuthApiResponse>("/api/auth/google/complete", {
           credential: state.credential,
           termsAccepted: true,
+          birthDate,
           ...(territoryCode ? { territoryCode } : {}),
         });
         const ok = await login(res.data.token!);

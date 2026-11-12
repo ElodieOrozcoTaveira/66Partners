@@ -31,7 +31,7 @@ const registerBody = (email: string, extra: Record<string, unknown> = {}) => ({
   pseudo: "Territorial",
   email,
   password: "Password123",
-  termsAccepted: true,
+  termsAccepted: true, birthDate: "1990-05-15",
   ...extra,
 });
 

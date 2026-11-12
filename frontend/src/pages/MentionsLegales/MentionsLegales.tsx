@@ -124,6 +124,20 @@ export function MentionsLegales() {
           gratuite.
         </p>
 
+        <h3 className="legal-subtitle-sm">Âge minimum : 18 ans</h3>
+        <p className="legal-text">
+          <strong className="legal-bold">
+            L'inscription et l'utilisation de la plateforme sont réservées
+            aux personnes majeures, âgées de 18 ans ou plus.
+          </strong>{' '}
+          Une date de naissance est demandée lors de l'inscription et
+          l'inscription est refusée aux personnes de moins de 18 ans. En
+          créant un compte, vous certifiez avoir au moins 18 ans et que la
+          date de naissance indiquée est exacte. Tout compte ouvert par une
+          personne mineure ou avec une fausse date de naissance pourra être
+          suspendu ou supprimé sans préavis.
+        </p>
+
         <h3 className="legal-subtitle-sm">Compte</h3>
         <p className="legal-text">
           Vous vous engagez à fournir des informations exactes, à garder

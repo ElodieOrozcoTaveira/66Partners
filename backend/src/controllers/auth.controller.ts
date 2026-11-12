@@ -253,7 +253,7 @@ export class AuthController {
     try {
       const { credential } = req.body;
       const profile = await verifyGoogleCredential(credential);
-      const newUser = await AuthService.completeGoogleSignup(profile, true, req.body.territoryCode);
+      const newUser = await AuthService.completeGoogleSignup(profile, true, req.body.birthDate, req.body.territoryCode);
       const token = signToken({ id: newUser.id });
 
       res.status(201).json({
