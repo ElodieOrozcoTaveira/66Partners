@@ -48,6 +48,6 @@ describe("nearbyLabel", () => {
   });
 });
 
-it("le rayon par défaut est de 25 km", () => {
-  expect(DEFAULT_SEARCH_RADIUS_KM).toBe(25);
+it("le rayon par défaut est de 50 km", () => {
+  expect(DEFAULT_SEARCH_RADIUS_KM).toBe(50);
 });

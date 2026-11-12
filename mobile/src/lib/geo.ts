@@ -1,7 +1,7 @@
 import type { MapRegion } from "../constants/brands";
 
 /** Rayon de recherche par défaut de l'onglet Explorer (même valeur que le serveur, cf. nearby.services.ts). */
-export const DEFAULT_SEARCH_RADIUS_KM = 25;
+export const DEFAULT_SEARCH_RADIUS_KM = 50;
 
 export interface Coordinates {
   latitude: number;
