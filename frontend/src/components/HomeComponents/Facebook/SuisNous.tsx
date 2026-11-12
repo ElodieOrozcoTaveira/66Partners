@@ -1,14 +1,21 @@
 import { NavLink } from "react-router-dom";
 import { FaFacebook } from "react-icons/fa";
+import { SiInstagram } from "react-icons/si";
 import {
   Bell,
+  ChevronDown,
+  Grid3x3,
   Heart,
   Lightbulb,
   MessageCircle,
   MessageCircleHeart,
+  Menu,
+  PlusSquare,
   Search,
   Share2,
+  SquarePlay,
   ThumbsUp,
+  UserSquare,
   Wrench,
 } from "lucide-react";
 import { useBranding } from "../../../contexts/TerritoryContext";
@@ -16,6 +23,16 @@ import { getSportPhoto } from "../../../lib/sportPhotos";
 import "./SuisNous.scss";
 
 const FACEBOOK_URL = "https://www.facebook.com/66Partners/";
+const INSTAGRAM_URL = "https://www.instagram.com/66par.tners/";
+
+const IG_HIGHLIGHTS = [
+  { label: "Rando", sport: "Randonnée" },
+  { label: "VTT", sport: "VTT" },
+  { label: "Trail", sport: "Trail" },
+  { label: "Padel", sport: "Padel" },
+];
+
+const IG_POSTS = ["Trail", "Paddle", "Cyclisme", "Escalade", "Running", "Natation"];
 
 const PROMPTS = [
   { icon: Heart, text: "Ce que j'aime…", tone: "love" },
@@ -26,8 +43,8 @@ const PROMPTS = [
 /** Téléphone montrant la page Facebook 66Partners (illustration, pas une capture). */
 function FacebookPhone() {
   return (
-    <div className="fb-phone" aria-hidden="true">
-      <div className="fb-phone__notch" />
+    <div className="social-phone fb-phone" aria-hidden="true">
+      <div className="social-phone__notch" />
       <div className="fb-phone__screen">
         <div className="fb-phone__bar">
           <FaFacebook size={20} />
@@ -88,7 +105,68 @@ function FacebookPhone() {
   );
 }
 
-/** « Suis-nous sur Facebook » : retours, idées et améliorations. */
+/** Téléphone montrant le compte Instagram 66par.tners (illustration, pas une capture). */
+function InstagramPhone() {
+  return (
+    <div className="social-phone ig-phone" aria-hidden="true">
+      <div className="social-phone__notch" />
+      <div className="ig-phone__screen">
+        <div className="ig-phone__bar">
+          <strong>
+            66par.tners <ChevronDown size={12} strokeWidth={2.6} />
+          </strong>
+          <PlusSquare size={15} />
+          <Menu size={15} />
+        </div>
+
+        <div className="ig-phone__profile">
+          <span className="ig-phone__ring">
+            <span className="ig-phone__avatar">
+              <img src="/newLogo.webp" alt="" />
+            </span>
+          </span>
+          <span className="ig-phone__name">
+            <strong>66Partners</strong>
+            <small>Communauté sportive</small>
+          </span>
+        </div>
+
+        <p className="ig-phone__bio">
+          Trouve tes partenaires de sport près de chez toi 🏃‍♀️🚴 Occitanie
+          <span>66partners.fr</span>
+        </p>
+
+        <div className="ig-phone__buttons">
+          <span className="ig-phone__btn ig-phone__btn--primary">Suivre</span>
+          <span className="ig-phone__btn">Message</span>
+        </div>
+
+        <div className="ig-phone__highlights">
+          {IG_HIGHLIGHTS.map(({ label, sport }) => (
+            <span key={label} className="ig-phone__highlight">
+              <span style={{ backgroundImage: `url(${getSportPhoto(sport)})` }} />
+              {label}
+            </span>
+          ))}
+        </div>
+
+        <div className="ig-phone__tabs">
+          <Grid3x3 size={13} className="ig-phone__tab--active" />
+          <SquarePlay size={13} />
+          <UserSquare size={13} />
+        </div>
+
+        <div className="ig-phone__grid">
+          {IG_POSTS.map((sport) => (
+            <span key={sport} style={{ backgroundImage: `url(${getSportPhoto(sport)})` }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** « Suis-nous sur Facebook et Instagram » : retours, idées et améliorations. */
 export default function SuisNous() {
   const { brandName } = useBranding();
   return (
@@ -99,11 +177,12 @@ export default function SuisNous() {
             <MessageCircleHeart size={15} strokeWidth={2.4} /> Ton avis compte
           </span>
           <h2 id="suis-nous-titre" className="suis-nous__titre">
-            Suis-nous sur Facebook
+            Suis-nous sur Facebook et Instagram
           </h2>
           <p>
             {brandName} se construit avec toi. Partage tes ressentis, tes idées et ce qu'on peut améliorer : on lit
-            tout, et beaucoup de nouveautés naissent de ces retours.
+            tout, et beaucoup de nouveautés naissent de ces retours. Et sur Instagram, retrouve les plus belles sorties
+            de la communauté.
           </p>
           <ul className="suis-nous__prompts" aria-label="Ce que tu peux nous partager">
             {PROMPTS.map(({ icon: Icon, text, tone }) => (
@@ -116,7 +195,11 @@ export default function SuisNous() {
           <div className="suis-nous__actions">
             <a className="suis-nous__facebook" href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer">
               <FaFacebook size={20} aria-hidden="true" />
-              Rejoindre la page Facebook
+              Page Facebook
+            </a>
+            <a className="suis-nous__instagram" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+              <SiInstagram size={18} aria-hidden="true" />
+              Compte Instagram
             </a>
             <NavLink to="/contact" className="suis-nous__contact">
               Ou écris-nous directement
@@ -124,16 +207,26 @@ export default function SuisNous() {
           </div>
         </div>
 
-        <a
-          className="suis-nous__visual"
-          href={FACEBOOK_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          tabIndex={-1}
-          aria-hidden="true"
-        >
-          <FacebookPhone />
-        </a>
+        <div className="suis-nous__visual" aria-hidden="true">
+          <a
+            className="suis-nous__phone suis-nous__phone--instagram"
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            tabIndex={-1}
+          >
+            <InstagramPhone />
+          </a>
+          <a
+            className="suis-nous__phone suis-nous__phone--facebook"
+            href={FACEBOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            tabIndex={-1}
+          >
+            <FacebookPhone />
+          </a>
+        </div>
       </div>
     </section>
   );
