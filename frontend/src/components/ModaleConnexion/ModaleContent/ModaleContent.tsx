@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { HandMetal, X } from "lucide-react";
+import BirthDateField from "../../BirthDateField/BirthDateField";
 import TerritoryPicker, { useSignupTerritory } from "../../TerritoryPicker/TerritoryPicker";
 import PasswordInput from "../../PasswordInput/PasswordInput";
 import api from "../../../lib/axios";
@@ -35,6 +36,7 @@ export default function ModaleContent({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [termsAcceptedGoogle, setTermsAcceptedGoogle] = useState(false);
+  const [birthDateGoogle, setBirthDateGoogle] = useState("");
   const { territoryCode: signupTerritory, setTerritoryCode: setSignupTerritory } = useSignupTerritory();
 
   function handleSocialAuthSuccess() {
@@ -68,6 +70,7 @@ export default function ModaleContent({
       setError(null);
       setIsSubmitting(false);
       setTermsAcceptedGoogle(false);
+      setBirthDateGoogle("");
       googleAuth.reset();
     }
     // googleAuth est recréé à chaque render (hooks locaux) :
@@ -155,6 +158,7 @@ export default function ModaleContent({
 
             <section className="container-modaleConnexion__section">
               <TerritoryPicker id="google-territory" value={signupTerritory} onChange={setSignupTerritory} />
+              <BirthDateField id="google-birthdate" value={birthDateGoogle} onChange={setBirthDateGoogle} />
               <label htmlFor="google-terms" className="container-modaleConnexion__checkboxLabel">
                 <input
                   id="google-terms"
@@ -171,7 +175,7 @@ export default function ModaleContent({
                 <NavLink to="/confidentialite" onClick={onClose}>
                   Politique de confidentialité
                 </NavLink>{" "}
-                de {brandName}.
+                de {brandName}, et je certifie avoir au moins 18 ans.
               </label>
 
               {googleAuth.error && (
@@ -182,7 +186,7 @@ export default function ModaleContent({
                 type="button"
                 className="container-modaleConnexion__submit"
                 disabled={googleAuth.isSubmitting}
-                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle, signupTerritory)}
+                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle, signupTerritory, birthDateGoogle)}
               >
                 {googleAuth.isSubmitting ? "Création..." : "Créer mon compte"}
               </button>

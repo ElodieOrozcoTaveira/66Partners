@@ -33,6 +33,8 @@ export interface UserRegistration {
   avatar?: string;
   /** Territoire principal choisi à l'inscription (absent : premier territoire actif). */
   territoryCode?: string | undefined;
+  /** AAAA-MM-JJ, déjà validée par Zod (18 ans révolus). */
+  birthDate: string;
   termsAccepted: true;
 }
 
@@ -85,6 +87,8 @@ interface SocialIdentity {
   pseudo: string;
   avatar?: string | undefined;
   territoryCode?: string | undefined;
+  /** AAAA-MM-JJ, déjà validée (18 ans révolus). */
+  birthDate: string;
 }
 
 // Le token brut part par email ; seul son hash est conservé en base
@@ -110,7 +114,7 @@ export class AuthService {
    * Inscription d'un nouvel utilisateur
    */
   static async registerUser(userData: UserRegistration): Promise<UserData> {
-    const { pseudo, email, password, city, avatar, territoryCode } = userData;
+    const { pseudo, email, password, city, avatar, territoryCode, birthDate } = userData;
 
     // Territoire principal résolu AVANT toute écriture : un code inconnu ou
     // inactif échoue proprement, sans compte créé à moitié.
@@ -159,6 +163,7 @@ export class AuthService {
           // La validation Zod (registerSchema) a déjà refusé toute valeur
           // autre que `true` avant d'arriver ici — cf. P1 audit RGPD.
           termsAcceptedAt: new Date(),
+          birthDate,
           emailVerificationTokenHash: hashResetToken(verifyToken),
           emailVerificationExpiresAt: new Date(Date.now() + VERIFY_TOKEN_TTL_MS),
         })
@@ -554,6 +559,7 @@ export class AuthService {
           password: null,
           avatar: identity.avatar,
           termsAcceptedAt: new Date(),
+          birthDate: identity.birthDate,
           // Adresse déjà vérifiée par le fournisseur (Google).
           emailVerifiedAt: new Date(),
         })
@@ -686,10 +692,12 @@ export class AuthService {
     // Type volontairement restreint au littéral `true` : impossible d'appeler
     // cette méthode sans avoir déjà une acceptation explicite des CGU.
     _termsAccepted: true,
+    birthDate: string,
     territoryCode?: string
   ): Promise<UserData> {
     return AuthService.completeSocialSignup("google", {
       territoryCode,
+      birthDate,
       providerUserId: profile.sub,
       email: profile.email,
       pseudo: derivePseudoFromGoogleProfile(profile),

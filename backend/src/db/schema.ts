@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, varchar, text, timestamp, integer, smallint, boolean, pgEnum, unique, primaryKey, doublePrecision, index, uniqueIndex, bigint,
+  pgTable, uuid, varchar, text, timestamp, integer, smallint, boolean, pgEnum, unique, primaryKey, doublePrecision, index, uniqueIndex, bigint, date,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -54,6 +54,9 @@ export const users = pgTable("users", {
   // comptes créés avant l'introduction de cette exigence n'ont pas cette
   // preuve et ne sont pas invités à l'accepter rétroactivement.
   termsAcceptedAt: timestamp("terms_accepted_at"),
+  // Date de naissance (AAAA-MM-JJ), obligatoire à l'inscription : service
+  // réservé aux 18 ans et plus. Null pour les comptes créés avant.
+  birthDate: date("birth_date", { mode: "string" }),
   // Facultatif, renseigné par l'utilisateur lui-même (profil, ou au moment
   // de rejoindre une activité réservée). Jamais exposé aux autres membres :
   // seul GET /users/me (son propre profil) le renvoie.

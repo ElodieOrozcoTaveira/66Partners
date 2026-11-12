@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { NavLink } from "react-router-dom";
 import { Check, X } from "lucide-react";
 import { isAxiosError } from "axios";
+import { birthDateError } from "../../../lib/age";
+import BirthDateField from "../../BirthDateField/BirthDateField";
 import TerritoryPicker, { useSignupTerritory } from "../../TerritoryPicker/TerritoryPicker";
 import PasswordInput from "../../PasswordInput/PasswordInput";
 import api from "../../../lib/axios";
@@ -45,6 +47,7 @@ export default function ModaleRegisterContent({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [birthDate, setBirthDate] = useState("");
   const { territoryCode: signupTerritory, setTerritoryCode: setSignupTerritory } = useSignupTerritory();
   const [previewTheme, setPreviewTheme] = useState<TerritoryTheme>({});
   const [previewEmblem, setPreviewEmblem] = useState<string | null>(null);
@@ -52,6 +55,7 @@ export default function ModaleRegisterContent({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [termsAcceptedGoogle, setTermsAcceptedGoogle] = useState(false);
+  const [birthDateGoogle, setBirthDateGoogle] = useState("");
 
   function handleSocialAuthSuccess() {
     onClose();
@@ -144,9 +148,11 @@ export default function ModaleRegisterContent({
       setPassword("");
       setConfirmPassword("");
       setTermsAccepted(false);
+      setBirthDate("");
       setError(null);
       setIsSubmitting(false);
       setTermsAcceptedGoogle(false);
+      setBirthDateGoogle("");
       googleAuth.reset();
     }
     // googleAuth est recréé à chaque render (hooks locaux) :
@@ -177,6 +183,12 @@ export default function ModaleRegisterContent({
       return;
     }
 
+    const birthDateProblem = birthDateError(birthDate);
+    if (birthDateProblem) {
+      setError(birthDateProblem);
+      return;
+    }
+
     if (!termsAccepted) {
       setError(
         "Tu dois accepter les Mentions Légales et la Politique de confidentialité pour créer un compte."
@@ -191,6 +203,7 @@ export default function ModaleRegisterContent({
         email,
         password,
         termsAccepted,
+        birthDate,
         ...(signupTerritory ? { territoryCode: signupTerritory } : {}),
       });
       if (import.meta.env.DEV) {
@@ -248,6 +261,7 @@ export default function ModaleRegisterContent({
 
             <section className="container-modaleRegister__section">
               <TerritoryPicker id="google-territory-r" value={signupTerritory} onChange={setSignupTerritory} />
+              <BirthDateField id="google-birthdate-r" value={birthDateGoogle} onChange={setBirthDateGoogle} />
               <label htmlFor="google-terms" className="container-modaleRegister__checkboxLabel">
                 <input
                   id="google-terms"
@@ -264,7 +278,7 @@ export default function ModaleRegisterContent({
                 <NavLink to="/confidentialite" onClick={onClose}>
                   Politique de confidentialité
                 </NavLink>{" "}
-                de {brandName}.
+                de {brandName}, et je certifie avoir au moins 18 ans.
               </label>
 
               {googleAuth.error && (
@@ -275,7 +289,7 @@ export default function ModaleRegisterContent({
                 type="button"
                 className="container-modaleRegister__submit"
                 disabled={googleAuth.isSubmitting}
-                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle, signupTerritory)}
+                onClick={() => googleAuth.completeSignup(termsAcceptedGoogle, signupTerritory, birthDateGoogle)}
               >
                 {googleAuth.isSubmitting ? "Création..." : "Créer mon compte"}
               </button>
@@ -397,6 +411,8 @@ export default function ModaleRegisterContent({
                   </p>
                 )}
 
+                <BirthDateField id="register-birthdate" value={birthDate} onChange={setBirthDate} />
+
                 <label
                   htmlFor="termsAccepted"
                   className="container-modaleRegister__checkboxLabel"
@@ -417,7 +433,7 @@ export default function ModaleRegisterContent({
                   <NavLink to="/confidentialite" onClick={onClose}>
                     Politique de confidentialité
                   </NavLink>{" "}
-                  de {brandName}.
+                  de {brandName}, et je certifie avoir au moins 18 ans.
                 </label>
 
                 {error && (

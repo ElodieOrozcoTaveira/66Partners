@@ -1,0 +1,63 @@
+@use "../../styles/variables/variables.scss";
+
+.birthdate-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  text-align: left;
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: variables.$encre;
+  }
+
+  // Mêmes dimensions que les autres champs des modales (cf. modals.scss).
+  &__input {
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 0 0.9rem;
+    border-radius: 14px;
+    border: 1.5px solid variables.$bordure;
+    background: variables.$fond;
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem;
+    color: variables.$encre;
+
+    &:focus {
+      outline: none;
+      border-color: variables.$rouge;
+      box-shadow: 0 0 0 3px variables.alpha(variables.$rouge, 14%);
+    }
+
+    &[aria-invalid="true"] {
+      border-color: #dc2626;
+    }
+  }
+
+  &__hint {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: variables.$texte2;
+
+    svg {
+      flex-shrink: 0;
+      color: variables.$rouge;
+    }
+
+    &--error {
+      color: #b91c1c;
+
+      svg {
+        color: #b91c1c;
+      }
+    }
+  }
+}

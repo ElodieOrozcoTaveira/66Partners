@@ -50,6 +50,16 @@ export function PolitiqueConfidentialite() {
         l'application mobile.
       </p>
 
+      <p className="legal-text">
+        <strong className="legal-bold">Service réservé aux personnes majeures.</strong>{' '}
+        L'inscription est réservée aux personnes âgées de 18 ans ou plus.
+        Nous ne collectons pas sciemment de données concernant des mineurs :
+        une date de naissance est demandée à l'inscription et l'inscription
+        est refusée si elle indique moins de 18 ans. Si nous apprenons qu'un
+        compte appartient à une personne mineure, il est supprimé avec ses
+        données.
+      </p>
+
       <hr className="legal-divider" />
 
       <section className="legal-section">
@@ -83,6 +93,10 @@ export function PolitiqueConfidentialite() {
         <h3 className="legal-subtitle-sm">Lors de l'inscription</h3>
         <ul className="legal-list">
           <li>Pseudo et adresse email</li>
+          <li>
+            Date de naissance, demandée uniquement pour vérifier que vous
+            avez au moins 18 ans
+          </li>
           <li>
             Mot de passe, stocké sous une forme cryptographiquement protégée
             et jamais en clair
@@ -227,13 +241,14 @@ export function PolitiqueConfidentialite() {
           head={['Donnée / traitement', 'Finalité', 'Base légale']}
           rows={[
             ['Email et mot de passe', 'Création, authentification et sécurisation du compte', 'Exécution du contrat'],
+            ['Date de naissance', 'Vérifier que le membre est majeur (18 ans ou plus), condition d\'inscription', 'Exécution du contrat'],
             ['Connexion avec Google', 'Créer le compte ou se connecter sans mot de passe 66Partners', 'Exécution du contrat'],
             ['Territoire de rattachement', 'Déterminer le territoire actif et proposer les membres et activités correspondants', 'Exécution du contrat'],
             ['Profil, sports, disponibilités', 'Présenter les membres et faciliter la mise en relation entre sportifs', 'Exécution du contrat'],
             ['Activités, participations, covoiturage', 'Créer, gérer et rejoindre des activités sportives, organiser un trajet commun', 'Exécution du contrat'],
             ['Messages et photos d\'activité', 'Permettre aux participants d\'une activité d\'échanger et de partager leurs souvenirs', 'Exécution du contrat'],
             ['Notifications dans l\'application et rappels', 'Prévenir des demandes, réponses, messages et rappeler une activité la veille et 1 h avant', 'Exécution du contrat'],
-            ['Emails de service', 'Bienvenue, réinitialisation du mot de passe, confirmation de liaison Strava, confirmation de suppression du compte', 'Exécution du contrat'],
+            ['Emails de service', 'Bienvenue, vérification de l\'adresse email, réinitialisation du mot de passe, confirmation de liaison Strava, confirmation de suppression du compte', 'Exécution du contrat'],
             ['Connexion à Strava', 'Relier votre compte Strava et, à votre demande, renommer l\'activité Strava d\'une sortie avec vos partenaires', 'Consentement'],
             ['Genre déclaré', 'Accès aux activités réservées « entre femmes » / « entre hommes »', 'Consentement'],
             ['Position approximative', 'Afficher le nombre de sportifs à proximité', 'Consentement'],
@@ -305,6 +320,7 @@ export function PolitiqueConfidentialite() {
             ['Données de compte et de profil', 'Pendant la durée de vie du compte. Elles sont supprimées immédiatement lorsque vous supprimez votre compte.'],
             ['Messages, participations, photos que vous avez ajoutées, notifications, disponibilités, sports, blocages', 'Pendant la durée de vie du compte, puis supprimés avec lui.'],
             ['Activités que vous avez créées', 'Elles restent visibles pour leurs participants après la suppression de votre compte, sans aucun lien avec vous (organisateur affiché comme « compte supprimé »).'],
+            ['Date de naissance', 'Pendant la durée de vie du compte, puis supprimée avec lui.'],
             ['Position approximative', '30 jours sans mise à jour au maximum, et supprimée avec le compte.'],
             ['Données Strava (identifiant, nom, photo, jetons, numéros des activités validées)', 'Jusqu\'à ce que vous déconnectiez Strava, que vous retiriez l\'accès depuis Strava ou que vous supprimiez votre compte. Elles sont alors effacées et l\'accès est révoqué auprès de Strava.'],
             ['Signalements', 'Le temps nécessaire à leur traitement et à la gestion d\'un éventuel litige. Si un compte concerné est supprimé, le signalement est conservé sans lien avec ce compte.'],
@@ -414,7 +430,7 @@ export function PolitiqueConfidentialite() {
         </p>
         <p className="legal-text">
           Ne sont jamais affichés aux autres membres : votre adresse email,
-          votre genre, votre position, les membres que vous avez bloqués
+          votre date de naissance (ni votre âge), votre genre, votre position, les membres que vous avez bloqués
           ou signalés, et le fait que vous ayez relié Strava (votre nom et
           votre photo Strava ne sont visibles que par vous).
         </p>
@@ -574,7 +590,7 @@ export function PolitiqueConfidentialite() {
 
       <hr className="legal-divider" />
 
-      <p className="legal-update">Dernière mise à jour : 5 novembre 2026</p>
+      <p className="legal-update">Dernière mise à jour : 12 novembre 2026</p>
     </div>
   );
 }

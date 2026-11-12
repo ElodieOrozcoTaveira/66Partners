@@ -139,7 +139,7 @@ describe("DELETE /api/users/me — parcours utilisateur", () => {
         pseudo: "ToDelete",
         email: "todelete@test.com",
         password: "Password123",
-        termsAccepted: true,
+        termsAccepted: true, birthDate: "1990-05-15",
       });
 
     const loginBefore = await request(app)
@@ -570,7 +570,7 @@ describe("DELETE /api/admin/users/:userId — parcours admin", () => {
         pseudo: "AdminDel",
         email: "admindel@test.com",
         password: "Password123",
-        termsAccepted: true,
+        termsAccepted: true, birthDate: "1990-05-15",
       });
     const [row] = await testDb.select().from(users).where(eq(users.email, "admindel@test.com"));
     const adminToken = signAdminToken();
