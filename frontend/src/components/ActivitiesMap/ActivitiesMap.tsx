@@ -173,7 +173,7 @@ export default function ActivitiesMap({
     });
   }, [points, selectedId]);
 
-  // Position du membre et cercle de 25 km.
+  // Position du membre et cercle de 50 km.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !styleReady) return;

@@ -1,5 +1,5 @@
 /** Rayon de recherche par défaut (même valeur que le serveur, cf. backend nearby.services.ts). */
-export const DEFAULT_SEARCH_RADIUS_KM = 25;
+export const DEFAULT_SEARCH_RADIUS_KM = 50;
 
 export interface Coordinates {
   latitude: number;
