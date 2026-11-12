@@ -2,6 +2,8 @@
 @use "../../../styles/mixins/mixins.scss";
 
 $facebook: #1877F2;
+$instagram: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+$instagram-pink: #dc2743;
 
 .suis-nous {
   padding: 1.5rem 0 2.5rem;
@@ -16,13 +18,14 @@ $facebook: #1877F2;
     overflow: hidden;
     background:
       radial-gradient(circle at 100% 0%, color-mix(in srgb, #{$facebook} 16%, transparent), transparent 55%),
+      radial-gradient(circle at 100% 100%, color-mix(in srgb, #{$instagram-pink} 12%, transparent), transparent 50%),
       radial-gradient(circle at 0% 100%, variables.alpha(variables.$rouge, 8%), transparent 50%),
       #ffffff;
     border: 1px solid variables.$bordure;
     box-shadow: variables.$ombre-carte;
 
     @media (min-width: variables.$laptop) {
-      grid-template-columns: 1.15fr 0.85fr;
+      grid-template-columns: 1fr 1fr;
       padding: 3rem 3.5rem 0;
     }
   }
@@ -129,6 +132,27 @@ $facebook: #1877F2;
     }
   }
 
+  &__instagram {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.85rem 1.4rem;
+    border-radius: 999px;
+    background: $instagram;
+    color: #ffffff;
+    font-family: "Manrope", sans-serif;
+    font-size: 0.98rem;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 10px 24px color-mix(in srgb, #{$instagram-pink} 28%, transparent);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px color-mix(in srgb, #{$instagram-pink} 34%, transparent);
+    }
+  }
+
   &__contact {
     color: variables.$texte2;
     font-size: 0.9rem;
@@ -141,16 +165,53 @@ $facebook: #1877F2;
     }
   }
 
+  // Deux téléphones superposés : Facebook devant, Instagram derrière.
   &__visual {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-areas: "stack";
+    justify-items: center;
+    align-items: end;
     align-self: end;
+    padding-top: 1rem;
+  }
+
+  &__phone {
+    grid-area: stack;
     text-decoration: none;
+    transform-origin: 50% 100%;
+    transition: transform 0.3s ease;
+
+    // Instagram à gauche (derrière), Facebook à droite (devant) : le profil
+    // Instagram (pseudo, avatar) reste visible.
+    --spread: 26%;
+
+    @media (min-width: variables.$tablet) {
+      --spread: 34%;
+    }
+
+    &--facebook {
+      z-index: 2;
+      transform: translateX(var(--spread)) rotate(4deg);
+
+      &:hover {
+        transform: translateX(var(--spread)) rotate(1deg) translateY(-6px);
+      }
+    }
+
+    &--instagram {
+      z-index: 1;
+      transform: translateX(calc(var(--spread) * -1)) translateY(-18px) rotate(-6deg) scale(0.95);
+
+      &:hover {
+        z-index: 3;
+        transform: translateX(calc(var(--spread) * -1)) translateY(-26px) rotate(-3deg) scale(0.95);
+      }
+    }
   }
 }
 
-// ─── Téléphone avec la page Facebook (illustration) ──────────────────────
-.fb-phone {
+// ─── Cadre commun aux téléphones (illustrations) ─────────────────────────
+.social-phone {
   position: relative;
   width: 270px;
   height: 470px;
@@ -159,12 +220,10 @@ $facebook: #1877F2;
   border-radius: 42px 42px 0 0;
   background: #0b0c0f;
   box-shadow: 0 30px 70px rgba(17, 19, 24, 0.25);
-  transform: rotate(-3deg);
-  transform-origin: 50% 100%;
-  transition: transform 0.3s ease;
 
-  .suis-nous__visual:hover & {
-    transform: rotate(0deg) translateY(-6px);
+  @media (max-width: variables.$mobile) {
+    width: 230px;
+    height: 420px;
   }
 
   &__notch {
@@ -178,7 +237,166 @@ $facebook: #1877F2;
     background: #0b0c0f;
     transform: translateX(-50%);
   }
+}
 
+// ─── Téléphone avec le compte Instagram ──────────────────────────────────
+.ig-phone {
+  &__screen {
+    height: 100%;
+    border-radius: 32px 32px 0 0;
+    background: #ffffff;
+    overflow: hidden;
+    font-family: "Inter", sans-serif;
+    color: #0c1014;
+  }
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 2.5rem 0.8rem 0.5rem;
+
+    strong {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15rem;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+  }
+
+  &__profile {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.3rem 0.8rem 0;
+  }
+
+  &__ring {
+    display: flex;
+    padding: 2.5px;
+    border-radius: 50%;
+    background: $instagram;
+  }
+
+  &__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 2.5px solid #ffffff;
+    background: linear-gradient(135deg, #f5832a, #c4121a);
+    overflow: hidden;
+
+    img {
+      width: 86%;
+    }
+  }
+
+  &__name {
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      font-family: "Manrope", sans-serif;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    small {
+      font-size: 0.6rem;
+      color: #737373;
+    }
+  }
+
+  &__bio {
+    margin: 0.5rem 0.8rem 0;
+    font-size: 0.62rem;
+    line-height: 1.4;
+
+    span {
+      display: block;
+      color: #00376b;
+      font-weight: 700;
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.55rem 0.8rem 0;
+  }
+
+  &__btn {
+    flex: 1;
+    padding: 0.32rem 0;
+    border-radius: 7px;
+    background: #efefef;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-align: center;
+
+    &--primary {
+      background: #0095f6;
+      color: #ffffff;
+    }
+  }
+
+  &__highlights {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem 0;
+  }
+
+  &__highlight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.52rem;
+
+    span {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      outline: 1px solid #dbdbdb;
+      background-size: cover;
+      background-position: center;
+    }
+  }
+
+  &__tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 0.55rem;
+    padding: 0.35rem 0;
+    border-top: 1px solid #efefef;
+    color: #a8a8a8;
+  }
+
+  &__tab--active {
+    color: #0c1014;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+
+    span {
+      aspect-ratio: 3 / 4;
+      background-size: cover;
+      background-position: center;
+    }
+  }
+}
+
+// ─── Téléphone avec la page Facebook (illustration) ──────────────────────
+.fb-phone {
   &__screen {
     height: 100%;
     border-radius: 32px 32px 0 0;
@@ -349,7 +567,7 @@ $facebook: #1877F2;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fb-phone {
+  .suis-nous__phone {
     transition: none;
   }
 }
