@@ -14,6 +14,10 @@
   pointer-events: none;
 
   @media (min-width: variables.$tablet) {
+    bottom: calc(124px + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (min-width: variables.$laptop) {
     bottom: 28px;
   }
 
