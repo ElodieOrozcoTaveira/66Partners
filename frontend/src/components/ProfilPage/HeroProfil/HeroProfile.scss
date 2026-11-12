@@ -74,15 +74,15 @@
     // Tablette : boîte pleine largeur bien plus large que haute, recadrage
     // vertical comme sur laptop.
     @media (min-width: variables.$tablet) {
-      background-position: center 20%;
+      background-position: center top;
     }
 
     @media (min-width: variables.$laptop) {
-      background-position: center 20%;
+      background-position: center top;
     }
 
     @media (min-width: variables.$desktop) {
-      background-position: center 18%;
+      background-position: center top;
     }
   }
 
