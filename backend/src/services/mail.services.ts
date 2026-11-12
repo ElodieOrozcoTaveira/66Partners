@@ -6,6 +6,7 @@ import { resetPasswordEmailTemplate } from "./emailTemplates/resetPassword.templ
 import { accountDeletedEmailTemplate } from "./emailTemplates/accountDeleted.template.js";
 import { stravaLinkedEmailTemplate } from "./emailTemplates/stravaLinked.template.js";
 import type { TerritoryBrand } from "./territory.services.js";
+import { htmlToText } from "../utils/htmlToText.js";
 
 // Port 587 + STARTTLS obligatoire plutôt que 465 (SSL implicite) : Hetzner
 // bloque le port 465 sortant sur le serveur de prod. requireTLS refuse tout
@@ -21,11 +22,16 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+/** Envoie l'email avec, en plus du HTML, sa version texte brut (meilleure délivrabilité). */
+function sendMail(options: nodemailer.SendMailOptions & { html: string }) {
+  return transporter.sendMail({ ...options, text: htmlToText(options.html) });
+}
+
 export async function sendWelcomeEmail(
   user: { email: string; pseudo: string },
   brand: TerritoryBrand,
 ) {
-  await transporter.sendMail({
+  await sendMail({
     from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to: user.email,
@@ -39,7 +45,7 @@ export async function sendVerifyEmail(
   verifyUrl: string,
   brand: TerritoryBrand,
 ) {
-  await transporter.sendMail({
+  await sendMail({
     from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to: user.email,
@@ -53,7 +59,7 @@ export async function sendResetPasswordEmail(
   resetUrl: string,
   brand: TerritoryBrand,
 ) {
-  await transporter.sendMail({
+  await sendMail({
     from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to: user.email,
@@ -69,7 +75,7 @@ export async function sendAdminResetPasswordEmail(
   const to = process.env.ADMIN_RECOVERY_EMAIL;
   if (!to) return;
 
-  await transporter.sendMail({
+  await sendMail({
     from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to,
@@ -113,7 +119,7 @@ export async function sendReportAlertEmail(report: {
     ? `${escapeHtml(report.reportedUser.pseudo)} (${report.reportedUser.openReports} signalement(s) en attente)`
     : "compte supprimé";
 
-  await transporter.sendMail({
+  await sendMail({
     from: `"66Partners" <${process.env.SMTP_USER}>`,
     to,
     subject: `Nouveau signalement : ${REPORT_REASON_LABELS[report.reason] ?? report.reason}`,
@@ -134,7 +140,7 @@ export async function sendAccountDeletedEmail(
   user: { email: string; pseudo: string },
   brand: TerritoryBrand,
 ) {
-  await transporter.sendMail({
+  await sendMail({
     from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to: user.email,
@@ -149,7 +155,7 @@ export async function sendStravaLinkedEmail(
   athleteName: string | null,
 ) {
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  await transporter.sendMail({
+  await sendMail({
     from: `"${brand.brandName}" <${process.env.SMTP_USER}>`,
     replyTo: "contact@66partners.fr",
     to: user.email,
@@ -159,17 +165,17 @@ export async function sendStravaLinkedEmail(
 }
 
 export async function sendContactEmail(contact: { name: string; email: string; message: string }) {
-  await transporter.sendMail({
+  await sendMail({
     from: `"66Partners" <${process.env.SMTP_USER}>`,
     replyTo: contact.email,
     to: "contact@66partners.fr",
     subject: `Nouveau message de contact — ${contact.name}`,
     html: `
       <h1>Nouveau message via le formulaire de contact</h1>
-      <p><strong>Nom :</strong> ${contact.name}</p>
-      <p><strong>Email :</strong> ${contact.email}</p>
+      <p><strong>Nom :</strong> ${escapeHtml(contact.name)}</p>
+      <p><strong>Email :</strong> ${escapeHtml(contact.email)}</p>
       <p><strong>Message :</strong></p>
-      <p>${contact.message.replace(/\n/g, "<br>")}</p>
+      <p>${escapeHtml(contact.message).replace(/\n/g, "<br>")}</p>
     `,
   });
 }
