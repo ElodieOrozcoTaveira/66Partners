@@ -130,6 +130,13 @@ html body {
     object-fit: contain;
   }
 
+  // Logo principal orange (modale de connexion, mode déconnecté).
+  .modal-main-logo {
+    display: flex;
+    width: fit-content;
+    margin: 0 auto 0.75rem;
+  }
+
   #{$titles} {
     margin: 0 0 0.35rem;
     font-family: "Manrope", sans-serif;

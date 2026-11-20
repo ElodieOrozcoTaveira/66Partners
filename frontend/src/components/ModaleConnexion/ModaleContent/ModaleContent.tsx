@@ -10,6 +10,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { useGoogleAuth, useGoogleButton } from "../../../hooks/useGoogleAuth";
 import "./ModaleContent.scss";
 import { useBranding } from "../../../contexts/TerritoryContext";
+import MainLogo from "../../MainLogo/MainLogo";
 
 interface ModaleContentProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ export default function ModaleContent({
   onClose,
   onSwitchToRegister,
 }: ModaleContentProps) {
-  const { brandName, asset } = useBranding();
+  const { brandName } = useBranding();
   const { login, getLastLoginFailureReason } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -150,7 +151,7 @@ export default function ModaleContent({
         </button>
         {googleAuth.state.step === "newAccount" ? (
           <div className="container-modaleConnexion">
-            <img className="modal-brand" src={asset("logo")} alt="" />
+            <MainLogo height={36} className="modal-main-logo" />
             <h3 className="container-modaleConnexion__h3">Finalise ton inscription</h3>
             <h4 className="container-modaleConnexion__h4">
               Connecté·e avec {googleAuth.state.email} <HandMetal size={12} color="var(--brand-accent-dark, #F4B400)" />
@@ -203,7 +204,7 @@ export default function ModaleContent({
           </div>
         ) : (
           <div className="container-modaleConnexion">
-            <img className="modal-brand" src={asset("logo")} alt="" />
+            <MainLogo height={36} className="modal-main-logo" />
             <h3 className="container-modaleConnexion__h3">Se connecter</h3>
             <h4 className="container-modaleConnexion__h4">
               Bienvenue chez {brandName} <HandMetal size={12} color="var(--brand-accent-dark, #F4B400)" />
