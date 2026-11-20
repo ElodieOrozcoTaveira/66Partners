@@ -1,7 +1,8 @@
 import request from "supertest";
 import app from "../../src/app.js";
 import { resetUsers, closeTestDb, testDb, createUser } from "../helpers/db.js";
-import { pushSubscriptions } from "../../src/db/schema.js";
+import { adminPushSubscriptions, pushSubscriptions } from "../../src/db/schema.js";
+import { signAdminToken } from "../../src/utils/adminJwt.js";
 import { eq } from "drizzle-orm";
 
 const validKeys = { p256dh: "test-p256dh-key", auth: "test-auth-key" };
@@ -118,5 +119,59 @@ describe("POST /api/push/unsubscribe", () => {
     const rows = await testDb.select().from(pushSubscriptions).where(eq(pushSubscriptions.endpoint, endpoint));
     expect(rows).toHaveLength(0);
     void userId;
+  });
+});
+
+describe("Alertes push admin — /api/admin/push/*", () => {
+  beforeEach(async () => {
+    await testDb.delete(adminPushSubscriptions);
+  });
+
+  it("refuse sans jeton admin (un token membre ne suffit pas)", async () => {
+    const { token } = await createUser({ email: "push-admin-user@example.com" });
+    const res = await request(app)
+      .post("/api/admin/push/subscribe")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ endpoint: "https://push.example.com/admin-x", keys: validKeys });
+
+    expect(res.status).toBe(401);
+    expect(await testDb.select().from(adminPushSubscriptions)).toHaveLength(0);
+  });
+
+  it("abonne puis désabonne l'appareil admin, sans toucher aux abonnements membre", async () => {
+    const adminToken = signAdminToken();
+    const endpoint = "https://push.example.com/admin-device";
+    // Même téléphone abonné aussi comme membre (même endpoint navigateur).
+    const { token } = await createUser({ email: "push-admin-dual@example.com" });
+    await request(app)
+      .post("/api/push/subscribe")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ endpoint, keys: validKeys });
+
+    const sub = await request(app)
+      .post("/api/admin/push/subscribe")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ endpoint, keys: validKeys });
+    expect(sub.status).toBe(201);
+
+    // Idempotent.
+    await request(app)
+      .post("/api/admin/push/subscribe")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ endpoint, keys: validKeys });
+    expect(await testDb.select().from(adminPushSubscriptions)).toHaveLength(1);
+
+    const unsub = await request(app)
+      .post("/api/admin/push/unsubscribe")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ endpoint });
+    expect(unsub.status).toBe(200);
+    expect(await testDb.select().from(adminPushSubscriptions)).toHaveLength(0);
+
+    const memberRows = await testDb
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.endpoint, endpoint));
+    expect(memberRows).toHaveLength(1);
   });
 });

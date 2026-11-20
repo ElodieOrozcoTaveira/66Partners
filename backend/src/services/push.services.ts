@@ -2,7 +2,7 @@ import "dotenv/config";
 import webpush from "web-push";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { pushSubscriptions } from "../db/schema.js";
+import { adminPushSubscriptions, pushSubscriptions } from "../db/schema.js";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -93,34 +93,85 @@ export class PushService {
       .from(pushSubscriptions)
       .where(eq(pushSubscriptions.userId, userId));
 
-    if (subscriptions.length === 0) return;
-
-    const body = JSON.stringify(payload);
-
-    await Promise.all(
-      subscriptions.map(async (subscription) => {
-        try {
-          await webpush.sendNotification(
-            {
-              endpoint: subscription.endpoint,
-              keys: { p256dh: subscription.p256dh, auth: subscription.auth },
-            },
-            body
-          );
-        } catch (error) {
-          const statusCode = (error as { statusCode?: number }).statusCode;
-          // 404/410 : le navigateur a révoqué l'abonnement (désinstallation,
-          // nettoyage des données...) — on le retire pour ne pas réessayer
-          // indéfiniment contre un endpoint mort (minimisation des données).
-          if (statusCode === 404 || statusCode === 410) {
-            await db
-              .delete(pushSubscriptions)
-              .where(eq(pushSubscriptions.id, subscription.id));
-            return;
-          }
-          console.error("Erreur envoi push:", error);
-        }
-      })
-    );
+    await sendToSubscriptions(subscriptions, payload, async (id) => {
+      await db.delete(pushSubscriptions).where(eq(pushSubscriptions.id, id));
+    });
   }
+
+  // --- Alertes administrateur ------------------------------------------------
+  // L'admin n'est pas un compte `users` : ses appareils sont rangés à part
+  // (admin_push_subscriptions). Activé explicitement depuis Paramètres admin.
+
+  static async subscribeAdmin(subscription: PushSubscriptionKeys): Promise<void> {
+    await db
+      .insert(adminPushSubscriptions)
+      .values({
+        endpoint: subscription.endpoint,
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
+      })
+      .onConflictDoUpdate({
+        target: adminPushSubscriptions.endpoint,
+        set: { p256dh: subscription.keys.p256dh, auth: subscription.keys.auth },
+      });
+  }
+
+  static async unsubscribeAdmin(endpoint: string): Promise<void> {
+    await db.delete(adminPushSubscriptions).where(eq(adminPushSubscriptions.endpoint, endpoint));
+  }
+
+  // Ne lève jamais : appelé en "fire and forget" (ex. après une inscription),
+  // une alerte admin ne doit jamais faire échouer l'action qui la déclenche.
+  static async sendToAdmins(payload: PushPayload): Promise<void> {
+    if (!vapidConfigured) return;
+    try {
+      const subscriptions = await db.select().from(adminPushSubscriptions);
+      await sendToSubscriptions(subscriptions, payload, async (id) => {
+        await db.delete(adminPushSubscriptions).where(eq(adminPushSubscriptions.id, id));
+      });
+    } catch (error) {
+      console.error("Erreur envoi alerte push admin:", error);
+    }
+  }
+}
+
+interface StoredSubscription {
+  id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}
+
+async function sendToSubscriptions(
+  subscriptions: StoredSubscription[],
+  payload: PushPayload,
+  removeDead: (id: string) => Promise<void>
+): Promise<void> {
+  if (subscriptions.length === 0) return;
+
+  const body = JSON.stringify(payload);
+
+  await Promise.all(
+    subscriptions.map(async (subscription) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: subscription.endpoint,
+            keys: { p256dh: subscription.p256dh, auth: subscription.auth },
+          },
+          body
+        );
+      } catch (error) {
+        const statusCode = (error as { statusCode?: number }).statusCode;
+        // 404/410 : le navigateur a révoqué l'abonnement (désinstallation,
+        // nettoyage des données...) — on le retire pour ne pas réessayer
+        // indéfiniment contre un endpoint mort (minimisation des données).
+        if (statusCode === 404 || statusCode === 410) {
+          await removeDead(subscription.id);
+          return;
+        }
+        console.error("Erreur envoi push:", error);
+      }
+    })
+  );
 }

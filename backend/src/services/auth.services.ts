@@ -7,6 +7,7 @@ import { users } from "../db/schema.js";
 import { isUniqueViolation } from "../utils/db-errors.js";
 import { sendWelcomeEmail, sendResetPasswordEmail, sendVerifyEmail } from "./mail.services.js";
 import { TerritoryService } from "./territory.services.js";
+import { PushService } from "./push.services.js";
 import { SocialAccountService, type SocialProvider } from "./socialAccount.services.js";
 import type { GoogleProfile } from "./google.services.js";
 
@@ -109,6 +110,21 @@ export class AuthError extends Error {
   }
 }
 
+// Alerte push sur le(s) téléphone(s) de l'admin à chaque nouveau compte.
+// Non bloquant : PushService.sendToAdmins ne lève jamais.
+function notifyAdminsOfSignup(
+  user: { id: string; pseudo: string },
+  territoryName: string,
+  via: string
+): void {
+  const method = via === "email" ? "" : ` via ${via.charAt(0).toUpperCase()}${via.slice(1)}`;
+  void PushService.sendToAdmins({
+    title: "Nouvelle inscription 🎉",
+    body: `${user.pseudo} vient de créer un compte${method} (${territoryName}).`,
+    url: `/admin/utilisateurs/${user.id}`,
+  });
+}
+
 export class AuthService {
   /**
    * Inscription d'un nouvel utilisateur
@@ -193,6 +209,8 @@ export class AuthService {
 
     // 6. Email de bienvenue avec le lien de confirmation (non bloquant),
     // aux couleurs du territoire choisi.
+    notifyAdminsOfSignup(newUser, signupTerritory.name, "email");
+
     sendVerifyEmail(newUser, AuthService.verifyUrl(verifyToken), {
       brandName: signupTerritory.brandName,
       territoryName: signupTerritory.name,
@@ -597,6 +615,8 @@ export class AuthService {
       brandName: signupTerritory.brandName,
       territoryName: signupTerritory.name,
     }).catch((err) => console.error("Erreur envoi email de bienvenue:", err));
+
+    notifyAdminsOfSignup(newUser, signupTerritory.name, provider);
 
     return {
       id: newUser.id,

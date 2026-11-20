@@ -296,6 +296,19 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   userIdx: index("push_subscriptions_user_id_idx").on(t.userId),
 }));
 
+// Appareils de l'administrateur abonnés aux alertes admin (nouvelle
+// inscription...). Table distincte de push_subscriptions : l'admin n'est pas
+// un compte `users` (mot de passe partagé, cf. admin_credentials), et un même
+// téléphone peut être à la fois abonné comme membre ET comme admin (même
+// endpoint navigateur dans les deux tables, sans conflit).
+export const adminPushSubscriptions = pgTable("admin_push_subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Fournisseurs d'identité externes rattachés à un compte 66Partners (Google
 // pour l'instant, d'autres fournisseurs possibles plus tard) — table dédiée plutôt
 // que de surcharger `users`, pour permettre plusieurs fournisseurs par

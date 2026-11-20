@@ -1,4 +1,5 @@
 import api from "./axios";
+import adminApi from "./adminAxios";
 
 /**
  * Aide côté client pour l'abonnement Web Push. Ne décide jamais elle-même
@@ -76,11 +77,11 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   return outputArray;
 }
 
-export async function subscribeToPush(): Promise<boolean> {
-  if (!isPushSupported()) return false;
-
+// Demande la permission puis renvoie l'abonnement navigateur de cet appareil
+// (le crée si besoin). null si la permission est refusée.
+async function getOrCreateBrowserSubscription(): Promise<PushSubscriptionJSON | null> {
   const permission = await Notification.requestPermission();
-  if (permission !== "granted") return false;
+  if (permission !== "granted") return null;
 
   const { data } = await api.get<{ success: boolean; publicKey: string }>(
     "/api/push/vapid-public-key",
@@ -94,14 +95,78 @@ export async function subscribeToPush(): Promise<boolean> {
       applicationServerKey: urlBase64ToUint8Array(data.publicKey),
     });
   }
+  return subscription.toJSON();
+}
 
-  const json = subscription.toJSON();
+export async function subscribeToPush(): Promise<boolean> {
+  if (!isPushSupported()) return false;
+
+  const json = await getOrCreateBrowserSubscription();
+  if (!json) return false;
+
   await api.post("/api/push/subscribe", {
     endpoint: json.endpoint,
     keys: json.keys,
   });
 
   return true;
+}
+
+// --- Alertes administrateur (nouvelle inscription...) -----------------------
+// Même abonnement navigateur que les notifications membre, enregistré en plus
+// côté admin (table séparée). L'état "activé" est mémorisé par appareil.
+
+const ADMIN_PUSH_FLAG_KEY = "66p_admin_push_enabled";
+
+export function isAdminPushFlagSet(): boolean {
+  try {
+    return localStorage.getItem(ADMIN_PUSH_FLAG_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setAdminPushFlag(enabled: boolean): void {
+  try {
+    if (enabled) localStorage.setItem(ADMIN_PUSH_FLAG_KEY, "1");
+    else localStorage.removeItem(ADMIN_PUSH_FLAG_KEY);
+  } catch {
+    // stockage indisponible (navigation privée) : seul l'affichage en pâtit
+  }
+}
+
+export async function getAdminPushState(): Promise<PushSupportState> {
+  const state = await getPushSupportState();
+  if (state === "subscribed" && !isAdminPushFlagSet()) return "available";
+  if (state === "available" && isAdminPushFlagSet()) setAdminPushFlag(false);
+  return state;
+}
+
+export async function subscribeAdminToPush(): Promise<boolean> {
+  if (!isPushSupported()) return false;
+
+  const json = await getOrCreateBrowserSubscription();
+  if (!json) return false;
+
+  await adminApi.post("/api/admin/push/subscribe", {
+    endpoint: json.endpoint,
+    keys: json.keys,
+  });
+  setAdminPushFlag(true);
+  return true;
+}
+
+// Ne révoque PAS l'abonnement navigateur : il peut servir aussi aux
+// notifications membre sur ce même appareil.
+export async function unsubscribeAdminFromPush(): Promise<void> {
+  setAdminPushFlag(false);
+  if (!isPushSupported()) return;
+
+  const registration = await readyServiceWorker();
+  const subscription = await registration.pushManager.getSubscription();
+  if (!subscription) return;
+
+  await adminApi.post("/api/admin/push/unsubscribe", { endpoint: subscription.endpoint });
 }
 
 export async function unsubscribeFromPush(): Promise<void> {
