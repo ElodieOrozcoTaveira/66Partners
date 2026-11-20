@@ -31,7 +31,8 @@ import {
   getGoogleIdToken,
   isGoogleSignInAvailable,
 } from "../../src/services/googleSignIn";
-import { useBrand, useBrandStyles } from "../../src/context/BrandContext";
+import { useBrand, useBrandStyles, useIsNeutralBrand } from "../../src/context/BrandContext";
+import { MainLogo } from "../../src/components/MainLogo";
 import type { Brand } from "../../src/constants/brands";
 
 /**
@@ -47,6 +48,7 @@ type GoogleFlow =
 
 export default function LoginScreen() {
   const brand = useBrand();
+  const neutralBrand = useIsNeutralBrand();
   const styles = useBrandStyles(makeStyles);
   const { login, startSession, sessionExpired } = useAuth();
   const passwordRef = useRef<TextInputInstance>(null);
@@ -170,13 +172,18 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Image
-            source={brand.logo}
-            resizeMode="contain"
-            style={styles.logo}
-            accessibilityRole="image"
-            accessibilityLabel="66Partners"
-          />
+          {/* Aucun territoire connu : logo principal ; sinon celui du territoire. */}
+          {neutralBrand ? (
+            <MainLogo width={230} style={styles.mainLogo} />
+          ) : (
+            <Image
+              source={brand.logo}
+              resizeMode="contain"
+              style={styles.logo}
+              accessibilityRole="image"
+              accessibilityLabel={`${brand.code}Partners`}
+            />
+          )}
 
           <AuthTabs active="login" />
 
@@ -361,6 +368,9 @@ const makeStyles = (brand: Brand) =>
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
+  },
+  mainLogo: {
+    marginBottom: Spacing.lg,
   },
   logo: {
     width: 240,

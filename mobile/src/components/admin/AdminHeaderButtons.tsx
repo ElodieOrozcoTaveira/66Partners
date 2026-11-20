@@ -6,7 +6,7 @@ import { Colors, Spacing } from "../../constants/theme";
 import { useAdmin } from "../../context/AdminContext";
 
 /** Revient à l'application (la session admin reste ouverte). */
-export function CloseAdminButton() {
+export function CloseAdminButton({ color = Colors.text }: { color?: string }) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -15,13 +15,13 @@ export function CloseAdminButton() {
       onPress={() => router.dismissTo("/settings")}
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}
     >
-      <Ionicons name="close" size={26} color={Colors.text} />
+      <Ionicons name="close" size={26} color={color} />
     </Pressable>
   );
 }
 
 /** Ferme la session admin sur ce téléphone (le mot de passe sera redemandé). */
-export function AdminLogoutButton() {
+export function AdminLogoutButton({ color = Colors.text }: { color?: string }) {
   const { logout } = useAdmin();
   return (
     <Pressable
@@ -36,7 +36,7 @@ export function AdminLogoutButton() {
       }
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}
     >
-      <Ionicons name="log-out-outline" size={24} color={Colors.text} />
+      <Ionicons name="log-out-outline" size={24} color={color} />
     </Pressable>
   );
 }

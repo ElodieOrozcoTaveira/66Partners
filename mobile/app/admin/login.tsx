@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "../../src/components/ui/Text";
-import { Ionicons } from "@expo/vector-icons";
 
 import { Button } from "../../src/components/ui/Button";
 import { TextField } from "../../src/components/ui/TextField";
 import type { Brand } from "../../src/constants/brands";
-import { Colors, Radius, Spacing, Typography } from "../../src/constants/theme";
+import { Colors, Spacing, Typography } from "../../src/constants/theme";
 import { useAdmin } from "../../src/context/AdminContext";
-import { useBrand, useBrandStyles } from "../../src/context/BrandContext";
+import { MainLogo } from "../../src/components/MainLogo";
+import { useBrandStyles } from "../../src/context/BrandContext";
 import { haptics } from "../../src/lib/haptics";
 import { requestAdminPasswordReset } from "../../src/services/admin.service";
 import { getApiErrorMessage } from "../../src/services/api";
@@ -20,7 +20,6 @@ const ERRORS = {
 } as const;
 
 export default function AdminLoginScreen() {
-  const brand = useBrand();
   const styles = useBrandStyles(makeStyles);
   const { login } = useAdmin();
   const [password, setPassword] = useState("");
@@ -72,9 +71,8 @@ export default function AdminLoginScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.icon}>
-          <Ionicons name="shield-checkmark" size={34} color={brand.primary} />
-        </View>
+        {/* Espace admin : commun à tous les territoires, logo principal. */}
+        <MainLogo width={190} style={styles.logo} />
         <Text style={styles.title}>Accès administrateur</Text>
         <Text style={styles.caption}>
           Statistiques, comptes et activités de toute l’application. Le mot de passe est le même que sur le site web.
@@ -115,16 +113,7 @@ const makeStyles = (brand: Brand) =>
   StyleSheet.create({
     flex: { flex: 1, backgroundColor: Colors.background },
     content: { padding: Spacing.xl, gap: Spacing.md, alignItems: "stretch" },
-    icon: {
-      alignSelf: "center",
-      width: 72,
-      height: 72,
-      borderRadius: Radius.pill,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: brand.primarySoft,
-      marginTop: Spacing.lg,
-    },
+    logo: { marginTop: Spacing.lg },
     title: { ...Typography.heading, textAlign: "center" },
     caption: { ...Typography.caption, fontSize: 14, textAlign: "center" },
     form: { gap: Spacing.md, marginTop: Spacing.lg },

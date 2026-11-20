@@ -24,7 +24,8 @@ import { PASSWORD_MIN_LENGTH, validateRegister } from "../../src/lib/validation"
 import { getApiErrorMessage } from "../../src/services/api";
 import { getTerritories } from "../../src/services/territory.service";
 import type { Territory } from "../../src/types/domain";
-import { BrandProvider, useBrand, useBrandStyles } from "../../src/context/BrandContext";
+import { BrandProvider, useBrand, useBrandStyles, useIsNeutralBrand } from "../../src/context/BrandContext";
+import { MainLogo } from "../../src/components/MainLogo";
 import { getBrand } from "../../src/constants/brands";
 import type { Brand } from "../../src/constants/brands";
 
@@ -43,6 +44,7 @@ export default function RegisterScreen() {
 
 function RegisterForm({ onTerritoryChange }: { onTerritoryChange: (code: string) => void }) {
   const brand = useBrand();
+  const neutralBrand = useIsNeutralBrand();
   const styles = useBrandStyles(makeStyles);
   const { register } = useAuth();
 
@@ -139,13 +141,18 @@ function RegisterForm({ onTerritoryChange }: { onTerritoryChange: (code: string)
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Image
-            source={brand.logo}
-            resizeMode="contain"
-            style={styles.logo}
-            accessibilityRole="image"
-            accessibilityLabel="66Partners"
-          />
+          {/* Aucun territoire connu : logo principal ; sinon celui du territoire. */}
+          {neutralBrand ? (
+            <MainLogo width={190} style={styles.mainLogo} />
+          ) : (
+            <Image
+              source={brand.logo}
+              resizeMode="contain"
+              style={styles.logo}
+              accessibilityRole="image"
+              accessibilityLabel={`${brand.code}Partners`}
+            />
+          )}
 
           <AuthTabs active="register" />
 
@@ -306,6 +313,9 @@ const makeStyles = (brand: Brand) =>
   content: {
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.xxl,
+  },
+  mainLogo: {
+    marginBottom: Spacing.md,
   },
   logo: {
     width: 200,

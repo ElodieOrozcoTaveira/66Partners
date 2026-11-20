@@ -9,6 +9,9 @@ import { useTerritory } from "./TerritoryContext";
 const LAST_BRAND_KEY = "66partners.lastBrandCode";
 
 const BrandContext = createContext<Brand>(getBrand(null));
+// Vrai tant qu'aucun territoire n'est connu (app jamais connectée sur ce
+// téléphone) : on affiche alors le logo principal plutôt que celui du 66.
+const NeutralBrandContext = createContext<boolean>(true);
 
 /** Fournit le thème d'un territoire précis (ex. aperçu à l'inscription). */
 export function BrandProvider({
@@ -19,8 +22,13 @@ export function BrandProvider({
   children: React.ReactNode;
 }) {
   const parent = useContext(BrandContext);
+  const parentNeutral = useContext(NeutralBrandContext);
   const brand = code ? getBrand(code) : parent;
-  return <BrandContext.Provider value={brand}>{children}</BrandContext.Provider>;
+  return (
+    <NeutralBrandContext.Provider value={code ? false : parentNeutral}>
+      <BrandContext.Provider value={brand}>{children}</BrandContext.Provider>
+    </NeutralBrandContext.Provider>
+  );
 }
 
 /**
@@ -62,6 +70,11 @@ export function TerritoryBrandProvider({ children }: { children: React.ReactNode
 
 export function useBrand(): Brand {
   return useContext(BrandContext);
+}
+
+/** Aucun territoire connu (thème 66 par défaut) : afficher le logo principal (MainLogo). */
+export function useIsNeutralBrand(): boolean {
+  return useContext(NeutralBrandContext);
 }
 
 /**
