@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { revokeAdminAccess } from "../../lib/adminAccess";
+import AdminPushAlerts from "../../components/AdminComponents/AdminPushAlerts/AdminPushAlerts";
 import AdminBottomNav from "../../components/AdminComponents/AdminBottomNav/AdminBottomNav";
 import SettingsSection, {
   type SettingsItem,
@@ -147,6 +148,8 @@ export default function AdminSettings() {
             Quitter
           </button>
         </div>
+
+        <AdminPushAlerts onMessage={setToast} />
 
         {SECTIONS.map((section) => (
           <SettingsSection

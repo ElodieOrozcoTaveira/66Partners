@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { AdminController } from "../controllers/admin.controller.js";
+import { PushController } from "../controllers/push.controller.js";
+import { pushSubscribeSchema, pushUnsubscribeSchema } from "../validations/push.validations.js";
 import { requireAdminAuth } from "../middlewares/adminAuth.middleware.js";
 import { validateBody, validateParams, validateQuery } from "../middlewares/validation.middleware.js";
 import {
@@ -36,6 +38,8 @@ GET /admin/activities
 GET /admin/activities/:activityId
 GET /admin/reports
 PATCH /admin/reports/:reportId
+POST /admin/push/subscribe
+POST /admin/push/unsubscribe
 */
 
 const router = Router();
@@ -120,6 +124,20 @@ router.patch(
   validateParams(adminReportIdParamSchema),
   validateBody(adminReportStatusSchema),
   AdminController.updateReport
+);
+
+// Alertes push admin (nouvelle inscription) sur l'appareil de l'admin.
+router.post(
+  "/push/subscribe",
+  requireAdminAuth,
+  validateBody(pushSubscribeSchema),
+  PushController.adminSubscribe
+);
+router.post(
+  "/push/unsubscribe",
+  requireAdminAuth,
+  validateBody(pushUnsubscribeSchema),
+  PushController.adminUnsubscribe
 );
 
 export default router;
