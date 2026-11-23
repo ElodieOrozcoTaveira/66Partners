@@ -14,6 +14,8 @@
 const GEO_API_URL = "https://geo.api.gouv.fr/communes";
 
 export interface VilleSuggestion {
+  /** Code INSEE de la commune. */
+  code: string;
   nom: string;
   codePostal: string | null;
   latitude: number;
@@ -21,6 +23,7 @@ export interface VilleSuggestion {
 }
 
 interface GeoApiCommune {
+  code: string;
   nom: string;
   codesPostaux?: string[];
   centre?: { coordinates: [number, number] };
@@ -55,7 +58,7 @@ function loadVilles(departmentCode: string): Promise<IndexedVille[]> {
 
   const url = new URL(GEO_API_URL);
   url.searchParams.set("codeDepartement", departmentCode);
-  url.searchParams.set("fields", "nom,centre,codesPostaux");
+  url.searchParams.set("fields", "nom,code,centre,codesPostaux");
   // Pas de limite : l'API renvoie toutes les communes du département (la
   // Haute-Garonne en compte 586 ; une limite à 500 faisait disparaître
   // Toulouse, code 31555).
@@ -69,6 +72,7 @@ function loadVilles(departmentCode: string): Promise<IndexedVille[]> {
       const indexed = communes
         .filter((commune) => commune.centre)
         .map((commune) => ({
+          code: commune.code,
           nom: commune.nom,
           codePostal: commune.codesPostaux?.[0] ?? null,
           longitude: commune.centre!.coordinates[0],
@@ -117,7 +121,8 @@ export async function searchVilles(
       return a.nom.localeCompare(b.nom, "fr");
     })
     .slice(0, 8)
-    .map(({ nom, codePostal, latitude, longitude }) => ({
+    .map(({ code, nom, codePostal, latitude, longitude }) => ({
+      code,
       nom,
       codePostal,
       latitude,
