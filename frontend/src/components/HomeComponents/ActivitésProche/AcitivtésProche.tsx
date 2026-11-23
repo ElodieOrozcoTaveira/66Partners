@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
-import { ArrowRight, CalendarPlus } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useBranding, useTerritory } from "../../../contexts/TerritoryContext";
 import ActivityCard from "../../ActivityCard/ActivityCard";
@@ -41,7 +41,7 @@ interface ActivitiesResponse {
 }
 
 export default function ActivitésProche() {
-  const { territoryOf, territoryIn } = useBranding();
+  const { territoryOf } = useBranding();
   const { activeTerritory } = useTerritory();
   const territoryCode = activeTerritory?.code;
   const { user } = useAuth();
@@ -89,39 +89,9 @@ export default function ActivitésProche() {
       .slice(0, UPCOMING_COUNT);
   }, [activities]);
 
-  // Territoire sans sortie à venir (ex. tout juste ouvert) : encart court
-  // plutôt qu'une section vide en haut de page.
-  if (isLoaded && upcoming.length === 0) {
-    return (
-      <section className="nearby page-container" aria-labelledby="nearby-titre">
-        <div className="nearby__first">
-          <span className="nearby__first-icon">
-            <CalendarPlus size={24} />
-          </span>
-          <div className="nearby__first-text">
-            <h2 id="nearby-titre">Lance la première sortie {territoryIn}</h2>
-            <p>Propose une activité : les sportifs de ton territoire pourront te rejoindre.</p>
-          </div>
-          <NavLink to="/mesactivités/nouvelle" className="btn btn--primary" onClick={handleExplorerClick}>
-            Créer une activité
-          </NavLink>
-        </div>
-
-        <Suspense fallback={null}>
-          <ModaleContent
-            isOpen={activeModal === "login"}
-            onClose={() => setActiveModal(null)}
-            onSwitchToRegister={() => setActiveModal("register")}
-          />
-          <ModaleRegisterContent
-            isOpen={activeModal === "register"}
-            onClose={() => setActiveModal(null)}
-            onSwitchToLogin={() => setActiveModal("login")}
-          />
-        </Suspense>
-      </section>
-    );
-  }
+  // Territoire sans sortie à venir : rien à montrer ici, la section
+  // précédente de l'accueil (OseCreer) invite déjà à proposer une activité.
+  if (isLoaded && upcoming.length === 0) return null;
 
   return (
     <section className="nearby page-container" aria-labelledby="nearby-titre">

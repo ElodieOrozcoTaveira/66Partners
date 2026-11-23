@@ -20,6 +20,7 @@ import ActivitésProche from "../../components/HomeComponents/ActivitésProche/A
 import HowItWorks from "../../components/HomeComponents/HowItWorks/HowItWorks";
 import PourquoiHome from "../../components/HomeComponents/Pourquoi/PourquoiHome";
 import NouveauLook, { NOUVEAU_LOOK_ID } from "../../components/HomeComponents/NouveauLook/NouveauLook";
+import OseCreer from "../../components/HomeComponents/OseCreer/OseCreer";
 import SuisNous from "../../components/HomeComponents/Facebook/SuisNous";
 import { useBranding } from "../../contexts/TerritoryContext";
 
@@ -47,71 +48,72 @@ export default function Home() {
 
   return (
     <>
-      <section className="home-hero">
-        <div className="home-hero__banner page-container">
-          <img className="home-hero__bg" src={asset("hero")} alt="" />
-          <div className="home-hero__overlay" />
-          <div className="home-hero__intro">
-            <a
-              href={`#${NOUVEAU_LOOK_ID}`}
-              className="home-hero__new"
-              onClick={(event) => {
-                event.preventDefault();
-                document.getElementById(NOUVEAU_LOOK_ID)?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              <span className="home-hero__new-tag">
-                <Sparkles size={12} strokeWidth={2.6} /> Nouveau
-              </span>
-              {brandName} s'est refait une beauté
-              <ArrowRight size={14} />
-            </a>
-            <h1 className="home-hero__titre">
-              {taglineLeadLines.map((line) => (
-                <span key={line} className="home-hero__titre-ligne">{line}</span>
-              ))}
-              <span className="home-hero__titre-ligne home-hero__titre-accent">{taglineAccent}</span>
-            </h1>
-            <p className="home-hero__soustitre">
-              La plateforme qui regroupe tous les sportifs. <br></br> Trouve des partenaires, rejoins une
-              sortie en un clic et retrouve le groupe sur place.
-            </p>
-            <div className="home-hero__actions">
-              <NavLink to="/explorer" className="btn btn--primary" onClick={handleExplorerClick}>
-                <Compass size={18} /> Découvrir les activités
-              </NavLink>
-              <button type="button" className="btn btn--light" onClick={openRegister}>
-                {user ? "Mon tableau de bord" : "Créer mon compte"} <ArrowRight size={17} />
-              </button>
+      {/* Premier écran : hero + bandeau des sports, le reste arrive au scroll. */}
+      <div className="home-first-screen">
+        <section className="home-hero">
+          <div className="home-hero__banner page-container">
+            <img className="home-hero__bg" src={asset("hero")} alt="" />
+            <div className="home-hero__overlay" />
+            <div className="home-hero__intro">
+              <a
+                href={`#${NOUVEAU_LOOK_ID}`}
+                className="home-hero__new"
+                onClick={(event) => {
+                  event.preventDefault();
+                  document.getElementById(NOUVEAU_LOOK_ID)?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                <span className="home-hero__new-tag">
+                  <Sparkles size={12} strokeWidth={2.6} /> Nouveau
+                </span>
+                {brandName} s'est refait une beauté
+                <ArrowRight size={14} />
+              </a>
+              <h1 className="home-hero__titre">
+                {taglineLeadLines.map((line) => (
+                  <span key={line} className="home-hero__titre-ligne">{line}</span>
+                ))}
+                <span className="home-hero__titre-ligne home-hero__titre-accent">{taglineAccent}</span>
+              </h1>
+              <p className="home-hero__soustitre">
+                La plateforme qui regroupe tous les sportifs. <br></br> Trouve des partenaires, rejoins une
+                sortie en un clic et retrouve le groupe sur place.
+              </p>
+              <div className="home-hero__actions">
+                <NavLink to="/explorer" className="btn btn--primary" onClick={handleExplorerClick}>
+                  <Compass size={18} /> Découvrir les activités
+                </NavLink>
+                <button type="button" className="btn btn--light" onClick={openRegister}>
+                  {user ? "Mon tableau de bord" : "Créer mon compte"} <ArrowRight size={17} />
+                </button>
+              </div>
+            </div>
+
+            <div className="home-hero__toasts" aria-hidden="true">
+              <div className="home-hero__toast">
+                <span className="home-hero__toast-icon">
+                  <MapPin size={16} />
+                </span>
+                Des sorties près de chez toi
+              </div>
+              <div className="home-hero__toast">
+                <span className="home-hero__toast-icon home-hero__toast-icon--accent">
+                  <BellRing size={16} />
+                </span>
+                Rappel : c'est demain !
+              </div>
+              <div className="home-hero__toast">
+                <span className="home-hero__toast-icon home-hero__toast-icon--ok">
+                  <CheckCircle2 size={16} />
+                </span>
+                Demande acceptée · Footing du dimanche
+              </div>
             </div>
           </div>
+        </section>
 
-          <div className="home-hero__toasts" aria-hidden="true">
-            <div className="home-hero__toast">
-              <span className="home-hero__toast-icon">
-                <MapPin size={16} />
-              </span>
-              Des sorties près de chez toi
-            </div>
-            <div className="home-hero__toast">
-              <span className="home-hero__toast-icon home-hero__toast-icon--accent">
-                <BellRing size={16} />
-              </span>
-              Rappel : c'est demain !
-            </div>
-            <div className="home-hero__toast">
-              <span className="home-hero__toast-icon home-hero__toast-icon--ok">
-                <CheckCircle2 size={16} />
-              </span>
-              Demande acceptée · Footing du dimanche
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <SportsMarquee />
-
-      <NouveauLook />
+        <SportsMarquee />
+      </div>
 
       <Suspense fallback={null}>
         <ModaleContent
@@ -126,11 +128,13 @@ export default function Home() {
         />
       </Suspense>
 
+      <OseCreer onRequireAccount={() => setActiveModal("register")} />
       <ActivitésProche />
-      <SuisNous />
       <HowItWorks />
       <Bento />
       <PourquoiHome />
+      <NouveauLook />
+      <SuisNous />
 
       <section className="home-final page-container">
         <div className="home-final__inner" style={{ backgroundImage: `url(${asset("cover")})` }}>

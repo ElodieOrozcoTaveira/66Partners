@@ -22,15 +22,33 @@
   }
 }
 
+// ─── Premier écran : le hero et le bandeau des sports occupent toute la
+// hauteur visible ; la section suivante n'apparaît qu'au scroll.
+.home-first-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+
+  .sports-marquee {
+    flex-shrink: 0;
+    margin-top: 0;
+  }
+}
+
 // ─── Hero : grande photo du territoire, texte en surimpression ───────────
 .home-hero {
-  padding: calc(var(--header-height) + 1rem) 0 1rem;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  padding: calc(var(--header-height) + 0.75rem) 0 0.75rem;
 
   &__banner {
     position: relative;
     display: grid;
-    align-items: end;
-    min-height: min(640px, 82vh);
+    flex: 1 0 auto;
+    // Contenu aligné à gauche, centré verticalement sur l'image.
+    align-items: center;
     padding: 2rem 1.5rem;
     border-radius: 32px;
     overflow: hidden;
@@ -39,14 +57,20 @@
 
     @media (min-width: variables.$laptop) {
       grid-template-columns: 1.2fr 0.8fr;
-      align-items: center;
       padding: 3.5rem;
     }
 
     @media (max-width: (variables.$tablet - 1px)) {
-      width: calc(100% - 1.5rem);
-      min-height: 560px;
       border-radius: 26px;
+    }
+  }
+
+  // Plus large que le conteneur standard, avec une marge de chaque côté.
+  &__banner.page-container {
+    width: min(1480px, 100% - 5rem);
+
+    @media (max-width: (variables.$tablet - 1px)) {
+      width: calc(100% - 2.5rem);
     }
   }
 
@@ -71,8 +95,8 @@
 
     @media (max-width: (variables.$laptop - 1px)) {
       background:
-        linear-gradient(0deg, rgba(20, 16, 14, 0.82) 0%, rgba(20, 16, 14, 0.35) 60%, rgba(20, 16, 14, 0.1) 100%),
-        linear-gradient(0deg, variables.alpha(variables.$rouge2, 40%) 0%, transparent 50%);
+        linear-gradient(90deg, rgba(20, 16, 14, 0.76) 0%, rgba(20, 16, 14, 0.5) 70%, rgba(20, 16, 14, 0.3) 100%),
+        linear-gradient(0deg, variables.alpha(variables.$rouge2, 40%) 0%, transparent 35%);
     }
   }
 
@@ -91,6 +115,8 @@
     align-items: center;
     gap: 0.5rem;
     max-width: 100%;
+    // Un peu détachée du titre, au-dessus du bloc de texte.
+    margin-bottom: 1rem;
     padding: 0.3rem 0.85rem 0.3rem 0.3rem;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.16);
@@ -277,5 +303,25 @@
     justify-content: center;
     gap: 0.75rem;
     margin-top: 0.5rem;
+  }
+}
+
+// Écrans d'ordinateur peu hauts : le hero se compacte pour que le bandeau des
+// sports reste visible sans scroller.
+@media (min-width: variables.$laptop) and (max-height: 760px) {
+  .home-hero__banner {
+    padding-block: 1.25rem;
+  }
+
+  .home-hero__new {
+    margin-bottom: 0.4rem;
+  }
+
+  .home-hero__intro {
+    gap: 0.7rem;
+  }
+
+  .home-hero__titre {
+    font-size: clamp(2.2rem, 7.5vh, 3.2rem);
   }
 }
