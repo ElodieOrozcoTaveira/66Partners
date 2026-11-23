@@ -29,6 +29,11 @@
   flex-direction: column;
   min-height: 100vh;
   min-height: 100svh;
+  margin-bottom: 1rem;
+  // iPhone : l'écran visible peut dépasser 100svh quand les barres de Safari
+  // sont translucides ou réduites. Cette marge garde la section suivante
+  // hors de l'écran jusqu'au scroll.
+  margin-bottom: calc(100lvh - 100svh + env(safe-area-inset-bottom, 0px) + 1rem);
 
   .sports-marquee {
     flex-shrink: 0;
