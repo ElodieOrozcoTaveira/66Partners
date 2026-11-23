@@ -9,6 +9,7 @@ import TopProfile from "../../components/ProfilPage/TopProfil/TopProfil";
 import { useAuth, type User } from "../../contexts/AuthContext";
 import api from "../../lib/axios";
 import ModerationCard from "../../components/Moderation/ModerationCard";
+import MemberDiscovery from "../../components/ProfilPage/MemberDiscovery/MemberDiscovery";
 import "../Profil/Profil.scss";
 
 // Réponse du profil PUBLIC (GET /api/users/:id) : superset local de `User`
@@ -86,6 +87,7 @@ export default function UserProfil() {
           isOwnProfile={false}
           territory={profileUser.territory}
         />
+        <MemberDiscovery userId={profileUser.id} />
         <StatsProfil userId={profileUser.id} />
         <Dispo userId={profileUser.id} isOwnProfile={false} />
         <MesSports userId={profileUser.id} isOwnProfile={false} />

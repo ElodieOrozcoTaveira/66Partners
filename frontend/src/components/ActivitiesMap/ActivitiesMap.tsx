@@ -1,16 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NavLink } from "react-router-dom";
-import * as maplibregl from "maplibre-gl";
 import type { GeoJSONSource, LngLatBoundsLike } from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-// MapLibre 6 calcule la carte dans un fichier séparé (worker) : on le fait
-// copier par Vite avec le site et on donne son adresse à MapLibre.
-import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import { CalendarDays, ChevronRight, LocateFixed, MapPin, Users, X } from "lucide-react";
 import { useBranding } from "../../contexts/TerritoryContext";
 import { formatWhen } from "../../lib/dateFormat";
 import { DEFAULT_SEARCH_RADIUS_KM, distanceKm, formatDistance, type Coordinates } from "../../lib/geo";
+import { MAP_STYLE, maplibregl } from "../../lib/mapLibre";
 import { isInRegion, territoryRegion, toMapPoints, type MapRegion } from "../../lib/mapPoints";
 import { getSportPhoto } from "../../lib/sportPhotos";
 import { getIconColor, getSportVisual } from "../../lib/sportVisuals";
@@ -36,12 +32,6 @@ interface ActivitiesMapProps {
   onLocate: () => Promise<Coordinates | null>;
   locating: boolean;
 }
-
-// Fonds de carte vectoriels OpenFreeMap : gratuits, sans clé ni cookies.
-const MAP_STYLE =
-  (import.meta.env.VITE_MAP_STYLE_URL as string | undefined) || "https://tiles.openfreemap.org/styles/liberty";
-
-maplibregl.setWorkerUrl(mapWorkerUrl);
 
 const USER_SOURCE = "user-radius";
 

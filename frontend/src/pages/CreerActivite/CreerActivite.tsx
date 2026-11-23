@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Celebration from "../../components/Celebration/Celebration";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "../../lib/axios";
@@ -67,6 +67,8 @@ export default function CreerActivite() {
   const { activeTerritory } = useTerritory();
   const [step, setStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [searchParams] = useSearchParams();
+  const presetSportId = searchParams.get("sport");
   const [form, setForm] = useState<CreerActiviteForm>(INITIAL_FORM);
   const [sports, setSports] = useState<Sport[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,9 +78,15 @@ export default function CreerActivite() {
   useEffect(() => {
     api
       .get<{ success: boolean; sports: Sport[] }>("/api/sports")
-      .then((res) => setSports(res.data.sports))
+      .then((res) => {
+        setSports(res.data.sports);
+        // Depuis un profil : sport prérempli, s'il existe bien.
+        if (presetSportId && res.data.sports.some((sport) => sport.id === presetSportId)) {
+          setForm((prev) => (prev.sportId ? prev : { ...prev, sportId: presetSportId }));
+        }
+      })
       .catch(() => setSports([]));
-  }, []);
+  }, [presetSportId]);
 
   function updateForm(patch: Partial<CreerActiviteForm>) {
     setForm((prev) => ({ ...prev, ...patch }));

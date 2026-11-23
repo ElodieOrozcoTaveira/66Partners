@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
-import { CalendarPlus, LayoutGrid, Map as MapIcon, Navigation, Users } from "lucide-react";
+import { CalendarPlus, LayoutGrid, Map as MapIcon, Navigation, UserRound, Users } from "lucide-react";
 import api from "../../lib/axios";
 import { useTerritory } from "../../contexts/TerritoryContext";
 import Recherche from "../../components/SportsComponents/Recherche/Recheche";
@@ -17,6 +17,7 @@ import { AUDIENCE_LABELS, AUDIENCE_OPTIONS, type ActivityAudience } from "../../
 
 // Leaflet n'est chargé qu'à l'ouverture de la carte.
 const ActivitiesMap = lazy(() => import("../../components/ActivitiesMap/ActivitiesMap"));
+const MembersAround = lazy(() => import("../../components/MembersAround/MembersAround"));
 
 const DATE_PRESETS: DatePreset[] = ["all", "today", "tomorrow", "week", "weekend", "month"];
 
@@ -75,7 +76,9 @@ export default function Explorer() {
   const datePreset: DatePreset = (DATE_PRESETS as string[]).includes(rawPreset ?? "")
     ? (rawPreset as DatePreset)
     : "all";
-  const view: "list" | "map" = searchParams.get("vue") === "carte" ? "map" : "list";
+  const rawView = searchParams.get("vue");
+  const view: "list" | "map" | "members" =
+    rawView === "carte" ? "map" : rawView === "sportifs" ? "members" : "list";
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -155,127 +158,134 @@ export default function Explorer() {
         toi.
       </p>
 
-      <div className="container-explorer__around">
-        <button
-          type="button"
-          className={`around-toggle${aroundMe ? " around-toggle--active" : ""}`}
-          aria-pressed={aroundMe}
-          onClick={() => void toggleAroundMe()}
-          disabled={location.status === "locating"}
-        >
-          <Navigation size={16} />
-          {location.status === "locating"
-            ? "Localisation…"
-            : `Autour de moi · ${DEFAULT_SEARCH_RADIUS_KM} km`}
-        </button>
-        {nearby ? (
-          <span className="around-count">
-            <Users size={15} /> {nearbyLabel(nearby.count, nearby.radiusKm)}
-          </span>
-        ) : location.status === "denied" ? (
-          <span className="around-hint">
-            Autorise la localisation dans ton navigateur pour voir les sorties autour de toi.
-          </span>
-        ) : null}
-      </div>
-
-      <Recherche
-        value={search}
-        onChange={setSearch}
-        placeholder="Rechercher une activité..."
-      />
-
-      <div className="container-explorer__filters">
-        {DATE_PRESETS.map((preset) => {
-          const isActive = datePreset === preset;
-          return (
+      {/* Filtres d'activités : sans objet dans l'onglet Sportifs. */}
+      {view !== "members" && (
+        <>
+          <div className="container-explorer__around">
             <button
-              key={preset}
               type="button"
-              className={`filter-chip${isActive ? " filter-chip--active" : ""}`}
-              onClick={() =>
-                setSearchParams((prev) => {
-                  const next = new URLSearchParams(prev);
-                  if (preset === "all") next.delete("when");
-                  else next.set("when", preset);
-                  return next;
-                })
-              }
+              className={`around-toggle${aroundMe ? " around-toggle--active" : ""}`}
+              aria-pressed={aroundMe}
+              onClick={() => void toggleAroundMe()}
+              disabled={location.status === "locating"}
             >
-              {DATE_PRESET_LABELS[preset]}
+              <Navigation size={16} />
+              {location.status === "locating"
+                ? "Localisation…"
+                : `Autour de moi · ${DEFAULT_SEARCH_RADIUS_KM} km`}
             </button>
-          );
-        })}
-      </div>
+            {nearby ? (
+              <span className="around-count">
+                <Users size={15} /> {nearbyLabel(nearby.count, nearby.radiusKm)}
+              </span>
+            ) : location.status === "denied" ? (
+              <span className="around-hint">
+                Autorise la localisation dans ton navigateur pour voir les sorties autour de toi.
+              </span>
+            ) : null}
+          </div>
 
-      <div className="container-explorer__filters" role="radiogroup" aria-label="Public">
-        {AUDIENCE_OPTIONS.map((audience) => (
-          <button
-            key={audience}
-            type="button"
-            role="radio"
-            aria-checked={audienceFilter === audience}
-            className={`filter-chip${audienceFilter === audience ? " filter-chip--active" : ""}`}
-            onClick={() =>
-              setSearchParams((prev) => {
-                const next = new URLSearchParams(prev);
-                if (audience === "ALL") next.delete("public");
-                else next.set("public", audience);
-                return next;
-              })
-            }
-          >
-            {audience === "ALL" ? "Tous publics" : AUDIENCE_LABELS[audience]}
-          </button>
-        ))}
-      </div>
+          <Recherche
+            value={search}
+            onChange={setSearch}
+            placeholder="Rechercher une activité..."
+          />
 
-      {availableSports.length > 0 && (
-        <div className="container-explorer__filters">
-          <button
-            type="button"
-            className={`filter-chip${selectedSportId === null ? " filter-chip--active" : ""}`}
-            onClick={() =>
-              setSearchParams((prev) => {
-                const next = new URLSearchParams(prev);
-                next.delete("sport");
-                return next;
-              })
-            }
-          >
-            Tous
-          </button>
-          {availableSports.map((sport) => {
-            const { icon: Icon, color } = getSportVisual(sport.name);
-            const isActive = selectedSportId === sport.id;
-            return (
+          <div className="container-explorer__filters">
+            {DATE_PRESETS.map((preset) => {
+              const isActive = datePreset === preset;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  className={`filter-chip${isActive ? " filter-chip--active" : ""}`}
+                  onClick={() =>
+                    setSearchParams((prev) => {
+                      const next = new URLSearchParams(prev);
+                      if (preset === "all") next.delete("when");
+                      else next.set("when", preset);
+                      return next;
+                    })
+                  }
+                >
+                  {DATE_PRESET_LABELS[preset]}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="container-explorer__filters" role="radiogroup" aria-label="Public">
+            {AUDIENCE_OPTIONS.map((audience) => (
               <button
-                key={sport.id}
+                key={audience}
                 type="button"
-                className={`filter-chip${isActive ? " filter-chip--active" : ""}`}
-                style={isActive ? { backgroundColor: color, borderColor: color } : undefined}
+                role="radio"
+                aria-checked={audienceFilter === audience}
+                className={`filter-chip${audienceFilter === audience ? " filter-chip--active" : ""}`}
                 onClick={() =>
                   setSearchParams((prev) => {
                     const next = new URLSearchParams(prev);
-                    next.set("sport", sport.id);
+                    if (audience === "ALL") next.delete("public");
+                    else next.set("public", audience);
                     return next;
                   })
                 }
               >
-                <Icon size={14} color={isActive ? getIconColor(color) : color} />
-                {sport.name}
+                {audience === "ALL" ? "Tous publics" : AUDIENCE_LABELS[audience]}
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+
+          {availableSports.length > 0 && (
+            <div className="container-explorer__filters">
+              <button
+                type="button"
+                className={`filter-chip${selectedSportId === null ? " filter-chip--active" : ""}`}
+                onClick={() =>
+                  setSearchParams((prev) => {
+                    const next = new URLSearchParams(prev);
+                    next.delete("sport");
+                    return next;
+                  })
+                }
+              >
+                Tous
+              </button>
+              {availableSports.map((sport) => {
+                const { icon: Icon, color } = getSportVisual(sport.name);
+                const isActive = selectedSportId === sport.id;
+                return (
+                  <button
+                    key={sport.id}
+                    type="button"
+                    className={`filter-chip${isActive ? " filter-chip--active" : ""}`}
+                    style={isActive ? { backgroundColor: color, borderColor: color } : undefined}
+                    onClick={() =>
+                      setSearchParams((prev) => {
+                        const next = new URLSearchParams(prev);
+                        next.set("sport", sport.id);
+                        return next;
+                      })
+                    }
+                  >
+                    <Icon size={14} color={isActive ? getIconColor(color) : color} />
+                    {sport.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       <div className="explorer-view" role="tablist" aria-label="Affichage">
         <span className="explorer-view__count">
-          {filteredActivities.length} activité{filteredActivities.length > 1 ? "s" : ""}
+          {view === "members"
+            ? "Sportifs autour de toi"
+            : `${filteredActivities.length} activité${filteredActivities.length > 1 ? "s" : ""}`}
         </span>
         <div className="explorer-view__switch">
-          {(["list", "map"] as const).map((mode) => (
+          {(["list", "map", "members"] as const).map((mode) => (
             <button
               key={mode}
               type="button"
@@ -287,6 +297,7 @@ export default function Explorer() {
                   (prev) => {
                     const next = new URLSearchParams(prev);
                     if (mode === "map") next.set("vue", "carte");
+                    else if (mode === "members") next.set("vue", "sportifs");
                     else next.delete("vue");
                     return next;
                   },
@@ -295,19 +306,29 @@ export default function Explorer() {
               }
               onPointerUp={(event) => {
                 // Sur téléphone, la carte est sous les filtres : on l'amène à l'écran.
-                if (mode !== "map") return;
+                if (mode === "list") return;
                 const bar = event.currentTarget.closest(".explorer-view");
                 window.setTimeout(() => bar?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
               }}
             >
-              {mode === "list" ? <LayoutGrid size={15} strokeWidth={2.4} /> : <MapIcon size={15} strokeWidth={2.4} />}
-              {mode === "list" ? "Liste" : "Carte"}
+              {mode === "list" ? (
+                <LayoutGrid size={15} strokeWidth={2.4} />
+              ) : mode === "map" ? (
+                <MapIcon size={15} strokeWidth={2.4} />
+              ) : (
+                <UserRound size={15} strokeWidth={2.4} />
+              )}
+              {mode === "list" ? "Liste" : mode === "map" ? "Carte" : "Sportifs"}
             </button>
           ))}
         </div>
       </div>
 
-      {view === "map" ? (
+      {view === "members" ? (
+        <Suspense fallback={<p className="explorer-state">Chargement...</p>}>
+          <MembersAround territoryCode={activeTerritory?.code} />
+        </Suspense>
+      ) : view === "map" ? (
         <Suspense fallback={<p className="explorer-state">Chargement de la carte...</p>}>
           <ActivitiesMap
             activities={filteredActivities}

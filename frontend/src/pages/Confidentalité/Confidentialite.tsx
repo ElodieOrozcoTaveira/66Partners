@@ -170,6 +170,10 @@ export function PolitiqueConfidentialite() {
             Position approximative (à environ 1 km près), uniquement si vous
             autorisez la localisation (application mobile ou site)
           </li>
+          <li>
+            Commune choisie et préférence d'affichage de l'âge, uniquement si
+            vous choisissez d'apparaître sur la carte « Sportifs autour de toi »
+          </li>
           <li>Signalements que vous envoyez et membres que vous bloquez</li>
           <li>
             Messages envoyés via le formulaire de contact (nom, email,
@@ -203,6 +207,24 @@ export function PolitiqueConfidentialite() {
           pouvez la refuser ou la retirer à tout moment dans les réglages de
           votre téléphone ou de votre navigateur ; la position enregistrée est supprimée automatiquement
           après 30 jours sans mise à jour, et avec votre compte.
+        </p>
+
+        <p className="legal-text">
+          <strong className="legal-bold">Carte « Sportifs autour de toi ».</strong>{' '}
+          Cette fonctionnalité est désactivée par défaut et repose sur votre
+          consentement. Si vous l'activez, vous choisissez une commune : aucune
+          position GPS n'est utilisée et votre position approximative décrite
+          ci-dessus n'est jamais reprise. Votre repère est placé à environ 2 km
+          autour du centre de cette commune, jamais à votre adresse. Vous
+          apparaissez alors, dans un rayon de 50 km, auprès des membres
+          connectés dont l'email est confirmé et qui ont eux-mêmes activé la
+          carte, à l'exception des membres bloqués. Ils voient votre pseudo,
+          votre photo, vos sports et niveaux, ce que vous recherchez, le nom de
+          la commune choisie, les activités à venir que vous organisez et, si
+          vous l'activez, votre âge (jamais votre date de naissance). Vous
+          pouvez vous retirer à tout moment depuis l'onglet « Sportifs » de la
+          page Activités : votre commune et vos préférences sont alors
+          effacées.
         </p>
 
         <p className="legal-text">
@@ -252,6 +274,7 @@ export function PolitiqueConfidentialite() {
             ['Connexion à Strava', 'Relier votre compte Strava et, à votre demande, renommer l\'activité Strava d\'une sortie avec vos partenaires', 'Consentement'],
             ['Genre déclaré', 'Accès aux activités réservées « entre femmes » / « entre hommes »', 'Consentement'],
             ['Position approximative', 'Afficher le nombre de sportifs à proximité', 'Consentement'],
+            ['Carte « Sportifs autour de toi »', 'Vous rendre visible des membres proches ayant activé la carte, et vous permettre de les découvrir', 'Consentement'],
             ['Notifications push', 'Envoyer des notifications sur l\'appareil lorsque vous les activez', 'Consentement'],
             ['Mesure d\'audience', 'Statistiques de fréquentation du site', 'Consentement'],
             ['Signalements et blocages', 'Protéger les membres, modérer les contenus et faire respecter les règles d\'utilisation', 'Intérêt légitime'],
@@ -322,6 +345,7 @@ export function PolitiqueConfidentialite() {
             ['Activités que vous avez créées', 'Elles restent visibles pour leurs participants après la suppression de votre compte, sans aucun lien avec vous (organisateur affiché comme « compte supprimé »).'],
             ['Date de naissance', 'Pendant la durée de vie du compte, puis supprimée avec lui.'],
             ['Position approximative', '30 jours sans mise à jour au maximum, et supprimée avec le compte.'],
+            ['Commune et préférences de la carte « Sportifs autour de toi »', 'Jusqu\'à ce que vous vous retiriez de la carte ou que vous supprimiez votre compte.'],
             ['Données Strava (identifiant, nom, photo, jetons, numéros des activités validées)', 'Jusqu\'à ce que vous déconnectiez Strava, que vous retiriez l\'accès depuis Strava ou que vous supprimiez votre compte. Elles sont alors effacées et l\'accès est révoqué auprès de Strava.'],
             ['Signalements', 'Le temps nécessaire à leur traitement et à la gestion d\'un éventuel litige. Si un compte concerné est supprimé, le signalement est conservé sans lien avec ce compte.'],
             ['Messages du formulaire de contact', 'Le temps nécessaire au traitement de la demande.'],
@@ -391,8 +415,9 @@ export function PolitiqueConfidentialite() {
           </li>
           <li>
             <span className="legal-label">API Géo de l'État (geo.api.gouv.fr) :</span>{' '}
-            suggestion des communes lorsque vous saisissez une ville ; seul
-            le texte saisi est transmis.
+            suggestion et vérification des communes ; seuls le code du
+            département et, pour la carte « Sportifs autour de toi », le code
+            de la commune choisie sont transmis, sans donnée de compte.
           </li>
           <li>
             <span className="legal-label">Autorités compétentes :</span>{' '}
@@ -430,9 +455,10 @@ export function PolitiqueConfidentialite() {
         </p>
         <p className="legal-text">
           Ne sont jamais affichés aux autres membres : votre adresse email,
-          votre date de naissance (ni votre âge), votre genre, votre position, les membres que vous avez bloqués
+          votre date de naissance, votre genre, votre position, les membres que vous avez bloqués
           ou signalés, et le fait que vous ayez relié Strava (votre nom et
-          votre photo Strava ne sont visibles que par vous).
+          votre photo Strava ne sont visibles que par vous). Votre âge n'est
+          affiché que si vous l'activez sur la carte « Sportifs autour de toi ».
         </p>
         <p className="legal-text">
           <strong className="legal-bold">Rencontres validées sur Strava.</strong>{' '}
@@ -590,7 +616,7 @@ export function PolitiqueConfidentialite() {
 
       <hr className="legal-divider" />
 
-      <p className="legal-update">Dernière mise à jour : 12 novembre 2026</p>
+      <p className="legal-update">Dernière mise à jour : 23 novembre 2026</p>
     </div>
   );
 }

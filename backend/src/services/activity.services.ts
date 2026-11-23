@@ -79,6 +79,8 @@ export interface ActivityFilters {
   status?: ActivityStatus;
   /** Ne retourne que les activités où cet utilisateur a une participation acceptée */
   participantId?: string;
+  /** Ne retourne que les activités organisées par ce membre */
+  creatorId?: string;
   /** Code du territoire (ex: "66") */
   territory?: string;
   /** Borne basse (incluse) sur activities.startDate — ex. "maintenant" pour
@@ -246,12 +248,13 @@ export class ActivityService {
    * le nombre réel de participants acceptés (calculé à la volée).
    */
   static async listActivities(filters: ActivityFilters = {}): Promise<ActivityWithDetails[]> {
-    const { city, sportId, status, participantId, territory, from, to, audience, viewerId } = filters;
+    const { city, sportId, status, participantId, creatorId, territory, from, to, audience, viewerId } = filters;
 
     const conditions = [
       city ? eq(activities.city, city) : undefined,
       sportId ? eq(activities.sportId, sportId) : undefined,
       status ? eq(activities.status, status) : undefined,
+      creatorId ? eq(activities.creatorId, creatorId) : undefined,
       territory ? eq(territories.code, territory) : undefined,
       from ? gte(activities.startDate, from) : undefined,
       to ? lte(activities.startDate, to) : undefined,

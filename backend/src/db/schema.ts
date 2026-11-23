@@ -420,6 +420,23 @@ export const userLocations = pgTable("user_locations", {
   latitudeIdx: index("user_locations_latitude_idx").on(t.latitude),
 }));
 
+// Présence sur la carte « Sportifs autour de toi », sur consentement explicite :
+// une ligne = visible, aucune ligne = invisible (défaut). Distincte de
+// user_locations, dont la position n'est jamais montrée. Les coordonnées sont
+// le centre officiel de la commune choisie (donnée publique), jamais un GPS.
+export const userMapProfiles = pgTable("user_map_profiles", {
+  userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  inseeCode: varchar("insee_code", { length: 5 }).notNull(),
+  sectorName: varchar("sector_name", { length: 100 }).notNull(),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+  showAge: boolean("show_age").notNull().default(false),
+  consentedAt: timestamp("consented_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  latitudeIdx: index("user_map_profiles_latitude_idx").on(t.latitude),
+}));
+
 // Compte Strava relié à un membre (OAuth 2.0). Les jetons sont chiffrés
 // (AES-256-GCM, cf. utils/secretBox.ts) : jamais stockés en clair. Un seul
 // compte Strava par membre, et un compte Strava ne peut être relié qu'à un
