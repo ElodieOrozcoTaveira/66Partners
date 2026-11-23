@@ -10,7 +10,7 @@ const DOUTES = [
   },
   {
     doute: "Je n'ai pas le niveau…",
-    reponse: "Tu indiques le tien : ceux qui viendront sauront à quoi s'attendre.  Et au pire, c'est pas grave : tu ne peux que progresser..",
+    reponse: "Tu indiques le tien : ceux qui viendront sauront à quoi s'attendre. Et au pire, c'est pas grave : tu ne peux que progresser..",
   },
   {
     doute: "Je ne connais personne.",
