@@ -37,44 +37,4 @@
     border-radius: variables.$radius;
     background: variables.$fond2;
   }
-
-  // Territoire sans sortie à venir : encart court.
-  &__first {
-    @include mixins.carte;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem 1.25rem;
-    padding: 1.4rem 1.5rem;
-    background: color-mix(in srgb, var(--brand-accent, #FFCC00) 12%, white);
-  }
-
-  &__first-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    color: #ffffff;
-    @include mixins.gradient;
-  }
-
-  &__first-text {
-    flex: 1;
-    min-width: 14rem;
-
-    h2 {
-      margin: 0;
-      font-family: "Manrope", sans-serif;
-      font-size: clamp(1.2rem, 2.4vw, 1.5rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    p {
-      margin: 0.25rem 0 0;
-      color: variables.$texte2;
-    }
-  }
 }
