@@ -106,6 +106,28 @@
     }
   }
 
+  // Lecture automatique sans le son : invite à l'activer.
+  &__video-unmute {
+    position: absolute;
+    top: 0.75rem;
+    left: 50%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border: none;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    cursor: pointer;
+  }
+
   &__video-label {
     padding: 0.45rem 0.95rem;
     border-radius: 999px;
