@@ -26,7 +26,7 @@ export function MentionsLegales() {
 
         <ul className="legal-list">
           <li>
-            <span className="legal-label">Nom :</span> CanailleDev
+            <span className="legal-label">Nom :</span> ElodieOrozcoDev
           </li>
 
           <li>
