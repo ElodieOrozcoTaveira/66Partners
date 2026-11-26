@@ -6,8 +6,8 @@ import "./HowItWorks.scss";
 
 // Vidéo de présentation commune à tous les territoires.
 const VIDEO = {
-  src: "/video/presentation-v1.mp4",
-  poster: "/video/presentation-v1-poster.webp",
+  src: "/video/presentation-v2.mp4",
+  poster: "/video/presentation-v2-poster.webp",
 };
 
 const STEPS = [

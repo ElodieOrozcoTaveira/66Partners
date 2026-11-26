@@ -121,7 +121,7 @@ export default function HowVideo({ src, poster, brandName }: HowVideoProps) {
           <span className="how__video-icon">
             <Play size={24} fill="currentColor" />
           </span>
-          <span className="how__video-label">Voir la vidéo · 49 s</span>
+          <span className="how__video-label">Voir la vidéo · 54 s</span>
         </button>
       ) : muted ? (
         <button type="button" className="how__video-unmute" onClick={unmute}>
