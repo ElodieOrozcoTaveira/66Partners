@@ -14,7 +14,7 @@ interface AdminPushAlertsProps {
 
 /**
  * Alertes push admin sur CET appareil : une notification à chaque nouvelle
- * inscription. Activation uniquement sur clic (jamais automatique).
+ * inscription et à chaque nouvelle activité. Activation uniquement sur clic (jamais automatique).
  * Sur iPhone, ne fonctionne que depuis le site installé sur l'écran d'accueil.
  */
 export default function AdminPushAlerts({ onMessage }: AdminPushAlertsProps) {
@@ -53,7 +53,7 @@ export default function AdminPushAlerts({ onMessage }: AdminPushAlertsProps) {
         ? "Notifications bloquées : autorise-les dans les réglages du navigateur."
         : state === "error"
           ? "Service worker indisponible, recharge la page."
-          : "Reçois une notification sur ce téléphone à chaque nouvelle inscription.";
+          : "Reçois une notification sur ce téléphone à chaque nouvelle inscription et nouvelle activité.";
 
   const canToggle = state === "available" || state === "subscribed";
 
@@ -65,7 +65,7 @@ export default function AdminPushAlerts({ onMessage }: AdminPushAlertsProps) {
           <BellRing size={18} strokeWidth={2.2} />
         </span>
         <span className="admin-push-alerts__text">
-          <span className="admin-push-alerts__label">Nouvelles inscriptions</span>
+          <span className="admin-push-alerts__label">Inscriptions et activités</span>
           <span className="admin-push-alerts__description">{description}</span>
         </span>
         {canToggle && (
@@ -73,7 +73,7 @@ export default function AdminPushAlerts({ onMessage }: AdminPushAlertsProps) {
             type="button"
             role="switch"
             aria-checked={state === "subscribed"}
-            aria-label="Alertes nouvelles inscriptions"
+            aria-label="Alertes nouvelles inscriptions et activités"
             className={`admin-push-alerts__switch${state === "subscribed" ? " is-on" : ""}`}
             onClick={handleToggle}
             disabled={busy}

@@ -12,6 +12,7 @@ import {
   users,
 } from "../db/schema.js";
 import { notBlockedWith } from "./block.services.js";
+import { PushService } from "./push.services.js";
 import { TerritoryService } from "./territory.services.js";
 import { checkAudience, type ActivityAudience } from "../utils/audience.js";
 import { deleteUploadedFileIfUnreferenced } from "../utils/uploadedFiles.js";
@@ -115,6 +116,30 @@ async function assertSportExists(sportId: string): Promise<void> {
   }
 }
 
+// Alerte push sur le(s) téléphone(s) de l'admin à chaque nouvelle activité.
+// Ne lève jamais : l'activité est déjà créée, l'alerte n'est qu'un plus.
+async function notifyAdminsOfNewActivity(activity: Activity): Promise<void> {
+  try {
+    const [details] = await db
+      .select({ pseudo: users.pseudo, sportName: sports.name, territoryName: territories.name })
+      .from(activities)
+      .innerJoin(sports, eq(sports.id, activities.sportId))
+      .innerJoin(territories, eq(territories.id, activities.territoryId))
+      .leftJoin(users, eq(users.id, activities.creatorId))
+      .where(eq(activities.id, activity.id))
+      .limit(1);
+    if (!details) return;
+
+    void PushService.sendToAdmins({
+      title: "Nouvelle activité 🏃",
+      body: `${details.pseudo ?? "Un membre"} propose « ${activity.title} » : ${details.sportName} à ${activity.city} (${details.territoryName}).`,
+      url: `/admin/activites/${activity.id}`,
+    });
+  } catch (error) {
+    console.error("Erreur alerte admin nouvelle activité:", error);
+  }
+}
+
 export class ActivityService {
   /**
    * Création d'une nouvelle activité
@@ -186,6 +211,8 @@ export class ActivityService {
         500
       );
     }
+
+    await notifyAdminsOfNewActivity(newActivity);
 
     return newActivity;
   }
