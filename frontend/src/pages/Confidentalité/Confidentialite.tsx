@@ -67,7 +67,7 @@ export function PolitiqueConfidentialite() {
 
         <ul className="legal-list">
           <li>
-            <span className="legal-label">Nom :</span> CanailleDev
+            <span className="legal-label">Nom :</span> ElodieOrozcoDev
           </li>
           <li>
             <span className="legal-label">Email :</span>{' '}
@@ -616,7 +616,7 @@ export function PolitiqueConfidentialite() {
 
       <hr className="legal-divider" />
 
-      <p className="legal-update">Dernière mise à jour : 23 novembre 2026</p>
+      <p className="legal-update">Dernière mise à jour : 26 novembre 2026</p>
     </div>
   );
 }
